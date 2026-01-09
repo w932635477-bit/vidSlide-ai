@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - 简化版Vue应用</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .primary { background: #007bff; color: white; }
+        .success-btn { background: #28a745; color: white; }
+        .danger { background: #dc3545; color: white; }
+        .video-section {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .timeline-section {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            min-height: 120px;
+        }
+        .controls {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+        .timeline-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 10px 0;
+            position: relative;
+            cursor: pointer;
+        }
+        .timeline-progress {
+            height: 100%;
+            background: #007bff;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .marker {
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 30px;
+            background: #dc3545;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        h1, h2, h3 { color: #333; }
+        .component-test { border: 2px solid #28a745; padding: 10px; margin: 10px 0; }
+        .error-msg { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 VidSlide AI - 简化版Vue应用测试</h1>
+
+        <div class="status info">
+            <h3>📊 组件测试状态</h3>
+            <p>逐步恢复基础组件功能</p>
+            <div id="test-results"></div>
+        </div>
+
+        <!-- Vue应用挂载点 -->
+        <div id="vue-app">
+            <!-- 视频上传组件 -->
+            <div class="component-test">
+                <h2>📁 视频上传组件</h2>
+                <div class="video-section">
+                    <input type="file" accept="video/*" @change="handleVideoSelect" ref="fileInput">
+                    <div v-if="currentVideoFile" class="status success">
+                        <h3>✅ 视频已选择</h3>
+                        <p>文件名: {{ currentVideoFile.name }}</p>
+                        <p>大小: {{ formatFileSize(currentVideoFile.size) }}</p>
+                        <p>类型: {{ currentVideoFile.type }}</p>
+                    </div>
+                    <div v-else class="status warning">
+                        <p>请先选择一个视频文件</p>
+                    </div>
+                    <button class="danger" @click="resetVideo" v-if="currentVideoFile">重置</button>
+                </div>
+            </div>
+
+            <!-- 视频播放组件 -->
+            <div class="component-test" v-if="currentVideoFile">
+                <h2>🎥 视频播放组件</h2>
+                <div class="video-section">
+                    <video
+                        ref="videoPlayer"
+                        :src="videoSrc"
+                        controls
+                        @loadedmetadata="handleVideoLoaded"
+                        @timeupdate="handleTimeUpdate"
+                        @play="handlePlay"
+                        @pause="handlePause"
+                        style="max-width: 100%; max-height: 400px;"
+                    ></video>
+                    <div class="controls">
+                        <button @click="playVideo" :disabled="!canPlay">播放</button>
+                        <button @click="pauseVideo" :disabled="!canPlay">暂停</button>
+                        <button @click="seekVideo(10)">前进10秒</button>
+                        <button @click="seekVideo(-10)">后退10秒</button>
+                        <span>当前时间: {{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时间轴组件 -->
+            <div class="component-test" v-if="currentVideoFile">
+                <h2>⏱️ 时间轴组件</h2>
+                <div class="timeline-section">
+                    <div class="timeline-bar" @click="handleTimelineClick">
+                        <div class="timeline-progress" :style="{ width: progressPercent + '%' }"></div>
+                        <!-- 时间轴标记 -->
+                        <div
+                            v-for="marker in markers"
+                            :key="marker.id"
+                            class="marker"
+                            :style="{ left: getMarkerPosition(marker) + '%' }"
+                            @click.stop="selectMarker(marker)"
+                        ></div>
+                    </div>
+                    <div class="controls">
+                        <button @click="addMarker">添加标记</button>
+                        <button @click="removeMarker" :disabled="!selectedMarkerId">删除标记</button>
+                        <span>标记数量: {{ markers.length }}</span>
+                        <span v-if="selectedMarkerId">选中标记: {{ selectedMarkerId }}</span>
+                    </div>
+                    <div v-if="markers.length > 0">
+                        <h4>标记列表:</h4>
+                        <ul>
+                            <li v-for="marker in markers" :key="marker.id"
+                                :class="{ 'selected': marker.id === selectedMarkerId }"
+                                @click="selectMarker(marker)">
+                                标记 {{ marker.id }}: {{ formatTime(marker.time) }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 调试信息 -->
+            <div class="component-test">
+                <h2>🔧 调试信息</h2>
+                <div class="status info">
+                    <h3>应用状态</h3>
+                    <p>视频文件: {{ currentVideoFile ? '已选择' : '未选择' }}</p>
+                    <p>视频源: {{ videoSrc ? '已设置' : '未设置' }}</p>
+                    <p>当前时间: {{ currentTime }} ({{ typeof currentTime }})</p>
+                    <p>视频时长: {{ videoDuration }}</p>
+                    <p>播放状态: {{ isPlaying ? '播放中' : '暂停中' }}</p>
+                    <p>标记数量: {{ markers.length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 测试结果显示
+        function addTestResult(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<small>${new Date().toLocaleTimeString()}</small><br>${message}`;
+            results.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Vue应用
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+        const app = createApp({
+            setup() {
+                // 状态
+                const currentVideoFile = ref(null);
+                const videoSrc = ref('');
+                const videoPlayer = ref(null);
+                const currentTime = ref(0);
+                const videoDuration = ref(0);
+                const isPlaying = ref(false);
+                const canPlay = ref(false);
+                const markers = ref([]);
+                const selectedMarkerId = ref('');
+                let markerIdCounter = 1;
+
+                // 计算属性
+                const progressPercent = computed(() => {
+                    if (videoDuration.value === 0) return 0;
+                    return (currentTime.value / videoDuration.value) * 100;
+                });
+
+                // 文件大小格式化
+                const formatFileSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                // 时间格式化
+                const formatTime = (seconds) => {
+                    if (typeof seconds !== 'number' || isNaN(seconds)) return '00:00';
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                };
+
+                // 获取标记位置
+                const getMarkerPosition = (marker) => {
+                    if (videoDuration.value === 0) return 0;
+                    return (marker.time / videoDuration.value) * 100;
+                };
+
+                // 事件处理
+                const handleVideoSelect = async (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        try {
+                            addTestResult(`选择文件: ${file.name}`, 'info');
+
+                            // 验证文件
+                            if (!file.type.startsWith('video/')) {
+                                addTestResult('请选择视频文件', 'error');
+                                return;
+                            }
+
+                            // 设置文件
+                            currentVideoFile.value = file;
+                            videoSrc.value = URL.createObjectURL(file);
+
+                            addTestResult('✅ 视频文件设置成功', 'success');
+
+                        } catch (error) {
+                            addTestResult(`❌ 文件处理失败: ${error.message}`, 'error');
+                            console.error('File handling error:', error);
+                        }
+                    }
+                };
+
+                const resetVideo = () => {
+                    if (videoSrc.value) {
+                        URL.revokeObjectURL(videoSrc.value);
+                    }
+                    currentVideoFile.value = null;
+                    videoSrc.value = '';
+                    currentTime.value = 0;
+                    videoDuration.value = 0;
+                    isPlaying.value = false;
+                    canPlay.value = false;
+                    markers.value = [];
+                    selectedMarkerId.value = '';
+                    addTestResult('视频已重置', 'info');
+                };
+
+                const handleVideoLoaded = () => {
+                    if (videoPlayer.value) {
+                        videoDuration.value = videoPlayer.value.duration || 0;
+                        canPlay.value = true;
+                        addTestResult(`✅ 视频加载完成，时长: ${formatTime(videoDuration.value)}`, 'success');
+                    }
+                };
+
+                const handleTimeUpdate = () => {
+                    if (videoPlayer.value) {
+                        const newTime = videoPlayer.value.currentTime;
+                        if (typeof newTime === 'number' && !isNaN(newTime)) {
+                            currentTime.value = newTime;
+                        }
+                    }
+                };
+
+                const handlePlay = () => {
+                    isPlaying.value = true;
+                    addTestResult('视频开始播放', 'info');
+                };
+
+                const handlePause = () => {
+                    isPlaying.value = false;
+                    addTestResult('视频暂停播放', 'info');
+                };
+
+                const playVideo = () => {
+                    if (videoPlayer.value) {
+                        videoPlayer.value.play();
+                    }
+                };
+
+                const pauseVideo = () => {
+                    if (videoPlayer.value) {
+                        videoPlayer.value.pause();
+                    }
+                };
+
+                const seekVideo = (seconds) => {
+                    if (videoPlayer.value) {
+                        const newTime = Math.max(0, Math.min(videoDuration.value, currentTime.value + seconds));
+                        videoPlayer.value.currentTime = newTime;
+                        currentTime.value = newTime;
+                    }
+                };
+
+                const handleTimelineClick = (event) => {
+                    if (videoDuration.value > 0 && videoPlayer.value) {
+                        const rect = event.target.getBoundingClientRect();
+                        const clickX = event.clientX - rect.left;
+                        const percentage = clickX / rect.width;
+                        const newTime = percentage * videoDuration.value;
+
+                        videoPlayer.value.currentTime = newTime;
+                        currentTime.value = newTime;
+                    }
+                };
+
+                const addMarker = () => {
+                    const marker = {
+                        id: markerIdCounter++,
+                        time: currentTime.value,
+                        title: `标记 ${markerIdCounter - 1}`
+                    };
+                    markers.value.push(marker);
+                    selectedMarkerId.value = marker.id;
+                    addTestResult(`添加标记: ${formatTime(marker.time)}`, 'info');
+                };
+
+                const removeMarker = () => {
+                    if (selectedMarkerId.value) {
+                        const index = markers.value.findIndex(m => m.id === selectedMarkerId.value);
+                        if (index > -1) {
+                            markers.value.splice(index, 1);
+                            selectedMarkerId.value = '';
+                            addTestResult('标记已删除', 'info');
+                        }
+                    }
+                };
+
+                const selectMarker = (marker) => {
+                    selectedMarkerId.value = marker.id;
+                    if (videoPlayer.value) {
+                        videoPlayer.value.currentTime = marker.time;
+                        currentTime.value = marker.time;
+                    }
+                    addTestResult(`选择标记: ${formatTime(marker.time)}`, 'info');
+                };
+
+                // 初始化
+                onMounted(() => {
+                    addTestResult('✅ Vue应用初始化完成', 'success');
+                });
+
+                return {
+                    currentVideoFile,
+                    videoSrc,
+                    videoPlayer,
+                    currentTime,
+                    videoDuration,
+                    isPlaying,
+                    canPlay,
+                    markers,
+                    selectedMarkerId,
+                    progressPercent,
+                    formatFileSize,
+                    formatTime,
+                    getMarkerPosition,
+                    handleVideoSelect,
+                    resetVideo,
+                    handleVideoLoaded,
+                    handleTimeUpdate,
+                    handlePlay,
+                    handlePause,
+                    playVideo,
+                    pauseVideo,
+                    seekVideo,
+                    handleTimelineClick,
+                    addMarker,
+                    removeMarker,
+                    selectMarker
+                };
+            }
+        });
+
+        // 挂载应用
+        try {
+            app.mount('#vue-app');
+            addTestResult('✅ Vue应用挂载成功', 'success');
+        } catch (error) {
+            addTestResult(`❌ Vue应用挂载失败: ${error.message}`, 'error');
+            console.error('Vue app mount failed:', error);
+        }
+
+        // 错误处理
+        window.addEventListener('error', (event) => {
+            addTestResult(`❌ 页面错误: ${event.error.message}`, 'error');
+        });
+
+        app.config.errorHandler = (err, instance, info) => {
+            addTestResult(`❌ Vue错误: ${err.message}`, 'error');
+            console.error('Vue error:', err, info);
+        };
+    </script>
+</body>
+</html>

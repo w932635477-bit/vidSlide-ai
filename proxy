@@ -1,0 +1,91 @@
+#!/bin/bash
+# 🚀 腾讯云科学上网一键启动脚本
+# 使用方法: proxy start|stop|status|test
+
+# 获取脚本的实际路径（解决符号链接问题）
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+
+show_help() {
+    echo "🚀 腾讯云科学上网管理脚本"
+    echo ""
+    echo "使用方法:"
+    echo "  proxy start    启动代理服务"
+    echo "  proxy stop     停止代理服务"
+    echo "  proxy status   查看代理状态"
+    echo "  proxy test     测试网络连接"
+    echo "  proxy help     显示此帮助信息"
+    echo ""
+    echo "快捷命令:"
+    echo "  proxy          启动代理服务（默认）"
+    echo ""
+    echo "配置信息:"
+    echo "  服务器: 43.160.250.84 (腾讯云新加坡)"
+    echo "  本地端口: SOCKS5 1080, HTTP 1081"
+}
+
+start_proxy() {
+    echo "🚀 启动腾讯云科学上网服务..."
+    "$SCRIPT_DIR/start_tencent_proxy.sh"
+}
+
+stop_proxy() {
+    echo "🛑 停止腾讯云科学上网服务..."
+    "$SCRIPT_DIR/stop_tencent_proxy.sh"
+}
+
+show_status() {
+    echo "📊 腾讯云科学上网状态"
+    echo "===================="
+    "$SCRIPT_DIR/status_tencent_proxy.sh"
+}
+
+test_connection() {
+    echo "🧪 测试网络连接"
+    echo "=============="
+    echo "测试Google连接..."
+    if curl -x http://127.0.0.1:1081 -I https://www.google.com --connect-timeout 10 --max-time 15 2>/dev/null | head -1 | grep -q "200\|301\|302"; then
+        echo "✅ Google连接成功"
+    else
+        echo "❌ Google连接失败"
+    fi
+
+    echo "测试GitHub连接..."
+    if curl -x http://127.0.0.1:1081 -I https://github.com --connect-timeout 10 --max-time 15 2>/dev/null | head -1 | grep -q "200\|301\|302"; then
+        echo "✅ GitHub连接成功"
+    else
+        echo "❌ GitHub连接失败"
+    fi
+
+    echo "测试V0.dev连接..."
+    if curl -x http://127.0.0.1:1081 -I https://v0.dev --connect-timeout 10 --max-time 15 2>/dev/null | head -1 | grep -q "200\|301\|302"; then
+        echo "✅ V0.dev连接成功"
+    else
+        echo "❌ V0.dev连接失败"
+    fi
+}
+
+# 主逻辑
+case "${1:-start}" in
+    "start"|"")
+        start_proxy
+        ;;
+    "stop")
+        stop_proxy
+        ;;
+    "status")
+        show_status
+        ;;
+    "test")
+        test_connection
+        ;;
+    "help"|"-h"|"--help")
+        show_help
+        ;;
+    *)
+        echo "❌ 无效命令: $1"
+        echo ""
+        show_help
+        exit 1
+        ;;
+esac

@@ -1,0 +1,306 @@
+{
+  "timestamp": "2026-01-08T14:36:18.331Z",
+  "phase": "optimization-phase",
+  "checks": {
+    "functionality": {
+      "name": "功能完整性",
+      "status": "warning",
+      "score": 93.33333333333333,
+      "checks": {
+        "externalAPIIntegration": {
+          "name": "外部素材API集成",
+          "status": "pass",
+          "score": 100,
+          "checks": [
+            {
+              "name": "ExternalAPI类存在",
+              "status": "pass",
+              "message": "ExternalAPI.js文件存在"
+            },
+            {
+              "name": "支持Unsplash API",
+              "status": "pass",
+              "message": "支持Unsplash API"
+            },
+            {
+              "name": "支持Pexels API",
+              "status": "pass",
+              "message": "支持Pexels API"
+            },
+            {
+              "name": "缓存功能实现",
+              "status": "pass",
+              "message": "有缓存功能实现"
+            },
+            {
+              "name": "AssetBrowser集成外部API",
+              "status": "pass",
+              "message": "AssetBrowser集成了外部API和配置功能"
+            },
+            {
+              "name": "API配置对话框",
+              "status": "pass",
+              "message": "有API配置用户界面"
+            }
+          ]
+        },
+        "templateSystem": {
+          "name": "模板系统",
+          "status": "pass",
+          "score": 100,
+          "checks": [
+            {
+              "name": "模板目录存在",
+              "status": "pass",
+              "message": "templates目录存在"
+            },
+            {
+              "name": "TemplateSelector组件存在",
+              "status": "pass",
+              "message": "TemplateSelector.vue存在"
+            },
+            {
+              "name": "至少有5个模板组件",
+              "status": "pass",
+              "message": "发现5个模板组件"
+            }
+          ]
+        },
+        "userAdjustmentPanel": {
+          "name": "用户调整面板",
+          "status": "fail",
+          "score": 60,
+          "checks": [
+            {
+              "name": "UserAdjustmentPanel组件存在",
+              "status": "pass",
+              "message": "UserAdjustmentPanel.vue存在"
+            },
+            {
+              "name": "支持位置调整",
+              "status": "pass",
+              "message": "支持位置调整功能"
+            },
+            {
+              "name": "支持尺寸调整",
+              "status": "pass",
+              "message": "支持尺寸调整功能"
+            },
+            {
+              "name": "支持透明度调整",
+              "status": "fail",
+              "message": "不支持透明度调整"
+            },
+            {
+              "name": "支持旋转调整",
+              "status": "fail",
+              "message": "不支持旋转调整"
+            }
+          ]
+        },
+        "pictureInPicture": {
+          "name": "画中画效果",
+          "status": "pass",
+          "score": 100,
+          "checks": [
+            {
+              "name": "PictureInPicture组件存在",
+              "status": "pass",
+              "message": "PictureInPicture.vue存在"
+            },
+            {
+              "name": "支持位置控制",
+              "status": "pass",
+              "message": "支持画中画位置控制"
+            },
+            {
+              "name": "支持尺寸控制",
+              "status": "pass",
+              "message": "支持画中画尺寸控制"
+            },
+            {
+              "name": "支持样式控制",
+              "status": "pass",
+              "message": "支持画中画样式控制"
+            }
+          ]
+        },
+        "assetBrowser": {
+          "name": "素材浏览器",
+          "status": "pass",
+          "score": 100,
+          "checks": [
+            {
+              "name": "AssetBrowser组件存在",
+              "status": "pass",
+              "message": "AssetBrowser.vue存在"
+            },
+            {
+              "name": "支持素材搜索",
+              "status": "pass",
+              "message": "支持素材搜索功能"
+            },
+            {
+              "name": "支持素材过滤",
+              "status": "pass",
+              "message": "支持素材过滤功能"
+            },
+            {
+              "name": "支持素材预览",
+              "status": "pass",
+              "message": "支持素材预览功能"
+            },
+            {
+              "name": "支持素材下载",
+              "status": "pass",
+              "message": "支持素材下载功能"
+            }
+          ]
+        },
+        "animationSystem": {
+          "name": "动画系统",
+          "status": "pass",
+          "score": 100,
+          "checks": [
+            {
+              "name": "AnimationSystem组件存在",
+              "status": "pass",
+              "message": "AnimationSystem.vue存在"
+            },
+            {
+              "name": "支持关键词动画",
+              "status": "pass",
+              "message": "支持关键词强调动画"
+            },
+            {
+              "name": "支持画中画动画",
+              "status": "pass",
+              "message": "支持画中画入场动画"
+            },
+            {
+              "name": "性能优化",
+              "status": "pass",
+              "message": "有性能优化措施"
+            }
+          ]
+        }
+      }
+    },
+    "codeQuality": {
+      "name": "代码质量",
+      "status": "fail",
+      "score": 63.67852246148883,
+      "checks": {
+        "commentRate": {
+          "name": "代码注释率",
+          "status": "fail",
+          "score": 91.03556738446649,
+          "value": "18.2%",
+          "target": "20%",
+          "message": "当前注释率: 18.2% (目标: ≥20%)"
+        },
+        "eslintErrors": {
+          "name": "ESLint错误检查",
+          "status": "pass",
+          "score": 100,
+          "value": "0 errors",
+          "message": "无ESLint错误"
+        },
+        "codeStyle": {
+          "name": "代码风格检查",
+          "status": "warning",
+          "score": 0,
+          "value": "13441 issues",
+          "message": "发现13441个风格问题"
+        }
+      }
+    },
+    "performance": {
+      "name": "性能指标",
+      "status": "pass",
+      "score": 90,
+      "checks": {
+        "animationPerformance": {
+          "name": "动画性能",
+          "status": "pass",
+          "score": 100,
+          "message": "使用requestAnimationFrame和性能监控"
+        },
+        "memoryUsage": {
+          "name": "内存管理",
+          "status": "pass",
+          "score": 100,
+          "message": "有内存清理和blob URL管理"
+        },
+        "cacheEfficiency": {
+          "name": "缓存效率",
+          "status": "pass",
+          "score": 70,
+          "message": "有基础缓存功能"
+        }
+      }
+    },
+    "userExperience": {
+      "name": "用户体验",
+      "status": "fail",
+      "score": 74.60317460317461,
+      "checks": {
+        "errorHandling": {
+          "name": "错误处理",
+          "status": "pass",
+          "score": 100,
+          "message": "完整错误处理系统"
+        },
+        "accessibility": {
+          "name": "可访问性",
+          "status": "warning",
+          "score": 30.952380952380953,
+          "message": "平均可访问性得分: 31.0%"
+        },
+        "responsiveness": {
+          "name": "响应式设计",
+          "status": "pass",
+          "score": 92.85714285714286,
+          "message": "13/14 个组件支持响应式 (92.9%)"
+        }
+      }
+    },
+    "compliance": {
+      "name": "合规性",
+      "status": "pass",
+      "score": 100,
+      "checks": {
+        "constraintChecker": {
+          "name": "约束检查器",
+          "status": "pass",
+          "message": "约束检查器存在"
+        }
+      }
+    },
+    "testing": {
+      "name": "测试覆盖",
+      "status": "fail",
+      "score": 31.25,
+      "checks": {
+        "testCoverage": {
+          "name": "测试覆盖率",
+          "status": "fail",
+          "score": 31.25,
+          "value": "31.3%",
+          "target": "≥80%",
+          "message": "测试覆盖率: 31.3% (目标: ≥80%)"
+        }
+      }
+    }
+  },
+  "summary": {
+    "overallScore": 75.4775050663328,
+    "overallStatus": "acceptable",
+    "totalChecks": 1,
+    "passedChecks": 12,
+    "recommendations": [
+      "提升代码注释率到≥20%",
+      "改善错误处理和可访问性"
+    ]
+  }
+}

@@ -1,0 +1,97 @@
+# VidSlide AI Apple Style Design System - Animation Specifications
+
+## Animation Philosophy
+Inspired by Apple's fluidity principle - smooth, purposeful, and delightful
+
+## Easing Functions
+
+### Primary Easings
+- **Spring Animation**: `cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+  - Usage: Interactive elements, modal transitions
+  - Characteristics: Bouncy, responsive, natural feel
+
+- **Ease Out**: `cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+  - Usage: Standard transitions, hover states
+  - Characteristics: Smooth deceleration
+
+- **Ease In Out**: `cubic-bezier(0.42, 0, 0.58, 1)`
+  - Usage: Continuous animations, loading states
+  - Characteristics: Balanced acceleration and deceleration
+
+## Duration Scale
+Following Apple's timing system
+
+```
+Instant: 0.15s - Immediate feedback, button presses
+Fast: 0.2s - Quick transitions, hover states
+Normal: 0.3s - Standard animations, component transitions
+Slow: 0.4s - Major transitions, page changes
+Slowest: 0.6s - Dramatic entrances, initial loads
+```
+
+## Template-Specific Animations
+
+### Picture-in-Picture Template
+- **Entrance**: Slide from corner (0.4s, spring easing)
+- **Style Change**: Scale and fade (0.3s, ease-out)
+- **Position Change**: Smooth slide (0.3s, ease-out)
+- **Exit**: Scale down and fade (0.3s, ease-in)
+
+### Info Card Template
+- **Entrance**: Center zoom with bounce (0.4s, spring)
+- **Pulse Highlight**: Subtle glow (2s cycle, ease-in-out)
+- **Content Update**: Fade transition (0.2s, ease-out)
+
+### Keyword Highlight Template
+- **Entrance**: Slide down from top (0.3s, ease-out)
+- **Highlight Pulse**: Gentle scale (0.2s, ease-in-out)
+- **Exit**: Fade out (0.2s, ease-in)
+
+### Document Display Template
+- **Stack Animation**: Staggered slide-in (0.4s total, 0.1s delay)
+- **Focus Effect**: Scale and shadow increase (0.3s, spring)
+- **Shake**: Subtle movement (0.5s, ease-in-out)
+
+### Title Text Template
+- **Fade In**: Smooth opacity increase (0.6s, ease-out)
+- **Float**: Gentle upward movement (3s cycle, ease-in-out)
+- **Exit**: Fade out (0.4s, ease-in)
+
+## Micro-Interactions
+
+### Hover States
+- **Scale**: 1.0 → 1.05 (0.2s, ease-out)
+- **Shadow**: Increase blur radius (0.2s, ease-out)
+- **Color**: Subtle tint change (0.15s, instant)
+
+### Button Interactions
+- **Press**: Scale down to 0.95 (0.1s, ease-out)
+- **Release**: Spring back (0.3s, spring)
+- **Loading**: Spin indicator (1s continuous, linear)
+
+### Form Elements
+- **Focus**: Border color transition (0.2s, ease-out)
+- **Error**: Shake animation (0.5s, ease-in-out)
+- **Success**: Checkmark bounce (0.4s, spring)
+
+## Performance Guidelines
+
+### Optimization Rules
+1. **Prefer Transform**: Use `transform` for movement (GPU accelerated)
+2. **Avoid Layout Triggers**: Minimize changes to layout properties
+3. **Use Will-Change**: Hint browser about upcoming animations
+4. **Limit Concurrent Animations**: Maximum 3 simultaneous animations
+5. **60fps Target**: Ensure smooth 60fps performance
+
+### Implementation Notes
+1. All animations respect `prefers-reduced-motion` setting
+2. Use CSS transitions for simple state changes
+3. Use CSS animations for complex sequences
+4. Consider JavaScript for dynamic animations
+5. Test on actual devices for performance validation
+
+### Accessibility
+- Respect `prefers-reduced-motion: reduce` media query
+- Provide alternative static states
+- Ensure animations don't interfere with content readability
+- Test with assistive technologies

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - 离线基础功能测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #007bff;
+            color: white;
+        }
+        .video-section {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .timeline-section {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            min-height: 120px;
+        }
+        .controls {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+        .timeline-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 10px 0;
+            position: relative;
+            cursor: pointer;
+        }
+        .timeline-progress {
+            height: 100%;
+            background: #007bff;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        .marker {
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 30px;
+            background: #dc3545;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        h1, h2, h3 { color: #333; }
+        .component-test { border: 2px solid #28a745; padding: 10px; margin: 10px 0; }
+        input[type="file"] { margin: 10px 0; }
+        ul { padding-left: 20px; }
+        li.selected { background: #e3f2fd; padding: 2px 4px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 VidSlide AI - 离线基础功能测试</h1>
+
+        <div class="status info">
+            <h3>📊 测试状态</h3>
+            <p>纯JavaScript实现，测试浏览器基础功能</p>
+            <div id="test-results"></div>
+        </div>
+
+        <!-- 视频上传组件 -->
+        <div class="component-test">
+            <h2>📁 视频上传组件</h2>
+            <div class="video-section">
+                <input type="file" accept="video/*" id="videoFileInput" onchange="handleVideoSelect()">
+                <div id="videoFileInfo" class="status warning">
+                    <p>请先选择一个视频文件</p>
+                </div>
+                <button class="error" onclick="resetVideo()" id="resetBtn" style="display:none;">重置</button>
+            </div>
+        </div>
+
+        <!-- 视频播放组件 -->
+        <div class="component-test" id="videoPlayerSection" style="display:none;">
+            <h2>🎥 视频播放组件</h2>
+            <div class="video-section">
+                <video
+                    id="videoPlayer"
+                    controls
+                    onloadedmetadata="handleVideoLoaded()"
+                    ontimeupdate="handleTimeUpdate()"
+                    onplay="handlePlay()"
+                    onpause="handlePause()"
+                    style="max-width: 100%; max-height: 400px;"
+                ></video>
+                <div class="controls">
+                    <button onclick="playVideo()" id="playBtn">播放</button>
+                    <button onclick="pauseVideo()" id="pauseBtn">暂停</button>
+                    <button onclick="seekVideo(10)">前进10秒</button>
+                    <button onclick="seekVideo(-10)">后退10秒</button>
+                    <span id="timeDisplay">当前时间: 00:00 / 00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 时间轴组件 -->
+        <div class="component-test" id="timelineSection" style="display:none;">
+            <h2>⏱️ 时间轴组件</h2>
+            <div class="timeline-section">
+                <div class="timeline-bar" onclick="handleTimelineClick(event)">
+                    <div class="timeline-progress" id="timelineProgress"></div>
+                    <!-- 时间轴标记 -->
+                    <div id="timelineMarkers"></div>
+                </div>
+                <div class="controls">
+                    <button onclick="addMarker()">添加标记</button>
+                    <button onclick="removeMarker()" id="removeMarkerBtn" disabled>删除标记</button>
+                    <span id="markerCount">标记数量: 0</span>
+                    <span id="selectedMarkerInfo"></span>
+                </div>
+                <div id="markerList"></div>
+            </div>
+        </div>
+
+        <!-- 调试信息 -->
+        <div class="component-test">
+            <h2>🔧 调试信息</h2>
+            <div class="status info">
+                <h3>应用状态</h3>
+                <div id="debugInfo">
+                    <p>视频文件: 未选择</p>
+                    <p>视频源: 未设置</p>
+                    <p>当前时间: 0 (number)</p>
+                    <p>视频时长: 0</p>
+                    <p>播放状态: 暂停中</p>
+                    <p>标记数量: 0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能测试按钮 -->
+        <div class="component-test">
+            <h2>🧪 功能验证</h2>
+            <div class="controls">
+                <button onclick="testFileAPI()">测试文件API</button>
+                <button onclick="testVideoAPI()">测试视频API</button>
+                <button onclick="testLocalStorage()">测试本地存储</button>
+                <button onclick="clearAll()">清除所有</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        let currentVideoFile = null;
+        let videoSrc = null;
+        let currentTime = 0;
+        let videoDuration = 0;
+        let isPlaying = false;
+        let markers = [];
+        let selectedMarkerId = null;
+        let markerIdCounter = 1;
+
+        // 测试结果显示
+        function addTestResult(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<small>${new Date().toLocaleTimeString()}</small><br>${message}`;
+            results.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 调试信息更新
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <p>视频文件: ${currentVideoFile ? '已选择' : '未选择'}</p>
+                <p>视频源: ${videoSrc ? '已设置' : '未设置'}</p>
+                <p>当前时间: ${currentTime} (${typeof currentTime})</p>
+                <p>视频时长: ${videoDuration}</p>
+                <p>播放状态: ${isPlaying ? '播放中' : '暂停中'}</p>
+                <p>标记数量: ${markers.length}</p>
+            `;
+        }
+
+        // 文件大小格式化
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 时间格式化
+        function formatTime(seconds) {
+            if (typeof seconds !== 'number' || isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 更新时间显示
+        function updateTimeDisplay() {
+            const timeDisplay = document.getElementById('timeDisplay');
+            timeDisplay.textContent = `当前时间: ${formatTime(currentTime)} / ${formatTime(videoDuration)}`;
+        }
+
+        // 更新时间轴进度
+        function updateTimelineProgress() {
+            const progress = document.getElementById('timelineProgress');
+            const percentage = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
+            progress.style.width = percentage + '%';
+        }
+
+        // 更新标记显示
+        function updateMarkers() {
+            const markersContainer = document.getElementById('timelineMarkers');
+            markersContainer.innerHTML = '';
+
+            markers.forEach(marker => {
+                const markerElement = document.createElement('div');
+                markerElement.className = 'marker';
+                const percentage = videoDuration > 0 ? (marker.time / videoDuration) * 100 : 0;
+                markerElement.style.left = percentage + '%';
+                markerElement.onclick = (e) => {
+                    e.stopPropagation();
+                    selectMarker(marker.id);
+                };
+                markersContainer.appendChild(markerElement);
+            });
+        }
+
+        // 更新标记列表
+        function updateMarkerList() {
+            const markerList = document.getElementById('markerList');
+            const markerCount = document.getElementById('markerCount');
+
+            markerCount.textContent = `标记数量: ${markers.length}`;
+
+            if (markers.length > 0) {
+                markerList.innerHTML = '<h4>标记列表:</h4><ul>';
+                markers.forEach(marker => {
+                    const li = document.createElement('li');
+                    li.textContent = `标记 ${marker.id}: ${formatTime(marker.time)}`;
+                    li.className = marker.id === selectedMarkerId ? 'selected' : '';
+                    li.onclick = () => selectMarker(marker.id);
+                    markerList.appendChild(li);
+                });
+                markerList.innerHTML += '</ul>';
+            } else {
+                markerList.innerHTML = '';
+            }
+
+            document.getElementById('removeMarkerBtn').disabled = !selectedMarkerId;
+        }
+
+        // 选择标记
+        function selectMarker(markerId) {
+            selectedMarkerId = markerId;
+            const selectedMarkerInfo = document.getElementById('selectedMarkerInfo');
+
+            if (markerId) {
+                const marker = markers.find(m => m.id === markerId);
+                selectedMarkerInfo.textContent = `选中标记: ${markerId}`;
+                seekToTime(marker.time);
+            } else {
+                selectedMarkerInfo.textContent = '';
+            }
+
+            updateMarkerList();
+        }
+
+        // 处理视频选择
+        function handleVideoSelect() {
+            const fileInput = document.getElementById('videoFileInput');
+            const file = fileInput.files[0];
+
+            if (file) {
+                try {
+                    addTestResult(`选择文件: ${file.name}`, 'info');
+
+                    // 验证文件类型
+                    if (!file.type.startsWith('video/')) {
+                        addTestResult('请选择视频文件', 'error');
+                        return;
+                    }
+
+                    // 设置文件
+                    currentVideoFile = file;
+                    videoSrc = URL.createObjectURL(file);
+
+                    // 更新UI
+                    const videoPlayer = document.getElementById('videoPlayer');
+                    videoPlayer.src = videoSrc;
+
+                    const fileInfo = document.getElementById('videoFileInfo');
+                    fileInfo.className = 'status success';
+                    fileInfo.innerHTML = `
+                        <h3>✅ 视频已选择</h3>
+                        <p>文件名: ${file.name}</p>
+                        <p>大小: ${formatFileSize(file.size)}</p>
+                        <p>类型: ${file.type}</p>
+                    `;
+
+                    // 显示组件
+                    document.getElementById('videoPlayerSection').style.display = 'block';
+                    document.getElementById('timelineSection').style.display = 'block';
+                    document.getElementById('resetBtn').style.display = 'inline-block';
+
+                    addTestResult('✅ 视频文件设置成功', 'success');
+                    updateDebugInfo();
+
+                } catch (error) {
+                    addTestResult(`❌ 文件处理失败: ${error.message}`, 'error');
+                    console.error('File handling error:', error);
+                }
+            }
+        }
+
+        // 重置视频
+        function resetVideo() {
+            if (videoSrc) {
+                URL.revokeObjectURL(videoSrc);
+            }
+
+            currentVideoFile = null;
+            videoSrc = null;
+            currentTime = 0;
+            videoDuration = 0;
+            isPlaying = false;
+            markers = [];
+            selectedMarkerId = null;
+
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = '';
+            videoPlayer.currentTime = 0;
+
+            const fileInfo = document.getElementById('videoFileInfo');
+            fileInfo.className = 'status warning';
+            fileInfo.innerHTML = '<p>请先选择一个视频文件</p>';
+
+            document.getElementById('videoPlayerSection').style.display = 'none';
+            document.getElementById('timelineSection').style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'none';
+
+            updateDebugInfo();
+            updateTimeDisplay();
+            updateTimelineProgress();
+            updateMarkers();
+            updateMarkerList();
+
+            addTestResult('视频已重置', 'info');
+        }
+
+        // 视频加载完成
+        function handleVideoLoaded() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoDuration = videoPlayer.duration || 0;
+
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = false;
+
+            updateTimeDisplay();
+            updateTimelineProgress();
+
+            addTestResult(`✅ 视频加载完成，时长: ${formatTime(videoDuration)}`, 'success');
+            updateDebugInfo();
+        }
+
+        // 时间更新
+        function handleTimeUpdate() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            currentTime = videoPlayer.currentTime || 0;
+
+            updateTimeDisplay();
+            updateTimelineProgress();
+        }
+
+        // 播放事件
+        function handlePlay() {
+            isPlaying = true;
+            addTestResult('视频开始播放', 'info');
+            updateDebugInfo();
+        }
+
+        // 暂停事件
+        function handlePause() {
+            isPlaying = false;
+            addTestResult('视频暂停播放', 'info');
+            updateDebugInfo();
+        }
+
+        // 播放控制
+        function playVideo() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoPlayer) {
+                videoPlayer.play();
+            }
+        }
+
+        function pauseVideo() {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoPlayer) {
+                videoPlayer.pause();
+            }
+        }
+
+        function seekVideo(seconds) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoPlayer) {
+                const newTime = Math.max(0, Math.min(videoDuration, currentTime + seconds));
+                videoPlayer.currentTime = newTime;
+                currentTime = newTime;
+                updateTimeDisplay();
+                updateTimelineProgress();
+            }
+        }
+
+        function seekToTime(time) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            if (videoPlayer) {
+                videoPlayer.currentTime = time;
+                currentTime = time;
+                updateTimeDisplay();
+                updateTimelineProgress();
+            }
+        }
+
+        // 时间轴点击
+        function handleTimelineClick(event) {
+            if (videoDuration > 0) {
+                const timelineBar = event.currentTarget;
+                const rect = timelineBar.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const percentage = clickX / rect.width;
+                const newTime = percentage * videoDuration;
+
+                seekToTime(newTime);
+            }
+        }
+
+        // 标记管理
+        function addMarker() {
+            const marker = {
+                id: markerIdCounter++,
+                time: currentTime,
+                title: `标记 ${markerIdCounter - 1}`
+            };
+            markers.push(marker);
+            selectedMarkerId = marker.id;
+
+            updateMarkers();
+            updateMarkerList();
+            updateDebugInfo();
+
+            addTestResult(`添加标记: ${formatTime(marker.time)}`, 'info');
+        }
+
+        function removeMarker() {
+            if (selectedMarkerId) {
+                const index = markers.findIndex(m => m.id === selectedMarkerId);
+                if (index > -1) {
+                    markers.splice(index, 1);
+                    selectedMarkerId = null;
+
+                    updateMarkers();
+                    updateMarkerList();
+                    updateDebugInfo();
+
+                    addTestResult('标记已删除', 'info');
+                }
+            }
+        }
+
+        // 功能测试
+        function testFileAPI() {
+            try {
+                if (window.File && window.FileReader && window.FileList && window.Blob) {
+                    addTestResult('✅ File API支持正常', 'success');
+                } else {
+                    addTestResult('❌ File API不支持', 'error');
+                }
+            } catch (error) {
+                addTestResult(`❌ File API测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        function testVideoAPI() {
+            try {
+                const video = document.createElement('video');
+                const canPlayTypes = [
+                    'video/mp4; codecs="avc1.42E01E"',
+                    'video/webm; codecs="vp8, vorbis"',
+                    'video/ogg; codecs="theora"'
+                ];
+
+                let supportedTypes = [];
+                canPlayTypes.forEach(type => {
+                    if (video.canPlayType(type) !== '') {
+                        supportedTypes.push(type.split(';')[0]);
+                    }
+                });
+
+                if (supportedTypes.length > 0) {
+                    addTestResult(`✅ 视频API支持: ${supportedTypes.join(', ')}`, 'success');
+                } else {
+                    addTestResult('❌ 浏览器不支持常见视频格式', 'error');
+                }
+            } catch (error) {
+                addTestResult(`❌ 视频API测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        function testLocalStorage() {
+            try {
+                const testKey = 'vidslide-test';
+                const testValue = 'localStorage works';
+
+                localStorage.setItem(testKey, testValue);
+                const retrieved = localStorage.getItem(testKey);
+
+                if (retrieved === testValue) {
+                    addTestResult('✅ LocalStorage功能正常', 'success');
+                    localStorage.removeItem(testKey);
+                } else {
+                    addTestResult('❌ LocalStorage测试失败', 'error');
+                }
+            } catch (error) {
+                addTestResult(`❌ LocalStorage失败: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAll() {
+            resetVideo();
+            document.getElementById('test-results').innerHTML = '';
+            addTestResult('所有数据已清除', 'info');
+        }
+
+        // 页面初始化
+        window.addEventListener('load', () => {
+            addTestResult('✅ 页面加载完成，开始功能测试', 'success');
+
+            // 自动运行基础测试
+            setTimeout(() => {
+                testFileAPI();
+                testVideoAPI();
+                testLocalStorage();
+            }, 100);
+        });
+
+        // 错误处理
+        window.addEventListener('error', (event) => {
+            addTestResult(`❌ 页面错误: ${event.message}`, 'error');
+        });
+
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', () => {
+            if (videoSrc) {
+                URL.revokeObjectURL(videoSrc);
+            }
+        });
+    </script>
+</body>
+</html>

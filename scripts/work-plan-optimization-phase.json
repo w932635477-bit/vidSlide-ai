@@ -1,0 +1,478 @@
+{
+  "metadata": {
+    "phase": "优化完善阶段 (Week33-36)",
+    "version": "1.0.0",
+    "generated": "2026-01-08T13:48:37.070Z",
+    "constraints": [
+      "基于用户反馈进行迭代优化",
+      "不得新增核心功能",
+      "保持与约束文档100%合规",
+      "重点提升用户体验和质量"
+    ],
+    "successCriteria": [
+      "外部素材API完全集成",
+      "代码注释率≥20%",
+      "错误处理用户友好",
+      "约束系统完善",
+      "性能监控到位"
+    ]
+  },
+  "objectives": {
+    "primary": "基于紧急补齐阶段成果，进行用户体验和质量优化",
+    "secondary": [
+      "完善外部素材获取功能",
+      "提升代码质量和可维护性",
+      "增强错误处理和用户反馈",
+      "完善约束系统和专业性保护"
+    ],
+    "quality": [
+      "ESLint 0错误",
+      "测试覆盖率≥80%",
+      "代码注释率≥20%",
+      "性能指标达标"
+    ]
+  },
+  "tasks": {
+    "external-api-integration": {
+      "id": "external-api-integration",
+      "title": "外部素材API集成完善",
+      "priority": "high",
+      "status": "in_progress",
+      "description": "完善用户授权流程和API集成",
+      "subtasks": [
+        {
+          "id": "user-authorization-dialog",
+          "title": "用户授权对话框",
+          "description": "实现透明的用户授权流程",
+          "estimatedHours": 8,
+          "dependencies": [],
+          "deliverables": [
+            "UserAuthorizationDialog.vue"
+          ]
+        },
+        {
+          "id": "api-key-management",
+          "title": "API密钥管理",
+          "description": "安全管理外部API密钥",
+          "estimatedHours": 6,
+          "dependencies": [
+            "user-authorization-dialog"
+          ],
+          "deliverables": [
+            "APIKeyManager.vue",
+            "SecureStorage.js"
+          ]
+        },
+        {
+          "id": "network-error-handling",
+          "title": "网络错误处理",
+          "description": "优雅处理网络请求失败",
+          "estimatedHours": 4,
+          "dependencies": [
+            "api-key-management"
+          ],
+          "deliverables": [
+            "NetworkErrorHandler.js"
+          ]
+        },
+        {
+          "id": "material-download-cache",
+          "title": "素材下载缓存",
+          "description": "实现LRU缓存策略",
+          "estimatedHours": 6,
+          "dependencies": [
+            "network-error-handling"
+          ],
+          "deliverables": [
+            "MaterialCache.js"
+          ]
+        }
+      ],
+      "totalEstimatedHours": 24,
+      "owner": "Frontend Team",
+      "acceptanceCriteria": [
+        "用户可以安全授权外部API访问",
+        "API密钥安全存储和管理",
+        "网络错误有友好提示",
+        "素材缓存命中率≥70%"
+      ]
+    },
+    "code-quality-improvement": {
+      "id": "code-quality-improvement",
+      "priority": "high",
+      "status": "pending",
+      "title": "代码质量提升",
+      "description": "提升代码注释率和质量",
+      "subtasks": [
+        {
+          "id": "comment-audit",
+          "title": "注释审计",
+          "description": "识别需要补充注释的文件",
+          "estimatedHours": 4,
+          "dependencies": [],
+          "deliverables": [
+            "comment-audit-report.json"
+          ]
+        },
+        {
+          "id": "core-logic-comments",
+          "title": "核心逻辑注释",
+          "description": "为业务逻辑添加详细注释",
+          "estimatedHours": 12,
+          "dependencies": [
+            "comment-audit"
+          ],
+          "deliverables": [
+            "updated-core-files"
+          ]
+        },
+        {
+          "id": "api-documentation",
+          "title": "API文档",
+          "description": "完善JSDoc注释",
+          "estimatedHours": 8,
+          "dependencies": [
+            "core-logic-comments"
+          ],
+          "deliverables": [
+            "api-docs.html"
+          ]
+        },
+        {
+          "id": "comment-rate-validation",
+          "title": "注释率验证",
+          "description": "验证注释率≥20%",
+          "estimatedHours": 2,
+          "dependencies": [
+            "api-documentation"
+          ],
+          "deliverables": [
+            "comment-rate-report.json"
+          ]
+        }
+      ],
+      "totalEstimatedHours": 26,
+      "owner": "Development Team",
+      "acceptanceCriteria": [
+        "所有文件注释率≥20%",
+        "JSDoc注释完整",
+        "代码可读性显著提升",
+        "维护性大幅改善"
+      ]
+    },
+    "error-handling-enhancement": {
+      "id": "error-handling-enhancement",
+      "priority": "medium",
+      "status": "pending",
+      "title": "错误处理增强",
+      "description": "提升错误处理的友好性和恢复能力",
+      "subtasks": [
+        {
+          "id": "error-message-optimization",
+          "title": "错误信息优化",
+          "description": "用户友好的错误提示文案",
+          "estimatedHours": 4,
+          "dependencies": [],
+          "deliverables": [
+            "ErrorMessages.js"
+          ]
+        },
+        {
+          "id": "recovery-suggestions",
+          "title": "恢复建议",
+          "description": "自动生成恢复操作建议",
+          "estimatedHours": 6,
+          "dependencies": [
+            "error-message-optimization"
+          ],
+          "deliverables": [
+            "RecoverySuggestions.js"
+          ]
+        },
+        {
+          "id": "error-reporting",
+          "title": "错误报告",
+          "description": "用户反馈收集系统",
+          "estimatedHours": 8,
+          "dependencies": [
+            "recovery-suggestions"
+          ],
+          "deliverables": [
+            "ErrorReporter.vue"
+          ]
+        }
+      ],
+      "totalEstimatedHours": 18,
+      "owner": "UX Team",
+      "acceptanceCriteria": [
+        "所有错误有友好提示",
+        "提供具体的恢复建议",
+        "错误报告功能完整",
+        "用户满意度提升"
+      ]
+    },
+    "constraint-system-completion": {
+      "id": "constraint-system-completion",
+      "priority": "medium",
+      "status": "pending",
+      "title": "约束系统完善",
+      "description": "完善专业性保护和用户指导",
+      "subtasks": [
+        {
+          "id": "professional-constraints",
+          "title": "专业性约束",
+          "description": "定义专业设计约束规则",
+          "estimatedHours": 6,
+          "dependencies": [],
+          "deliverables": [
+            "ProfessionalConstraints.js"
+          ]
+        },
+        {
+          "id": "real-time-validation",
+          "title": "实时验证",
+          "description": "用户操作实时反馈",
+          "estimatedHours": 8,
+          "dependencies": [
+            "professional-constraints"
+          ],
+          "deliverables": [
+            "RealTimeValidator.js"
+          ]
+        },
+        {
+          "id": "constraint-suggestions",
+          "title": "约束建议",
+          "description": "智能建议生成",
+          "estimatedHours": 4,
+          "dependencies": [
+            "real-time-validation"
+          ],
+          "deliverables": [
+            "ConstraintSuggestions.js"
+          ]
+        }
+      ],
+      "totalEstimatedHours": 18,
+      "owner": "Product Team",
+      "acceptanceCriteria": [
+        "专业性约束完整",
+        "实时反馈准确",
+        "建议有用性高",
+        "用户接受度≥80%"
+      ]
+    },
+    "performance-monitoring": {
+      "id": "performance-monitoring",
+      "priority": "low",
+      "status": "pending",
+      "title": "性能监控完善",
+      "description": "完善性能监控和优化",
+      "subtasks": [
+        {
+          "id": "performance-dashboard",
+          "title": "性能仪表板",
+          "description": "可视化性能监控",
+          "estimatedHours": 6,
+          "dependencies": [],
+          "deliverables": [
+            "PerformanceDashboard.vue"
+          ]
+        },
+        {
+          "id": "memory-optimization",
+          "title": "内存优化",
+          "description": "内存泄漏检测和优化",
+          "estimatedHours": 4,
+          "dependencies": [
+            "performance-dashboard"
+          ],
+          "deliverables": [
+            "MemoryOptimizer.js"
+          ]
+        },
+        {
+          "id": "cache-performance",
+          "title": "缓存性能",
+          "description": "缓存策略优化",
+          "estimatedHours": 4,
+          "dependencies": [
+            "memory-optimization"
+          ],
+          "deliverables": [
+            "CacheOptimizer.js"
+          ]
+        }
+      ],
+      "totalEstimatedHours": 14,
+      "owner": "Performance Team",
+      "acceptanceCriteria": [
+        "性能指标实时监控",
+        "内存使用优化",
+        "缓存效率提升",
+        "用户体验改善"
+      ]
+    }
+  },
+  "timeline": {
+    "totalDuration": "4周",
+    "weeklyBreakdown": [
+      {
+        "week": "Week33",
+        "focus": "外部素材API集成",
+        "tasks": [
+          "external-api-integration"
+        ],
+        "milestones": [
+          "用户授权流程完成",
+          "API密钥管理就绪"
+        ]
+      },
+      {
+        "week": "Week34",
+        "focus": "代码质量提升",
+        "tasks": [
+          "code-quality-improvement"
+        ],
+        "milestones": [
+          "代码注释率达标",
+          "文档完善"
+        ]
+      },
+      {
+        "week": "Week35",
+        "focus": "错误处理和约束系统",
+        "tasks": [
+          "error-handling-enhancement",
+          "constraint-system-completion"
+        ],
+        "milestones": [
+          "错误处理优化完成",
+          "约束系统完善"
+        ]
+      },
+      {
+        "week": "Week36",
+        "focus": "性能优化和最终验收",
+        "tasks": [
+          "performance-monitoring"
+        ],
+        "milestones": [
+          "性能监控完成",
+          "最终验收通过"
+        ]
+      }
+    ],
+    "criticalPath": [
+      "external-api-integration",
+      "code-quality-improvement",
+      "error-handling-enhancement"
+    ]
+  },
+  "risks": {
+    "technical": [
+      {
+        "risk": "外部API服务不稳定",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "实现完善的降级方案和错误处理"
+      },
+      {
+        "risk": "缓存策略影响性能",
+        "probability": "low",
+        "impact": "medium",
+        "mitigation": "详细的性能测试和监控"
+      }
+    ],
+    "business": [
+      {
+        "risk": "用户授权率低",
+        "probability": "medium",
+        "impact": "high",
+        "mitigation": "优化授权流程和隐私说明"
+      },
+      {
+        "risk": "功能优化影响现有用户",
+        "probability": "low",
+        "impact": "medium",
+        "mitigation": "充分的回归测试和用户反馈收集"
+      }
+    ],
+    "schedule": [
+      {
+        "risk": "代码注释工作量大",
+        "probability": "high",
+        "impact": "medium",
+        "mitigation": "自动化工具辅助和优先级排序"
+      },
+      {
+        "risk": "API集成测试复杂",
+        "probability": "medium",
+        "impact": "medium",
+        "mitigation": "分阶段测试和模拟环境"
+      }
+    ]
+  },
+  "metrics": {
+    "quality": [
+      {
+        "name": "代码注释率",
+        "target": "≥20%",
+        "current": "4-15%",
+        "status": "需要提升"
+      },
+      {
+        "name": "ESLint错误",
+        "target": "0",
+        "current": "0",
+        "status": "已达标"
+      },
+      {
+        "name": "测试覆盖率",
+        "target": "≥80%",
+        "current": "80%",
+        "status": "已达标"
+      }
+    ],
+    "performance": [
+      {
+        "name": "素材缓存命中率",
+        "target": "≥70%",
+        "current": "待测",
+        "status": "待实现"
+      },
+      {
+        "name": "错误恢复率",
+        "target": "≥90%",
+        "current": "待测",
+        "status": "待实现"
+      },
+      {
+        "name": "用户授权转化率",
+        "target": "≥60%",
+        "current": "待测",
+        "status": "待实现"
+      }
+    ],
+    "userExperience": [
+      {
+        "name": "错误提示友好度",
+        "target": "≥8/10",
+        "current": "待测",
+        "status": "待实现"
+      },
+      {
+        "name": "操作流畅度",
+        "target": "≥9/10",
+        "current": "待测",
+        "status": "待实现"
+      },
+      {
+        "name": "功能发现易用性",
+        "target": "≥7/10",
+        "current": "待测",
+        "status": "待实现"
+      }
+    ]
+  }
+}

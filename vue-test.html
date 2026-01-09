@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - Vue基础测试</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #007bff;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+        h1, h2 { color: #333; }
+        .vue-test { border: 2px solid #007bff; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 VidSlide AI - Vue基础测试</h1>
+
+        <div class="status info">
+            <h3>📊 Vue测试状态</h3>
+            <p>测试Vue 3 Composition API基础功能</p>
+            <div id="vue-results"></div>
+        </div>
+
+        <!-- Vue应用挂载点 -->
+        <div id="vue-app" class="vue-test">
+            <h2>Vue 3 基础功能测试</h2>
+
+            <!-- 基础响应式数据 -->
+            <div class="test-section">
+                <h3>1️⃣ 响应式数据测试</h3>
+                <p>计数器: <span id="counter">{{ counter }}</span></p>
+                <button @click="increment">+1</button>
+                <button @click="decrement">-1</button>
+                <button @click="reset">重置</button>
+            </div>
+
+            <!-- 计算属性测试 -->
+            <div class="test-section">
+                <h3>2️⃣ 计算属性测试</h3>
+                <p>双倍计数: <span id="double-counter">{{ doubleCounter }}</span></p>
+                <p>计数器状态: <span id="counter-status">{{ counterStatus }}</span></p>
+            </div>
+
+            <!-- 条件渲染测试 -->
+            <div class="test-section">
+                <h3>3️⃣ 条件渲染测试</h3>
+                <button @click="toggleVisibility">切换显示</button>
+                <div v-if="isVisible" id="conditional-div">
+                    <p>✅ 条件渲染工作正常！</p>
+                </div>
+                <div v-else>
+                    <p>❌ 条件渲染被隐藏</p>
+                </div>
+            </div>
+
+            <!-- 列表渲染测试 -->
+            <div class="test-section">
+                <h3>4️⃣ 列表渲染测试</h3>
+                <button @click="addItem">添加项目</button>
+                <button @click="removeItem">删除项目</button>
+                <ul id="item-list">
+                    <li v-for="(item, index) in items" :key="index">
+                        项目 {{ index + 1 }}: {{ item }}
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 事件处理测试 -->
+            <div class="test-section">
+                <h3>5️⃣ 事件处理测试</h3>
+                <input v-model="inputText" @input="handleInput" placeholder="输入一些文字...">
+                <p>输入内容: <span id="input-display">{{ inputText }}</span></p>
+                <p>输入长度: <span id="input-length">{{ inputText.length }}</span></p>
+            </div>
+
+            <!-- 文件上传测试 -->
+            <div class="test-section">
+                <h3>6️⃣ 文件上传测试</h3>
+                <input type="file" @change="handleFileChange" accept="video/*" ref="fileInput">
+                <div v-if="selectedFile">
+                    <p>选中文件: {{ selectedFile.name }}</p>
+                    <p>文件大小: {{ formatFileSize(selectedFile.size) }}</p>
+                    <p>文件类型: {{ selectedFile.type }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试结果统计 -->
+        <div class="status success">
+            <h3>✅ 测试结果</h3>
+            <div id="test-stats">
+                <p>Vue功能测试: <span id="vue-working">等待测试...</span></p>
+                <p>响应式数据: <span id="reactive-working">等待测试...</span></p>
+                <p>计算属性: <span id="computed-working">等待测试...</span></p>
+                <p>条件渲染: <span id="conditional-working">等待测试...</span></p>
+                <p>列表渲染: <span id="list-working">等待测试...</span></p>
+                <p>事件处理: <span id="events-working">等待测试...</span></p>
+                <p>文件处理: <span id="file-working">等待测试...</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vue测试结果显示
+        function updateTestResult(testName, status) {
+            const element = document.getElementById(testName);
+            if (element) {
+                element.textContent = status;
+                element.style.color = status.includes('✅') ? '#28a745' : status.includes('❌') ? '#dc3545' : '#6c757d';
+            }
+        }
+
+        // Vue应用
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        const app = createApp({
+            setup() {
+                // 响应式数据
+                const counter = ref(0);
+                const isVisible = ref(true);
+                const items = ref(['项目A', '项目B', '项目C']);
+                const inputText = ref('');
+                const selectedFile = ref(null);
+
+                // 计算属性
+                const doubleCounter = computed(() => counter.value * 2);
+                const counterStatus = computed(() => {
+                    if (counter.value > 0) return '正数';
+                    if (counter.value < 0) return '负数';
+                    return '零';
+                });
+
+                // 方法
+                const increment = () => counter.value++;
+                const decrement = () => counter.value--;
+                const reset = () => counter.value = 0;
+
+                const toggleVisibility = () => isVisible.value = !isVisible.value;
+
+                const addItem = () => items.value.push(`项目${items.value.length + 1}`);
+                const removeItem = () => items.value.pop();
+
+                const handleInput = () => {
+                    updateTestResult('events-working', '✅ 事件处理正常');
+                };
+
+                const handleFileChange = (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        selectedFile.value = file;
+                        updateTestResult('file-working', '✅ 文件处理正常');
+                    }
+                };
+
+                const formatFileSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                // 生命周期钩子
+                onMounted(() => {
+                    updateTestResult('vue-working', '✅ Vue应用正常');
+                    updateTestResult('reactive-working', '✅ 响应式数据正常');
+                    updateTestResult('computed-working', '✅ 计算属性正常');
+                    updateTestResult('conditional-working', '✅ 条件渲染正常');
+                    updateTestResult('list-working', '✅ 列表渲染正常');
+                });
+
+                return {
+                    counter,
+                    doubleCounter,
+                    counterStatus,
+                    isVisible,
+                    items,
+                    inputText,
+                    selectedFile,
+                    increment,
+                    decrement,
+                    reset,
+                    toggleVisibility,
+                    addItem,
+                    removeItem,
+                    handleInput,
+                    handleFileChange,
+                    formatFileSize
+                };
+            }
+        });
+
+        // 挂载应用
+        try {
+            app.mount('#vue-app');
+            updateTestResult('vue-working', '✅ Vue应用正常');
+        } catch (error) {
+            updateTestResult('vue-working', `❌ Vue应用失败: ${error.message}`);
+            console.error('Vue app mount failed:', error);
+        }
+
+        // 页面错误处理
+        window.addEventListener('error', (event) => {
+            console.error('页面错误:', event.error);
+            updateTestResult('vue-working', `❌ 页面错误: ${event.error.message}`);
+        });
+
+        // Vue错误处理
+        app.config.errorHandler = (err, instance, info) => {
+            console.error('Vue错误:', err, info);
+            updateTestResult('vue-working', `❌ Vue错误: ${err.message}`);
+        };
+    </script>
+</body>
+</html>

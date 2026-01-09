@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTPS语音识别测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e4e7ed;
+            border-radius: 8px;
+        }
+
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .primary { background: #007bff; color: white; }
+        .primary:hover { background: #0056b3; }
+
+        .success-btn { background: #28a745; color: white; }
+        .success-btn:hover { background: #218838; }
+
+        .danger { background: #dc3545; color: white; }
+        .danger:hover { background: #c82333; }
+
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .env-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .env-info strong {
+            color: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 HTTPS语音识别测试</h1>
+            <p>在真正的HTTPS环境下测试语音识别功能</p>
+        </div>
+
+        <div id="envInfo" class="env-info">
+            <h3>🌐 环境信息</h3>
+            <div id="envDetails"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎤 语音识别测试</h2>
+            <p>测试Web Speech API是否在HTTPS环境下正常工作</p>
+
+            <button class="primary" onclick="testSpeechRecognition()" id="speechBtn">🎤 开始语音识别测试</button>
+            <button class="danger" onclick="stopSpeechRecognition()" id="stopBtn" style="display:none;">⏹️ 停止测试</button>
+
+            <div id="speechResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎙️ 麦克风权限测试</h2>
+            <p>测试浏览器是否能访问麦克风</p>
+
+            <button class="success-btn" onclick="testMicrophone()" id="micBtn">🔍 测试麦克风权限</button>
+
+            <div id="micResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 手动输入测试</h2>
+            <p>作为语音识别的备选方案</p>
+
+            <textarea id="manualInput" placeholder="在这里输入测试文字..." style="width: 100%; height: 60px; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; resize: vertical;"></textarea>
+            <br>
+            <button class="primary" onclick="testManualInput()">💾 测试手动输入</button>
+
+            <div id="manualResult" class="result" style="display:none;"></div>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        let recognition = null;
+        let isRecording = false;
+
+        // 测试结果显示
+        function addTestResult(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<small>${new Date().toLocaleTimeString()}</small><br>${message}`;
+            results.appendChild(div);
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // 环境检测
+        function checkEnvironment() {
+            const envDetails = document.getElementById('envDetails');
+
+            const protocol = location.protocol;
+            const hostname = location.hostname;
+            const port = location.port;
+            const userAgent = navigator.userAgent;
+
+            const isHttps = protocol === 'https:';
+            const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+            let envStatus = '';
+            let speechSupport = '❌ 不支持';
+
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                speechSupport = '✅ 支持';
+            }
+
+            envDetails.innerHTML = `
+                <strong>协议:</strong> ${protocol}<br>
+                <strong>主机名:</strong> ${hostname}<br>
+                <strong>端口:</strong> ${port || '默认'}<br>
+                <strong>HTTPS:</strong> ${isHttps ? '✅ 是' : '❌ 否'}<br>
+                <strong>localhost:</strong> ${isLocalhost ? '✅ 是' : '❌ 否'}<br>
+                <strong>语音识别:</strong> ${speechSupport}<br>
+                <strong>浏览器:</strong> ${userAgent.split(' ').pop()}<br>
+                <strong>时间:</strong> ${new Date().toLocaleString()}
+            `;
+
+            if (isHttps) {
+                addTestResult('✅ HTTPS环境，语音识别应该完全正常', 'success');
+            } else if (isLocalhost) {
+                addTestResult('⚠️ localhost环境，语音识别基本支持', 'warning');
+            } else {
+                addTestResult('❌ HTTP环境，语音识别可能不稳定', 'error');
+            }
+        }
+
+        // 语音识别测试
+        function testSpeechRecognition() {
+            const speechBtn = document.getElementById('speechBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const speechResult = document.getElementById('speechResult');
+
+            if (isRecording) {
+                stopSpeechRecognition();
+                return;
+            }
+
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                speechResult.style.display = 'block';
+                speechResult.textContent = '❌ 浏览器不支持语音识别';
+                addTestResult('❌ 浏览器不支持语音识别', 'error');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'zh-CN';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                speechResult.style.display = 'block';
+                speechResult.textContent = '🎤 正在录音，请说话...';
+                speechBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+                addTestResult('🎤 语音识别测试开始', 'info');
+            };
+
+            recognition.onresult = (event) => {
+                let finalTranscript = '';
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    speechResult.textContent = `✅ 识别成功: "${finalTranscript}"`;
+                    addTestResult(`✅ 语音识别成功: "${finalTranscript}"`, 'success');
+                } else if (interimTranscript) {
+                    speechResult.textContent = `🎤 正在识别: "${interimTranscript}"`;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                let errorMsg = `❌ 语音识别错误: ${event.error}`;
+                speechResult.style.display = 'block';
+                speechResult.textContent = errorMsg;
+
+                switch (event.error) {
+                    case 'network':
+                        errorMsg += '\n💡 建议: 使用HTTPS环境或localhost';
+                        break;
+                    case 'not-allowed':
+                        errorMsg += '\n💡 建议: 允许浏览器访问麦克风';
+                        break;
+                    case 'no-speech':
+                        errorMsg += '\n💡 建议: 请靠近麦克风大声说话';
+                        break;
+                }
+
+                addTestResult(errorMsg, 'error');
+                stopSpeechRecognition();
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                speechBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'none';
+                addTestResult('语音识别测试结束', 'info');
+            };
+
+            try {
+                recognition.start();
+            } catch (error) {
+                speechResult.style.display = 'block';
+                speechResult.textContent = `❌ 启动失败: ${error.message}`;
+                addTestResult(`❌ 启动语音识别失败: ${error.message}`, 'error');
+            }
+        }
+
+        function stopSpeechRecognition() {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+        }
+
+        // 麦克风权限测试
+        function testMicrophone() {
+            const micBtn = document.getElementById('micBtn');
+            const micResult = document.getElementById('micResult');
+
+            micBtn.textContent = '⏳ 测试中...';
+            micBtn.disabled = true;
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                micResult.style.display = 'block';
+                micResult.textContent = '❌ 浏览器不支持麦克风API';
+                addTestResult('❌ 浏览器不支持麦克风API', 'error');
+                micBtn.textContent = '🔍 测试麦克风权限';
+                micBtn.disabled = false;
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    micResult.style.display = 'block';
+                    micResult.textContent = '✅ 麦克风权限正常！\n🎤 可以听到音频输入';
+                    addTestResult('✅ 麦克风权限测试通过', 'success');
+
+                    // 播放测试音
+                    setTimeout(() => {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const analyser = audioContext.createAnalyser();
+                        const microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+
+                        analyser.fftSize = 256;
+                        const bufferLength = analyser.frequencyBinCount;
+                        const dataArray = new Uint8Array(bufferLength);
+
+                        function checkAudioLevel() {
+                            analyser.getByteFrequencyData(dataArray);
+                            const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+
+                            if (average > 10) {
+                                micResult.textContent += '\n🎵 检测到音频信号！';
+                            }
+
+                            if (isRecording) {
+                                requestAnimationFrame(checkAudioLevel);
+                            }
+                        }
+
+                        checkAudioLevel();
+                    }, 1000);
+
+                    // 5秒后停止
+                    setTimeout(() => {
+                        stream.getTracks().forEach(track => track.stop());
+                        audioContext.close();
+                    }, 5000);
+                })
+                .catch(error => {
+                    micResult.style.display = 'block';
+                    let errorMsg = `❌ 麦克风权限错误: ${error.name}`;
+
+                    switch (error.name) {
+                        case 'NotAllowedError':
+                            errorMsg += '\n💡 请允许浏览器访问麦克风';
+                            break;
+                        case 'NotFoundError':
+                            errorMsg += '\n💡 请检查麦克风连接';
+                            break;
+                        case 'NotReadableError':
+                            errorMsg += '\n💡 麦克风被其他应用占用';
+                            break;
+                    }
+
+                    micResult.textContent = errorMsg;
+                    addTestResult(`❌ 麦克风权限测试失败: ${error.name}`, 'error');
+                })
+                .finally(() => {
+                    micBtn.textContent = '🔍 测试麦克风权限';
+                    micBtn.disabled = false;
+                });
+        }
+
+        // 手动输入测试
+        function testManualInput() {
+            const manualInput = document.getElementById('manualInput');
+            const manualResult = document.getElementById('manualResult');
+
+            const text = manualInput.value.trim();
+
+            if (text) {
+                manualResult.style.display = 'block';
+                manualResult.textContent = `✅ 手动输入成功: "${text}"\n📝 字符数: ${text.length}`;
+                addTestResult(`✅ 手动输入测试成功: "${text}"`, 'success');
+            } else {
+                manualResult.style.display = 'block';
+                manualResult.textContent = '⚠️ 请输入一些文字';
+                addTestResult('⚠️ 手动输入测试: 未输入文字', 'warning');
+            }
+        }
+
+        // 页面初始化
+        window.addEventListener('load', () => {
+            checkEnvironment();
+            addTestResult('✅ HTTPS语音识别测试页面加载完成', 'success');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2711 @@
+/** * HomeView.vue - VidSlide AI 首页 * 使用 Wegic.ai 设计系统重新设计 */
+
+<template>
+  <div class="wegic-home-view">
+    <!-- Wegic 风格的英雄区域 -->
+    <section class="wegic-hero-section">
+      <!-- 动态背景效果 -->
+      <div class="wegic-hero-bg">
+        <div class="wegic-bg-gradient"></div>
+        <div class="wegic-bg-shapes">
+          <div class="wegic-shape shape-1 wegic-animate-float"></div>
+          <div class="wegic-shape shape-2 wegic-animate-pulse"></div>
+          <div class="wegic-shape shape-3 wegic-animate-glow"></div>
+        </div>
+      </div>
+
+      <!-- 主要内容区域 -->
+      <div class="wegic-hero-content">
+        <!-- 品牌标题区域 -->
+        <div class="wegic-brand-section">
+          <h1 class="wegic-hero-title">
+            <span class="wegic-title-main">VidSlide</span>
+            <span class="wegic-title-accent">AI</span>
+          </h1>
+          <p class="wegic-hero-subtitle">
+            5分钟视频 → 30秒专业PPT
+          </p>
+          <div class="wegic-title-decoration"></div>
+        </div>
+
+        <!-- 功能特色标签 -->
+        <div class="wegic-feature-tags">
+          <span class="wegic-badge wegic-badge-primary">
+            <span class="wegic-icon">⚡</span>
+            AI智能识别
+          </span>
+          <span class="wegic-badge wegic-badge-success">
+            <span class="wegic-icon">🎯</span>
+            一键生成
+          </span>
+          <span class="wegic-badge wegic-badge-light">
+            <span class="wegic-icon">🎨</span>
+            专业模板
+          </span>
+        </div>
+
+        <!-- 行动号召按钮 -->
+        <div class="wegic-cta-buttons">
+          <button class="wegic-btn wegic-btn-primary wegic-btn-large">
+            开始体验
+            <svg class="wegic-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </button>
+          <button class="wegic-btn wegic-btn-secondary wegic-btn-large">
+            观看演示
+          </button>
+        </div>
+
+        <!-- 信任指标 -->
+        <div class="wegic-trust-metrics">
+          <div class="wegic-metric">
+            <div class="wegic-metric-number">10K+</div>
+            <div class="wegic-metric-label">成功案例</div>
+          </div>
+          <div class="wegic-metric">
+            <div class="wegic-metric-number">4.9</div>
+            <div class="wegic-metric-label">用户评分</div>
+          </div>
+          <div class="wegic-metric">
+            <div class="wegic-metric-number">30s</div>
+            <div class="wegic-metric-label">平均生成</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 功能演示区域 -->
+    <section class="wegic-demo-section">
+      <div class="wegic-container">
+        <h2 class="wegic-section-title">
+          <span class="wegic-gradient-text">AI 魔法演示</span>
+        </h2>
+        <p class="wegic-section-subtitle">
+          亲眼见证从视频到PPT的完整转换过程
+        </p>
+
+        <div class="wegic-demo-grid">
+          <!-- 视频预览卡片 -->
+          <div class="wegic-card wegic-demo-card wegic-demo-video">
+            <div class="wegic-card-header">
+              <div class="wegic-card-icon">🎥</div>
+              <h3 class="wegic-card-title">输入视频</h3>
+            </div>
+            <div class="wegic-demo-placeholder">
+              <div class="wegic-placeholder-content">
+                <div class="wegic-video-icon">▶</div>
+                <p>上传你的视频内容</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI处理卡片 -->
+          <div class="wegic-card wegic-demo-card wegic-demo-process">
+            <div class="wegic-card-header">
+              <div class="wegic-card-icon">🤖</div>
+              <h3 class="wegic-card-title">AI 智能处理</h3>
+            </div>
+            <div class="wegic-process-animation">
+              <div class="wegic-process-step step-1 wegic-animate-pulse">分析内容</div>
+              <div class="wegic-process-step step-2 wegic-animate-pulse" style="animation-delay: 0.5s">提取要点</div>
+              <div class="wegic-process-step step-3 wegic-animate-pulse" style="animation-delay: 1s">生成PPT</div>
+            </div>
+          </div>
+
+          <!-- 输出PPT卡片 -->
+          <div class="wegic-card wegic-demo-card wegic-demo-result">
+            <div class="wegic-card-header">
+              <div class="wegic-card-icon">📊</div>
+              <h3 class="wegic-card-title">专业PPT</h3>
+            </div>
+            <div class="wegic-demo-placeholder">
+              <div class="wegic-placeholder-content">
+                <div class="wegic-ppt-icon">📄</div>
+                <p>高质量演示文稿</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 使用场景区域 -->
+    <section class="wegic-scenarios-section">
+      <div class="wegic-container">
+        <h2 class="wegic-section-title">
+          <span class="wegic-gradient-text">适用场景</span>
+        </h2>
+        <p class="wegic-section-subtitle">
+          各种场合的专业演示需求，一键解决
+        </p>
+
+        <div class="wegic-scenarios-grid">
+          <article class="wegic-card wegic-scenario-card" v-for="scenario in scenarios" :key="scenario.title">
+            <div class="wegic-scenario-icon">
+              <component :is="getIcon(scenario.icon)" />
+            </div>
+            <h3 class="wegic-scenario-title">{{ scenario.title }}</h3>
+            <p class="wegic-scenario-description">{{ scenario.description }}</p>
+            <div class="wegic-scenario-features">
+              <span class="wegic-tag" v-for="feature in scenario.features" :key="feature">
+                {{ feature }}
+              </span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 特性对比区域 -->
+    <section class="wegic-features-section">
+      <div class="wegic-container">
+        <h2 class="wegic-section-title">
+          <span class="wegic-gradient-text">为什么选择 VidSlide AI</span>
+        </h2>
+
+        <div class="wegic-features-grid">
+          <div class="wegic-feature-item">
+            <div class="wegic-feature-icon">⚡</div>
+            <h3 class="wegic-feature-title">闪电般快速</h3>
+            <p class="wegic-feature-desc">30秒内完成从视频到PPT的转换</p>
+          </div>
+          <div class="wegic-feature-item">
+            <div class="wegic-feature-icon">🎨</div>
+            <h3 class="wegic-feature-title">专业设计</h3>
+            <p class="wegic-feature-desc">采用最新设计趋势，打造视觉冲击</p>
+          </div>
+          <div class="wegic-feature-item">
+            <div class="wegic-feature-icon">🧠</div>
+            <h3 class="wegic-feature-title">智能识别</h3>
+            <p class="wegic-feature-desc">AI深度理解内容，精准提取关键信息</p>
+          </div>
+          <div class="wegic-feature-item">
+            <div class="wegic-feature-icon">📱</div>
+            <h3 class="wegic-feature-title">全平台支持</h3>
+            <p class="wegic-feature-desc">完美适配各种设备和演示环境</p>
+          </div>
+        </div>
+  </div>
+</section>
+        <div class="showcase-content">
+          <div class="content-header">
+            <h1 class="hero-title">
+              <span class="brand-highlight">VidSlide AI</span>
+            </h1>
+            <p class="hero-tagline">
+              5分钟视频 → 30秒专业PPT
+            </p>
+            <p class="hero-description">
+              AI驱动的智能视频编辑工具，一键生成同步演示文稿，让您的创意瞬间变现
+            </p>
+          </div>
+
+          <!-- 功能特色标签 -->
+          <div class="feature-tags">
+            <div class="tag primary">
+              <span class="tag-icon">⚡</span>
+              <span class="tag-text">AI智能识别</span>
+            </div>
+            <div class="tag secondary">
+              <span class="tag-icon">🎯</span>
+              <span class="tag-text">一键生成</span>
+            </div>
+            <div class="tag accent">
+              <span class="tag-icon">🎨</span>
+              <span class="tag-text">专业模板</span>
+            </div>
+          </div>
+
+          <!-- 行动按钮 -->
+          <div class="action-buttons">
+            <button class="cta-primary">
+              <span class="button-icon">🚀</span>
+              <span class="button-text">开始体验</span>
+            </button>
+            <button class="cta-secondary">
+              <span class="button-text">观看完整演示</span>
+              <span class="button-icon">▶</span>
+            </button>
+          </div>
+
+          <!-- 信任指标 -->
+          <div class="trust-indicators">
+            <div class="indicator">
+              <span class="indicator-number">10K+</span>
+              <span class="indicator-label">成功案例</span>
+            </div>
+            <div class="indicator">
+              <span class="indicator-number">4.9</span>
+              <span class="indicator-label">用户评分</span>
+            </div>
+            <div class="indicator">
+              <span class="indicator-number">30s</span>
+              <span class="indicator-label">平均生成时间</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <!-- 动态演示区域 -->
+      <div class="demo-section"
+role="region" aria-label="VidSlide AI功能演示">
+        <!-- 视频演示 -->
+        <div class="video-demo">
+          <!-- 备用的CSS动画演示 -->
+          <div class="demo-animation">
+            <div class="animation-content">
+              <div class="upload-icon">📁</div>
+              <div class="arrow">→</div>
+              <div class="ai-icon">🤖</div>
+              <div class="arrow">→</div>
+              <div class="ppt-icon">📊</div>
+            </div>
+            <div class="progress-bar">
+              <div
+class="progress-fill" :style="{ width: progressWidth }" />
+            </div>
+          </div>
+
+          <!-- 关键词高亮覆盖层 -->
+          <div class="keywords-overlay">
+            <transition-group name="keyword">
+              <div
+                v-for="keyword in activeKeywords"
+                :key="keyword.id"
+                class="keyword-highlight"
+                :style="keyword.style"
+              >
+                {{ keyword.text }}
+              </div>
+            </transition-group>
+          </div>
+          <!-- 画中画效果 -->
+          <transition name="pip">
+            <div v-if="showPiP"
+class="pip-overlay">
+              <div class="pip-animation">
+                <div class="pip-content">🎬</div>
+              </div>
+            </div>
+          </transition>
+        </div>
+
+        <!-- PPT演示 -->
+        <div class="ppt-demo">
+          <transition name="slide"
+mode="out-in">
+            <div
+              :key="currentSlide.id"
+              class="slide"
+              :style="{ backgroundColor: currentSlide.background }"
+            >
+              <div class="slide-header">
+                <h3 class="slide-title">
+                  {{ currentSlide.title }}
+                </h3>
+              </div>
+              <div class="slide-content">
+                <div class="slide-icon">
+                  {{ currentSlide.icon }}
+                </div>
+                <div class="slide-text">
+                  {{ currentSlide.content }}
+                </div>
+              </div>
+            </div>
+          </transition>
+
+          <!-- 幻灯片指示器 -->
+          <div class="slide-indicators">
+            <button
+              v-for="(slide, index) in demoSlides"
+              :key="slide.id"
+              class="indicator"
+              :class="{ active: index === currentSlideIndex }"
+              :aria-label="`查看幻灯片 ${index + 1}: ${slide.title}`"
+              @click="goToSlide(index)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 功能标签 -->
+      <div class="feature-tags"
+role="list" aria-label="核心功能标签">
+        <span class="tag"
+role="listitem">
+          <component :is="getIcon('sync')"
+class="tag-icon" />
+          智能同步播放
+        </span>
+        <span class="tag"
+role="listitem">
+          <component :is="getIcon('magic')"
+class="tag-icon" />
+          自动生成PPT
+        </span>
+        <span class="tag"
+role="listitem">
+          <component :is="getIcon('export')"
+class="tag-icon" />
+          一键导出演示
+        </span>
+      </div>
+
+      <!-- 行动召唤按钮 -->
+      <div class="cta-section">
+        <router-link to="/editor"
+class="cta-link">
+          <button
+            class="cta-button"
+            aria-describedby="cta-description"
+            @mouseenter="onButtonHover"
+            @mouseleave="onButtonLeave"
+            @click="onStartExperience"
+          >
+            <span class="button-text">开始体验</span>
+            <div class="button-glow" />
+          </button>
+        </router-link>
+        <div id="cta-description"
+class="sr-only">
+          点击开始体验按钮进入VidSlide AI视频编辑器，体验AI驱动的PPT生成功能
+        </div>
+      </div>
+    </div>
+
+    <!-- 场景演示区域 -->
+    <section class="scenarios-section"
+aria-labelledby="scenarios-heading">
+      <h2
+id="scenarios-heading" class="sr-only">使用场景</h2>
+      <div class="scenarios-grid">
+        <article v-for="scenario in scenarios" class="scenario-card" :key="scenario.id">
+          <div class="scenario-icon">
+            <component :is="getIcon(scenario.icon)" />
+          </div>
+          <h3 class="scenario-title">
+            {{ scenario.title }}
+          </h3>
+          <p class="scenario-description">
+            {{ scenario.description }}
+          </p>
+        </article>
+      </div>
+    </section>
+</template>
+
+<script>
+export default {
+  name: 'HomeView',
+  data() {
+    return {
+      // 使用场景数据
+      scenarios: [
+        {
+          icon: 'briefcase',
+          title: '商务演示',
+          description: '产品发布会、项目汇报、投资演讲的专业演示',
+          features: ['数据可视化', '商务模板', '快速生成']
+        },
+        {
+          icon: 'graduation',
+          title: '教育培训',
+          description: '课程讲义、知识分享、学术报告的教学辅助',
+          features: ['知识梳理', '重点突出', '易于理解']
+        },
+        {
+          icon: 'users',
+          title: '团队协作',
+          description: '会议纪要、进度更新、工作总结的团队沟通',
+          features: ['协作效率', '信息同步', '成果展示']
+        },
+        {
+          icon: 'film',
+          title: '内容创作',
+          description: '视频解说、播客整理、访谈记录的内容创作',
+          features: ['多媒体融合', '创意表达', '受众互动']
+        },
+        {
+          icon: 'trending',
+          title: '营销推广',
+          description: '品牌宣传、活动推广、销售演示的营销工具',
+          features: ['品牌印象', '转化提升', '市场拓展']
+        },
+        {
+          icon: 'lightbulb',
+          title: '创新展示',
+          description: '创意提案、技术演示、概念说明的创新表达',
+          features: ['创意展现', '技术解读', '概念传达']
+        }
+      ]
+    }
+  },
+  methods: {
+    // 获取图标组件
+    getIcon(iconName) {
+      // 简单的图标映射
+      const iconMap = {
+        briefcase: '💼',
+        graduation: '🎓',
+        users: '👥',
+        film: '🎬',
+        trending: '📈',
+        lightbulb: '💡'
+      }
+      return iconMap[iconName] || '📄'
+    }
+  }
+}
+</script>
+  {
+    id: 1,
+    title: '🎬 上传视频',
+    background: '#ffffff',
+    startTime: 0,
+    endTime: 10,
+    content: '拖拽或点击上传您的视频文件',
+    icon: '🎬'
+  },
+  {
+    id: 2,
+    title: '🤖 AI智能分析',
+    background: '#f8f9fa',
+    startTime: 10,
+    endTime: 20,
+    content: 'AI自动识别视频内容和关键信息',
+    icon: '🤖'
+  },
+  {
+    id: 3,
+    title: '📊 生成PPT演示',
+    background: '#ffffff',
+    startTime: 20,
+    endTime: 30,
+    content: '30秒内自动生成专业PPT演示文稿',
+    icon: '📊'
+  }
+]
+
+// 关键词数据
+const keywords = [
+  { id: 1, text: 'AI分析', start: 5, end: 15, style: { top: '20%', left: '30%' } },
+  { id: 2, text: '智能同步', start: 15, end: 25, style: { top: '40%', right: '20%' } },
+  { id: 3, text: '一键生成', start: 25, end: 35, style: { bottom: '20%', left: '40%' } }
+]
+
+// 使用场景
+const scenarios = [
+  {
+    id: 1,
+    icon: 'education',
+    title: '教育场景',
+    description: '教师上传课程视频，自动生成教学PPT'
+  },
+  {
+    id: 2,
+    icon: 'business',
+    title: '企业培训',
+    description: '培训师录制讲解视频，智能生成产品演示'
+  },
+  {
+    id: 3,
+    icon: 'creator',
+    title: '内容创作',
+    description: 'UP主上传视频内容，快速制作精美PPT'
+  }
+]
+
+// 响应式状态
+const currentTime = ref(0)
+const currentSlideIndex = ref(0)
+const showPiP = ref(false)
+const progressWidth = ref('0%')
+
+// 当前激活的关键词
+const activeKeywords = computed(() => {
+  return keywords.filter(
+    keyword => currentTime.value >= keyword.start && currentTime.value <= keyword.end
+  )
+})
+
+// 当前幻灯片
+const currentSlide = computed(() => demoSlides[currentSlideIndex.value])
+
+// 演示视频相关变量已移除，使用CSS动画替代
+
+// 动画时间更新 (模拟视频播放)
+const startAnimation = () => {
+  const startTime = Date.now()
+  const duration = 30000 // 30秒循环
+
+  const updateAnimation = () => {
+    const elapsed = Date.now() - startTime
+    const progress = (elapsed % duration) / duration
+    currentTime.value = progress * 30 // 30秒总时长
+
+    // 更新进度条
+    progressWidth.value = `${(currentTime.value / 30) * 100}%`
+
+    // 检查是否需要切换幻灯片
+    const targetSlide = demoSlides.find(
+      slide => currentTime.value >= slide.startTime && currentTime.value <= slide.endTime
+    )
+
+    if (targetSlide && demoSlides.indexOf(targetSlide) !== currentSlideIndex.value) {
+      currentSlideIndex.value = demoSlides.indexOf(targetSlide)
+    }
+
+    // 控制画中画效果
+    showPiP.value = currentTime.value > 15 && currentTime.value < 25
+
+    // 继续动画循环
+    requestAnimationFrame(updateAnimation)
+  }
+
+  updateAnimation()
+}
+
+// 手动切换幻灯片
+const goToSlide = index => {
+  currentSlideIndex.value = index
+  // CSS动画版本不需要设置视频时间
+}
+
+// 按钮交互效果
+const onButtonHover = () => {
+  // 可以添加额外的悬停效果
+}
+
+const onButtonLeave = () => {
+  // 移除悬停效果
+}
+
+// 开始体验
+const router = useRouter()
+const onStartExperience = () => {
+  router.push('/editor')
+}
+
+// 组件挂载
+onMounted(() => {
+  // 启动CSS动画演示
+  startAnimation()
+})
+
+// 组件卸载
+onUnmounted(() => {
+  // CSS动画版本不需要清理事件监听器
+})
+</script>
+
+<style scoped>
+/* ===========================================
+   Wegic.ai 设计系统 - HomeView 样式
+   =========================================== */
+
+/* ===========================================
+   Wegic 英雄区域样式
+   =========================================== */
+
+.wegic-home-view {
+  font-family: var(--wegic-font-body);
+  color: var(--wegic-gray-dark);
+  background: var(--wegic-bg-white);
+  min-height: 100vh;
+}
+
+.wegic-hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.wegic-hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.wegic-bg-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+    rgba(129, 87, 255, 0.1) 0%,
+    rgba(152, 117, 255, 0.15) 25%,
+    rgba(3, 178, 127, 0.1) 50%,
+    rgba(23, 43, 133, 0.15) 75%,
+    rgba(0, 68, 124, 0.1) 100%);
+}
+
+.wegic-bg-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.wegic-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(40px);
+}
+
+.wegic-shape.shape-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 10%;
+  animation: wegic-float 20s ease-in-out infinite;
+}
+
+.wegic-shape.shape-2 {
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: 15%;
+  animation: wegic-pulse 15s ease-in-out infinite;
+}
+
+.wegic-shape.shape-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 20%;
+  left: 70%;
+  animation: wegic-glow 25s ease-in-out infinite;
+}
+
+.wegic-hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 1200px;
+  padding: 2rem;
+  color: white;
+}
+
+.wegic-brand-section {
+  margin-bottom: 3rem;
+}
+
+.wegic-hero-title {
+  font-family: var(--wegic-font-heading);
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.wegic-title-main {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.wegic-title-accent {
+  background: linear-gradient(135deg, var(--wegic-success-green), var(--wegic-success-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.wegic-hero-subtitle {
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  font-weight: 300;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wegic-title-decoration {
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--wegic-primary-purple), var(--wegic-success-green));
+  border-radius: 2px;
+  margin: 2rem auto;
+}
+
+.wegic-feature-tags {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.wegic-cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  flex-wrap: wrap;
+}
+
+.wegic-btn-large {
+  padding: 1.2rem 3rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.wegic-btn-icon {
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.wegic-btn-primary:hover .wegic-btn-icon {
+  transform: translateX(3px);
+}
+
+.wegic-trust-metrics {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.wegic-metric {
+  text-align: center;
+}
+
+.wegic-metric-number {
+  font-family: var(--wegic-font-heading);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--wegic-success-green);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.wegic-metric-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===========================================
+   演示区域样式
+   =========================================== */
+
+.wegic-demo-section {
+  padding: 6rem 2rem;
+  background: var(--wegic-bg-light);
+}
+
+.wegic-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.wegic-section-title {
+  font-family: var(--wegic-font-heading);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.wegic-gradient-text {
+  background: linear-gradient(135deg, var(--wegic-primary-purple), var(--wegic-success-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.wegic-section-subtitle {
+  font-size: 1.1rem;
+  color: var(--wegic-gray-medium);
+  text-align: center;
+  margin-bottom: 4rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wegic-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.wegic-demo-card {
+  text-align: center;
+  padding: 2rem;
+}
+
+.wegic-card-header {
+  margin-bottom: 2rem;
+}
+
+.wegic-card-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.wegic-card-title {
+  font-family: var(--wegic-font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--wegic-gray-dark);
+}
+
+.wegic-demo-placeholder {
+  background: linear-gradient(135deg, rgba(129, 87, 255, 0.1), rgba(3, 178, 127, 0.1));
+  border: 2px dashed rgba(129, 87, 255, 0.3);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  margin-top: 1rem;
+}
+
+.wegic-placeholder-content {
+  color: var(--wegic-gray-medium);
+}
+
+.wegic-placeholder-content p {
+  margin: 1rem 0 0 0;
+  font-weight: 500;
+}
+
+.wegic-video-icon, .wegic-ppt-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.wegic-process-animation {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.wegic-process-step {
+  background: linear-gradient(135deg, var(--wegic-primary-purple), var(--wegic-secondary-purple));
+  color: white;
+  padding: 0.8rem 2rem;
+  border-radius: 25px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(129, 87, 255, 0.3);
+}
+
+/* ===========================================
+   场景区域样式
+   =========================================== */
+
+.wegic-scenarios-section {
+  padding: 6rem 2rem;
+  background: var(--wegic-bg-white);
+}
+
+.wegic-scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.wegic-scenario-card {
+  padding: 2.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.wegic-scenario-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.wegic-scenario-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.wegic-scenario-title {
+  font-family: var(--wegic-font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--wegic-gray-dark);
+  text-align: center;
+}
+
+.wegic-scenario-description {
+  color: var(--wegic-gray-medium);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.wegic-scenario-features {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wegic-tag {
+  background: linear-gradient(135deg, var(--wegic-primary-purple), var(--wegic-secondary-purple));
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ===========================================
+   特性区域样式
+   =========================================== */
+
+.wegic-features-section {
+  padding: 6rem 2rem;
+  background: var(--wegic-bg-light);
+}
+
+.wegic-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 3rem;
+}
+
+.wegic-feature-item {
+  text-align: center;
+}
+
+.wegic-feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.wegic-feature-title {
+  font-family: var(--wegic-font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--wegic-gray-dark);
+}
+
+.wegic-feature-desc {
+  color: var(--wegic-gray-medium);
+  line-height: 1.6;
+}
+
+/* ===========================================
+   响应式设计
+   =========================================== */
+
+@media (max-width: 768px) {
+  .wegic-hero-content {
+    padding: 1rem;
+  }
+
+  .wegic-hero-title {
+    font-size: clamp(2rem, 12vw, 4rem);
+  }
+
+  .wegic-feature-tags {
+    gap: 0.5rem;
+  }
+
+  .wegic-cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .wegic-trust-metrics {
+    gap: 2rem;
+  }
+
+  .wegic-demo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wegic-scenarios-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wegic-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wegic-demo-section,
+  .wegic-scenarios-section,
+  .wegic-features-section {
+    padding: 4rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wegic-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wegic-trust-metrics {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ===========================================
+   英雄区域 - VidSlide.jpg 背景 + 苹果设计风格
+   =========================================== */
+
+.hero-background {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  /* 适配背景图片的透明背景 */
+  background: transparent;
+  overflow: hidden;
+  /* 确保内容在背景之上 */
+  z-index: 1;
+}
+
+/* 自定义背景图片容器 */
+.custom-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: -1;
+}
+
+/* 主背景图片 - 增加亮度 */
+.custom-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* 增加亮度和对比度 */
+  filter: brightness(1.3) contrast(1.1) saturate(1.2);
+  /* 微妙的动画效果 */
+  animation: subtleParallax 30s ease-in-out infinite;
+  /* 图像优化 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* 备选渐变背景 - 防止图片加载失败 */
+.fallback-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+    #667eea 0%,
+    #764ba2 50%,
+    #f093fb 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  opacity: 0; /* 默认隐藏，只有在图片失败时显示 */
+  z-index: -1;
+}
+
+/* 苹果风格的动态装饰层 */
+.apple-decorations {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 微妙的几何装饰形状 */
+.decoration-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.shape-1 {
+  width: 140px;
+  height: 140px;
+  top: 15%;
+  left: 8%;
+  animation: gentleFloat 28s ease-in-out infinite;
+}
+
+.shape-2 {
+  width: 90px;
+  height: 90px;
+  top: 65%;
+  right: 12%;
+  animation: gentleFloat 32s ease-in-out infinite reverse;
+}
+
+.shape-3 {
+  width: 70px;
+  height: 70px;
+  bottom: 25%;
+  left: 75%;
+  animation: gentleFloat 38s ease-in-out infinite;
+}
+
+/* 流动的光点效果 */
+.floating-light {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+}
+
+.light-1 {
+  top: 28%;
+  left: 18%;
+  animation: lightDance 20s ease-in-out infinite;
+}
+
+.light-2 {
+  top: 58%;
+  right: 22%;
+  animation: lightDance 24s ease-in-out infinite reverse;
+}
+
+.light-3 {
+  bottom: 32%;
+  left: 62%;
+  animation: lightDance 28s ease-in-out infinite;
+}
+
+/* 内容叠加层 - 更轻微的叠加 */
+.content-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  /* 更轻微的叠加，让背景图片更突出 */
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(0.3px);
+  z-index: 1;
+}
+
+/* ===========================================
+   主要展示区域 - 视频为中心，文字辅助
+   =========================================== */
+
+.hero-showcase {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 10;
+}
+
+/* 响应式布局 */
+@media (min-width: 1024px) {
+  .hero-showcase {
+    flex-direction: row;
+    gap: 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 1023px) {
+  .hero-showcase {
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+  }
+}
+
+/* ===========================================
+   左侧：竖版视频展示（主要元素）
+   =========================================== */
+
+.showcase-video {
+  flex: 1;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.video-container {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 视频播放器 */
+.video-player {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9/16; /* 竖版比例 */
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: videoBreath 4s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.video-player:hover {
+  transform: scale(1.02);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+}
+
+.demo-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.demo-video:hover {
+  transform: scale(1.05);
+}
+
+/* 视频覆盖层 */
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.video-player:hover .video-overlay {
+  opacity: 1;
+}
+
+/* 播放指示器 */
+.play-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.play-icon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.play-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* 视频说明 */
+.video-caption {
+  text-align: center;
+  color: white;
+}
+
+.video-caption h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.video-caption p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ===========================================
+   右侧：文字说明和功能标签（辅助元素）
+   =========================================== */
+
+.showcase-content {
+  flex: 1;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+@media (max-width: 1023px) {
+  .showcase-content {
+    max-width: 100%;
+  }
+}
+
+.content-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 品牌标题 */
+.brand-highlight {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* 标语 */
+.hero-tagline {
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  font-weight: 500;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* 描述文字 */
+.hero-description {
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  max-width: 500px;
+}
+
+/* ===========================================
+   功能特色标签
+   =========================================== */
+
+.feature-tags {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1023px) {
+  .feature-tags {
+    justify-content: center;
+  }
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.tag.primary {
+  background: rgba(0, 122, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(0, 122, 255, 0.3);
+}
+
+.tag.secondary {
+  background: rgba(52, 199, 89, 0.2);
+  color: #ffffff;
+  border-color: rgba(52, 199, 89, 0.3);
+}
+
+.tag.accent {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 59, 48, 0.3);
+}
+
+.tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.tag-icon {
+  font-size: 1.1rem;
+}
+
+/* ===========================================
+   行动按钮
+   =========================================== */
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1023px) {
+  .action-buttons {
+    justify-content: center;
+  }
+}
+
+.cta-primary,
+.cta-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.cta-primary {
+  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.4);
+  animation: buttonPulse 3s ease-in-out infinite;
+}
+
+.cta-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 122, 255, 0.7);
+  animation-play-state: paused;
+}
+
+.cta-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
+}
+
+.cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* ===========================================
+   信任指标
+   =========================================== */
+
+.trust-indicators {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1023px) {
+  .trust-indicators {
+    justify-content: center;
+    gap: 1.5rem;
+  }
+}
+
+.indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.indicator-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.indicator-label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* 动态几何形状层 */
+.hero-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    /* 大型光晕效果 */
+    radial-gradient(circle at 20% 80%, rgba(0, 122, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(52, 199, 89, 0.06) 0%, transparent 35%),
+    radial-gradient(circle at 60% 40%, rgba(255, 215, 0, 0.04) 0%, transparent 30%),
+    /* 几何形状 */
+    radial-gradient(ellipse 800px 600px at 10% 20%, rgba(0, 122, 255, 0.02) 0%, transparent 70%),
+    radial-gradient(ellipse 600px 400px at 90% 80%, rgba(52, 199, 89, 0.02) 0%, transparent 70%),
+    radial-gradient(ellipse 1000px 800px at 50% 50%, rgba(255, 215, 0, 0.01) 0%, transparent 70%);
+  animation: particleFloat 20s ease-in-out infinite, geometryShift 30s ease-in-out infinite;
+}
+
+/* 浮动粒子层 */
+.hero-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(0, 122, 255, 0.15) 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(52, 199, 89, 0.12) 1px, transparent 1px),
+    radial-gradient(circle at 60% 10%, rgba(255, 215, 0, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 30% 80%, rgba(0, 122, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 70% 40%, rgba(52, 199, 89, 0.09) 1px, transparent 1px),
+    radial-gradient(circle at 10% 60%, rgba(255, 215, 0, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 90% 20%, rgba(0, 122, 255, 0.11) 1px, transparent 1px),
+    radial-gradient(circle at 40% 90%, rgba(52, 199, 89, 0.07) 1px, transparent 1px);
+  background-size: 200px 200px, 180px 180px, 220px 220px, 160px 160px, 190px 190px, 170px 170px, 210px 210px, 140px 140px;
+  background-position:
+    0% 0%, 20% 20%, 40% 40%, 60% 60%, 80% 80%, 10% 10%, 30% 30%, 50% 50%;
+  animation: particleDrift 40s linear infinite;
+}
+
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(10, 10, 10, 0.8) 25%,
+    rgba(15, 15, 15, 0.85) 50%,
+    rgba(10, 10, 10, 0.8) 75%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  backdrop-filter: blur(1px);
+}
+
+.hero-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* 实验性装饰路径 */
+.hero-content::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  transform: translate(-50%, -50%);
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(0, 122, 255, 0.05) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(52, 199, 89, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 40% 40%, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
+  background-size: 300px 300px, 250px 250px, 400px 400px;
+  background-position: 0% 0%, 50% 50%, 100% 100%;
+  animation: contentDecorations 35s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 背景装饰元素 - 增强视觉层次 */
+.hero-content::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(0, 122, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(52, 199, 89, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.01) 0%, transparent 50%);
+  border-radius: 50%;
+  animation: contentGlow 15s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.hero-content::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.01) 50%, transparent 100%),
+    linear-gradient(-45deg, transparent 0%, rgba(255, 255, 255, 0.005) 50%, transparent 100%);
+  animation: lightSweep 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ===========================================
+   标题区域 - 渐变文字效果
+   =========================================== */
+
+.title-section {
+  text-align: center;
+  margin-bottom: 4rem;
+  animation: fadeInUp 1s ease-apple;
+}
+
+.hero-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  /* 动态背景上的清晰文字 */
+  color: #FFFFFF;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 10;
+}
+
+/* 标题发光效果 */
+.hero-title::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+    rgba(0, 122, 255, 0.1) 0%,
+    rgba(52, 199, 89, 0.05) 50%,
+    rgba(255, 215, 0, 0.02) 100%
+  );
+  border-radius: 12px;
+  filter: blur(20px);
+  animation: titleGlow 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #007aff 0%, #34c759 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+}
+
+.accent-text {
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: #FFFFFF;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+  margin: 0 auto;
+  animation: fadeInUp 1s ease-apple 0.2s both;
+  z-index: 10;
+  position: relative;
+}
+
+/* ===========================================
+   演示区域 - 视频+PPT融合效果
+   =========================================== */
+
+.demo-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 2rem 0 3rem;
+  animation: fadeInUp 1s ease-apple 0.4s both;
+  position: relative;
+}
+
+/* 演示区域装饰光效 */
+.demo-section::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background:
+    radial-gradient(circle at 25% 25%, rgba(0, 122, 255, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(52, 199, 89, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.02) 0%, transparent 50%);
+  border-radius: 24px;
+  animation: demoGlow 12s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  .demo-section {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 1.5rem 0 2rem;
+  }
+}
+
+/* 视频演示 */
+.video-demo {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CSS动画演示 */
+.demo-animation {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.animation-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.upload-icon,
+.ai-icon,
+.ppt-icon {
+  animation: bounceIn 0.6s ease-apple;
+}
+
+.arrow {
+  color: #007aff;
+  font-size: 1.5rem;
+  animation: fadeIn 0.6s ease-apple 0.3s both;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007aff, #34c759);
+  border-radius: 2px;
+  transition: width 0.1s ease;
+}
+
+/* 备用的视频演示样式 (当视频加载失败时) */
+.demo-video {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.keywords-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.keyword-highlight {
+  position: absolute;
+  background: rgba(0, 122, 255, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  animation: keywordPulse 2s ease-in-out infinite;
+}
+
+.keyword-enter-active,
+.keyword-leave-active {
+  transition: all 0.3s ease-apple;
+}
+
+.keyword-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateY(10px);
+}
+
+.keyword-leave-to {
+  opacity: 0;
+  transform: scale(0.8) translateY(-10px);
+}
+
+.pip-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 120px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 215, 0, 0.8);
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pip-animation {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #007aff, #34c759);
+  animation: pipPulse 2s ease-in-out infinite;
+}
+
+.pip-content {
+  font-size: 1.5rem;
+  animation: pipBounce 1s ease-apple infinite;
+}
+
+.pip-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pip-enter-active,
+.pip-leave-active {
+  transition: all 0.5s ease-apple;
+}
+
+.pip-enter-from {
+  opacity: 0;
+  transform: scale(0.8) translateX(20px);
+}
+
+.pip-leave-to {
+  opacity: 0;
+  transform: scale(0.8) translateX(20px);
+}
+
+/* PPT演示 */
+.ppt-demo {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  min-height: 280px;
+}
+
+.slide {
+  padding: 2rem;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.slide-header {
+  margin-bottom: 1.5rem;
+}
+
+.slide-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.slide-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.slide-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.5;
+  max-width: 200px;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.5s ease-apple;
+}
+
+.slide-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.slide-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.slide-indicators {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-apple;
+}
+
+.indicator:hover {
+  background: rgba(0, 0, 0, 0.4);
+  transform: scale(1.2);
+}
+
+.indicator.active {
+  background: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+/* ===========================================
+   功能标签 - 胶囊样式
+   =========================================== */
+
+.feature-tags {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0;
+  animation: fadeInUp 1s ease-apple 0.6s both;
+}
+
+@media (max-width: 640px) {
+  .feature-tags {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(25px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #FFFFFF;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  transition: all 0.3s ease-apple;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.tag:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.tag-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+
+/* ===========================================
+   行动召唤按钮 - 苹果风格
+   =========================================== */
+
+.cta-section {
+  animation: fadeInUp 1s ease-apple 0.8s both;
+}
+
+.cta-link {
+  text-decoration: none;
+}
+
+.cta-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+  /* v0风格的鲜艳渐变按钮 */
+  background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #ffe66d 100%);
+  border: none;
+  border-radius: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s ease-apple;
+  box-shadow:
+    0 4px 20px rgba(255, 107, 107, 0.4),
+    0 0 40px rgba(78, 205, 196, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.4);
+}
+
+.cta-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.button-text {
+  position: relative;
+  z-index: 1;
+}
+
+.button-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease-apple;
+  pointer-events: none;
+}
+
+.cta-button:hover .button-glow {
+  opacity: 1;
+}
+
+/* ===========================================
+   场景演示区域
+   =========================================== */
+
+.scenarios-section {
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+}
+
+.scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.scenario-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease-apple;
+}
+
+.scenario-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.scenario-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  color: #007aff;
+}
+
+.scenario-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.scenario-description {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 0.875rem;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  line-height: 1.5;
+}
+
+/* ===========================================
+   动画定义
+   =========================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes keywordPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes backgroundShift {
+  0% {
+    background-position: 0% 0%, 0% 0%;
+    filter: hue-rotate(0deg) brightness(1) saturate(1);
+  }
+  25% {
+    background-position: 100% 0%, 20% 20%;
+    filter: hue-rotate(2deg) brightness(1.02) saturate(1.1);
+  }
+  50% {
+    background-position: 100% 100%, 40% 40%;
+    filter: hue-rotate(4deg) brightness(1.05) saturate(1.2);
+  }
+  75% {
+    background-position: 0% 100%, 60% 60%;
+    filter: hue-rotate(2deg) brightness(1.02) saturate(1.1);
+  }
+  100% {
+    background-position: 0% 0%, 0% 0%;
+    filter: hue-rotate(0deg) brightness(1) saturate(1);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translateY(-25px) translateX(15px) rotate(90deg) scale(1.1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-8px) translateX(-10px) rotate(180deg) scale(0.9);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(-35px) translateX(8px) rotate(270deg) scale(1.05);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(0px) translateX(0px) rotate(360deg) scale(1);
+    opacity: 0.2;
+  }
+}
+
+@keyframes geometryShift {
+  0% {
+    transform: translateX(0%) translateY(0%) rotate(0deg);
+    filter: blur(0px) brightness(1);
+  }
+  25% {
+    transform: translateX(3%) translateY(-3%) rotate(1deg);
+    filter: blur(0.5px) brightness(1.02);
+  }
+  50% {
+    transform: translateX(-2%) translateY(2%) rotate(-0.5deg);
+    filter: blur(1px) brightness(1.05);
+  }
+  75% {
+    transform: translateX(1%) translateY(-1%) rotate(0.5deg);
+    filter: blur(0.5px) brightness(1.02);
+  }
+  100% {
+    transform: translateX(0%) translateY(0%) rotate(0deg);
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes particleDrift {
+  0% {
+    background-position:
+      0% 0%, 20% 20%, 40% 40%, 60% 60%, 80% 80%, 10% 10%, 30% 30%, 50% 50%;
+  }
+  25% {
+    background-position:
+      5% 5%, 25% 25%, 45% 45%, 65% 65%, 85% 85%, 15% 15%, 35% 35%, 55% 55%;
+  }
+  50% {
+    background-position:
+      10% 10%, 30% 30%, 50% 50%, 70% 70%, 90% 90%, 20% 20%, 40% 40%, 60% 60%;
+  }
+  75% {
+    background-position:
+      15% 15%, 35% 35%, 55% 55%, 75% 75%, 95% 95%, 25% 25%, 45% 45%, 65% 65%;
+  }
+  100% {
+    background-position:
+      0% 0%, 20% 20%, 40% 40%, 60% 60%, 80% 80%, 10% 10%, 30% 30%, 50% 50%;
+  }
+}
+
+@keyframes pipPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes pipBounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes contentGlow {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 0.3;
+  }
+  33% {
+    transform: translate(-50%, -50%) scale(1.1) rotate(120deg);
+    opacity: 0.5;
+  }
+  66% {
+    transform: translate(-50%, -50%) scale(0.9) rotate(240deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+@keyframes lightSweep {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes demoGlow {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.2;
+  }
+  25% {
+    transform: scale(1.05) rotate(90deg);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(0.95) rotate(180deg);
+    opacity: 0.6;
+  }
+  75% {
+    transform: scale(1.02) rotate(270deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0.2;
+  }
+}
+
+/* 背景图片的微妙视差效果 */
+@keyframes subtleParallax {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+  }
+  33% {
+    transform: scale(1.03) translateY(-8px);
+  }
+  66% {
+    transform: scale(0.97) translateY(5px);
+  }
+}
+
+/* 渐变背景的平滑移动 */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 几何形状的优雅浮动 */
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-20px) rotate(3deg) scale(1.05);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-10px) rotate(-2deg) scale(0.95);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translateY(-25px) rotate(1deg) scale(1.02);
+    opacity: 0.8;
+  }
+}
+
+/* 光点的舞蹈动画 */
+@keyframes lightDance {
+  0%, 100% {
+    transform: translateX(0) translateY(0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translateX(15px) translateY(-12px) scale(1.3);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateX(-8px) translateY(-20px) scale(0.7);
+    opacity: 0.3;
+  }
+  75% {
+    transform: translateX(12px) translateY(-8px) scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+/* 视频播放器的呼吸效果 */
+@keyframes videoBreath {
+  0%, 100% {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* 按钮的脉冲效果 */
+@keyframes buttonPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes titleGlow {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+@keyframes v0ContentDecor {
+  0% {
+    background-position: 0% 0%, 50% 50%;
+    opacity: 0.1;
+  }
+  25% {
+    background-position: 25% 25%, 75% 75%;
+    opacity: 0.15;
+  }
+  50% {
+    background-position: 50% 50%, 100% 100%;
+    opacity: 0.2;
+  }
+  75% {
+    background-position: 75% 75%, 25% 25%;
+    opacity: 0.15;
+  }
+  100% {
+    background-position: 0% 0%, 50% 50%;
+    opacity: 0.1;
+  }
+}
+
+/* 苹果风格缓动函数 */
+@keyframes ease-apple {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ===========================================
+   响应式设计
+   =========================================== */
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 1rem;
+  }
+
+  .title-section {
+    margin-bottom: 2rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .demo-section {
+    margin: 1rem 0 2rem;
+  }
+
+  .video-demo,
+  .ppt-demo {
+    border-radius: 12px;
+  }
+
+  .demo-video {
+    height: 200px;
+  }
+
+  .ppt-demo {
+    min-height: 200px;
+  }
+
+  .slide {
+    padding: 1.5rem;
+  }
+
+  .feature-tags {
+    margin: 1.5rem 0;
+  }
+
+  .tag {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .scenarios-section {
+    padding: 3rem 1rem;
+  }
+
+  .scenario-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .demo-video {
+    height: 160px;
+  }
+
+  .ppt-demo {
+    min-height: 160px;
+  }
+
+  .slide {
+    padding: 1rem;
+  }
+
+  .scenarios-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================================
+   无障碍支持和动画优化
+   =========================================== */
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .wegic-gradient-text {
+    -webkit-text-fill-color: var(--wegic-primary-purple);
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .wegic-animate-float,
+  .wegic-animate-pulse,
+  .wegic-animate-glow {
+    animation: none;
+  }
+}
+</style>

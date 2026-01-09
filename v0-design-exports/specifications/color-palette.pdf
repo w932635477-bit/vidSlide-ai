@@ -1,0 +1,40 @@
+# VidSlide AI Apple Style Design System - Color Palette
+
+## Primary Color Scheme
+Following Apple's design principles with clarity, depth, and deference
+
+### Core Colors
+- **Gold Accent**: #FFD700
+  - Usage: Primary interactive elements, highlights, borders
+  - RGB: (255, 215, 0)
+  - Opacity variants: 100%, 80%, 60%, 40%, 20%
+
+- **White**: #FFFFFF
+  - Usage: Primary backgrounds, text on dark backgrounds
+  - RGB: (255, 255, 255)
+
+- **Dark Gray**: #1A1A1A
+  - Usage: Secondary backgrounds, overlays
+  - RGB: (26, 26, 26)
+
+- **Black**: #000000
+  - Usage: Text, shadows, overlays
+  - RGB: (0, 0, 0)
+  - Opacity variants: 100%, 65%, 40%
+
+### Semantic Colors
+- **Success**: Gold accent with increased saturation
+- **Warning**: Muted gold with reduced opacity
+- **Error**: Dark gray with red tint (subtle)
+- **Info**: Clean white with gold accent
+
+### Accessibility
+- All color combinations meet WCAG 2.1 AA standards
+- Minimum contrast ratio: 4.5:1 for normal text, 3:1 for large text
+- Gold accent provides clear visual hierarchy
+
+## Usage Guidelines
+1. Gold (#FFD700) should be used sparingly as accent color
+2. White and dark gray form the primary color foundation
+3. Black overlays at 40%, 60%, 65% opacity for depth
+4. Maintain consistency across all 5 templates and components
