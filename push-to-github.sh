@@ -32,25 +32,40 @@ if git status --porcelain | grep -q .; then
 🛠️ Vue 3 + Canvas 2D技术栈"
 fi
 
-echo "🌐 请输入你的GitHub用户名:"
-read -r GITHUB_USERNAME
+echo "📋 请先完成以下准备工作:"
+echo "   1. 访问 https://github.com/new 创建仓库"
+echo "   2. 仓库名: VidSlide-AI"
+echo "   3. 获取仓库URL: https://github.com/YOUR_USERNAME/VidSlide-AI.git"
+echo ""
+echo "🌐 请输入完整的GitHub仓库URL:"
+echo "   (例如: https://github.com/weilei/VidSlide-AI.git)"
+read -r REPO_URL
 
-if [ -z "$GITHUB_USERNAME" ]; then
-    echo "❌ 用户名不能为空"
+if [ -z "$REPO_URL" ]; then
+    echo "❌ 仓库URL不能为空"
+    echo ""
+    echo "💡 获取仓库URL的步骤:"
+    echo "   1. 登录GitHub"
+    echo "   2. 进入你的仓库: VidSlide-AI"
+    echo "   3. 点击 'Code' 按钮"
+    echo "   4. 复制 HTTPS URL"
     exit 1
 fi
 
-REPO_URL="https://github.com/$GITHUB_USERNAME/VidSlide-AI.git"
-
 echo "📡 添加远程仓库: $REPO_URL"
-git remote add origin "$REPO_URL" 2>/dev/null || git remote set-url origin "$REPO_URL"
+if git remote add origin "$REPO_URL" 2>/dev/null; then
+    echo "✅ 远程仓库添加成功"
+elif git remote set-url origin "$REPO_URL" 2>/dev/null; then
+    echo "✅ 远程仓库URL已更新"
+else
+    echo "⚠️ 远程仓库已存在，使用现有配置"
+fi
 
 echo "⬆️ 推送代码到GitHub..."
 if git push -u origin main; then
     echo ""
     echo "🎉 推送成功！"
-    echo "📁 仓库地址: https://github.com/$GITHUB_USERNAME/VidSlide-AI"
-    echo "🌐 在线预览: https://$GITHUB_USERNAME.github.io/VidSlide-AI"
+    echo "📁 仓库地址: $REPO_URL"
     echo ""
     echo "📋 项目特色:"
     echo "   ✅ Vue 3 + AI视频分析技术"
@@ -58,16 +73,22 @@ if git push -u origin main; then
     echo "   ✅ Apple设计风格UI界面"
     echo "   ✅ 响应式移动端适配"
     echo "   ✅ 单元测试覆盖82.6%"
-    echo "   ✅ ESLint代码质量检查"
+    echo "   ✅ ESLint代码质量保证"
+    echo ""
+    echo "🚀 下一步建议:"
+    echo "   1. 设置GitHub Pages自动部署"
+    echo "   2. 添加项目描述和话题标签"
+    echo "   3. 创建发布版本"
 else
     echo ""
     echo "❌ 推送失败，可能的原因:"
-    echo "   1. GitHub仓库不存在或URL错误"
-    echo "   2. 没有推送权限"
-    echo "   3. 网络连接问题"
+    echo "   1. GitHub仓库不存在"
+    echo "   2. 仓库URL格式错误"
+    echo "   3. 没有推送权限"
+    echo "   4. 网络连接问题"
     echo ""
-    echo "🔧 手动解决步骤:"
-    echo "   1. 确认GitHub仓库已创建"
-    echo "   2. 检查仓库URL是否正确"
-    echo "   3. 尝试: git push -u origin main"
+    echo "🔧 故障排除:"
+    echo "   1. 确认仓库已创建"
+    echo "   2. 检查URL格式: https://github.com/YOUR_USERNAME/VidSlide-AI.git"
+    echo "   3. 手动重试: git push -u origin main"
 fi
