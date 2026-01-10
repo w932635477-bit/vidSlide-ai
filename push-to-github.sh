@@ -34,8 +34,8 @@ fi
 
 echo "📋 请先完成以下准备工作:"
 echo "   1. 访问 https://github.com/new 创建仓库"
-echo "   2. 仓库名: VidSlide-AI"
-echo "   3. 获取仓库URL: https://github.com/YOUR_USERNAME/VidSlide-AI.git"
+echo "   2. 仓库名: vidSlide-ai"
+echo "   3. 获取仓库URL: https://github.com/YOUR_USERNAME/vidSlide-ai.git"
 echo ""
 echo "🌐 请输入完整的GitHub仓库URL:"
 echo "   (例如: https://github.com/weilei/VidSlide-AI.git)"
