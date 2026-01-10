@@ -309,8 +309,7 @@ export class ConstraintSystem {
 
      */
 
-
-    if(adjustments.text) {
+    if (adjustments.text) {
       // 长度验证
       /**
        * maxLength 函数
@@ -327,7 +326,7 @@ export class ConstraintSystem {
 
        */
 
-      if(adjustments.text.length > maxLength) {
+      if (adjustments.text.length > maxLength) {
         violations.push({
           type: 'TEXT_LENGTH',
           field: 'text',
@@ -348,8 +347,7 @@ export class ConstraintSystem {
 
        */
 
-
-      if(adjustments.text.length < textConstraints.minLength) {
+      if (adjustments.text.length < textConstraints.minLength) {
         violations.push({
           type: 'TEXT_LENGTH',
           field: 'text',
@@ -419,8 +417,7 @@ export class ConstraintSystem {
 
      */
 
-
-    if(adjustments.position) {
+    if (adjustments.position) {
       /**
        * allowedPositions 函数
        * VidSlide AI 紧急补齐阶段功能实现
@@ -448,7 +445,7 @@ export class ConstraintSystem {
 
        */
 
-      if(adjustments.coordinates) {
+      if (adjustments.coordinates) {
         const { x, y } = adjustments.coordinates
         /**
          * margins 函数
@@ -469,8 +466,7 @@ export class ConstraintSystem {
 
          */
 
-
-        if(x < margins.minEdgeDistance || y < margins.minEdgeDistance) {
+        if (x < margins.minEdgeDistance || y < margins.minEdgeDistance) {
           warnings.push({
             type: 'POSITION_MARGIN',
             field: 'position',
@@ -513,8 +509,7 @@ export class ConstraintSystem {
 
      */
 
-
-    if(adjustments.size) {
+    if (adjustments.size) {
       const { width, height } = adjustments.size
       /**
        * minSize 函数
@@ -540,7 +535,7 @@ export class ConstraintSystem {
 
        */
 
-      if(width < minSize.width || height < minSize.height) {
+      if (width < minSize.width || height < minSize.height) {
         violations.push({
           type: 'SIZE_TOO_SMALL',
           field: 'size',
@@ -561,8 +556,7 @@ export class ConstraintSystem {
 
        */
 
-
-      if(width > maxSize.width || height > maxSize.height) {
+      if (width > maxSize.width || height > maxSize.height) {
         violations.push({
           type: 'SIZE_TOO_LARGE',
           field: 'size',
@@ -631,8 +625,7 @@ export class ConstraintSystem {
 
      */
 
-
-    if(adjustments.colors) {
+    if (adjustments.colors) {
       const { background, text, accent } = adjustments.colors
 
       // 对比度验证
@@ -644,7 +637,7 @@ export class ConstraintSystem {
 
        */
 
-      if(background && text) {
+      if (background && text) {
         /**
          * contrastRatio 函数
          * VidSlide AI 紧急补齐阶段功能实现
@@ -664,8 +657,7 @@ export class ConstraintSystem {
 
          */
 
-
-        if(contrastRatio < colorConstraints.contrastRatio.min) {
+        if (contrastRatio < colorConstraints.contrastRatio.min) {
           violations.push({
             type: 'CONTRAST_RATIO',
             field: 'colors',
@@ -673,11 +665,7 @@ export class ConstraintSystem {
             current: contrastRatio,
             required: colorConstraints.contrastRatio.min
           })
-        } else /**
-  * if 方法
-  * VidSlide AI 功能实现
-  */
- if(contrastRatio < colorConstraints.contrastRatio.recommended) {
+        } else if (contrastRatio < colorConstraints.contrastRatio.recommended) {
           warnings.push({
             type: 'CONTRAST_RATIO',
             field: 'colors',
@@ -704,7 +692,7 @@ export class ConstraintSystem {
 
        */
 
-      if(colorCombination.length >= 2) {
+      if (colorCombination.length >= 2) {
         /**
          * isAvoided 函数
          * VidSlide AI 紧急补齐阶段功能实现
@@ -726,8 +714,7 @@ export class ConstraintSystem {
 
          */
 
-
-        if(isAvoided) {
+        if (isAvoided) {
           warnings.push({
             type: 'COLOR_COMBINATION',
             field: 'colors',
@@ -747,7 +734,7 @@ export class ConstraintSystem {
 
          */
 
-        if(color) {
+        if (color) {
           /**
            * brightness 函数
            * VidSlide AI 紧急补齐阶段功能实现
@@ -774,8 +761,7 @@ export class ConstraintSystem {
 
            */
 
-
-          if(
+          if (
             brightness < colorConstraints.brightness.min ||
             brightness > colorConstraints.brightness.max
           ) {
@@ -822,8 +808,7 @@ export class ConstraintSystem {
 
      */
 
-
-    if(adjustments.layout) {
+    if (adjustments.layout) {
       const { textAlign, margins, spacing } = adjustments.layout
 
       // 对齐方式验证
@@ -846,7 +831,7 @@ export class ConstraintSystem {
 
        */
 
-      if(margins) {
+      if (margins) {
         const { top, right, bottom, left } = margins
         /**
          * minMargin 函数
@@ -865,7 +850,7 @@ export class ConstraintSystem {
 
            */
 
-          if(margin !== undefined && margin < minMargin) {
+          if (margin !== undefined && margin < minMargin) {
             warnings.push({
               type: 'MARGIN_TOO_SMALL',
               field: 'layout',
@@ -885,7 +870,7 @@ export class ConstraintSystem {
 
        */
 
-      if(spacing && spacing < layoutConstraints.elementSpacing.min) {
+      if (spacing && spacing < layoutConstraints.elementSpacing.min) {
         suggestions.push({
           type: 'ELEMENT_SPACING',
           field: 'layout',
@@ -1002,8 +987,7 @@ export class ConstraintSystem {
 
      */
 
-
-    if(requiredElements) {
+    if (requiredElements) {
       requiredElements.forEach(element => {
         /**
 
@@ -1013,7 +997,7 @@ export class ConstraintSystem {
 
          */
 
-        if(!adjustments[element] || adjustments[element].length === 0) {
+        if (!adjustments[element] || adjustments[element].length === 0) {
           violations.push({
             type: 'MISSING_ELEMENT',
             field: element,
@@ -1033,9 +1017,9 @@ export class ConstraintSystem {
 
      */
 
-    switch(templateType) {
-      case TEMPLATE_TYPES.CHART_ANALYSIS:
-        /**
+    switch (templateType) {
+    case TEMPLATE_TYPES.CHART_ANALYSIS:
+      /**
 
          * if 方法
 
@@ -1043,18 +1027,18 @@ export class ConstraintSystem {
 
          */
 
-        if(adjustments.data && adjustments.data.length < 2) {
-          warnings.push({
-            type: 'INSUFFICIENT_DATA',
-            field: 'data',
-            message: '图表数据点过少',
-            suggestion: '建议至少提供2个数据点以构成有效图表'
-          })
-        }
-        break
+      if (adjustments.data && adjustments.data.length < 2) {
+        warnings.push({
+          type: 'INSUFFICIENT_DATA',
+          field: 'data',
+          message: '图表数据点过少',
+          suggestion: '建议至少提供2个数据点以构成有效图表'
+        })
+      }
+      break
 
-      case TEMPLATE_TYPES.TIMELINE_DISPLAY:
-        /**
+    case TEMPLATE_TYPES.TIMELINE_DISPLAY:
+      /**
 
          * if 方法
 
@@ -1062,15 +1046,15 @@ export class ConstraintSystem {
 
          */
 
-        if(adjustments.events && adjustments.events.length < 2) {
-          warnings.push({
-            type: 'INSUFFICIENT_EVENTS',
-            field: 'events',
-            message: '时间线事件过少',
-            suggestion: '建议至少提供2个事件以构成有效时间线'
-          })
-        }
-        break
+      if (adjustments.events && adjustments.events.length < 2) {
+        warnings.push({
+          type: 'INSUFFICIENT_EVENTS',
+          field: 'events',
+          message: '时间线事件过少',
+          suggestion: '建议至少提供2个事件以构成有效时间线'
+        })
+      }
+      break
     }
   }
 
@@ -1393,10 +1377,10 @@ export class ConstraintSystem {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
     return result
       ? {
-          r: parseInt(result[1], 16),
-          g: parseInt(result[2], 16),
-          b: parseInt(result[3], 16)
-        }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      }
       : null
   }
 
@@ -1439,7 +1423,7 @@ export class ConstraintSystem {
 
      */
 
-    if(this.constraints[category]) {
+    if (this.constraints[category]) {
       this.constraints[category] = { ...this.constraints[category], ...newConstraints }
     }
   }
@@ -1481,7 +1465,10 @@ export class ConstraintSystem {
       },
       recommendations: this.generateRecommendations(validationResult),
       metadata: {
-        totalChecks: validationResult.violations.length + validationResult.warnings.length + validationResult.suggestions.length,
+        totalChecks:
+          validationResult.violations.length +
+          validationResult.warnings.length +
+          validationResult.suggestions.length,
         criticalIssues: validationResult.violations.filter(v => v.severity === 'high').length,
         complianceLevel: this.getComplianceLevel(validationResult.score)
       }
@@ -1522,75 +1509,75 @@ export class ConstraintSystem {
     const recommendations = []
 
     switch (type) {
-      case 'TEXT_LENGTH':
-        recommendations.push({
-          priority: severity === 'violation' ? 'high' : 'medium',
-          category: 'typography',
-          action: '调整文字长度',
-          description: '确保文字内容长度在允许范围内',
-          implementation: '检查并截断或扩展文字内容'
-        })
-        break
+    case 'TEXT_LENGTH':
+      recommendations.push({
+        priority: severity === 'violation' ? 'high' : 'medium',
+        category: 'typography',
+        action: '调整文字长度',
+        description: '确保文字内容长度在允许范围内',
+        implementation: '检查并截断或扩展文字内容'
+      })
+      break
 
-      case 'FONT_SIZE_OUT_OF_RANGE':
-        recommendations.push({
-          priority: 'high',
-          category: 'typography',
-          action: '调整字体大小',
-          description: '使用符合规范的字体大小',
-          implementation: '选择12px-72px范围内的字体大小'
-        })
-        break
+    case 'FONT_SIZE_OUT_OF_RANGE':
+      recommendations.push({
+        priority: 'high',
+        category: 'typography',
+        action: '调整字体大小',
+        description: '使用符合规范的字体大小',
+        implementation: '选择12px-72px范围内的字体大小'
+      })
+      break
 
-      case 'CONTRAST_RATIO':
-        recommendations.push({
-          priority: 'high',
-          category: 'accessibility',
-          action: '提高颜色对比度',
-          description: '确保文字与背景的对比度符合WCAG标准',
-          implementation: '调整文字或背景颜色，提高对比度至4.5:1以上'
-        })
-        break
+    case 'CONTRAST_RATIO':
+      recommendations.push({
+        priority: 'high',
+        category: 'accessibility',
+        action: '提高颜色对比度',
+        description: '确保文字与背景的对比度符合WCAG标准',
+        implementation: '调整文字或背景颜色，提高对比度至4.5:1以上'
+      })
+      break
 
-      case 'TOUCH_TARGET_TOO_SMALL':
-        recommendations.push({
-          priority: 'high',
-          category: 'ux',
-          action: '增大触摸目标',
-          description: '确保触摸目标至少44px x 44px',
-          implementation: '增加按钮或链接的尺寸或内边距'
-        })
-        break
+    case 'TOUCH_TARGET_TOO_SMALL':
+      recommendations.push({
+        priority: 'high',
+        category: 'ux',
+        action: '增大触摸目标',
+        description: '确保触摸目标至少44px x 44px',
+        implementation: '增加按钮或链接的尺寸或内边距'
+      })
+      break
 
-      case 'MISSING_ALT_TEXT':
-        recommendations.push({
-          priority: 'high',
-          category: 'accessibility',
-          action: '添加替代文本',
-          description: '为所有图片添加描述性替代文本',
-          implementation: '为img元素添加alt属性，描述图片内容'
-        })
-        break
+    case 'MISSING_ALT_TEXT':
+      recommendations.push({
+        priority: 'high',
+        category: 'accessibility',
+        action: '添加替代文本',
+        description: '为所有图片添加描述性替代文本',
+        implementation: '为img元素添加alt属性，描述图片内容'
+      })
+      break
 
-      case 'TOO_MANY_COLORS':
-        recommendations.push({
-          priority: 'medium',
-          category: 'branding',
-          action: '简化配色方案',
-          description: '减少使用的颜色数量以保持一致性',
-          implementation: '使用不超过3种主要颜色'
-        })
-        break
+    case 'TOO_MANY_COLORS':
+      recommendations.push({
+        priority: 'medium',
+        category: 'branding',
+        action: '简化配色方案',
+        description: '减少使用的颜色数量以保持一致性',
+        implementation: '使用不超过3种主要颜色'
+      })
+      break
 
-      case 'LINE_TOO_LONG':
-        recommendations.push({
-          priority: 'medium',
-          category: 'readability',
-          action: '优化行长度',
-          description: '确保每行文字长度适中',
-          implementation: '调整容器宽度或字体大小'
-        })
-        break
+    case 'LINE_TOO_LONG':
+      recommendations.push({
+        priority: 'medium',
+        category: 'readability',
+        action: '优化行长度',
+        description: '确保每行文字长度适中',
+        implementation: '调整容器宽度或字体大小'
+      })
+      break
     }
 
     return recommendations

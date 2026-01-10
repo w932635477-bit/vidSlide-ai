@@ -29,10 +29,10 @@ export class IndexedDBStorage {
    * @throws {Error} 当数据库初始化失败时抛出错误
    */
   async /**
-  * initialize 方法
-  * VidSlide AI 功能实现
-  */
- initialize() {
+   * initialize 方法
+   * VidSlide AI 功能实现
+   */
+  initialize() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.version)
 
@@ -103,11 +103,11 @@ export class IndexedDBStorage {
    * @returns {Promise<string>} 生成的素材唯一ID
    * @throws {Error} 当存储失败或素材已存在时抛出错误
    */
-  async /**
-  * storeAsset 方法
-  * VidSlide AI 功能实现
-  */
- storeAsset(asset) {
+  /**
+   * storeAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async storeAsset(asset) {
     /**
 
      * if 方法
@@ -116,7 +116,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -154,7 +154,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(asset.metadata) {
+        if (asset.metadata) {
           const metadataData = {
             assetId,
             ...asset.metadata,
@@ -179,7 +179,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(assetRequest.error.name === 'ConstraintError') {
+        if (assetRequest.error.name === 'ConstraintError') {
           reject(new Error('素材已存在'))
         } else {
           reject(new Error('存储素材失败: ' + assetRequest.error.message))
@@ -197,11 +197,11 @@ export class IndexedDBStorage {
    * @param {string} assetId - 素材ID
    * @returns {Promise<Object>} 素材数据
    */
-  async /**
-  * getAsset 方法
-  * VidSlide AI 功能实现
-  */
- getAsset(assetId) {
+  /**
+   * getAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async getAsset(assetId) {
     /**
 
      * if 方法
@@ -210,7 +210,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -228,7 +228,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(request.result) {
+        if (request.result) {
           // 更新最后使用时间
           this.updateLastUsed(assetId).catch(console.warn)
           resolve(request.result)
@@ -249,11 +249,11 @@ export class IndexedDBStorage {
    * @param {string} assetId - 素材ID
    * @returns {Promise<void>}
    */
-  async /**
-  * updateLastUsed 方法
-  * VidSlide AI 功能实现
-  */
- updateLastUsed(assetId) {
+  /**
+   * updateLastUsed 方法
+   * VidSlide AI 功能实现
+   */
+  async updateLastUsed(assetId) {
     /**
 
      * if 方法
@@ -262,7 +262,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -280,7 +280,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(request.result) {
+        if (request.result) {
           const asset = request.result
           asset.lastUsed = new Date().toISOString()
 
@@ -302,11 +302,11 @@ export class IndexedDBStorage {
    * @param {Object} options - 搜索选项
    * @returns {Promise<Array>} 素材列表
    */
-  async /**
-  * searchAssets 方法
-  * VidSlide AI 功能实现
-  */
- searchAssets(filters = {}, options = {}) {
+  /**
+   * searchAssets 方法
+   * VidSlide AI 功能实现
+   */
+  async searchAssets(filters = {}, options = {}) {
     /**
 
      * if 方法
@@ -315,7 +315,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -335,7 +335,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(cursor) {
+        if (cursor) {
           const asset = cursor.value
 
           // 应用搜索过滤器
@@ -387,7 +387,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(filters.type && asset.type !== filters.type) {
+    if (filters.type && asset.type !== filters.type) {
       return false
     }
 
@@ -400,7 +400,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(filters.category && asset.category !== filters.category) {
+    if (filters.category && asset.category !== filters.category) {
       return false
     }
 
@@ -413,7 +413,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(filters.tags && filters.tags.length > 0) {
+    if (filters.tags && filters.tags.length > 0) {
       const assetTags = asset.tags || []
       const hasMatchingTag = filters.tags.some(tag =>
         assetTags.some(assetTag => assetTag.toLowerCase().includes(tag.toLowerCase()))
@@ -426,7 +426,7 @@ export class IndexedDBStorage {
 
        */
 
-      if(!hasMatchingTag) {
+      if (!hasMatchingTag) {
         return false
       }
     }
@@ -440,7 +440,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(filters.keyword) {
+    if (filters.keyword) {
       const keyword = filters.keyword.toLowerCase()
       const searchableText = [asset.name, asset.description, asset.category, ...(asset.tags || [])]
         .join(' ')
@@ -460,7 +460,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(filters.isDownloaded !== undefined && asset.isDownloaded !== filters.isDownloaded) {
+    if (filters.isDownloaded !== undefined && asset.isDownloaded !== filters.isDownloaded) {
       return false
     }
 
@@ -504,8 +504,7 @@ export class IndexedDBStorage {
 
        */
 
-
-      if(aValue < bValue) {
+      if (aValue < bValue) {
         return sortOrder === 'asc' ? -1 : 1
       }
       /**
@@ -516,7 +515,7 @@ export class IndexedDBStorage {
 
        */
 
-      if(aValue > bValue) {
+      if (aValue > bValue) {
         return sortOrder === 'asc' ? 1 : -1
       }
       return 0
@@ -547,11 +546,11 @@ export class IndexedDBStorage {
    * @param {string} assetId - 素材ID
    * @returns {Promise<void>}
    */
-  async /**
-  * deleteAsset 方法
-  * VidSlide AI 功能实现
-  */
- deleteAsset(assetId) {
+  /**
+   * deleteAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async deleteAsset(assetId) {
     /**
 
      * if 方法
@@ -560,7 +559,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -598,11 +597,11 @@ export class IndexedDBStorage {
    * 获取存储统计信息
    * @returns {Promise<Object>} 统计信息
    */
-  async /**
-  * getStorageStats 方法
-  * VidSlide AI 功能实现
-  */
- getStorageStats() {
+  /**
+   * getStorageStats 方法
+   * VidSlide AI 功能实现
+   */
+  async getStorageStats() {
     /**
 
      * if 方法
@@ -611,7 +610,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -637,7 +636,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(cursor) {
+        if (cursor) {
           const asset = cursor.value
 
           stats.totalAssets++
@@ -654,8 +653,7 @@ export class IndexedDBStorage {
 
            */
 
-
-          if(asset.isDownloaded) {
+          if (asset.isDownloaded) {
             stats.downloadedAssets++
           }
 
@@ -671,7 +669,7 @@ export class IndexedDBStorage {
 
            */
 
-          if(asset.category) {
+          if (asset.category) {
             stats.categories[asset.category] = (stats.categories[asset.category] || 0) + 1
           }
 
@@ -692,11 +690,11 @@ export class IndexedDBStorage {
    * @param {number} daysOld - 删除多少天前的未使用素材
    * @returns {Promise<number>} 删除的素材数量
    */
-  async /**
-  * cleanupOldAssets 方法
-  * VidSlide AI 功能实现
-  */
- cleanupOldAssets(daysOld = 90) {
+  /**
+   * cleanupOldAssets 方法
+   * VidSlide AI 功能实现
+   */
+  async cleanupOldAssets(daysOld = 90) {
     /**
 
      * if 方法
@@ -705,7 +703,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -728,7 +726,7 @@ export class IndexedDBStorage {
 
          */
 
-        if(cursor) {
+        if (cursor) {
           const asset = cursor.value
           const lastUsed = new Date(asset.lastUsed)
 
@@ -743,8 +741,7 @@ export class IndexedDBStorage {
 
            */
 
-
-          if(lastUsed < cutoffDate && !asset.isFavorite) {
+          if (lastUsed < cutoffDate && !asset.isFavorite) {
             cursor.delete()
             deletedCount++
           }
@@ -766,10 +763,10 @@ export class IndexedDBStorage {
    * @returns {Promise<string>} JSON字符串
    */
   async /**
-  * exportData 方法
-  * VidSlide AI 功能实现
-  */
- exportData() {
+   * exportData 方法
+   * VidSlide AI 功能实现
+   */
+  async exportData() {
     /**
 
      * if 方法
@@ -778,7 +775,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -802,11 +799,11 @@ export class IndexedDBStorage {
    * @param {string} jsonData - JSON字符串
    * @returns {Promise<number>} 导入的素材数量
    */
-  async /**
-  * importData 方法
-  * VidSlide AI 功能实现
-  */
- importData(jsonData) {
+  /**
+   * importData 方法
+   * VidSlide AI 功能实现
+   */
+  async importData(jsonData) {
     const importData = JSON.parse(jsonData)
 
     if (!importData.assets || !Array.isArray(importData.assets)) {
@@ -822,15 +819,15 @@ export class IndexedDBStorage {
 
      */
 
-    for(const asset of importData.assets) {
+    for (const asset of importData.assets) {
       try {
         await this.storeAsset(asset)
         importedCount++
-      } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+      } catch (error) {
+        /**
+         * catch 方法
+         * VidSlide AI 功能实现
+         */
         console.warn('导入素材失败:', asset.id, error)
       }
     }
@@ -843,10 +840,10 @@ export class IndexedDBStorage {
    * @returns {Promise<Array>}
    */
   async /**
-  * getAllMetadata 方法
-  * VidSlide AI 功能实现
-  */
- getAllMetadata() {
+   * getAllMetadata 方法
+   * VidSlide AI 功能实现
+   */
+  getAllMetadata() {
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction(['assetMetadata'], 'readonly')
       const store = transaction.objectStore('assetMetadata')
@@ -882,7 +879,7 @@ export class IndexedDBStorage {
 
      */
 
-    if(this.db) {
+    if (this.db) {
       this.db.close()
       this.db = null
       this.isInitialized = false
@@ -894,10 +891,10 @@ export class IndexedDBStorage {
    * @returns {Promise<void>}
    */
   async /**
-  * deleteDatabase 方法
-  * VidSlide AI 功能实现
-  */
- deleteDatabase() {
+   * deleteDatabase 方法
+   * VidSlide AI 功能实现
+   */
+  deleteDatabase() {
     return new Promise((resolve, reject) => {
       const deleteRequest = indexedDB.deleteDatabase(this.dbName)
 

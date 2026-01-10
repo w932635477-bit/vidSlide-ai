@@ -66,7 +66,7 @@ export class TemplateRenderer {
 
          */
 
-        if(this.performanceMonitor.renderTimes.length > this.performanceMonitor.maxSamples) {
+        if (this.performanceMonitor.renderTimes.length > this.performanceMonitor.maxSamples) {
           this.performanceMonitor.renderTimes.shift()
         }
       },
@@ -91,7 +91,7 @@ export class TemplateRenderer {
 
          */
 
-        if(performance.memory) {
+        if (performance.memory) {
           this.performanceMonitor.memoryUsage.push(performance.memory.usedJSHeapSize / 1024 / 1024)
           /**
 
@@ -101,7 +101,7 @@ export class TemplateRenderer {
 
            */
 
-          if(this.performanceMonitor.memoryUsage.length > this.performanceMonitor.maxSamples) {
+          if (this.performanceMonitor.memoryUsage.length > this.performanceMonitor.maxSamples) {
             this.performanceMonitor.memoryUsage.shift()
           }
         }
@@ -127,10 +127,10 @@ export class TemplateRenderer {
    * @returns {Promise<Object>} 渲染结果
    */
   async /**
-  * renderTemplate 方法
-  * VidSlide AI 功能实现
-  */
- renderTemplate(content, options = {}) {
+   * renderTemplate 方法
+   * VidSlide AI 功能实现
+   */
+  async renderTemplate(content, options = {}) {
     /**
      * startTime 函数
      * VidSlide AI 紧急补齐阶段功能实现
@@ -201,11 +201,7 @@ export class TemplateRenderer {
           totalRenders: this.renderStats.totalRenders
         }
       }
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
       console.error('Template rendering failed:', error)
       return {
         success: false,
@@ -225,10 +221,10 @@ export class TemplateRenderer {
    * @returns {Promise<Object>} 渲染结果
    */
   async /**
-  * renderTemplateContent 方法
-  * VidSlide AI 功能实现
-  */
- renderTemplateContent(template, options) {
+   * renderTemplateContent 方法
+   * VidSlide AI 功能实现
+   */
+  renderTemplateContent(template, options) {
     const { type, config, data } = template
 
     // 清空画布
@@ -243,24 +239,24 @@ export class TemplateRenderer {
 
      */
 
-    switch(type) {
-      case TEMPLATE_TYPES.DIALOG_POPUP:
-        return this.renderDialogPopup(config, data, options)
+    switch (type) {
+    case TEMPLATE_TYPES.DIALOG_POPUP:
+      return this.renderDialogPopup(config, data, options)
 
-      case TEMPLATE_TYPES.TIMELINE_DISPLAY:
-        return this.renderTimelineDisplay(config, data, options)
+    case TEMPLATE_TYPES.TIMELINE_DISPLAY:
+      return this.renderTimelineDisplay(config, data, options)
 
-      case TEMPLATE_TYPES.SPLIT_SCREEN:
-        return this.renderSplitScreen(config, data, options)
+    case TEMPLATE_TYPES.SPLIT_SCREEN:
+      return this.renderSplitScreen(config, data, options)
 
-      case TEMPLATE_TYPES.CHART_ANALYSIS:
-        return this.renderChartAnalysis(config, data, options)
+    case TEMPLATE_TYPES.CHART_ANALYSIS:
+      return this.renderChartAnalysis(config, data, options)
 
-      case TEMPLATE_TYPES.EMPHASIS_FOCUS:
-        return this.renderEmphasisFocus(config, data, options)
+    case TEMPLATE_TYPES.EMPHASIS_FOCUS:
+      return this.renderEmphasisFocus(config, data, options)
 
-      default:
-        throw new Error(`Unsupported template type: ${type}`)
+    default:
+      throw new Error(`Unsupported template type: ${type}`)
     }
   }
 
@@ -315,7 +311,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.shadow) {
+    if (visual.shadow) {
       this.visualEffects.drawWithShadow(
         () => this.visualEffects.drawRoundedRect(position.x, position.y, width, height, 12),
         visual.shadow
@@ -331,7 +327,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.title) {
+    if (data.content.title) {
       this.visualEffects.drawText(
         data.content.title,
         position.x + 20,
@@ -349,7 +345,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.text) {
+    if (data.content.text) {
       this.visualEffects.drawMultilineText(
         data.content.text,
         position.x + 20,
@@ -369,7 +365,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.animation && options.animate !== false) {
+    if (visual.animation && options.animate !== false) {
       this.applyAnimation(visual.animation, {
         element: { x: position.x, y: position.y, width, height },
         type: 'dialog-popup'
@@ -421,7 +417,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.background && visual.background.type === 'linear') {
+    if (visual.background && visual.background.type === 'linear') {
       this.visualEffects.drawGradientBackground(
         position.x,
         position.y,
@@ -465,7 +461,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.animation && options.animate !== false) {
+    if (visual.animation && options.animate !== false) {
       this.applyAnimation(visual.animation, {
         element: { x: position.x, y: position.y, width, height },
         type: 'timeline'
@@ -581,7 +577,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.left && data.content.left.label) {
+    if (data.content.left && data.content.left.label) {
       this.visualEffects.drawText(
         data.content.left.label,
         leftPanel.x + 20,
@@ -601,8 +597,7 @@ export class TemplateRenderer {
 
      */
 
-
-    if(data.content.right && data.content.right.label) {
+    if (data.content.right && data.content.right.label) {
       this.visualEffects.drawText(
         data.content.right.label,
         rightPanel.x + 20,
@@ -620,7 +615,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.left && data.content.left.content) {
+    if (data.content.left && data.content.left.content) {
       this.visualEffects.drawMultilineText(
         data.content.left.content,
         leftPanel.x + 20,
@@ -642,8 +637,7 @@ export class TemplateRenderer {
 
      */
 
-
-    if(data.content.right && data.content.right.content) {
+    if (data.content.right && data.content.right.content) {
       this.visualEffects.drawMultilineText(
         data.content.right.content,
         rightPanel.x + 20,
@@ -663,7 +657,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.animation && options.animate !== false) {
+    if (visual.animation && options.animate !== false) {
       this.applyAnimation(visual.animation, {
         element: { x: position.x, y: position.y, width, height },
         type: 'split-screen'
@@ -732,7 +726,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.shadow) {
+    if (visual.shadow) {
       this.visualEffects.drawWithShadow(
         () => this.visualEffects.drawRoundedRect(position.x, position.y, width, height, 12),
         visual.shadow
@@ -748,7 +742,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.title) {
+    if (data.content.title) {
       this.visualEffects.drawText(data.content.title, position.x + width / 2, position.y + 30, {
         ...content.title,
         textAlign: 'center'
@@ -773,7 +767,7 @@ export class TemplateRenderer {
 
      */
 
-    if(chartData && chartData.length > 0) {
+    if (chartData && chartData.length > 0) {
       this.visualEffects.drawChart(
         position.x + 40,
         position.y + 60,
@@ -798,7 +792,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.animation && options.animate !== false) {
+    if (visual.animation && options.animate !== false) {
       this.applyAnimation(visual.animation, {
         element: { x: position.x, y: position.y, width, height },
         type: 'chart'
@@ -856,7 +850,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.background && visual.background.type === 'radial') {
+    if (visual.background && visual.background.type === 'radial') {
       this.visualEffects.drawGradientBackground(
         position.x,
         position.y,
@@ -878,7 +872,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.title) {
+    if (data.content.title) {
       this.visualEffects.drawText(data.content.title, size.width / 2, size.height / 2 - 50, {
         ...content.title,
         textAlign: 'center'
@@ -894,7 +888,7 @@ export class TemplateRenderer {
 
      */
 
-    if(data.content.subtitle) {
+    if (data.content.subtitle) {
       this.visualEffects.drawText(data.content.subtitle, size.width / 2, size.height / 2 + 50, {
         ...content.subtitle,
         textAlign: 'center'
@@ -910,7 +904,7 @@ export class TemplateRenderer {
 
      */
 
-    if(visual.animation && options.animate !== false) {
+    if (visual.animation && options.animate !== false) {
       this.applyAnimation(visual.animation, {
         element: { x: position.x, y: position.y, width: size.width, height: size.height },
         type: 'emphasis'
@@ -996,31 +990,30 @@ export class TemplateRenderer {
 
      */
 
+    switch (position) {
+    case 'center':
+      return { x: centerX, y: centerY }
 
-    switch(position) {
-      case 'center':
-        return { x: centerX, y: centerY }
+    case 'top-left':
+      return { x: margin, y: margin }
 
-      case 'top-left':
-        return { x: margin, y: margin }
+    case 'top-right':
+      return { x: this.width - width - margin, y: margin }
 
-      case 'top-right':
-        return { x: this.width - width - margin, y: margin }
+    case 'bottom-left':
+      return { x: margin, y: this.height - height - margin }
 
-      case 'bottom-left':
-        return { x: margin, y: this.height - height - margin }
+    case 'bottom-right':
+      return { x: this.width - width - margin, y: this.height - height - margin }
 
-      case 'bottom-right':
-        return { x: this.width - width - margin, y: this.height - height - margin }
+    case 'bottom':
+      return { x: centerX, y: this.height - height - margin }
 
-      case 'bottom':
-        return { x: centerX, y: this.height - height - margin }
+    case 'left-to-right':
+      return { x: margin, y: centerY }
 
-      case 'left-to-right':
-        return { x: margin, y: centerY }
-
-      default:
-        return { x: centerX, y: centerY }
+    default:
+      return { x: centerX, y: centerY }
     }
   }
 
@@ -1051,30 +1044,29 @@ export class TemplateRenderer {
 
      */
 
+    switch (type) {
+    case 'fade-in-scale':
+      this.applyFadeInScaleAnimation(target, duration, easing)
+      break
 
-    switch(type) {
-      case 'fade-in-scale':
-        this.applyFadeInScaleAnimation(target, duration, easing)
-        break
+    case 'progress-bar':
+      this.applyProgressBarAnimation(target, duration, easing)
+      break
 
-      case 'progress-bar':
-        this.applyProgressBarAnimation(target, duration, easing)
-        break
+    case 'slide-in-sync':
+      this.applySlideInSyncAnimation(target, duration, easing)
+      break
 
-      case 'slide-in-sync':
-        this.applySlideInSyncAnimation(target, duration, easing)
-        break
+    case 'data-animation':
+      this.applyDataAnimation(target, duration, easing)
+      break
 
-      case 'data-animation':
-        this.applyDataAnimation(target, duration, easing)
-        break
+    case 'fade-in-text':
+      this.applyFadeInTextAnimation(target, duration, easing)
+      break
 
-      case 'fade-in-text':
-        this.applyFadeInTextAnimation(target, duration, easing)
-        break
-
-      default:
-        console.warn(`Unsupported animation type: ${type}`)
+    default:
+      console.warn(`Unsupported animation type: ${type}`)
     }
   }
 
@@ -1292,8 +1284,7 @@ export class TemplateRenderer {
 
      */
 
-
-    if(content.years && content.events) {
+    if (content.years && content.events) {
       content.years.forEach((year, index) => {
         events.push({
           year: year,
@@ -1362,7 +1353,7 @@ export class TemplateRenderer {
 
      */
 
-    if(validationResult.violations && validationResult.violations.length > 0) {
+    if (validationResult.violations && validationResult.violations.length > 0) {
       validationResult.violations.forEach(violation => {
         this.autoFixViolation(template, violation)
       })
@@ -1393,9 +1384,9 @@ export class TemplateRenderer {
 
      */
 
-    switch(violation.type) {
-      case 'TEXT_LENGTH':
-        /**
+    switch (violation.type) {
+    case 'TEXT_LENGTH':
+      /**
 
          * if 方法
 
@@ -1403,27 +1394,13 @@ export class TemplateRenderer {
 
          */
 
-        if(violation.field === 'text' && template.data.content) {
-          template.data.content = template.data.content.substring(0, violation.limit)
-        }
-        break
+      if (violation.field === 'text' && template.data.content) {
+        template.data.content = template.data.content.substring(0, violation.limit)
+      }
+      break
 
-      case 'POSITION_INVALID':
-        /**
-
-         * if 方法
-
-         * VidSlide AI 功能实现
-
-         */
-
-        if(violation.allowed && violation.allowed.length > 0) {
-          template.config.visual.position = violation.allowed[0]
-        }
-        break
-
-      case 'SIZE_TOO_SMALL':
-        /**
+    case 'POSITION_INVALID':
+      /**
 
          * if 方法
 
@@ -1431,13 +1408,13 @@ export class TemplateRenderer {
 
          */
 
-        if(violation.minimum) {
-          template.config.visual.size = { ...violation.minimum }
-        }
-        break
+      if (violation.allowed && violation.allowed.length > 0) {
+        template.config.visual.position = violation.allowed[0]
+      }
+      break
 
-      case 'SIZE_TOO_LARGE':
-        /**
+    case 'SIZE_TOO_SMALL':
+      /**
 
          * if 方法
 
@@ -1445,18 +1422,32 @@ export class TemplateRenderer {
 
          */
 
-        if(violation.maximum) {
-          template.config.visual.size = { ...violation.maximum }
-        }
-        break
+      if (violation.minimum) {
+        template.config.visual.size = { ...violation.minimum }
+      }
+      break
 
-      case 'CONTRAST_RATIO':
-        // 自动调整颜色以提高对比度
-        this.adjustColorsForContrast(template)
-        break
+    case 'SIZE_TOO_LARGE':
+      /**
 
-      default:
-        console.warn(`No auto-fix available for violation type: ${violation.type}`)
+         * if 方法
+
+         * VidSlide AI 功能实现
+
+         */
+
+      if (violation.maximum) {
+        template.config.visual.size = { ...violation.maximum }
+      }
+      break
+
+    case 'CONTRAST_RATIO':
+      // 自动调整颜色以提高对比度
+      this.adjustColorsForContrast(template)
+      break
+
+    default:
+      console.warn(`No auto-fix available for violation type: ${violation.type}`)
     }
   }
 
@@ -1482,7 +1473,7 @@ export class TemplateRenderer {
 
      */
 
-    if(template.config.content) {
+    if (template.config.content) {
       template.config.content.text = template.config.content.text || {}
       template.config.content.text.color = '#ffffff' // 使用白色文字
       template.config.visual.background = 'rgba(0,0,0,0.8)' // 使用深色背景
@@ -1509,7 +1500,7 @@ export class TemplateRenderer {
 
      */
 
-    if(this.currentTemplate) {
+    if (this.currentTemplate) {
       this.renderTemplateContent(this.currentTemplate, { animate: false })
     }
   }
@@ -1620,7 +1611,7 @@ export class TemplateRenderer {
 
      */
 
-    if(this.visualEffects) {
+    if (this.visualEffects) {
       this.visualEffects.destroy()
     }
 

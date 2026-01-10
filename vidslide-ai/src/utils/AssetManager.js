@@ -70,11 +70,11 @@ export class AssetManager {
       this.emit('initialized', {})
 
       this.isInitialized = true
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('资产管理器初始化失败:', error)
       throw new Error('无法初始化素材管理系统')
     }
@@ -106,7 +106,7 @@ export class AssetManager {
 
      */
 
-    if('memory' in performance) {
+    if ('memory' in performance) {
       setInterval(() => {
         const memInfo = performance.memory
         this.performanceStats.memoryUsage = memInfo.usedJSHeapSize
@@ -143,8 +143,7 @@ export class AssetManager {
 
      */
 
-
-    for(const [key, cachedAsset] of toRemove) {
+    for (const [key, cachedAsset] of toRemove) {
       this.assetCache.delete(key)
 
       // 清理blob URL
@@ -156,7 +155,7 @@ export class AssetManager {
 
        */
 
-      if(cachedAsset.blobUrl) {
+      if (cachedAsset.blobUrl) {
         URL.revokeObjectURL(cachedAsset.blobUrl)
         this.blobUrls.delete(cachedAsset.blobUrl)
       }
@@ -184,7 +183,7 @@ export class AssetManager {
 
      */
 
-    if(cached) {
+    if (cached) {
       this.performanceStats.cacheHits++
       // 更新访问时间（LRU）
       cached.lastAccess = Date.now()
@@ -214,7 +213,7 @@ export class AssetManager {
 
      */
 
-    if(this.assetCache.size >= this.cacheMaxSize) {
+    if (this.assetCache.size >= this.cacheMaxSize) {
       this.cleanupExpiredCache()
     }
 
@@ -230,7 +229,7 @@ export class AssetManager {
 
      */
 
-    if(assetData.blobUrl) {
+    if (assetData.blobUrl) {
       this.blobUrls.add(assetData.blobUrl)
     }
   }
@@ -288,7 +287,7 @@ export class AssetManager {
 
      */
 
-    for(const url of this.blobUrls) {
+    for (const url of this.blobUrls) {
       URL.revokeObjectURL(url)
     }
     this.blobUrls.clear()
@@ -360,8 +359,7 @@ export class AssetManager {
 
      */
 
-
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -399,7 +397,7 @@ export class AssetManager {
 
        */
 
-      if(includeLocal) {
+      if (includeLocal) {
         const localFilters = { keyword: query }
         if (type) localFilters.type = type
         if (category) localFilters.category = category
@@ -429,17 +427,17 @@ export class AssetManager {
 
        */
 
-      for(const asset of results.external) {
+      for (const asset of results.external) {
         try {
           // 调用版权检查器进行检查
           const copyrightInfo = await this.copyrightChecker.checkCopyright(asset)
           // 将版权信息添加到素材对象中
           asset.copyrightInfo = copyrightInfo
-        } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+        } catch (error) {
+          /**
+           * catch 方法
+           * VidSlide AI 功能实现
+           */
           // 处理版权检查失败的情况
           console.warn(`获取素材 ${asset.id} 版权信息失败:`, error)
           // 设置默认的版权信息
@@ -464,11 +462,7 @@ export class AssetManager {
       this.emit('searchCompleted', { query, options, results })
 
       return results
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
       console.error('素材搜索失败:', error)
       throw new Error('搜索素材时发生错误，请重试')
     }
@@ -491,10 +485,10 @@ export class AssetManager {
    * @throws {Error} 当API不可用或网络错误时抛出
    */
   async /**
-  * getPopularAssets 方法
-  * VidSlide AI 功能实现
-  */
- getPopularAssets(options = {}) {
+   * getPopularAssets 方法
+   * VidSlide AI 功能实现
+   */
+  async getPopularAssets(options = {}) {
     const { limit = 20, includeCopyright = true } = options
 
     try {
@@ -511,8 +505,7 @@ export class AssetManager {
 
        */
 
-
-      if(includeCopyright) {
+      if (includeCopyright) {
         // 批量检查版权
         const copyrightResults = await this.copyrightChecker.checkCopyrightBatch(assets)
 
@@ -525,7 +518,7 @@ export class AssetManager {
 
          */
 
-        for(let i = 0; i < assets.length; i++) {
+        for (let i = 0; i < assets.length; i++) {
           assets[i].copyrightInfo = copyrightResults[i]
         }
       }
@@ -533,11 +526,7 @@ export class AssetManager {
       this.emit('popularAssetsLoaded', { assets, options })
 
       return assets
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
       console.error('获取热门素材失败:', error)
       throw new Error('获取热门素材失败，请检查网络连接')
     }
@@ -560,11 +549,11 @@ export class AssetManager {
    * @fires AssetManager#downloadFailed - 下载失败时触发
    * @throws {Error} 当版权检查失败或下载失败时抛出
    */
-  async /**
-  * downloadAsset 方法
-  * VidSlide AI 功能实现
-  */
- downloadAsset(asset, options = {}) {
+  /**
+   * downloadAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async downloadAsset(asset, options = {}) {
     // 解析下载选项
     const {
       checkCopyright = true, // 是否检查版权
@@ -581,7 +570,7 @@ export class AssetManager {
 
        */
 
-      if(checkCopyright) {
+      if (checkCopyright) {
         const copyrightValidation = await this.copyrightChecker.validateAssetUsage(asset)
 
         /**
@@ -595,8 +584,7 @@ export class AssetManager {
 
          */
 
-
-        if(!copyrightValidation.canUse) {
+        if (!copyrightValidation.canUse) {
           throw new Error(`版权检查失败: ${copyrightValidation.issues.join(', ')}`)
         }
 
@@ -632,7 +620,7 @@ export class AssetManager {
 
        */
 
-      if(addToLibrary) {
+      if (addToLibrary) {
         const assetId = await this.storage.storeAsset(assetData)
         assetData.id = assetId
       }
@@ -641,11 +629,11 @@ export class AssetManager {
       this.emit('downloadCompleted', { asset: assetData, options })
 
       return assetData
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('下载素材失败:', error)
 
       // 触发下载失败事件
@@ -660,11 +648,11 @@ export class AssetManager {
    * @param {string} assetId - 素材ID
    * @returns {Promise<Object>} 素材数据
    */
-  async /**
-  * getLocalAsset 方法
-  * VidSlide AI 功能实现
-  */
- getLocalAsset(assetId) {
+  /**
+   * getLocalAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async getLocalAsset(assetId) {
     /**
 
      * if 方法
@@ -673,7 +661,7 @@ export class AssetManager {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -684,11 +672,11 @@ export class AssetManager {
       this.emit('assetAccessed', { asset })
 
       return asset
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('获取本地素材失败:', error)
       throw new Error('获取素材失败，请检查素材是否存在')
     }
@@ -700,10 +688,10 @@ export class AssetManager {
    * @returns {Promise<void>}
    */
   async /**
-  * deleteLocalAsset 方法
-  * VidSlide AI 功能实现
-  */
- deleteLocalAsset(assetId) {
+   * deleteLocalAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async deleteLocalAsset(assetId) {
     /**
 
      * if 方法
@@ -712,7 +700,7 @@ export class AssetManager {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -730,11 +718,11 @@ export class AssetManager {
 
       // 触发删除事件
       this.emit('assetDeleted', { assetId, asset })
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('删除素材失败:', error)
       throw new Error('删除素材失败，请重试')
     }
@@ -745,10 +733,10 @@ export class AssetManager {
    * @returns {Promise<Object>} 统计信息
    */
   async /**
-  * getLibraryStats 方法
-  * VidSlide AI 功能实现
-  */
- getLibraryStats() {
+   * getLibraryStats 方法
+   * VidSlide AI 功能实现
+   */
+  async getLibraryStats() {
     /**
 
      * if 方法
@@ -757,7 +745,7 @@ export class AssetManager {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -776,11 +764,11 @@ export class AssetManager {
       }
 
       return stats
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('获取统计信息失败:', error)
       throw new Error('获取统计信息失败')
     }
@@ -792,10 +780,10 @@ export class AssetManager {
    * @returns {Promise<number>} 删除的素材数量
    */
   async /**
-  * cleanupExpiredAssets 方法
-  * VidSlide AI 功能实现
-  */
- cleanupExpiredAssets(daysOld = 90) {
+   * cleanupExpiredAssets 方法
+   * VidSlide AI 功能实现
+   */
+  async cleanupExpiredAssets(daysOld = 90) {
     /**
 
      * if 方法
@@ -804,7 +792,7 @@ export class AssetManager {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -815,11 +803,11 @@ export class AssetManager {
       this.emit('cleanupCompleted', { deletedCount, daysOld })
 
       return deletedCount
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('清理过期素材失败:', error)
       throw new Error('清理过期素材失败')
     }
@@ -830,10 +818,10 @@ export class AssetManager {
    * @returns {Promise<string>} JSON字符串
    */
   async /**
-  * exportLibrary 方法
-  * VidSlide AI 功能实现
-  */
- exportLibrary() {
+   * exportLibrary 方法
+   * VidSlide AI 功能实现
+   */
+  async exportLibrary() {
     /**
 
      * if 方法
@@ -842,7 +830,7 @@ export class AssetManager {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -853,11 +841,7 @@ export class AssetManager {
       this.emit('libraryExported', { dataSize: jsonData.length })
 
       return jsonData
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
       console.error('导出素材库失败:', error)
       throw new Error('导出素材库失败')
     }
@@ -869,10 +853,10 @@ export class AssetManager {
    * @returns {Promise<number>} 导入的素材数量
    */
   async /**
-  * importLibrary 方法
-  * VidSlide AI 功能实现
-  */
- importLibrary(jsonData) {
+   * importLibrary 方法
+   * VidSlide AI 功能实现
+   */
+  async importLibrary(jsonData) {
     /**
 
      * if 方法
@@ -881,7 +865,7 @@ export class AssetManager {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       await this.initialize()
     }
 
@@ -892,11 +876,7 @@ export class AssetManager {
       this.emit('libraryImported', { importedCount })
 
       return importedCount
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
       console.error('导入素材库失败:', error)
       throw new Error('导入素材库失败，请检查数据格式')
     }
@@ -908,10 +888,10 @@ export class AssetManager {
    * @returns {Promise<Object>} 版权检查结果
    */
   async /**
-  * checkAssetCopyright 方法
-  * VidSlide AI 功能实现
-  */
- checkAssetCopyright(asset) {
+   * checkAssetCopyright 方法
+   * VidSlide AI 功能实现
+   */
+  async checkAssetCopyright(asset) {
     return await this.copyrightChecker.checkCopyright(asset)
   }
 
@@ -922,10 +902,10 @@ export class AssetManager {
    * @returns {Promise<Object>} 验证结果
    */
   async /**
-  * validateAssetUsage 方法
-  * VidSlide AI 功能实现
-  */
- validateAssetUsage(asset, intendedUse = 'commercial') {
+   * validateAssetUsage 方法
+   * VidSlide AI 功能实现
+   */
+  async validateAssetUsage(asset, intendedUse = 'commercial') {
     return await this.copyrightChecker.validateAssetUsage(asset, intendedUse)
   }
 
@@ -1026,7 +1006,7 @@ export class AssetManager {
 
      */
 
-    if(listeners) {
+    if (listeners) {
       const index = listeners.indexOf(callback)
       /**
 
@@ -1036,7 +1016,7 @@ export class AssetManager {
 
        */
 
-      if(index > -1) {
+      if (index > -1) {
         listeners.splice(index, 1)
       }
     }
@@ -1068,15 +1048,15 @@ export class AssetManager {
 
      */
 
-    if(listeners) {
+    if (listeners) {
       listeners.forEach(callback => {
         try {
           callback(data)
-        } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+        } catch (error) {
+          /**
+           * catch 方法
+           * VidSlide AI 功能实现
+           */
           console.error(`事件 ${event} 的回调函数执行失败:`, error)
         }
       })
@@ -1104,10 +1084,10 @@ export class AssetManager {
    * 销毁资产管理器
    */
   async /**
-  * destroy 方法
-  * VidSlide AI 功能实现
-  */
- destroy() {
+   * destroy 方法
+   * VidSlide AI 功能实现
+   */
+  destroy() {
     try {
       // 关闭数据库连接
       this.storage.close()
@@ -1120,11 +1100,11 @@ export class AssetManager {
 
       this.isInitialized = false
       console.log('资产管理器已销毁')
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('销毁资产管理器失败:', error)
     }
   }
@@ -1172,7 +1152,7 @@ export async function getAssetManager() {
 
    */
 
-  if(!assetManagerInstance) {
+  if (!assetManagerInstance) {
     assetManagerInstance = new AssetManager()
   }
   return assetManagerInstance

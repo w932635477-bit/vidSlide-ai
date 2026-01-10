@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - 4K视频导出技术验证</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .test-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-running {
+            background: #3498db;
+            color: white;
+        }
+
+        .status-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .test-results {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ecf0f1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #3498db);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .summary h2 {
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .summary-item h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .recommendations {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .recommendations h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .rec-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rec-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .rec-item:last-child {
+            border-bottom: none;
+        }
+
+        .rec-priority {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .rec-high {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .rec-medium {
+            background: #f39c12;
+            color: white;
+        }
+
+        .rec-low {
+            background: #27ae60;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 4K视频导出技术验证</h1>
+            <p>测试VidSlide AI对4K分辨率视频导出的技术支持情况</p>
+        </div>
+
+        <div id="quick-check" class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">快速兼容性检查</h2>
+                <span id="quick-status" class="status-badge status-pending">待检查</span>
+            </div>
+            <div class="test-controls">
+                <button id="quick-check-btn" class="btn btn-primary">运行快速检查</button>
+            </div>
+            <div id="quick-results" class="test-results" style="display: none;"></div>
+        </div>
+
+        <div id="full-validation" class="test-section">
+            <div class="test-header">
+                <h2 class="test-title">完整技术验证</h2>
+                <span id="full-status" class="status-badge status-pending">待验证</span>
+            </div>
+            <div class="test-controls">
+                <button id="full-validation-btn" class="btn btn-primary">开始完整验证</button>
+                <button id="stop-validation-btn" class="btn btn-secondary" style="display: none;">停止验证</button>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <div id="full-results" class="test-results" style="display: none;"></div>
+        </div>
+
+        <div id="summary" class="summary" style="display: none;">
+            <h2>📊 验证结果汇总</h2>
+            <div id="summary-content"></div>
+        </div>
+
+        <div id="recommendations" class="recommendations" style="display: none;">
+            <h3>💡 实施建议</h3>
+            <ul id="rec-list" class="rec-list"></ul>
+        </div>
+    </div>
+
+    <script type="module">
+        import { Video4KValidator, validateVideo4KSupport, quick4KCheck } from './src/utils/video4K-validation.js';
+
+        let currentValidator = null;
+        let isValidating = false;
+
+        // DOM元素引用
+        const quickCheckBtn = document.getElementById('quick-check-btn');
+        const quickStatus = document.getElementById('quick-status');
+        const quickResults = document.getElementById('quick-results');
+
+        const fullValidationBtn = document.getElementById('full-validation-btn');
+        const stopValidationBtn = document.getElementById('stop-validation-btn');
+        const fullStatus = document.getElementById('full-status');
+        const progressFill = document.getElementById('progress-fill');
+        const fullResults = document.getElementById('full-results');
+
+        const summary = document.getElementById('summary');
+        const summaryContent = document.getElementById('summary-content');
+        const recommendations = document.getElementById('recommendations');
+        const recList = document.getElementById('rec-list');
+
+        // 快速检查
+        quickCheckBtn.addEventListener('click', async () => {
+            quickStatus.textContent = '检查中...';
+            quickStatus.className = 'status-badge status-running';
+            quickCheckBtn.disabled = true;
+
+            try {
+                const results = quick4KCheck();
+
+                let output = '🚀 快速兼容性检查结果:\n\n';
+
+                Object.entries(results).forEach(([key, value]) => {
+                    const status = value ? '✅' : '❌';
+                    const label = {
+                        webCodecs: 'WebCodecs API',
+                        mediaRecorder: 'MediaRecorder API',
+                        canvas4K: '4K画布支持',
+                        memory: '设备内存充足'
+                    }[key] || key;
+
+                    output += `${status} ${label}: ${value}\n`;
+                });
+
+                // 综合评分
+                const score = Object.values(results).filter(Boolean).length;
+                const total = Object.keys(results).length;
+                const percentage = Math.round((score / total) * 100);
+
+                output += `\n📊 兼容性评分: ${score}/${total} (${percentage}%)\n`;
+                output += percentage >= 75 ? '🎉 优秀兼容性' :
+                         percentage >= 50 ? '👍 良好兼容性' :
+                         percentage >= 25 ? '⚠️ 一般兼容性' : '❌ 兼容性不足';
+
+                quickResults.textContent = output;
+                quickResults.style.display = 'block';
+
+                quickStatus.textContent = percentage >= 50 ? '通过' : '不足';
+                quickStatus.className = `status-badge ${percentage >= 50 ? 'status-success' : 'status-error'}`;
+
+            } catch (error) {
+                console.error('快速检查失败:', error);
+                quickResults.textContent = `❌ 快速检查失败: ${error.message}`;
+                quickResults.style.display = 'block';
+                quickStatus.textContent = '失败';
+                quickStatus.className = 'status-badge status-error';
+            } finally {
+                quickCheckBtn.disabled = false;
+            }
+        });
+
+        // 完整验证
+        fullValidationBtn.addEventListener('click', async () => {
+            if (isValidating) return;
+
+            isValidating = true;
+            currentValidator = new Video4KValidator();
+
+            fullStatus.textContent = '验证中...';
+            fullStatus.className = 'status-badge status-running';
+            fullValidationBtn.style.display = 'none';
+            stopValidationBtn.style.display = 'inline-block';
+            progressFill.style.width = '0%';
+            fullResults.style.display = 'block';
+            fullResults.textContent = '🎬 开始4K视频导出技术验证...\n\n';
+
+            try {
+                // 重定向console.log到结果显示
+                const originalLog = console.log;
+                const originalWarn = console.warn;
+                const originalError = console.error;
+
+                console.log = (...args) => {
+                    fullResults.textContent += args.join(' ') + '\n';
+                    fullResults.scrollTop = fullResults.scrollHeight;
+                    originalLog.apply(console, args);
+                };
+
+                console.warn = (...args) => {
+                    fullResults.textContent += '⚠️ ' + args.join(' ') + '\n';
+                    fullResults.scrollTop = fullResults.scrollHeight;
+                    originalWarn.apply(console, args);
+                };
+
+                console.error = (...args) => {
+                    fullResults.textContent += '❌ ' + args.join(' ') + '\n';
+                    fullResults.scrollTop = fullResults.scrollHeight;
+                    originalError.apply(console, args);
+                };
+
+                const results = await currentValidator.validate4KSupport();
+
+                // 恢复console
+                console.log = originalLog;
+                console.warn = originalWarn;
+                console.error = originalError;
+
+                progressFill.style.width = '100%';
+                fullStatus.textContent = '完成';
+                fullStatus.className = 'status-badge status-success';
+
+                // 显示汇总报告
+                displaySummary(results);
+                displayRecommendations(results);
+
+            } catch (error) {
+                console.error('完整验证失败:', error);
+                fullResults.textContent += `\n❌ 验证失败: ${error.message}`;
+                fullStatus.textContent = '失败';
+                fullStatus.className = 'status-badge status-error';
+            } finally {
+                isValidating = false;
+                fullValidationBtn.style.display = 'inline-block';
+                stopValidationBtn.style.display = 'none';
+            }
+        });
+
+        // 停止验证
+        stopValidationBtn.addEventListener('click', () => {
+            if (currentValidator && isValidating) {
+                // 这里可以添加停止逻辑
+                isValidating = false;
+                fullStatus.textContent = '已停止';
+                fullStatus.className = 'status-badge status-error';
+                fullValidationBtn.style.display = 'inline-block';
+                stopValidationBtn.style.display = 'none';
+            }
+        });
+
+        // 显示汇总报告
+        function displaySummary(results) {
+            summary.style.display = 'block';
+
+            const report = results.report;
+            const support = report.overallSupport;
+
+            let html = `
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3>总体支持情况</h3>
+                        <div class="metric">
+                            <span>兼容性评分:</span>
+                            <span class="metric-value">${support.percentage}%</span>
+                        </div>
+                        <div class="metric">
+                            <span>支持等级:</span>
+                            <span class="metric-value">${support.level.toUpperCase()}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <h3>推荐方案</h3>
+                        <div class="metric">
+                            <span>主要方案:</span>
+                            <span class="metric-value">${report.recommendedApproach.primary}</span>
+                        </div>
+                        <div class="metric">
+                            <span>备选方案:</span>
+                            <span class="metric-value">${report.recommendedApproach.secondary}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <h3>性能估算</h3>
+                        <div class="metric">
+                            <span>编码速度:</span>
+                            <span class="metric-value">${report.performanceEstimates.encodingSpeed}</span>
+                        </div>
+                        <div class="metric">
+                            <span>内存使用:</span>
+                            <span class="metric-value">${report.performanceEstimates.memoryUsage}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <h3>技术限制</h3>
+                        <div style="font-size: 0.9em; color: #666;">
+                            ${report.limitations.map(lim => `• ${lim}`).join('<br>')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            summaryContent.innerHTML = html;
+        }
+
+        // 显示实施建议
+        function displayRecommendations(results) {
+            recommendations.style.display = 'block';
+
+            const nextSteps = results.report.nextSteps;
+
+            recList.innerHTML = nextSteps.map((step, index) => {
+                const priority = index < 2 ? 'rec-high' : index < 4 ? 'rec-medium' : 'rec-low';
+                const priorityText = index < 2 ? '高' : index < 4 ? '中' : '低';
+
+                return `
+                    <li class="rec-item">
+                        <span class="rec-priority ${priority}">${priorityText}</span>
+                        ${step}
+                    </li>
+                `;
+            }).join('');
+        }
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('4K验证页面已加载完成');
+        });
+    </script>
+</body>
+</html>

@@ -21,9 +21,17 @@ module.exports = {
     // JavaScript 规则
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }
+    ],
     'prefer-const': 'error',
     'no-var': 'error',
+    'no-case-declarations': 'off', // 允许在case块中使用词法声明
 
     // 代码风格
     'comma-dangle': ['error', 'never'],
@@ -37,6 +45,16 @@ module.exports = {
     defineProps: 'readonly',
     defineEmits: 'readonly',
     defineExpose: 'readonly',
-    withDefaults: 'readonly'
+    withDefaults: 'readonly',
+    // TensorFlow.js
+    tf: 'readonly',
+    // PDF and PPTX libraries
+    jsPDF: 'readonly',
+    PptxGenJS: 'readonly',
+    // Web APIs
+    VideoEncoder: 'readonly',
+    VideoDecoder: 'readonly',
+    VideoFrame: 'readonly',
+    webkitAudioContext: 'readonly'
   }
 }

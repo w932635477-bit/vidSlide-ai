@@ -4,9 +4,8 @@
 <!-- TitleTemplate 组件模板 -->
 <template>
   <div class="title-template">
-    <img src="/assets/templates/title-template.png"
-alt="标题文本模板" class="template-image"
-/>
+    <img
+src="/assets/templates/title-template.png" alt="标题文本模板" class="template-image" />
   </div>
 </template>
 

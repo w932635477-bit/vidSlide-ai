@@ -30,13 +30,8 @@
         <!-- 右侧操作按钮 -->
         <div class="navbar-actions">
           <!-- 多语言切换按钮 -->
-          <div
-class="lang-switcher-wrapper" :class="{ 'show-menu': showLangMenu }"
->
-            <button
-class="btn-lang-switcher" @click="toggleLangMenu"
-:title="currentLang.name"
->
+          <div class="lang-switcher-wrapper" :class="{ 'show-menu': showLangMenu }">
+            <button class="btn-lang-switcher" @click="toggleLangMenu" :title="currentLang.name">
               <span class="lang-flag">{{ currentLang.flag }}</span>
               <span class="lang-code">{{ currentLang.code }}</span>
               <span class="lang-arrow">▼</span>
@@ -52,10 +47,7 @@ class="btn-lang-switcher" @click="toggleLangMenu"
 
     <!-- 语言下拉菜单 - 使用Teleport渲染到body -->
     <Teleport to="body">
-      <div
-v-if="showLangMenu" class="lang-menu"
-:style="langMenuStyle" @click.stop
->
+      <div v-if="showLangMenu" class="lang-menu" :style="langMenuStyle" @click.stop>
         <button
           v-for="lang in languages"
           :key="lang.code"
@@ -81,9 +73,7 @@ v-if="showLangMenu" class="lang-menu"
         </div>
 
         <!-- 主标题 -->
-        <h1 class="hero-title">
-从视频到 完美演示文稿
-</h1>
+        <h1 class="hero-title">从视频到 完美演示文稿</h1>
 
         <!-- 副标题 -->
         <p class="hero-subtitle">
@@ -92,11 +82,9 @@ v-if="showLangMenu" class="lang-menu"
 
         <!-- 按钮组 -->
         <div class="hero-buttons">
-          <button class="btn-primary-large"
-onclick="window.location.hash='#/workspace'"
->
-免费开始 →
-</button>
+          <button class="btn-primary-large" onclick="window.location.hash = '#/workspace'">
+            免费开始 →
+          </button>
           <button class="btn-secondary-large" @click="watchDemo">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
               <path d="M8 5v14l11-7z" />
@@ -178,8 +166,7 @@ onclick="window.location.hash='#/workspace'"
                   </div>
                 </div>
                 <div class="upload-progress">
-                  <div
-class="progress-bar" :style="{ width: uploadProgress + '%' }" />
+                  <div class="progress-bar" :style="{ width: uploadProgress + '%' }" />
                 </div>
               </div>
 
@@ -189,8 +176,7 @@ class="progress-bar" :style="{ width: uploadProgress + '%' }" />
                   <div class="analyze-icon">🤖</div>
                   <div class="analyze-text">AI Analyzing Video...</div>
                   <div class="analyze-progress">
-                    <div
-class="progress-bar" :style="{ width: analyzeProgress + '%' }" />
+                    <div class="progress-bar" :style="{ width: analyzeProgress + '%' }" />
                   </div>
                   <!-- 粒子效果 -->
                   <div class="particles">
@@ -225,8 +211,7 @@ class="progress-bar" :style="{ width: analyzeProgress + '%' }" />
                     <div class="progress-text">
                       Generating Slides: {{ currentSlideIndex + 1 }}/{{ pptSlides.length }}
                     </div>
-                    <div
-class="progress-bar" :style="{ width: generateProgress + '%' }" />
+                    <div class="progress-bar" :style="{ width: generateProgress + '%' }" />
                   </div>
                 </div>
               </div>
@@ -307,8 +292,7 @@ class="progress-bar" :style="{ width: generateProgress + '%' }" />
                   </div>
                   <div class="compose-progress">
                     <div class="progress-text">Composing Video with PPT Effects...</div>
-                    <div
-class="progress-bar" :style="{ width: composeProgress + '%' }" />
+                    <div class="progress-bar" :style="{ width: composeProgress + '%' }" />
                   </div>
                 </div>
               </div>
@@ -665,31 +649,31 @@ export default {
       let opacity = 1
 
       switch (effect) {
-        case 'fade':
-          opacity =
+      case 'fade':
+        opacity =
             slideProgress < 0.2
               ? slideProgress / 0.2
               : slideProgress > 0.8
                 ? (1 - slideProgress) / 0.2
                 : 1
-          break
-        case 'slide':
-          const slideX = slideProgress < 0.3 ? (0.3 - slideProgress) * 100 : 0
-          transform = `translateX(${slideX}px)`
-          break
-        case 'zoom':
-          const scale =
+        break
+      case 'slide':
+        const slideX = slideProgress < 0.3 ? (0.3 - slideProgress) * 100 : 0
+        transform = `translateX(${slideX}px)`
+        break
+      case 'zoom':
+        const scale =
             slideProgress < 0.3
               ? 0.5 + (slideProgress / 0.3) * 0.5
               : slideProgress > 0.7
                 ? 1 - ((slideProgress - 0.7) / 0.3) * 0.2
                 : 1
-          transform = `scale(${scale})`
-          break
-        case 'rotate':
-          const rotate = slideProgress < 0.3 ? (1 - slideProgress / 0.3) * 10 : 0
-          transform = `rotate(${rotate}deg)`
-          break
+        transform = `scale(${scale})`
+        break
+      case 'rotate':
+        const rotate = slideProgress < 0.3 ? (1 - slideProgress / 0.3) * 10 : 0
+        transform = `rotate(${rotate}deg)`
+        break
       }
 
       return {

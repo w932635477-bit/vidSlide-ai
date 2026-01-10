@@ -539,28 +539,28 @@ export class TemplateParser {
      */
 
     switch (template.type) {
-      case TEMPLATE_TYPES.DIALOG_POPUP:
-        data.content = this.parseDialogContent(content)
-        break
+    case TEMPLATE_TYPES.DIALOG_POPUP:
+      data.content = this.parseDialogContent(content)
+      break
 
-      case TEMPLATE_TYPES.TIMELINE_DISPLAY:
-        data.content = this.parseTimelineContent(content)
-        break
+    case TEMPLATE_TYPES.TIMELINE_DISPLAY:
+      data.content = this.parseTimelineContent(content)
+      break
 
-      case TEMPLATE_TYPES.SPLIT_SCREEN:
-        data.content = this.parseSplitScreenContent(content)
-        break
+    case TEMPLATE_TYPES.SPLIT_SCREEN:
+      data.content = this.parseSplitScreenContent(content)
+      break
 
-      case TEMPLATE_TYPES.CHART_ANALYSIS:
-        data.content = this.parseChartContent(content)
-        break
+    case TEMPLATE_TYPES.CHART_ANALYSIS:
+      data.content = this.parseChartContent(content)
+      break
 
-      case TEMPLATE_TYPES.EMPHASIS_FOCUS:
-        data.content = this.parseEmphasisContent(content)
-        break
+    case TEMPLATE_TYPES.EMPHASIS_FOCUS:
+      data.content = this.parseEmphasisContent(content)
+      break
 
-      default:
-        data.content = { text: content }
+    default:
+      data.content = { text: content }
     }
 
     return data

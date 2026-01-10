@@ -4,9 +4,8 @@
 <!-- InfoCardTemplate 组件模板 -->
 <template>
   <div class="info-card-template">
-    <img src="/assets/templates/info-card-template.png"
-alt="信息卡片模板" class="template-image"
-/>
+    <img
+src="/assets/templates/info-card-template.png" alt="信息卡片模板" class="template-image" />
   </div>
 </template>
 

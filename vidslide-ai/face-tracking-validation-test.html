@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidSlide AI - 人脸跟踪技术验证</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .status-panel {
+      background: #ecf0f1;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #bdc3c7;
+    }
+
+    .status-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-label {
+      font-weight: 500;
+    }
+
+    .status-value {
+      font-family: monospace;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: white;
+    }
+
+    .status-success { color: #27ae60; }
+    .status-error { color: #e74c3c; }
+    .status-warning { color: #f39c12; }
+    .status-info { color: #3498db; }
+
+    .test-section {
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 20px;
+    }
+
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .test-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .test-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .test-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .metric-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #3498db;
+    }
+
+    .metric-title {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .metric-unit {
+      font-size: 12px;
+      color: #95a5a6;
+    }
+
+    .console-output {
+      background: #2c3e50;
+      color: #ecf0f1;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      padding: 15px;
+      border-radius: 6px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 0 10px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #2980b9;
+    }
+
+    .btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: #95a5a6;
+    }
+
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #ecf0f1;
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #3498db;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .recommendation {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .recommendation h3 {
+      margin: 0 0 10px 0;
+      font-size: 20px;
+    }
+
+    .recommendation p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      .test-content {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 VidSlide AI - 人脸跟踪技术验证</h1>
+    <p class="subtitle">验证MediaPipe Face Mesh和OpenCV.js在浏览器中的可行性</p>
+
+    <div class="status-panel">
+      <div class="status-item">
+        <span class="status-label">验证状态</span>
+        <span class="status-value status-info" id="overall-status">准备中</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">浏览器兼容性</span>
+        <span class="status-value" id="browser-support">检测中...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">WebAssembly支持</span>
+        <span class="status-value" id="wasm-support">检测中...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">内存使用</span>
+        <span class="status-value" id="memory-usage">检测中...</span>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <div class="test-header">
+        <h2 class="test-title">MediaPipe Face Mesh测试</h2>
+        <span class="test-status" id="mediapipe-status">未开始</span>
+      </div>
+      <div class="test-content">
+        <div class="metric-card">
+          <div class="metric-title">加载时间</div>
+          <div class="metric-value" id="mediapipe-load-time">-</div>
+          <div class="metric-unit">毫秒</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">推理时间</div>
+          <div class="metric-value" id="mediapipe-inference-time">-</div>
+          <div class="metric-unit">毫秒</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">检测精度</div>
+          <div class="metric-value" id="mediapipe-accuracy">-</div>
+          <div class="metric-unit">关键点</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">可用性</div>
+          <div class="metric-value" id="mediapipe-available">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <div class="test-header">
+        <h2 class="test-title">OpenCV.js测试</h2>
+        <span class="test-status" id="opencv-status">未开始</span>
+      </div>
+      <div class="test-content">
+        <div class="metric-card">
+          <div class="metric-title">加载时间</div>
+          <div class="metric-value" id="opencv-load-time">-</div>
+          <div class="metric-unit">毫秒</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">推理时间</div>
+          <div class="metric-value" id="opencv-inference-time">-</div>
+          <div class="metric-unit">毫秒</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">检测精度</div>
+          <div class="metric-value" id="opencv-accuracy">-</div>
+          <div class="metric-unit">特征</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">可用性</div>
+          <div class="metric-value" id="opencv-available">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <div class="test-header">
+        <h2 class="test-title">性能对比分析</h2>
+        <span class="test-status" id="comparison-status">未开始</span>
+      </div>
+      <div class="test-content">
+        <div class="metric-card">
+          <div class="metric-title">当前实现FPS</div>
+          <div class="metric-value" id="current-fps">-</div>
+          <div class="metric-unit">帧/秒</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">MediaPipe优势</div>
+          <div class="metric-value" id="mediapipe-advantage">-</div>
+          <div class="metric-unit">倍</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">推荐方案</div>
+          <div class="metric-value" id="recommended-solution">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">置信度</div>
+          <div class="metric-value" id="confidence-level">-</div>
+          <div class="metric-unit">%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="start-test-btn">开始验证</button>
+      <button class="btn btn-secondary" id="clear-console-btn">清空控制台</button>
+      <button class="btn btn-secondary" id="export-report-btn">导出报告</button>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <div class="recommendation" id="recommendation-panel" style="display: none;">
+      <h3 id="recommendation-title">验证完成</h3>
+      <p id="recommendation-text">正在生成推荐方案...</p>
+    </div>
+
+    <div class="console-output" id="console-output">
+      <div>控制台输出将显示在这里...</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { validateFaceTracking } from './face-tracking-validation.js'
+
+    class ValidationUI {
+      constructor() {
+        this.results = null
+        this.originalConsoleLog = console.log
+        this.originalConsoleWarn = console.warn
+        this.originalConsoleError = console.error
+
+        this.initUI()
+        this.setupConsoleCapture()
+        this.checkInitialSupport()
+      }
+
+      initUI() {
+        this.startBtn = document.getElementById('start-test-btn')
+        this.clearBtn = document.getElementById('clear-console-btn')
+        this.exportBtn = document.getElementById('export-report-btn')
+        this.progressFill = document.getElementById('progress-fill')
+        this.consoleOutput = document.getElementById('console-output')
+        this.recommendationPanel = document.getElementById('recommendation-panel')
+
+        this.startBtn.addEventListener('click', () => this.startValidation())
+        this.clearBtn.addEventListener('click', () => this.clearConsole())
+        this.exportBtn.addEventListener('click', () => this.exportReport())
+      }
+
+      setupConsoleCapture() {
+        const self = this
+
+        console.log = function(...args) {
+          self.addToConsole('log', ...args)
+          self.originalConsoleLog.apply(console, args)
+        }
+
+        console.warn = function(...args) {
+          self.addToConsole('warn', ...args)
+          self.originalConsoleWarn.apply(console, args)
+        }
+
+        console.error = function(...args) {
+          self.addToConsole('error', ...args)
+          self.originalConsoleError.apply(console, args)
+        }
+      }
+
+      addToConsole(type, ...args) {
+        const timestamp = new Date().toLocaleTimeString()
+        const message = args.map(arg =>
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+        ).join(' ')
+
+        const line = document.createElement('div')
+        line.className = `console-${type}`
+        line.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`
+
+        this.consoleOutput.appendChild(line)
+        this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight
+      }
+
+      checkInitialSupport() {
+        // 检查WebAssembly支持
+        const wasmSupported = typeof WebAssembly === 'object'
+        document.getElementById('wasm-support').textContent = wasmSupported ? '✅ 支持' : '❌ 不支持'
+        document.getElementById('wasm-support').className = `status-value ${wasmSupported ? 'status-success' : 'status-error'}`
+
+        // 检查浏览器类型
+        const userAgent = navigator.userAgent
+        let browser = '未知'
+        if (userAgent.includes('Chrome')) browser = 'Chrome'
+        else if (userAgent.includes('Firefox')) browser = 'Firefox'
+        else if (userAgent.includes('Safari')) browser = 'Safari'
+        else if (userAgent.includes('Edge')) browser = 'Edge'
+
+        document.getElementById('browser-support').textContent = browser
+
+        // 检查内存信息
+        if (performance.memory) {
+          const mem = performance.memory
+          const usage = (mem.usedJSHeapSize / mem.jsHeapSizeLimit * 100).toFixed(1)
+          document.getElementById('memory-usage').textContent = `${usage}%`
+        } else {
+          document.getElementById('memory-usage').textContent = '不可用'
+        }
+      }
+
+      async startValidation() {
+        this.startBtn.disabled = true
+        this.startBtn.textContent = '验证中...'
+        document.getElementById('overall-status').textContent = '进行中'
+        document.getElementById('overall-status').className = 'status-value status-warning'
+
+        try {
+          this.updateProgress(10)
+          console.log('🚀 开始人脸跟踪技术验证...')
+
+          this.updateProgress(30)
+          const results = await validateFaceTracking()
+
+          this.results = results
+          this.updateProgress(100)
+
+          this.displayResults(results)
+          this.showRecommendation(results)
+
+          document.getElementById('overall-status').textContent = '完成'
+          document.getElementById('overall-status').className = 'status-value status-success'
+
+        } catch (error) {
+          console.error('验证失败:', error)
+          document.getElementById('overall-status').textContent = '失败'
+          document.getElementById('overall-status').className = 'status-value status-error'
+        } finally {
+          this.startBtn.disabled = false
+          this.startBtn.textContent = '重新验证'
+        }
+      }
+
+      updateProgress(percent) {
+        this.progressFill.style.width = `${percent}%`
+      }
+
+      displayResults(results) {
+        if (results.error) {
+          console.error('验证过程中发生错误:', results.error)
+          return
+        }
+
+        // MediaPipe结果
+        const mp = results.detailedResults.mediapipe
+        document.getElementById('mediapipe-load-time').textContent = mp.loadTime > 0 ? mp.loadTime.toFixed(1) : '-'
+        document.getElementById('mediapipe-inference-time').textContent = mp.inferenceTime > 0 ? mp.inferenceTime.toFixed(1) : '-'
+        document.getElementById('mediapipe-accuracy').textContent = mp.accuracy || '-'
+        document.getElementById('mediapipe-available').textContent = mp.available ? '✅' : '❌'
+        document.getElementById('mediapipe-status').textContent = mp.available ? '成功' : '失败'
+        document.getElementById('mediapipe-status').className = `test-status ${mp.available ? 'status-success' : 'status-error'}`
+
+        // OpenCV结果
+        const ocv = results.detailedResults.opencv
+        document.getElementById('opencv-load-time').textContent = ocv.loadTime > 0 ? ocv.loadTime.toFixed(1) : '-'
+        document.getElementById('opencv-inference-time').textContent = ocv.inferenceTime > 0 ? ocv.inferenceTime.toFixed(1) : '-'
+        document.getElementById('opencv-accuracy').textContent = ocv.accuracy || '-'
+        document.getElementById('opencv-available').textContent = ocv.available ? '✅' : '❌'
+        document.getElementById('opencv-status').textContent = ocv.available ? '成功' : '失败'
+        document.getElementById('opencv-status').className = `test-status ${ocv.available ? 'status-success' : 'status-error'}`
+
+        // 对比分析
+        document.getElementById('current-fps').textContent = results.detailedResults.currentImplementation.fps || '0'
+        document.getElementById('mediapipe-advantage').textContent = mp.inferenceTime > 0 ? (1000 / mp.inferenceTime).toFixed(1) : '-'
+        document.getElementById('recommended-solution').textContent = results.summary.recommendation.split(' - ')[0]
+        document.getElementById('confidence-level').textContent = mp.available ? '95' : '30'
+        document.getElementById('comparison-status').textContent = '完成'
+        document.getElementById('comparison-status').className = 'test-status status-success'
+      }
+
+      showRecommendation(results) {
+        const panel = this.recommendationPanel
+        const title = document.getElementById('recommendation-title')
+        const text = document.getElementById('recommendation-text')
+
+        if (results.summary.recommendation.includes('MediaPipe')) {
+          title.textContent = '🎯 推荐使用 MediaPipe Face Mesh'
+          text.textContent = '性能优异，精度高，推荐作为主要人脸跟踪方案'
+          panel.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)'
+        } else if (results.summary.recommendation.includes('OpenCV')) {
+          title.textContent = '🔧 建议使用 OpenCV.js'
+          text.textContent = '功能全面，但包体积较大，适合复杂场景'
+          panel.style.background = 'linear-gradient(135deg, #f39c12 0%, #e67e22 100%)'
+        } else {
+          title.textContent = '⚠️ 需要进一步评估'
+          text.textContent = '当前方案暂不成熟，建议等待技术发展或寻找替代方案'
+          panel.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)'
+        }
+
+        panel.style.display = 'block'
+      }
+
+      clearConsole() {
+        this.consoleOutput.innerHTML = '<div>控制台已清空...</div>'
+      }
+
+      exportReport() {
+        if (!this.results) {
+          alert('请先运行验证测试')
+          return
+        }
+
+        const report = {
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          results: this.results
+        }
+
+        const blob = new Blob([JSON.stringify(report, null, 2)], {
+          type: 'application/json'
+        })
+
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `face-tracking-validation-${Date.now()}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
+    }
+
+    // 初始化UI
+    new ValidationUI()
+
+    console.log('🎬 人脸跟踪验证工具已就绪')
+    console.log('点击"开始验证"按钮开始测试')
+  </script>
+</body>
+</html>

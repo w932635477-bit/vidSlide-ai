@@ -6,23 +6,13 @@
   集成P0+P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统
 -->
 <template>
-  <div
-class="video-editor-view" role="application"
-aria-label="VidSlide AI 视频编辑器"
->
+  <div class="video-editor-view" role="application" aria-label="VidSlide AI 视频编辑器">
     <!-- 视频上传区域 -->
-    <section
-v-if="!videoSrc" class="upload-section"
-role="region" aria-labelledby="upload-heading"
->
+    <section v-if="!videoSrc" class="upload-section" role="region" aria-labelledby="upload-heading">
       <div class="upload-container">
-        <h3 id="upload-heading">
-📤 上传视频
-</h3>
+        <h3 id="upload-heading">📤 上传视频</h3>
         <p>选择您要转换为PPT的视频文件</p>
-        <label
-for="video-file-input" class="sr-only"
->选择视频文件</label>
+        <label for="video-file-input" class="sr-only">选择视频文件</label>
         <input
           id="video-file-input"
           type="file"
@@ -30,43 +20,25 @@ for="video-file-input" class="sr-only"
           class="file-input"
           aria-describedby="upload-description"
           @change="handleFileSelect"
-        >
-        <div
-id="upload-description" class="sr-only"
->
+        />
+        <div id="upload-description" class="sr-only">
           支持MP4、AVI、MOV等常见视频格式，文件大小不超过500MB
         </div>
       </div>
     </section>
 
     <!-- 视频编辑区域 -->
-    <main
-v-else class="editor-section"
-role="main" aria-labelledby="editor-heading"
->
+    <main v-else class="editor-section" role="main" aria-labelledby="editor-heading">
       <div class="editor-layout">
         <!-- 左侧工具栏 -->
-        <aside
-class="left-panel" role="complementary"
-aria-label="编辑工具面板"
->
-          <section
-class="panel-section" role="region"
-aria-labelledby="template-section-heading"
->
-            <h4 id="template-section-heading">
-🎨 模板选择
-</h4>
+        <aside class="left-panel" role="complementary" aria-label="编辑工具面板">
+          <section class="panel-section" role="region" aria-labelledby="template-section-heading">
+            <h4 id="template-section-heading">🎨 模板选择</h4>
             <TemplateSelector @template-selected="handleTemplateSelected" />
           </section>
 
-          <section
-class="panel-section" role="region"
-aria-labelledby="adjustment-section-heading"
->
-            <h4 id="adjustment-section-heading">
-⚙️ 参数调整
-</h4>
+          <section class="panel-section" role="region" aria-labelledby="adjustment-section-heading">
+            <h4 id="adjustment-section-heading">⚙️ 参数调整</h4>
             <UserAdjustmentPanel
               v-if="selectedTemplate"
               :template="selectedTemplate"
@@ -77,15 +49,9 @@ aria-labelledby="adjustment-section-heading"
         </aside>
 
         <!-- 主编辑区 -->
-        <section
-class="main-editor" role="region"
-aria-labelledby="editor-heading"
->
-          <h2 id="editor-heading"
-class="sr-only"
->
-视频编辑主区域
-</h2>
+        <section class="main-editor" role="region" aria-labelledby="editor-heading">
+          <h2
+id="editor-heading" class="sr-only">视频编辑主区域</h2>
 
           <div class="canvas-container">
             <canvas
@@ -100,10 +66,7 @@ class="sr-only"
             />
 
             <!-- 画中画控制 -->
-            <div
-v-if="pipEnabled" class="pip-controls"
-role="region" aria-label="画中画效果控制"
->
+            <div v-if="pipEnabled" class="pip-controls" role="region" aria-label="画中画效果控制">
               <PictureInPicture
                 :video-element="videoElement"
                 :pip-element="pipElement"
@@ -116,15 +79,9 @@ role="region" aria-label="画中画效果控制"
           </div>
 
           <!-- 动画控制 -->
-          <section
-class="animation-controls" role="region"
-aria-labelledby="animation-heading"
->
-            <h3 id="animation-heading"
-class="sr-only"
->
-动画效果控制
-</h3>
+          <section class="animation-controls" role="region" aria-labelledby="animation-heading">
+            <h3
+id="animation-heading" class="sr-only">动画效果控制</h3>
             <AnimationSystem
               :video-element="videoElement"
               :text-elements="textElements"
@@ -137,17 +94,9 @@ class="sr-only"
       </div>
 
       <!-- 右侧素材面板 -->
-      <aside
-class="right-panel" role="complementary"
-aria-label="素材和监控面板"
->
-        <section
-class="panel-section" role="region"
-aria-labelledby="asset-section-heading"
->
-          <h4 id="asset-section-heading">
-🖼️ 素材浏览器
-</h4>
+      <aside class="right-panel" role="complementary" aria-label="素材和监控面板">
+        <section class="panel-section" role="region" aria-labelledby="asset-section-heading">
+          <h4 id="asset-section-heading">🖼️ 素材浏览器</h4>
           <AssetBrowser
             aria-label="素材资源浏览器和选择器"
             @asset-selected="handleAssetSelected"
@@ -155,13 +104,8 @@ aria-labelledby="asset-section-heading"
           />
         </section>
 
-        <section
-class="panel-section" role="region"
-aria-labelledby="monitor-section-heading"
->
-          <h4 id="monitor-section-heading">
-📊 性能监控
-</h4>
+        <section class="panel-section" role="region" aria-labelledby="monitor-section-heading">
+          <h4 id="monitor-section-heading">📊 性能监控</h4>
           <PerformanceMonitor
             :auto-start="true"
             :update-interval="2000"
@@ -175,35 +119,32 @@ aria-labelledby="monitor-section-heading"
   </div>
 
   <!-- 底部控制栏 -->
-  <footer
-class="bottom-toolbar" role="toolbar"
-aria-label="编辑器操作控制栏"
->
+  <footer class="bottom-toolbar" role="toolbar" aria-label="编辑器操作控制栏">
     <button
       class="export-btn"
-      aria-label="导出编辑结果为PPT演示文稿"
+      aria-label="导出演示结果"
       :aria-describedby="exportStatus ? 'export-status' : undefined"
-      @click="exportPPT"
+      @click="openExportDialog"
     >
-      导出PPT
+      导出
     </button>
-    <div
-v-if="exportStatus" id="export-status"
-class="sr-only" aria-live="polite"
->
+    <div v-if="exportStatus" id="export-status" class="sr-only" aria-live="polite">
       {{ exportStatus }}
     </div>
-    <button class="preview-btn"
-@click="previewPPT"
->
-预览
-</button>
-    <button class="reset-btn"
-@click="resetAll"
->
-重置
-</button>
+    <button
+class="preview-btn" @click="previewPPT">预览</button>
+    <button
+class="reset-btn" @click="resetAll">重置</button>
   </footer>
+
+  <!-- 导出对话框 -->
+  <ExportDialog
+    :visible="showExportDialog"
+    :canvas="canvasRef"
+    :slides="exportSlides"
+    @close="closeExportDialog"
+    @export-complete="handleExportComplete"
+  />
 </template>
 
 <script setup>
@@ -214,6 +155,7 @@ import TemplateSelector from '../components/templates/TemplateSelector.vue'
 import PerformanceMonitor from '../components/PerformanceMonitor.vue'
 import UserAdjustmentPanel from '../components/UserAdjustmentPanel.vue'
 import PictureInPicture from '../components/PictureInPicture.vue'
+import ExportDialog from '../components/ExportDialog.vue'
 import { getErrorHandler, withUserFeedback } from '../utils/ErrorHandler.js'
 
 // 响应式状态
@@ -257,6 +199,14 @@ const videoElement = ref(null)
 
 // 画中画元素引用
 const pipElement = ref(null)
+
+// 导出相关状态
+
+// 导出对话框显示状态
+const showExportDialog = ref(false)
+
+// 导出用的幻灯片数据
+const exportSlides = ref([])
 
 // 计算属性
 const canvasAspectRatio = computed(() => canvasWidth.value / canvasHeight.value)
@@ -376,46 +326,89 @@ const initializeCanvas = () => {
 }
 
 /**
- * 导出PPT文件
- * 将当前Canvas内容导出为PPT格式文件
+ * 打开导出对话框
  */
-const exportPPT = async () => {
-  if (!videoSrc.value) {
-    getErrorHandler().handleError(new Error('请先上传视频'), {
-      context: 'export-validation',
-      severity: 'low'
-    })
-    return
-  }
+const openExportDialog = () => {
+  // 准备导出数据
+  prepareExportData()
+  showExportDialog.value = true
+}
 
-  if (!selectedTemplate.value) {
-    getErrorHandler().handleError(new Error('请选择一个PPT模板'), {
-      context: 'export-validation',
-      severity: 'low'
-    })
-    return
-  }
+/**
+ * 关闭导出对话框
+ */
+const closeExportDialog = () => {
+  showExportDialog.value = false
+}
 
-  await withUserFeedback(
-    async () => {
-      // 模拟导出过程
-      await new Promise(resolve => setTimeout(resolve, 2000))
+/**
+ * 处理导出完成
+ */
+const handleExportComplete = () => {
+  console.log('导出完成')
+  // 可以添加导出成功的后续处理
+}
 
-      // 这里应该是实际的PPT导出逻辑
-      // 目前只是模拟
-
-      throw new Error('PPT导出功能正在开发中，请稍后使用')
-    },
+/**
+ * 准备导出数据
+ */
+const prepareExportData = () => {
+  // 从当前canvas和设置生成导出用的幻灯片数据
+  exportSlides.value = [
     {
-      loadingMessage: '正在生成PPT...',
-      successMessage: 'PPT导出成功',
-      errorOptions: {
-        context: 'ppt-export',
-        severity: 'medium',
-        showDialog: true
-      }
+      id: 'slide-1',
+      background: {
+        color: '#ffffff',
+        image: null
+      },
+      elements: [
+        {
+          id: 'title-1',
+          type: 'text',
+          content: 'VidSlide AI 演示',
+          x: 100,
+          y: 100,
+          width: 800,
+          height: 100,
+          style: {
+            fontSize: '48px',
+            fontWeight: 'bold',
+            color: '#333333',
+            textAlign: 'center'
+          }
+        },
+        {
+          id: 'content-1',
+          type: 'text',
+          content: '基于AI的视频转PPT解决方案',
+          x: 100,
+          y: 250,
+          width: 800,
+          height: 60,
+          style: {
+            fontSize: '24px',
+            color: '#666666',
+            textAlign: 'center'
+          }
+        }
+      ],
+      animations: [
+        {
+          elementId: 'title-1',
+          type: 'fadeIn',
+          startTime: 0,
+          duration: 1.0
+        },
+        {
+          elementId: 'content-1',
+          type: 'fadeIn',
+          startTime: 0.5,
+          duration: 1.0
+        }
+      ]
     }
-  )
+    // 可以根据实际内容生成更多幻灯片
+  ]
 }
 
 /**
@@ -516,7 +509,7 @@ const handleCanvasKeydown = event => {
   case 'e':
     if (cmdKey) {
       event.preventDefault()
-      exportPPT()
+      openExportDialog()
     }
     break
   case 'p':

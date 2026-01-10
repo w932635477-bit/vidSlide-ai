@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - 水印策略技术验证</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056cc;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+            max-width: 100%;
+            height: auto;
+        }
+        .watermark-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .watermark-sample {
+            border: 1px solid #eee;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .watermark-sample h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007aff, #5856d6);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .user-tiers {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .tier-card {
+            flex: 1;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .tier-free {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        .tier-premium {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+        .tier-enterprise {
+            background: linear-gradient(135deg, #45b7d1, #96c93d);
+            color: white;
+        }
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .metric {
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007aff;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ VidSlide AI - 水印策略技术验证</h1>
+
+        <!-- Canvas文字渲染测试 -->
+        <div class="test-section">
+            <h2>1. Canvas文字渲染测试</h2>
+            <p>测试Canvas对文字和水印的渲染能力</p>
+
+            <canvas id="textRenderCanvas" width="400" height="200"></canvas>
+            <br>
+            <button onclick="testCanvasTextRendering()">测试文字渲染</button>
+            <button onclick="testChineseRendering()">测试中文字体</button>
+            <button onclick="testTransparency()">测试透明度</button>
+
+            <div id="textRenderStatus"></div>
+            <div id="textRenderResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 动态水印生成测试 -->
+        <div class="test-section">
+            <h2>2. 动态水印生成测试</h2>
+            <p>测试不同位置和样式的水印生成</p>
+
+            <canvas id="watermarkCanvas" width="800" height="600"></canvas>
+            <br>
+            <button onclick="generateDynamicWatermarks()">生成动态水印</button>
+            <button onclick="testWatermarkPositions()">测试位置</button>
+            <button onclick="testWatermarkStyles()">测试样式</button>
+
+            <div class="watermark-preview" id="watermarkPreview" style="display: none;">
+                <div class="watermark-sample">
+                    <h3>免费版水印</h3>
+                    <canvas id="freeWatermark" width="200" height="50"></canvas>
+                </div>
+                <div class="watermark-sample">
+                    <h3>专业版水印</h3>
+                    <canvas id="premiumWatermark" width="200" height="50"></canvas>
+                </div>
+                <div class="watermark-sample">
+                    <h3>企业版水印</h3>
+                    <canvas id="enterpriseWatermark" width="200" height="50"></canvas>
+                </div>
+            </div>
+
+            <div id="watermarkStatus"></div>
+            <div id="watermarkResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 用户等级检测测试 -->
+        <div class="test-section">
+            <h2>3. 用户等级检测测试</h2>
+            <p>测试用户等级识别和水印策略应用</p>
+
+            <div class="user-tiers">
+                <div class="tier-card tier-free">
+                    <h3>免费版</h3>
+                    <p>显示水印</p>
+                </div>
+                <div class="tier-card tier-premium">
+                    <h3>专业版</h3>
+                    <p>无水印</p>
+                </div>
+                <div class="tier-card tier-enterprise">
+                    <h3>企业版</h3>
+                    <p>无水印</p>
+                </div>
+            </div>
+
+            <button onclick="testUserTierDetection()">测试等级检测</button>
+            <button onclick="simulateUserSwitching()">模拟用户切换</button>
+
+            <div id="userTierStatus"></div>
+            <div id="userTierResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 性能影响测试 -->
+        <div class="test-section">
+            <h2>4. 性能影响测试</h2>
+            <p>测试水印渲染对性能的影响</p>
+
+            <div class="performance-metrics">
+                <div class="metric">
+                    <div class="metric-value" id="avgRenderTime">--</div>
+                    <div class="metric-label">平均渲染时间</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="maxRenderTime">--</div>
+                    <div class="metric-label">最大渲染时间</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="memoryUsage">--</div>
+                    <div class="metric-label">内存使用</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value" id="performanceStatus">--</div>
+                    <div class="metric-label">性能状态</div>
+                </div>
+            </div>
+
+            <button onclick="testPerformanceImpact()">测试性能影响</button>
+            <button onclick="runPerformanceBenchmark()">运行性能基准测试</button>
+
+            <div class="progress">
+                <div class="progress-fill" id="performanceProgress"></div>
+            </div>
+
+            <div id="performanceStatus"></div>
+            <div id="performanceResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 完整验证测试 -->
+        <div class="test-section">
+            <h2>5. 完整技术验证</h2>
+            <p>运行完整的自动化验证套件</p>
+
+            <button onclick="runFullValidation()" id="fullValidationBtn">运行完整验证</button>
+
+            <div class="progress">
+                <div class="progress-fill" id="fullValidationProgress"></div>
+            </div>
+
+            <div id="fullValidationStatus"></div>
+            <div id="fullValidationResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 测试总结 -->
+        <div class="test-section">
+            <h2>6. 测试总结</h2>
+            <div id="overallStatus"></div>
+            <button onclick="generateReport()">生成验证报告</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { validateWatermarkCapabilities } from './src/utils/watermark-validation.js';
+
+        let validationResults = null;
+
+        // Canvas文字渲染测试
+        window.testCanvasTextRendering = function() {
+            const canvas = document.getElementById('textRenderCanvas');
+            const ctx = canvas.getContext('2d');
+            const statusDiv = document.getElementById('textRenderStatus');
+            const resultDiv = document.getElementById('textRenderResult');
+
+            try {
+                // 清空画布
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 绘制背景
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 测试基础文字渲染
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText('Canvas文字渲染测试', 20, 40);
+
+                // 测试不同样式
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                ctx.font = 'italic 16px Georgia';
+                ctx.fillText('样式测试: 斜体红色', 20, 70);
+
+                ctx.fillStyle = 'rgba(0, 100, 0, 0.8)';
+                ctx.font = 'bold 14px Verdana';
+                ctx.fillText('样式测试: 粗体绿色', 20, 100);
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Canvas文字渲染测试成功';
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = 'Canvas文字渲染功能正常:\n- 基础文字渲染: ✓\n- 样式控制: ✓\n- 颜色和透明度: ✓';
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 文字渲染测试失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+            }
+        };
+
+        window.testChineseRendering = function() {
+            const canvas = document.getElementById('textRenderCanvas');
+            const ctx = canvas.getContext('2d');
+
+            try {
+                ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
+                ctx.font = '20px "Microsoft YaHei", "SimHei", sans-serif';
+                ctx.fillText('中文字体渲染测试', 20, 140);
+
+                ctx.font = '16px Arial, sans-serif';
+                ctx.fillStyle = 'rgba(100, 0, 100, 0.8)';
+                ctx.fillText('Fallback字体测试', 20, 170);
+
+                document.getElementById('textRenderStatus').textContent = '✅ 中文字体渲染测试成功';
+
+            } catch (error) {
+                document.getElementById('textRenderStatus').className = 'status error';
+                document.getElementById('textRenderStatus').textContent = `❌ 中文字体测试失败: ${error.message}`;
+            }
+        };
+
+        window.testTransparency = function() {
+            const canvas = document.getElementById('textRenderCanvas');
+            const ctx = canvas.getContext('2d');
+
+            try {
+                // 创建半透明水印效果
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(250, 20, 130, 160);
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.font = '14px Arial';
+                ctx.fillText('透明度: 30%', 260, 50);
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillText('透明度: 60%', 260, 80);
+
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+                ctx.fillText('透明度: 90%', 260, 110);
+
+                document.getElementById('textRenderStatus').textContent = '✅ 透明度控制测试成功';
+
+            } catch (error) {
+                document.getElementById('textRenderStatus').className = 'status error';
+                document.getElementById('textRenderStatus').textContent = `❌ 透明度测试失败: ${error.message}`;
+            }
+        };
+
+        // 动态水印生成测试
+        window.generateDynamicWatermarks = function() {
+            const canvas = document.getElementById('watermarkCanvas');
+            const ctx = canvas.getContext('2d');
+
+            try {
+                // 清空画布
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 绘制背景图片模拟
+                ctx.fillStyle = '#e8f4f8';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 绘制模拟内容
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('演示文稿内容', canvas.width / 2, canvas.height / 2);
+
+                // 添加水印
+                addWatermark(ctx, canvas.width, canvas.height, 'VidSlide AI 演示', 'bottom-right');
+                addWatermark(ctx, canvas.width, canvas.height, '免费版水印', 'top-left', 0.5);
+
+                document.getElementById('watermarkStatus').className = 'status success';
+                document.getElementById('watermarkStatus').textContent = '✅ 动态水印生成成功';
+
+            } catch (error) {
+                document.getElementById('watermarkStatus').className = 'status error';
+                document.getElementById('watermarkStatus').textContent = `❌ 水印生成失败: ${error.message}`;
+            }
+        };
+
+        window.testWatermarkPositions = function() {
+            const canvas = document.getElementById('watermarkCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const positions = ['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right'];
+
+            positions.forEach((position, index) => {
+                addWatermark(ctx, canvas.width, canvas.height, position, position, 0.7);
+            });
+
+            document.getElementById('watermarkStatus').textContent = '✅ 水印位置测试完成';
+        };
+
+        window.testWatermarkStyles = function() {
+            // 显示水印样式预览
+            document.getElementById('watermarkPreview').style.display = 'grid';
+
+            // 免费版水印
+            const freeCanvas = document.getElementById('freeWatermark');
+            const freeCtx = freeCanvas.getContext('2d');
+            freeCtx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+            freeCtx.font = '14px Arial';
+            freeCtx.fillText('VidSlide AI - 免费版', 10, 30);
+
+            // 专业版水印
+            const premiumCanvas = document.getElementById('premiumWatermark');
+            const premiumCtx = premiumCanvas.getContext('2d');
+            premiumCtx.fillStyle = 'rgba(0, 100, 255, 0.6)';
+            premiumCtx.font = '12px Arial';
+            premiumCtx.fillText('VidSlide AI - 专业版', 10, 30);
+
+            // 企业版水印
+            const enterpriseCanvas = document.getElementById('enterpriseWatermark');
+            const enterpriseCtx = enterpriseCanvas.getContext('2d');
+            enterpriseCtx.fillStyle = 'rgba(0, 150, 0, 0.5)';
+            enterpriseCtx.font = '16px Arial';
+            enterpriseCtx.fillText('VidSlide AI - 企业版', 10, 30);
+        };
+
+        // 用户等级检测测试
+        window.testUserTierDetection = function() {
+            const statusDiv = document.getElementById('userTierStatus');
+            const resultDiv = document.getElementById('userTierResult');
+
+            try {
+                // 模拟用户等级检测
+                const users = [
+                    { id: 1, subscription: 'free' },
+                    { id: 2, subscription: 'premium' },
+                    { id: 3, subscription: 'enterprise' }
+                ];
+
+                const results = users.map(user => {
+                    const hasWatermark = user.subscription === 'free';
+                    const watermarkText = hasWatermark ? 'VidSlide AI - 免费版' : null;
+                    return {
+                        userId: user.id,
+                        tier: user.subscription,
+                        hasWatermark,
+                        watermarkText
+                    };
+                });
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ 用户等级检测测试成功';
+
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = '用户等级检测结果:\n' +
+                    results.map(r => `用户${r.userId} (${r.tier}): ${r.hasWatermark ? '显示水印' : '无水印'}`).join('\n');
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 等级检测测试失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+            }
+        };
+
+        window.simulateUserSwitching = function() {
+            const tiers = ['free', 'premium', 'enterprise'];
+            let currentIndex = 0;
+
+            const interval = setInterval(() => {
+                const tier = tiers[currentIndex];
+                document.querySelectorAll('.tier-card').forEach(card => {
+                    card.style.opacity = '0.3';
+                });
+
+                const activeCard = document.querySelector(`.tier-${tier}`);
+                if (activeCard) {
+                    activeCard.style.opacity = '1';
+                    activeCard.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        activeCard.style.transform = 'scale(1)';
+                    }, 200);
+                }
+
+                currentIndex = (currentIndex + 1) % tiers.length;
+
+                if (currentIndex === 0) {
+                    clearInterval(interval);
+                    document.querySelectorAll('.tier-card').forEach(card => {
+                        card.style.opacity = '1';
+                    });
+                }
+            }, 1000);
+        };
+
+        // 性能影响测试
+        window.testPerformanceImpact = async function() {
+            const progressFill = document.getElementById('performanceProgress');
+            const statusDiv = document.getElementById('performanceStatus');
+
+            statusDiv.className = 'status info';
+            statusDiv.textContent = '正在测试性能影响...';
+
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1920;
+                canvas.height = 1080;
+                const ctx = canvas.getContext('2d');
+
+                // 预热
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, 1920, 1080);
+
+                // 测试水印渲染性能
+                const testCount = 50;
+                const renderTimes = [];
+
+                for (let i = 0; i < testCount; i++) {
+                    const startTime = performance.now();
+
+                    // 渲染水印
+                    ctx.save();
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.font = '24px Arial';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('VidSlide AI 性能测试水印', 1900, 1060);
+                    ctx.restore();
+
+                    const endTime = performance.now();
+                    renderTimes.push(endTime - startTime);
+
+                    // 更新进度
+                    progressFill.style.width = ((i + 1) / testCount * 100) + '%';
+                }
+
+                const avgTime = renderTimes.reduce((a, b) => a + b, 0) / testCount;
+                const maxTime = Math.max(...renderTimes);
+
+                // 更新显示
+                document.getElementById('avgRenderTime').textContent = avgTime.toFixed(2) + 'ms';
+                document.getElementById('maxRenderTime').textContent = maxTime.toFixed(2) + 'ms';
+
+                if (performance.memory) {
+                    const memoryMB = (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(1);
+                    document.getElementById('memoryUsage').textContent = memoryMB + 'MB';
+                }
+
+                const isAcceptable = avgTime < 50;
+                document.getElementById('performanceStatus').textContent = isAcceptable ? '良好' : '需要优化';
+                document.getElementById('performanceStatus').style.color = isAcceptable ? '#28a745' : '#dc3545';
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ 性能测试完成 - 平均渲染时间: ${avgTime.toFixed(2)}ms`;
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 性能测试失败: ${error.message}`;
+            }
+        };
+
+        window.runPerformanceBenchmark = function() {
+            // 运行更全面的性能基准测试
+            const startTime = performance.now();
+
+            // 模拟大量水印渲染
+            for (let i = 0; i < 1000; i++) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 100;
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.font = '12px Arial';
+                ctx.fillText('基准测试水印', 150, 80);
+            }
+
+            const endTime = performance.now();
+            const duration = endTime - startTime;
+
+            document.getElementById('performanceStatus').textContent = `基准测试完成: ${duration.toFixed(2)}ms`;
+        };
+
+        // 完整验证测试
+        window.runFullValidation = async function() {
+            const btn = document.getElementById('fullValidationBtn');
+            const progressFill = document.getElementById('fullValidationProgress');
+            const statusDiv = document.getElementById('fullValidationStatus');
+            const resultDiv = document.getElementById('fullValidationResult');
+
+            btn.disabled = true;
+            btn.textContent = '验证中...';
+            statusDiv.className = 'status info';
+            statusDiv.textContent = '正在运行完整验证套件...';
+            progressFill.style.width = '0%';
+
+            try {
+                // 更新进度
+                const updateProgress = (percent) => {
+                    progressFill.style.width = percent + '%';
+                };
+
+                updateProgress(10);
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                updateProgress(30);
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                updateProgress(50);
+                await new Promise(resolve => setTimeout(resolve, 200));
+
+                updateProgress(70);
+                // 运行实际验证
+                validationResults = await validateWatermarkCapabilities();
+
+                updateProgress(100);
+
+                // 显示结果
+                const overallStatus = validationResults.overallStatus;
+                if (overallStatus === 'passed') {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '🎉 完整验证通过！水印功能技术可行';
+                } else if (overallStatus === 'warning') {
+                    statusDiv.className = 'status warning';
+                    statusDiv.textContent = '⚠️ 验证完成，但存在一些性能考虑';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ 验证失败，存在技术障碍';
+                }
+
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = '完整验证结果:\n' + JSON.stringify(validationResults, null, 2);
+
+                updateOverallStatus();
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 验证失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+                console.error('Validation failed:', error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '运行完整验证';
+            }
+        };
+
+        window.generateReport = function() {
+            if (!validationResults) {
+                alert('请先运行完整验证');
+                return;
+            }
+
+            const report = `
+VidSlide AI - 水印策略技术验证报告
+====================================
+
+验证时间: ${new Date().toLocaleString()}
+验证状态: ${validationResults.overallStatus.toUpperCase()}
+
+详细结果:
+${Object.entries(validationResults)
+    .filter(([key]) => key !== 'overallStatus')
+    .map(([key, result]) => `- ${result.name}: ${result.status.toUpperCase()}`)
+    .join('\n')}
+
+建议:
+- ${validationResults.overallStatus === 'passed' ?
+    '水印功能可以正常实现，建议立即开始开发' :
+    '需要重新评估水印实现策略或寻找备选方案'}
+`;
+
+            // 创建下载链接
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'watermark-validation-report.txt';
+            a.textContent = '下载验证报告';
+            a.style.marginLeft = '10px';
+            a.style.color = '#007aff';
+            a.style.textDecoration = 'underline';
+            a.style.cursor = 'pointer';
+
+            const statusDiv = document.getElementById('overallStatus');
+            statusDiv.appendChild(a);
+        };
+
+        // 辅助函数
+        function addWatermark(ctx, canvasWidth, canvasHeight, text, position, opacity = 0.8) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'bottom';
+
+            const textWidth = ctx.measureText(text).width;
+            const textHeight = 20;
+            const margin = 20;
+
+            let x, y;
+            switch (position) {
+                case 'top-left':
+                    x = margin;
+                    y = margin + textHeight;
+                    ctx.textAlign = 'left';
+                    break;
+                case 'top-right':
+                    x = canvasWidth - margin;
+                    y = margin + textHeight;
+                    break;
+                case 'bottom-left':
+                    x = margin;
+                    y = canvasHeight - margin;
+                    ctx.textAlign = 'left';
+                    break;
+                case 'bottom-right':
+                    x = canvasWidth - margin;
+                    y = canvasHeight - margin;
+                    break;
+                case 'center':
+                    x = canvasWidth / 2;
+                    y = canvasHeight / 2;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    break;
+                default:
+                    x = canvasWidth - margin;
+                    y = canvasHeight - margin;
+            }
+
+            ctx.fillText(text, x, y);
+            ctx.restore();
+        }
+
+        function updateOverallStatus() {
+            const statusDiv = document.getElementById('overallStatus');
+
+            if (!validationResults) {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = '等待完整验证完成...';
+                return;
+            }
+
+            const passedCount = Object.values(validationResults)
+                .filter(result => typeof result === 'object' && result.status === 'passed').length;
+            const totalCount = Object.keys(validationResults)
+                .filter(key => key !== 'overallStatus').length;
+
+            if (validationResults.overallStatus === 'passed') {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `🎉 水印功能验证成功! (${passedCount}/${totalCount}项通过)`;
+            } else if (validationResults.overallStatus === 'warning') {
+                statusDiv.className = 'status warning';
+                statusDiv.textContent = `⚠️ 验证完成，有性能考虑 (${passedCount}/${totalCount}项通过)`;
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 验证失败，存在技术障碍 (${passedCount}/${totalCount}项通过)`;
+            }
+        }
+
+        // 初始化
+        updateOverallStatus();
+    </script>
+</body>
+</html>

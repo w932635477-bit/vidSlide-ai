@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - 导出功能技术验证</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.running {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+        .status.completed {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+        .status.failed {
+            background: #ffeaea;
+            border-left: 4px solid #f44336;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #2196f3);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+            padding: 15px;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .result-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .result-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-passed { background: #4caf50; color: white; }
+        .status-failed { background: #f44336; color: white; }
+        .status-warning { background: #ff9800; color: white; }
+        .details {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .recommendations {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .recommendations ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #f44336;
+            background: #ffeaea;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 VidSlide AI - 导出功能技术验证</h1>
+
+        <div class="status running" id="status">
+            <strong>状态:</strong> 准备开始验证...
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <button id="start-validation" onclick="startValidation()">开始验证</button>
+        <button onclick="clearResults()">清除结果</button>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script type="module">
+        import { validateExportCapabilities } from './src/utils/export-validation.js';
+
+        let isRunning = false;
+
+        window.startValidation = async function() {
+            if (isRunning) return;
+
+            isRunning = true;
+            const startBtn = document.getElementById('start-validation');
+            const statusDiv = document.getElementById('status');
+            const progressFill = document.getElementById('progress-fill');
+            const resultsDiv = document.getElementById('results');
+
+            startBtn.disabled = true;
+            startBtn.textContent = '验证中...';
+
+            statusDiv.className = 'status running';
+            statusDiv.innerHTML = '<strong>状态:</strong> 正在运行验证...';
+            progressFill.style.width = '0%';
+            resultsDiv.innerHTML = '';
+
+            try {
+                // 模拟进度更新
+                const progressSteps = [10, 25, 40, 55, 70, 85, 100];
+                let stepIndex = 0;
+
+                const progressInterval = setInterval(() => {
+                    if (stepIndex < progressSteps.length) {
+                        progressFill.style.width = progressSteps[stepIndex] + '%';
+                        stepIndex++;
+                    } else {
+                        clearInterval(progressInterval);
+                    }
+                }, 300);
+
+                // 运行验证
+                const results = await validateExportCapabilities();
+
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                // 显示结果
+                displayResults(results);
+
+                // 更新状态
+                const overallStatus = results.overallStatus;
+                if (overallStatus === 'passed') {
+                    statusDiv.className = 'status completed';
+                    statusDiv.innerHTML = '<strong>状态:</strong> ✅ 验证完成 - 所有功能可行！';
+                } else if (overallStatus === 'warning') {
+                    statusDiv.className = 'status completed';
+                    statusDiv.innerHTML = '<strong>状态:</strong> ⚠️ 验证完成 - 大部分功能可行，少数需要备选方案';
+                } else {
+                    statusDiv.className = 'status failed';
+                    statusDiv.innerHTML = '<strong>状态:</strong> ❌ 验证失败 - 存在重大技术障碍';
+                }
+
+            } catch (error) {
+                console.error('验证失败:', error);
+                statusDiv.className = 'status failed';
+                statusDiv.innerHTML = `<strong>状态:</strong> ❌ 验证失败 - ${error.message}`;
+
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <strong>验证过程中发生错误:</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            } finally {
+                isRunning = false;
+                startBtn.disabled = false;
+                startBtn.textContent = '开始验证';
+            }
+        };
+
+        window.clearResults = function() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('status').className = 'status running';
+            document.getElementById('status').innerHTML = '<strong>状态:</strong> 准备开始验证...';
+            document.getElementById('progress-fill').style.width = '0%';
+        };
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            const resultKeys = Object.keys(results).filter(key => key !== 'overallStatus');
+
+            resultsDiv.innerHTML = '<h2>📊 验证结果详情</h2>';
+
+            resultKeys.forEach(key => {
+                const result = results[key];
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-item';
+
+                const statusClass = result.status === 'passed' ? 'status-passed' :
+                                  result.status === 'failed' ? 'status-failed' : 'status-warning';
+
+                resultDiv.innerHTML = `
+                    <div class="result-header">
+                        <span class="result-name">${result.name}</span>
+                        <span class="result-status ${statusClass}">${result.status.toUpperCase()}</span>
+                    </div>
+                    <div class="details">
+                        ${formatDetails(result.details)}
+                    </div>
+                    ${result.recommendations && result.recommendations.length > 0 ? `
+                        <div class="recommendations">
+                            <strong>建议:</strong>
+                            <ul>
+                                ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                `;
+
+                resultsDiv.appendChild(resultDiv);
+            });
+        }
+
+        function formatDetails(details) {
+            if (!details) return '<em>无详细信息</em>';
+
+            const formatted = Object.entries(details).map(([key, value]) => {
+                if (typeof value === 'boolean') {
+                    return `<strong>${key}:</strong> ${value ? '✅ 是' : '❌ 否'}`;
+                } else if (typeof value === 'object') {
+                    return `<strong>${key}:</strong> ${JSON.stringify(value, null, 2)}`;
+                } else {
+                    return `<strong>${key}:</strong> ${value}`;
+                }
+            }).join('<br>');
+
+            return formatted;
+        }
+    </script>
+</body>
+</html>

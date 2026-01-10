@@ -5,6 +5,7 @@
 **重要提示**: 请以苹果设计师的身份来设计这些模板。想象你是苹果设计团队的一员，为VidSlide AI设计专业的PPT模板系统。
 
 ### 苹果设计师的核心思考框架
+
 - **用户为中心**: 每个设计决策都要服务于用户的核心需求
 - **系统一致性**: 所有模板遵循相同的视觉语言和交互模式
 - **细节完美主义**: 关注每一个像素、每一个动画的精确度
@@ -12,6 +13,7 @@
 - **情感共鸣**: 创造让用户喜爱的体验
 
 ### 苹果设计原则应用到PPT模板
+
 - **Clarity (清晰)**: 让内容一目了然，避免视觉噪音
 - **Depth (深度)**: 使用阴影、透视创造层次感
 - **Deference (谦逊)**: 模板服务于内容，不喧宾夺主
@@ -19,6 +21,7 @@
 - **Consistency (一致)**: 金色强调色贯穿始终
 
 ### 参考苹果产品
+
 - **iOS界面**: 圆角、留白、微妙的阴影
 - **Keynote**: 优雅的过渡动画和模板设计
 - **macOS**: 毛玻璃效果、深度层次
@@ -27,6 +30,7 @@
 ## 🎯 核心设计指令 - 苹果风格
 
 ### 主提示词 (Primary Prompt) - 苹果设计师版本
+
 ```
 As an Apple designer, design an elegant PPT template system for VidSlide AI with these 5 templates, following Apple's design principles of clarity, depth, deference, and fluidity:
 
@@ -65,6 +69,7 @@ Style: Enterprise PPT quality, clean, modern, professional
 ## 🎨 模板专用提示词
 
 ### 画中画模板 (PIP Template) - 苹果风格
+
 ```
 Design a picture-in-picture template with Apple-like elegance:
 - Main video: full screen with subtle blur effect
@@ -78,6 +83,7 @@ Design a picture-in-picture template with Apple-like elegance:
 ```
 
 ### 信息卡片模板 (Info Card) - 苹果风格
+
 ```
 Create an information card with iOS notification center aesthetics:
 - Card design: large corner radius (24px), floating card appearance
@@ -91,6 +97,7 @@ Create an information card with iOS notification center aesthetics:
 ```
 
 ### 关键词高亮模板 (Keyword Highlight) - 苹果风格
+
 ```
 Design a keyword highlight with Apple alert/banner aesthetics:
 - Card style: translucent white background, subtle blur effect
@@ -104,6 +111,7 @@ Design a keyword highlight with Apple alert/banner aesthetics:
 ```
 
 ### 文件展示模板 (Document Display) - 苹果风格
+
 ```
 Create a document stack with macOS Finder aesthetics:
 - Documents: realistic paper appearance with subtle textures
@@ -117,6 +125,7 @@ Create a document stack with macOS Finder aesthetics:
 ```
 
 ### 标题文字模板 (Title Text) - 苹果风格
+
 ```
 Design a full-screen title with Apple tvOS aesthetics:
 - Typography: SF Pro Display, perfect kerning and leading
@@ -131,6 +140,7 @@ Design a full-screen title with Apple tvOS aesthetics:
 ## 🎛️ 界面组件提示词
 
 ### 属性面板 (Property Panel)
+
 ```
 Design a right-side property panel (300px width):
 - Header: "[Template Name] Settings"
@@ -149,6 +159,7 @@ Style: Clean, grouped sections, consistent spacing
 ```
 
 ### 时间轴编辑器 (Timeline Editor)
+
 ```
 Create a timeline editor (bottom 200px height):
 - Time scale ruler on top
@@ -164,6 +175,7 @@ Interactive: click to seek, drag keyframes, hover tooltips
 ## 📱 响应式设计提示词
 
 ### 桌面版本 (Desktop)
+
 ```
 Full-featured desktop design:
 - Property panel: right sidebar 300px
@@ -175,6 +187,7 @@ Full-featured desktop design:
 ```
 
 ### 平板版本 (Tablet)
+
 ```
 Tablet-optimized design:
 - Collapsible property panel
@@ -185,6 +198,7 @@ Tablet-optimized design:
 ```
 
 ### 手机版本 (Mobile)
+
 ```
 Mobile-first design:
 - Hidden edit controls by default
@@ -197,6 +211,7 @@ Mobile-first design:
 ## 🎬 动画规范提示词
 
 ### 进入动画 (Entrance Animations)
+
 ```
 Consistent entrance animations:
 - Fade-in: 0.2-0.3 seconds, ease-out
@@ -206,6 +221,7 @@ Consistent entrance animations:
 ```
 
 ### 交互动画 (Interaction Animations)
+
 ```
 Subtle interaction feedback:
 - Hover: slight scale up 1.0→1.05
@@ -217,6 +233,7 @@ Subtle interaction feedback:
 ## 🎨 色彩和字体规范
 
 ### 色彩系统 (Color System)
+
 ```
 Primary colors:
 - Gold: #FFD700 (accents, borders, highlights)
@@ -232,6 +249,7 @@ Semantic colors:
 ```
 
 ### 字体系统 (Typography)
+
 ```
 Font hierarchy:
 - H1 Title: 48px+, Bold, Gold color
@@ -245,6 +263,7 @@ Font family: System font stack (inter, etc.)
 ## 🔧 快速迭代提示词
 
 ### 优化指令 (Optimization Prompts)
+
 ```
 Make the design more professional:
 - Increase border radius for modern look

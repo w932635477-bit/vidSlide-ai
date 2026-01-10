@@ -558,24 +558,24 @@ export class ErrorHandler {
         <p><strong>可能的原因：</strong>${errorInfo.technicalMessage}</p>
 
         ${
-          errorInfo.solutions.length > 0
-            ? `
+  errorInfo.solutions.length > 0
+    ? `
           <p><strong>建议解决方案：</strong></p>
           <ul>
             ${errorInfo.solutions.map(solution => `<li>${solution}</li>`).join('')}
           </ul>
         `
-            : ''
-        }
+    : ''
+}
 
         ${
-          recoverySuggestions.length > 0
-            ? `
+  recoverySuggestions.length > 0
+    ? `
           <p><strong>快速修复：</strong></p>
           <div class="recovery-suggestions" style="margin: 12px 0;">
             ${recoverySuggestions
-              .map(
-                (suggestion, index) => `
+    .map(
+      (suggestion, index) => `
               <button
                 type="button"
                 class="recovery-btn"
@@ -596,12 +596,12 @@ export class ErrorHandler {
                 ${suggestion.label}
               </button>
             `
-              )
-              .join('')}
+    )
+    .join('')}
           </div>
         `
-            : ''
-        }
+    : ''
+}
 
         <div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #007bff;">
           <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 14px;">💡 快速解决指南</h4>

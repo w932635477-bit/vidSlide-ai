@@ -3,11 +3,9 @@
   提供实时的性能指标监控和可视化
 -->
 <template>
-  <div class="performance-monitor"
-:class="{ minimized }">
+  <div class="performance-monitor" :class="{ minimized }">
     <!-- 监控面板头部 -->
-    <div class="monitor-header"
-@click="toggleMinimized">
+    <div class="monitor-header" @click="toggleMinimized">
       <h3 class="monitor-title">
         <el-icon><DataAnalysis /></el-icon>
         性能监控
@@ -35,8 +33,7 @@
     </div>
 
     <!-- 监控内容区域 -->
-    <div v-show="!minimized"
-class="monitor-content">
+    <div v-show="!minimized" class="monitor-content">
       <!-- 实时指标 -->
       <div class="metrics-section">
         <h4 class="section-title">实时指标</h4>
@@ -54,8 +51,7 @@ class="monitor-content">
                 {{ currentFps }}
               </div>
               <div class="metric-label">FPS</div>
-              <div class="metric-status"
-:class="getFpsStatus()">
+              <div class="metric-status" :class="getFpsStatus()">
                 {{ getFpsStatusText() }}
               </div>
             </div>
@@ -67,15 +63,14 @@ class="monitor-content">
             :aria-label="`内存使用: ${formatMemory(memoryUsage)}, 状态: ${getMemoryStatusText()}`"
           >
             <div class="metric-icon">
-              <el-icon><Memory /></el-icon>
+              <el-icon><Cpu /></el-icon>
             </div>
             <div class="metric-info">
               <div class="metric-value">
                 {{ formatMemory(memoryUsage) }}
               </div>
               <div class="metric-label">内存使用</div>
-              <div class="metric-status"
-:class="getMemoryStatus()">
+              <div class="metric-status" :class="getMemoryStatus()">
                 {{ getMemoryStatusText() }}
               </div>
             </div>
@@ -92,8 +87,7 @@ class="monitor-content">
             <div class="metric-info">
               <div class="metric-value">{{ renderTime.toFixed(1) }}ms</div>
               <div class="metric-label">渲染时间</div>
-              <div class="metric-status"
-:class="getRenderStatus()">
+              <div class="metric-status" :class="getRenderStatus()">
                 {{ getRenderStatusText() }}
               </div>
             </div>
@@ -110,8 +104,7 @@ class="monitor-content">
             <div class="metric-info">
               <div class="metric-value">{{ cacheHitRate }}%</div>
               <div class="metric-label">缓存命中率</div>
-              <div class="metric-status"
-:class="getCacheStatus()">
+              <div class="metric-status" :class="getCacheStatus()">
                 {{ getCacheStatusText() }}
               </div>
             </div>
@@ -128,8 +121,7 @@ class="monitor-content">
               <span>FPS 历史</span>
               <span class="chart-value">{{ averageFps.toFixed(1) }} avg</span>
             </div>
-            <div class="chart-visual"
-:aria-label="`FPS趋势图表，平均值: ${averageFps.toFixed(1)}`">
+            <div class="chart-visual" :aria-label="`FPS趋势图表，平均值: ${averageFps.toFixed(1)}`">
               <div
                 v-for="(fps, index) in fpsHistory.slice(-10)"
                 :key="index"
@@ -183,13 +175,11 @@ class="monitor-content">
 
       <!-- 控制按钮 -->
       <div class="monitor-controls">
-        <el-button size="small"
-@click="clearStats" :aria-label="清除性能统计数据">
+        <el-button size="small" @click="clearStats" :aria-label="清除性能统计数据">
           <el-icon><Delete /></el-icon>
           清除统计
         </el-button>
-        <el-button size="small"
-type="primary" :aria-label="导出性能报告" @click="exportReport">
+        <el-button size="small" type="primary" :aria-label="导出性能报告" @click="exportReport">
           <el-icon><Download /></el-icon>
           导出报告
         </el-button>
@@ -205,7 +195,7 @@ import {
   ArrowUp,
   ArrowDown,
   VideoPlay,
-  Memory,
+  Cpu,
   Timer,
   Box,
   Warning,
@@ -259,7 +249,7 @@ const maxMemoryUsage = ref(0) // 历史最大内存使用量
 /** 性能监控内部变量 */
 let animationFrameId = null // 动画帧ID
 let lastFrameTime = 0 // 上一帧时间戳
-let frameCount = 0 // 帧计数器
+let _frameCount = 0 // 帧计数器
 let monitorInterval = null // 监控定时器
 let renderStartTime = 0 // 渲染开始时间
 let visibilityListener = null // 页面可见性监听器
@@ -370,7 +360,7 @@ const startMonitoring = () => {
     }
 
     lastFrameTime = now
-    frameCount++
+    _frameCount++
     animationFrameId = requestAnimationFrame(measureFps)
   }
 

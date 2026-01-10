@@ -205,10 +205,10 @@ export class CopyrightChecker {
    * @throws {Error} 当检查过程中发生严重错误时抛出
    */
   async /**
-  * checkCopyright 方法
-  * VidSlide AI 功能实现
-  */
- checkCopyright(asset) {
+   * checkCopyright 方法
+   * VidSlide AI 功能实现
+   */
+  checkCopyright(asset) {
     const cacheKey = `copyright_${asset.id}`
     const cached = this.getFromCache(cacheKey)
 
@@ -223,8 +223,7 @@ export class CopyrightChecker {
 
      */
 
-
-    if(cached) {
+    if (cached) {
       return cached
     }
 
@@ -248,23 +247,23 @@ export class CopyrightChecker {
 
        */
 
-      if(asset.source === 'unsplash') {
+      if (asset.source === 'unsplash') {
         result.license = this.licenseDatabase['Unsplash License']
         result.status = 'free'
         result.isSafe = true
-      } else /**
-  * if 方法
-  * VidSlide AI 功能实现
-  */
- if(asset.source === 'pexels') {
+      } else if (asset.source === 'pexels') {
+        /**
+         * if 方法
+         * VidSlide AI 功能实现
+         */
         result.license = this.licenseDatabase['Pexels License']
         result.status = 'free'
         result.isSafe = true
-      } else /**
-  * if 方法
-  * VidSlide AI 功能实现
-  */
- if(asset.metadata && asset.metadata.license) {
+      } else if (asset.metadata && asset.metadata.license) {
+        /**
+         * if 方法
+         * VidSlide AI 功能实现
+         */
         // 检查已知的许可证
         const knownLicense = this.licenseDatabase[asset.metadata.license]
         /**
@@ -275,7 +274,7 @@ export class CopyrightChecker {
 
          */
 
-        if(knownLicense) {
+        if (knownLicense) {
           result.license = knownLicense
           result.status = knownLicense.type
           result.isSafe = this.isLicenseSafeForUse(knownLicense)
@@ -298,11 +297,11 @@ export class CopyrightChecker {
 
       // 缓存结果
       this.setCache(cacheKey, result)
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('版权检查失败:', error)
       result.status = 'error'
       result.warnings.push('版权检查过程中发生错误')
@@ -317,11 +316,11 @@ export class CopyrightChecker {
    * @param {Array} assets - 素材数组
    * @returns {Promise<Array>} 版权检查结果数组
    */
-  async /**
-  * checkCopyrightBatch 方法
-  * VidSlide AI 功能实现
-  */
- checkCopyrightBatch(assets) {
+  /**
+   * checkCopyrightBatch 方法
+   * VidSlide AI 功能实现
+   */
+  async checkCopyrightBatch(assets) {
     const results = []
 
     /**
@@ -335,16 +334,11 @@ export class CopyrightChecker {
 
      */
 
-
-    for(const asset of assets) {
+    for (const asset of assets) {
       try {
         const result = await this.checkCopyright(asset)
         results.push(result)
-      } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+      } catch (error) {
         console.error(`检查素材 ${asset.id} 版权失败:`, error)
         results.push({
           assetId: asset.id,
@@ -382,7 +376,7 @@ export class CopyrightChecker {
 
      */
 
-    if(license.type === 'free' && license.commercial) {
+    if (license.type === 'free' && license.commercial) {
       return true
     }
 
@@ -395,7 +389,7 @@ export class CopyrightChecker {
 
      */
 
-    if(license.type === 'cc' && license.name === 'CC0') {
+    if (license.type === 'cc' && license.name === 'CC0') {
       return true
     }
 
@@ -413,7 +407,7 @@ export class CopyrightChecker {
 
      */
 
-    if(license.type === 'paid') {
+    if (license.type === 'paid') {
       return true // 在实际应用中需要验证购买状态
     }
 
@@ -443,7 +437,7 @@ export class CopyrightChecker {
 
      */
 
-    if(result.license && !result.license.commercial) {
+    if (result.license && !result.license.commercial) {
       result.warnings.push('此许可证不允许商业使用')
       result.isSafe = false
     }
@@ -457,7 +451,7 @@ export class CopyrightChecker {
 
      */
 
-    if(result.license && result.license.attribution) {
+    if (result.license && result.license.attribution) {
       result.warnings.push('使用时需要署名原作者')
     }
 
@@ -470,7 +464,7 @@ export class CopyrightChecker {
 
      */
 
-    if(result.license && !result.license.modification) {
+    if (result.license && !result.license.modification) {
       result.warnings.push('不得修改原作品')
     }
 
@@ -483,7 +477,7 @@ export class CopyrightChecker {
 
      */
 
-    if(asset.type === 'image' && asset.category === 'portrait') {
+    if (asset.type === 'image' && asset.category === 'portrait') {
       result.warnings.push('肖像作品请确认获得肖像权许可')
     }
 
@@ -496,7 +490,7 @@ export class CopyrightChecker {
 
      */
 
-    if(asset.metadata && asset.metadata.createdAt) {
+    if (asset.metadata && asset.metadata.createdAt) {
       const createdDate = new Date(asset.metadata.createdAt)
       const now = new Date()
       const age = now.getFullYear() - createdDate.getFullYear()
@@ -512,8 +506,7 @@ export class CopyrightChecker {
 
        */
 
-
-      if(age > 10) {
+      if (age > 10) {
         result.warnings.push('作品年代较久远，请确认版权状态')
       }
     }
@@ -591,7 +584,7 @@ export class CopyrightChecker {
 
      */
 
-    if(!copyrightInfo.license || !copyrightInfo.license.attribution) {
+    if (!copyrightInfo.license || !copyrightInfo.license.attribution) {
       return ''
     }
 
@@ -612,17 +605,16 @@ export class CopyrightChecker {
 
      */
 
-
-    switch(source) {
-      case 'unsplash':
-        attribution = `Photo by ${author.name} on Unsplash`
-        break
-      case 'pexels':
-        attribution = `Photo by ${author.name} on Pexels`
-        break
-      default:
-        attribution = `© ${author.name}`
-        /**
+    switch (source) {
+    case 'unsplash':
+      attribution = `Photo by ${author.name} on Unsplash`
+      break
+    case 'pexels':
+      attribution = `Photo by ${author.name} on Pexels`
+      break
+    default:
+      attribution = `© ${author.name}`
+      /**
 
          * if 方法
 
@@ -630,9 +622,9 @@ export class CopyrightChecker {
 
          */
 
-        if(license.name) {
-          attribution += ` (${license.name})`
-        }
+      if (license.name) {
+        attribution += ` (${license.name})`
+      }
     }
 
     return attribution
@@ -666,20 +658,19 @@ export class CopyrightChecker {
 
      */
 
-
-    switch(usage) {
-      case 'commercial':
-        return license.commercial
-      case 'personal':
-        return license.private
-      case 'web':
-        return license.redistribution
-      case 'print':
-        return license.redistribution
-      case 'modification':
-        return license.modification
-      default:
-        return false
+    switch (usage) {
+    case 'commercial':
+      return license.commercial
+    case 'personal':
+      return license.private
+    case 'web':
+      return license.redistribution
+    case 'print':
+      return license.redistribution
+    case 'modification':
+      return license.modification
+    default:
+      return false
     }
   }
 
@@ -705,7 +696,7 @@ export class CopyrightChecker {
 
      */
 
-    if(copyrightInfo.status === 'error') {
+    if (copyrightInfo.status === 'error') {
       return 'critical'
     }
 
@@ -720,8 +711,7 @@ export class CopyrightChecker {
 
      */
 
-
-    if(copyrightInfo.status === 'unknown') {
+    if (copyrightInfo.status === 'unknown') {
       return 'high'
     }
 
@@ -736,8 +726,7 @@ export class CopyrightChecker {
 
      */
 
-
-    if(copyrightInfo.warnings.length > 2) {
+    if (copyrightInfo.warnings.length > 2) {
       return 'high'
     }
 
@@ -752,8 +741,7 @@ export class CopyrightChecker {
 
      */
 
-
-    if(copyrightInfo.warnings.length > 0) {
+    if (copyrightInfo.warnings.length > 0) {
       return 'medium'
     }
 
@@ -768,8 +756,7 @@ export class CopyrightChecker {
 
      */
 
-
-    if(copyrightInfo.isSafe) {
+    if (copyrightInfo.isSafe) {
       return 'low'
     }
 
@@ -783,10 +770,10 @@ export class CopyrightChecker {
    * @returns {Promise<Object>} 验证结果
    */
   async /**
-  * validateAssetUsage 方法
-  * VidSlide AI 功能实现
-  */
- validateAssetUsage(asset, intendedUse = 'commercial') {
+   * validateAssetUsage 方法
+   * VidSlide AI 功能实现
+   */
+  async validateAssetUsage(asset, intendedUse = 'commercial') {
     const copyrightInfo = await this.checkCopyright(asset)
 
     const validation = {
@@ -806,7 +793,7 @@ export class CopyrightChecker {
 
      */
 
-    if(!copyrightInfo.isSafe) {
+    if (!copyrightInfo.isSafe) {
       validation.issues.push('素材可能存在版权风险')
     }
 
@@ -819,7 +806,7 @@ export class CopyrightChecker {
 
      */
 
-    if(copyrightInfo.license) {
+    if (copyrightInfo.license) {
       const canUseForIntended = this.canUseFor(copyrightInfo.license, intendedUse)
       /**
 
@@ -829,7 +816,7 @@ export class CopyrightChecker {
 
        */
 
-      if(!canUseForIntended) {
+      if (!canUseForIntended) {
         const useTypeText = intendedUse === 'commercial' ? '商业' : intendedUse
         validation.issues.push(`此许可证不允许${useTypeText}使用`)
       }
@@ -843,7 +830,7 @@ export class CopyrightChecker {
 
        */
 
-      if(copyrightInfo.license.attribution) {
+      if (copyrightInfo.license.attribution) {
         validation.requirements.push('使用时必须署名原作者')
         validation.attributionText = this.generateAttributionText(asset, copyrightInfo)
       }
@@ -857,7 +844,7 @@ export class CopyrightChecker {
 
        */
 
-      if(!copyrightInfo.license.modification) {
+      if (!copyrightInfo.license.modification) {
         validation.requirements.push('不得修改原作品')
       }
     }

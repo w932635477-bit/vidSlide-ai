@@ -2,9 +2,7 @@
   <div class="wegic-showcase">
     <header class="wegic-header">
       <h1 class="wegic-heading wegic-heading-xl">Wegic Design Showcase</h1>
-      <p class="wegic-text wegic-text-lg">
-从 Wegic.ai 导入的设计元素展示
-</p>
+      <p class="wegic-text wegic-text-lg">从 Wegic.ai 导入的设计元素展示</p>
     </header>
 
     <section class="wegic-section">
@@ -19,25 +17,17 @@
           </svg>
         </button>
 
-        <button class="wegic-btn wegic-btn-secondary">
-次要按钮
-</button>
+        <button class="wegic-btn wegic-btn-secondary">次要按钮</button>
 
-        <button class="wegic-btn wegic-btn-success">
-成功按钮
-</button>
+        <button class="wegic-btn wegic-btn-success">成功按钮</button>
       </div>
     </section>
 
     <section class="wegic-section">
       <h2 class="wegic-heading wegic-heading-lg">颜色系统</h2>
       <div class="color-palette">
-        <div
-v-for="(color, index) in colorPalette" class="color-item"
-:key="index"
->
-          <div
-class="color-swatch" :style="{ backgroundColor: color.value }" />
+        <div v-for="(color, index) in colorPalette" class="color-item" :key="index">
+          <div class="color-swatch" :style="{ backgroundColor: color.value }" />
           <span class="color-name">{{ color.name }}</span>
           <code class="color-code">{{ color.value }}</code>
         </div>
@@ -47,10 +37,7 @@ class="color-swatch" :style="{ backgroundColor: color.value }" />
     <section class="wegic-section">
       <h2 class="wegic-heading wegic-heading-lg">卡片组件</h2>
       <div class="card-grid">
-        <div
-v-for="card in showcaseCards" class="wegic-card"
-:key="card.title"
->
+        <div v-for="card in showcaseCards" class="wegic-card" :key="card.title">
           <div class="card-icon" :class="card.iconClass">
             {{ card.icon }}
           </div>

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI - 水印功能实现测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056cc;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+            max-width: 100%;
+            height: auto;
+        }
+        .user-tier-controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .tier-button {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .tier-button.active {
+            border-color: #007aff;
+            background: #007aff;
+            color: white;
+        }
+        .tier-button:hover {
+            border-color: #007aff;
+        }
+        .watermark-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .preview-item {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+            background: #fafafa;
+        }
+        .preview-item h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .export-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f8e8;
+            border: 1px solid #c8e8c8;
+            border-radius: 6px;
+        }
+        .export-result h3 {
+            margin: 0 0 10px 0;
+            color: #2d5a2d;
+        }
+        .export-actions {
+            margin-top: 10px;
+        }
+        .export-actions button {
+            margin-right: 10px;
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ VidSlide AI - 水印功能实现测试</h1>
+
+        <!-- 用户等级设置 -->
+        <div class="test-section">
+            <h2>1. 用户等级设置</h2>
+            <p>测试不同用户等级的水印策略</p>
+
+            <div class="user-tier-controls">
+                <button class="tier-button" onclick="setUserTier('free')">免费版</button>
+                <button class="tier-button" onclick="setUserTier('premium')">专业版</button>
+                <button class="tier-button" onclick="setUserTier('enterprise')">企业版</button>
+            </div>
+
+            <div id="userTierStatus"></div>
+            <div id="userTierResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 水印生成器测试 -->
+        <div class="test-section">
+            <h2>2. 水印生成器测试</h2>
+            <p>测试Canvas水印渲染功能</p>
+
+            <canvas id="watermarkCanvas" width="600" height="400"></canvas>
+            <br>
+            <button onclick="testCanvasWatermark()">应用Canvas水印</button>
+            <button onclick="clearCanvas()">清除画布</button>
+
+            <div id="watermarkStatus"></div>
+            <div id="watermarkResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 水印预览 -->
+        <div class="test-section">
+            <h2>3. 水印样式预览</h2>
+            <p>预览不同用户等级的水印样式</p>
+
+            <div class="watermark-preview">
+                <div class="preview-item">
+                    <h3>免费版水印</h3>
+                    <canvas id="freePreview" width="200" height="60"></canvas>
+                </div>
+                <div class="preview-item">
+                    <h3>专业版水印</h3>
+                    <div style="width: 200px; height: 60px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">无水印</div>
+                </div>
+                <div class="preview-item">
+                    <h3>企业版水印</h3>
+                    <div style="width: 200px; height: 60px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">无水印</div>
+                </div>
+            </div>
+
+            <button onclick="updateWatermarkPreviews()">更新预览</button>
+
+            <div id="previewStatus"></div>
+        </div>
+
+        <!-- 视频导出水印测试 -->
+        <div class="test-section">
+            <h2>4. 视频导出水印测试</h2>
+            <p>测试带水印的视频导出功能</p>
+
+            <canvas id="videoExportCanvas" width="640" height="360"></canvas>
+            <br>
+            <button onclick="prepareVideoCanvas()">准备视频内容</button>
+            <button onclick="testVideoExportWithWatermark()">导出带水印视频</button>
+            <button onclick="testVideoExportWithoutWatermark()">导出无水印视频</button>
+
+            <div id="videoExportStatus"></div>
+            <div id="videoExportResult" class="export-result" style="display: none;"></div>
+        </div>
+
+        <!-- HTML导出水印测试 -->
+        <div class="test-section">
+            <h2>5. HTML导出水印测试</h2>
+            <p>测试带水印的HTML演示文稿导出</p>
+
+            <button onclick="testHtmlExportWithWatermark()">导出带水印HTML</button>
+            <button onclick="testHtmlExportWithoutWatermark()">导出无水印HTML</button>
+
+            <div id="htmlExportStatus"></div>
+            <div id="htmlExportResult" class="export-result" style="display: none;"></div>
+        </div>
+
+        <!-- 完整功能测试 -->
+        <div class="test-section">
+            <h2>6. 完整功能验证</h2>
+            <p>运行完整的自动化功能验证</p>
+
+            <button onclick="runCompleteTest()" id="completeTestBtn">运行完整测试</button>
+
+            <div id="completeTestStatus"></div>
+            <div id="completeTestResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 测试总结 -->
+        <div class="test-section">
+            <h2>7. 测试总结</h2>
+            <div id="overallStatus"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getWatermarkGenerator } from './src/utils/WatermarkGenerator.js';
+        import { VideoExporter } from './src/utils/videoExporter.js';
+        import { HtmlExporter } from './src/utils/htmlExporter.js';
+
+        let watermarkGenerator = null;
+        let videoExporter = null;
+        let htmlExporter = null;
+
+        // 初始化
+        window.addEventListener('load', () => {
+            watermarkGenerator = getWatermarkGenerator();
+            videoExporter = new VideoExporter();
+            htmlExporter = new HtmlExporter();
+
+            updateUserTierDisplay();
+            updateWatermarkPreviews();
+        });
+
+        // 用户等级设置
+        window.setUserTier = function(tier) {
+            watermarkGenerator.setUserTier(tier);
+            updateUserTierDisplay();
+            updateWatermarkPreviews();
+
+            // 更新按钮状态
+            document.querySelectorAll('.tier-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        };
+
+        function updateUserTierDisplay() {
+            const config = watermarkGenerator.getCurrentConfig();
+            const statusDiv = document.getElementById('userTierStatus');
+            const resultDiv = document.getElementById('userTierResult');
+
+            statusDiv.className = 'status success';
+            statusDiv.textContent = `✅ 当前用户等级: ${config.userTier.toUpperCase()}`;
+
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = `用户等级配置:\n` +
+                `- 等级: ${config.userTier}\n` +
+                `- 显示水印: ${config.showWatermark ? '是' : '否'}\n` +
+                `- 水印文本: ${config.watermarkText || '无'}\n` +
+                `- 透明度: ${config.opacity}\n` +
+                `- 描述: ${watermarkGenerator.getUserTierDescription()}`;
+        }
+
+        // Canvas水印测试
+        window.testCanvasWatermark = function() {
+            const canvas = document.getElementById('watermarkCanvas');
+            const ctx = canvas.getContext('2d');
+            const statusDiv = document.getElementById('watermarkStatus');
+            const resultDiv = document.getElementById('watermarkResult');
+
+            try {
+                // 绘制背景内容
+                ctx.fillStyle = '#e8f4f8';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 绘制一些示例内容
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('VidSlide AI 演示内容', canvas.width / 2, canvas.height / 2);
+
+                ctx.fillStyle = '#666';
+                ctx.font = '16px Arial';
+                ctx.fillText('这是演示用的示例内容', canvas.width / 2, canvas.height / 2 + 40);
+
+                // 应用水印
+                watermarkGenerator.applyToCanvas(canvas);
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Canvas水印应用成功';
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = 'Canvas水印测试结果:\n- 背景内容: 已绘制\n- 水印应用: 已完成\n- 渲染效果: 请查看上方画布';
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ Canvas水印测试失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+            }
+        };
+
+        window.clearCanvas = function() {
+            const canvas = document.getElementById('watermarkCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            document.getElementById('watermarkStatus').className = 'status info';
+            document.getElementById('watermarkStatus').textContent = '画布已清除';
+        };
+
+        // 水印预览更新
+        window.updateWatermarkPreviews = function() {
+            const config = watermarkGenerator.getCurrentConfig();
+
+            // 免费版预览
+            const freeCanvas = document.getElementById('freePreview');
+            if (config.userTier === 'free' && config.showWatermark) {
+                const ctx = freeCanvas.getContext('2d');
+                ctx.clearRect(0, 0, freeCanvas.width, freeCanvas.height);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.font = '12px Arial';
+                ctx.fillText(config.watermarkText, 10, 35);
+            }
+
+            document.getElementById('previewStatus').className = 'status success';
+            document.getElementById('previewStatus').textContent = '✅ 水印预览已更新';
+        };
+
+        // 视频导出测试
+        window.prepareVideoCanvas = function() {
+            const canvas = document.getElementById('videoExportCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 创建渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制内容
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('VidSlide AI', canvas.width / 2, canvas.height / 2 - 20);
+
+            ctx.font = '18px Arial';
+            ctx.fillText('视频导出测试', canvas.width / 2, canvas.height / 2 + 20);
+
+            // 绘制一些图形
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillRect(50, 50, 100, 60);
+            ctx.fillRect(canvas.width - 150, canvas.height - 110, 100, 60);
+
+            document.getElementById('videoExportStatus').className = 'status success';
+            document.getElementById('videoExportStatus').textContent = '✅ 视频内容已准备';
+        };
+
+        window.testVideoExportWithWatermark = async function() {
+            await testVideoExport(true);
+        };
+
+        window.testVideoExportWithoutWatermark = async function() {
+            await testVideoExport(false);
+        };
+
+        async function testVideoExport(applyWatermark) {
+            const statusDiv = document.getElementById('videoExportStatus');
+            const resultDiv = document.getElementById('videoExportResult');
+
+            statusDiv.className = 'status info';
+            statusDiv.textContent = `正在导出${applyWatermark ? '带水印' : '无水印'}视频...`;
+
+            try {
+                const canvas = document.getElementById('videoExportCanvas');
+                const result = await videoExporter.exportVideo({
+                    canvas,
+                    duration: 3, // 3秒测试视频
+                    frameRate: 30,
+                    applyWatermark,
+                    onProgress: (progress) => {
+                        statusDiv.textContent = `导出进度: ${progress.message}`;
+                    }
+                });
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ ${applyWatermark ? '带水印' : '无水印'}视频导出成功`;
+
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h3>视频导出结果</h3>
+                    <p><strong>水印状态:</strong> ${applyWatermark ? '已应用' : '未应用'}</p>
+                    <p><strong>文件大小:</strong> ${(result.size / 1024).toFixed(1)} KB</p>
+                    <p><strong>文件类型:</strong> ${result.type}</p>
+                    <p><strong>预估时长:</strong> ${result.duration.toFixed(1)}秒</p>
+                    <div class="export-actions">
+                        <button onclick="downloadVideo('${URL.createObjectURL(result.blob)}', 'test-video-${applyWatermark ? 'watermark' : 'no-watermark'}.webm')">
+                            下载视频
+                        </button>
+                    </div>
+                `;
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 视频导出失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+            }
+        }
+
+        // HTML导出测试
+        window.testHtmlExportWithWatermark = async function() {
+            await testHtmlExport(true);
+        };
+
+        window.testHtmlExportWithoutWatermark = async function() {
+            await testHtmlExport(false);
+        };
+
+        async function testHtmlExport(applyWatermark) {
+            const statusDiv = document.getElementById('htmlExportStatus');
+            const resultDiv = document.getElementById('htmlExportResult');
+
+            statusDiv.className = 'status info';
+            statusDiv.textContent = `正在生成${applyWatermark ? '带水印' : '无水印'}HTML演示文稿...`;
+
+            try {
+                const testSlides = [
+                    {
+                        background: { color: '#ffffff' },
+                        elements: [
+                            {
+                                type: 'text',
+                                content: 'VidSlide AI 测试演示',
+                                x: 100,
+                                y: 150,
+                                style: { fontSize: '36px', color: '#333', fontWeight: 'bold' }
+                            },
+                            {
+                                type: 'text',
+                                content: `水印状态: ${applyWatermark ? '已启用' : '已禁用'}`,
+                                x: 100,
+                                y: 220,
+                                style: { fontSize: '18px', color: '#666' }
+                            }
+                        ]
+                    },
+                    {
+                        background: { color: '#f0f8ff' },
+                        elements: [
+                            {
+                                type: 'text',
+                                content: '第二页内容',
+                                x: 100,
+                                y: 180,
+                                style: { fontSize: '28px', color: '#333' }
+                            }
+                        ]
+                    }
+                ];
+
+                const result = await htmlExporter.exportHtml({
+                    slides: testSlides,
+                    title: `VidSlide AI ${applyWatermark ? '带水印' : '无水印'}演示`,
+                    applyWatermark
+                });
+
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ ${applyWatermark ? '带水印' : '无水印'}HTML演示文稿生成成功`;
+
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h3>HTML演示文稿结果</h3>
+                    <p><strong>水印状态:</strong> ${applyWatermark ? '已应用' : '未应用'}</p>
+                    <p><strong>文件大小:</strong> ${(result.size / 1024).toFixed(1)} KB</p>
+                    <p><strong>文件名:</strong> ${result.filename}</p>
+                    <p><strong>幻灯片数量:</strong> ${testSlides.length}</p>
+                    <div class="export-actions">
+                        <button onclick="previewHtml('${URL.createObjectURL(result.blob)}')">
+                            在新窗口预览
+                        </button>
+                        <button onclick="downloadHtml('${URL.createObjectURL(result.blob)}', '${result.filename}')">
+                            下载HTML文件
+                        </button>
+                    </div>
+                `;
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ HTML导出失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+            }
+        }
+
+        // 下载和预览功能
+        window.downloadVideo = function(blobUrl, filename) {
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        window.downloadHtml = function(blobUrl, filename) {
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        window.previewHtml = function(blobUrl) {
+            window.open(blobUrl, '_blank');
+        };
+
+        // 完整测试
+        window.runCompleteTest = async function() {
+            const btn = document.getElementById('completeTestBtn');
+            const statusDiv = document.getElementById('completeTestStatus');
+            const resultDiv = document.getElementById('completeTestResult');
+
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+
+            statusDiv.className = 'status info';
+            statusDiv.textContent = '正在运行完整水印功能测试...';
+
+            try {
+                const results = {
+                    userTierDetection: false,
+                    canvasWatermark: false,
+                    videoExport: false,
+                    htmlExport: false
+                };
+
+                // 测试用户等级检测
+                const config = watermarkGenerator.getCurrentConfig();
+                results.userTierDetection = config.userTier && typeof config.showWatermark === 'boolean';
+
+                // 测试Canvas水印
+                const testCanvas = document.createElement('canvas');
+                testCanvas.width = 200;
+                testCanvas.height = 100;
+                watermarkGenerator.applyToCanvas(testCanvas);
+                results.canvasWatermark = true;
+
+                // 测试视频导出
+                const videoCanvas = document.createElement('canvas');
+                videoCanvas.width = 320;
+                videoCanvas.height = 180;
+                const videoResult = await videoExporter.exportVideo({
+                    canvas: videoCanvas,
+                    duration: 1,
+                    applyWatermark: true
+                });
+                results.videoExport = videoResult && videoResult.blob;
+
+                // 测试HTML导出
+                const htmlResult = await htmlExporter.exportHtml({
+                    slides: [{
+                        background: { color: '#fff' },
+                        elements: [{
+                            type: 'text',
+                            content: '测试',
+                            x: 10,
+                            y: 30,
+                            style: { fontSize: '16px' }
+                        }]
+                    }],
+                    applyWatermark: true
+                });
+                results.htmlExport = htmlResult && htmlResult.blob;
+
+                // 计算成功率
+                const passedTests = Object.values(results).filter(Boolean).length;
+                const totalTests = Object.keys(results).length;
+
+                statusDiv.className = passedTests === totalTests ? 'status success' : 'status warning';
+                statusDiv.textContent = `✅ 完整测试完成: ${passedTests}/${totalTests}项通过`;
+
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = '完整功能测试结果:\n' +
+                    Object.entries(results).map(([test, passed]) =>
+                        `- ${test}: ${passed ? '✅ 通过' : '❌ 失败'}`
+                    ).join('\n');
+
+                updateOverallStatus(passedTests, totalTests);
+
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 完整测试失败: ${error.message}`;
+                resultDiv.style.display = 'none';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '运行完整测试';
+            }
+        };
+
+        function updateOverallStatus(passed = 0, total = 4) {
+            const statusDiv = document.getElementById('overallStatus');
+
+            if (passed === total) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `🎉 水印功能实现测试完全成功! (${passed}/${total})`;
+            } else if (passed >= total * 0.75) {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = `⚠️ 水印功能基本可用 (${passed}/${total})`;
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ 水印功能存在问题 (${passed}/${total})`;
+            }
+        }
+
+        // 初始化显示
+        updateOverallStatus();
+    </script>
+</body>
+</html>

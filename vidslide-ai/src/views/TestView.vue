@@ -7,7 +7,7 @@
     <h1>测试页面</h1>
     <p>如果这个页面能正常显示，说明基本路由和组件系统工作正常。</p>
     <el-button
-type="primary" @click="testMessage">测试按钮</el-button>
+type="primary" @click="testMessage"> 测试按钮 </el-button>
   </div>
 </template>
 

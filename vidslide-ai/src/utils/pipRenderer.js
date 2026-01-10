@@ -11,6 +11,11 @@ export class PipRenderer {
     this.isRendering = false
     this.animationFrame = null
 
+    // 检查Canvas上下文是否可用
+    if (!this.ctx) {
+      throw new Error('Canvas不支持2D上下文，无法初始化画中画渲染器')
+    }
+
     // 画中画配置
     this.pipConfig = {
       position: 'bottom-right',
@@ -526,23 +531,23 @@ export class PipRenderer {
      */
 
     switch (position) {
-      case 'top-left':
-        this.pipConfig.x = margin
-        this.pipConfig.y = margin
-        break
-      case 'top-right':
-        this.pipConfig.x = canvasWidth - pipSize - margin
-        this.pipConfig.y = margin
-        break
-      case 'bottom-left':
-        this.pipConfig.x = margin
-        this.pipConfig.y = canvasHeight - pipSize - margin
-        break
-      case 'bottom-right':
-      default:
-        this.pipConfig.x = canvasWidth - pipSize - margin
-        this.pipConfig.y = canvasHeight - pipSize - margin
-        break
+    case 'top-left':
+      this.pipConfig.x = margin
+      this.pipConfig.y = margin
+      break
+    case 'top-right':
+      this.pipConfig.x = canvasWidth - pipSize - margin
+      this.pipConfig.y = margin
+      break
+    case 'bottom-left':
+      this.pipConfig.x = margin
+      this.pipConfig.y = canvasHeight - pipSize - margin
+      break
+    case 'bottom-right':
+    default:
+      this.pipConfig.x = canvasWidth - pipSize - margin
+      this.pipConfig.y = canvasHeight - pipSize - margin
+      break
     }
 
     // 根据样式设置圆角
@@ -555,16 +560,16 @@ export class PipRenderer {
      */
 
     switch (this.pipConfig.style) {
-      case 'circle':
-        this.pipConfig.borderRadius = pipSize / 2
-        break
-      case 'rounded':
-        this.pipConfig.borderRadius = Math.min(pipSize * 0.2, 20)
-        break
-      case 'square':
-      default:
-        this.pipConfig.borderRadius = 0
-        break
+    case 'circle':
+      this.pipConfig.borderRadius = pipSize / 2
+      break
+    case 'rounded':
+      this.pipConfig.borderRadius = Math.min(pipSize * 0.2, 20)
+      break
+    case 'square':
+    default:
+      this.pipConfig.borderRadius = 0
+      break
     }
   }
 

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能裁剪功能验证测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+        }
+
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .test-section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        button.success {
+            background: #27ae60;
+        }
+
+        button.error {
+            background: #e74c3c;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .status.loading {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status.success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background: #fafafa;
+        }
+
+        .result-item h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .result-item .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .result-item .metric span:first-child {
+            font-weight: bold;
+        }
+
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .image-container {
+            text-align: center;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .image-container .label {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .crop-overlay {
+            position: relative;
+            display: inline-block;
+        }
+
+        .crop-rect {
+            position: absolute;
+            border: 2px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.3);
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s;
+        }
+
+        .console-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .console-output .log-entry {
+            margin: 2px 0;
+        }
+
+        .console-output .error {
+            color: #e74c3c;
+        }
+
+        .console-output .success {
+            color: #27ae60;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .summary-card h3 {
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .recommendations {
+            margin-top: 20px;
+        }
+
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .recommendations li:before {
+            content: "✓";
+            margin-right: 10px;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 智能裁剪功能验证测试</h1>
+            <p>测试OpenCV.js集成的智能裁剪算法，包括准确性、性能和内存管理</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 验证控制面板</h2>
+            <div class="test-controls">
+                <button id="start-validation" onclick="startValidation()">开始全面验证</button>
+                <button id="test-opencv" onclick="testOpenCV()">测试OpenCV集成</button>
+                <button id="test-accuracy" onclick="testAccuracy()">测试算法准确性</button>
+                <button id="test-performance" onclick="testPerformance()">测试性能基准</button>
+                <button id="test-memory" onclick="testMemory()">测试内存管理</button>
+                <button id="clear-console" onclick="clearConsole()">清空控制台</button>
+            </div>
+
+            <div id="overall-status" class="status" style="display: none;">
+                验证状态显示区域
+            </div>
+
+            <div id="progress-container" style="display: none;">
+                <div>验证进度:</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 验证结果</h2>
+            <div id="results-container">
+                <p>请点击"开始全面验证"来运行测试</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🖼️ 裁剪效果演示</h2>
+            <div id="demo-container">
+                <p>选择一张测试图片进行智能裁剪演示</p>
+                <div class="test-controls">
+                    <button onclick="demoCrop('centered')">居中主体</button>
+                    <button onclick="demoCrop('offset')">偏移主体</button>
+                    <button onclick="demoCrop('multiple')">多主体</button>
+                    <button onclick="demoCrop('complex')">复杂背景</button>
+                    <button onclick="demoCrop('contrast')">低对比度</button>
+                </div>
+                <div id="demo-results"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>💻 控制台输出</h2>
+            <div class="console-output" id="console-output">
+                等待验证开始...
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { validateSmartCrop, getSmartCropValidationSummary } from './smart-crop-validation.js'
+
+        let currentValidation = null
+        let consoleElement = document.getElementById('console-output')
+
+        // 控制台日志函数
+        function log(message, type = 'info') {
+            const entry = document.createElement('div')
+            entry.className = `log-entry ${type}`
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            consoleElement.appendChild(entry)
+            consoleElement.scrollTop = consoleElement.scrollHeight
+            console.log(message)
+        }
+
+        // 更新进度条
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('progress-fill')
+            const progressContainer = document.getElementById('progress-container')
+
+            progressContainer.style.display = 'block'
+            progressFill.style.width = `${percent}%`
+        }
+
+        // 更新状态
+        function updateStatus(message, type = 'loading') {
+            const statusElement = document.getElementById('overall-status')
+            statusElement.textContent = message
+            statusElement.className = `status ${type}`
+            statusElement.style.display = 'block'
+        }
+
+        // 显示验证结果
+        function displayResults(summary) {
+            const container = document.getElementById('results-container')
+            const { overallScore, results, recommendations, nextSteps } = summary
+
+            let html = `
+                <div class="summary-card">
+                    <h3>🏆 验证完成总结</h3>
+                    <div class="score-display">${overallScore}/100</div>
+                    <p style="text-align: center; margin-bottom: 20px;">
+                        ${overallScore >= 80 ? '优秀' : overallScore >= 60 ? '良好' : '需要改进'}
+                    </p>
+                </div>
+
+                <div class="results-grid">
+            `
+
+            results.forEach(result => {
+                const icon = result.success ? '✅' : '❌'
+                const statusClass = result.success ? 'success' : 'error'
+
+                html += `
+                    <div class="result-item">
+                        <h3>${icon} ${result.name}</h3>
+                        <div class="metric">
+                            <span>状态:</span>
+                            <span class="${statusClass}">${result.success ? '通过' : '失败'}</span>
+                        </div>
+                    </div>
+                `
+            })
+
+            html += `
+                </div>
+
+                <div class="recommendations">
+                    <h3>💡 实施建议</h3>
+                    <ul>
+                        ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+
+                    <h3 style="margin-top: 20px;">🚀 后续步骤</h3>
+                    <ul>
+                        ${nextSteps.map(step => `<li>${step}</li>`).join('')}
+                    </ul>
+                </div>
+            `
+
+            container.innerHTML = html
+        }
+
+        // 开始全面验证
+        window.startValidation = async function() {
+            if (currentValidation) return
+
+            try {
+                updateStatus('正在初始化验证器...', 'loading')
+                updateProgress(0)
+
+                log('🚀 开始智能裁剪功能全面验证', 'success')
+
+                const validator = await validateSmartCrop()
+                currentValidation = validator
+
+                updateProgress(100)
+                updateStatus('验证完成！', 'success')
+
+                displayResults(validator)
+
+                log(`🏆 验证完成 - 总体得分: ${validator.overallScore}/100`, 'success')
+
+            } catch (error) {
+                updateStatus('验证失败: ' + error.message, 'error')
+                log('❌ 验证失败: ' + error.message, 'error')
+            }
+        }
+
+        // 测试OpenCV集成
+        window.testOpenCV = async function() {
+            try {
+                updateStatus('测试OpenCV.js集成...', 'loading')
+
+                const summary = getSmartCropValidationSummary()
+                if (!summary.opencvIntegration.success) {
+                    const validator = await import('./smart-crop-validation.js').then(m => m.getSmartCropValidator())
+                    await validator.validateOpenCVIntegration()
+                }
+
+                const result = getSmartCropValidationSummary().opencvIntegration
+                updateStatus(
+                    result.success ? 'OpenCV集成成功' : 'OpenCV集成失败',
+                    result.success ? 'success' : 'error'
+                )
+
+                log(`OpenCV集成测试: ${result.success ? '通过' : '失败'}`)
+
+            } catch (error) {
+                updateStatus('OpenCV测试失败', 'error')
+                log('OpenCV测试错误: ' + error.message, 'error')
+            }
+        }
+
+        // 测试算法准确性
+        window.testAccuracy = async function() {
+            try {
+                updateStatus('测试算法准确性...', 'loading')
+
+                const validator = await import('./smart-crop-validation.js').then(m => m.getSmartCropValidator())
+                const success = await validator.validateAlgorithmAccuracy()
+
+                updateStatus(
+                    success ? '算法准确性测试通过' : '算法准确性测试失败',
+                    success ? 'success' : 'error'
+                )
+
+                log(`算法准确性测试: ${success ? '通过' : '失败'}`)
+
+            } catch (error) {
+                updateStatus('准确性测试失败', 'error')
+                log('准确性测试错误: ' + error.message, 'error')
+            }
+        }
+
+        // 测试性能基准
+        window.testPerformance = async function() {
+            try {
+                updateStatus('测试性能基准...', 'loading')
+
+                const validator = await import('./smart-crop-validation.js').then(m => m.getSmartCropValidator())
+                const success = await validator.validatePerformanceBenchmark()
+
+                updateStatus(
+                    success ? '性能基准测试通过' : '性能基准测试失败',
+                    success ? 'success' : 'error'
+                )
+
+                log(`性能基准测试: ${success ? '通过' : '失败'}`)
+
+            } catch (error) {
+                updateStatus('性能测试失败', 'error')
+                log('性能测试错误: ' + error.message, 'error')
+            }
+        }
+
+        // 测试内存管理
+        window.testMemory = async function() {
+            try {
+                updateStatus('测试内存管理...', 'loading')
+
+                const validator = await import('./smart-crop-validation.js').then(m => m.getSmartCropValidator())
+                const success = await validator.validateMemoryManagement()
+
+                updateStatus(
+                    success ? '内存管理测试通过' : '内存管理测试失败',
+                    success ? 'success' : 'error'
+                )
+
+                log(`内存管理测试: ${success ? '通过' : '失败'}`)
+
+            } catch (error) {
+                updateStatus('内存测试失败', 'error')
+                log('内存测试错误: ' + error.message, 'error')
+            }
+        }
+
+        // 演示裁剪效果
+        window.demoCrop = async function(type) {
+            try {
+                updateStatus(`演示${type}裁剪...`, 'loading')
+
+                const demoContainer = document.getElementById('demo-results')
+                demoContainer.innerHTML = '<p>正在生成演示图像...</p>'
+
+                // 创建测试图像
+                const canvas = document.createElement('canvas')
+                const ctx = canvas.getContext('2d')
+                canvas.width = 400
+                canvas.height = 300
+
+                // 生成不同类型的测试图像
+                generateDemoImage(ctx, canvas.width, canvas.height, type)
+
+                const image = new Image()
+                image.src = canvas.toDataURL()
+                image.style.maxWidth = '100%'
+
+                await new Promise(resolve => image.onload = resolve)
+
+                // 导入智能裁剪模块
+                const { smartCropImage } = await import('./src/utils/smartCrop.js')
+
+                // 执行智能裁剪
+                const result = await smartCropImage(image)
+
+                if (result.success && result.cropRect) {
+                    // 显示原始图像和裁剪结果
+                    const originalContainer = document.createElement('div')
+                    originalContainer.className = 'image-container'
+                    originalContainer.innerHTML = `
+                        <div class="crop-overlay">
+                            <img src="${image.src}" alt="原始图像">
+                            <div class="crop-rect" style="
+                                left: ${result.cropRect.x}px;
+                                top: ${result.cropRect.y}px;
+                                width: ${result.cropRect.width}px;
+                                height: ${result.cropRect.height}px;
+                            "></div>
+                        </div>
+                        <div class="label">原始图像 (裁剪区域标出)</div>
+                    `
+
+                    // 创建裁剪后的图像
+                    const croppedCanvas = document.createElement('canvas')
+                    const croppedCtx = croppedCanvas.getContext('2d')
+                    croppedCanvas.width = result.cropRect.width
+                    croppedCanvas.height = result.cropRect.height
+
+                    croppedCtx.drawImage(
+                        image,
+                        result.cropRect.x, result.cropRect.y,
+                        result.cropRect.width, result.cropRect.height,
+                        0, 0,
+                        result.cropRect.width, result.cropRect.height
+                    )
+
+                    const croppedContainer = document.createElement('div')
+                    croppedContainer.className = 'image-container'
+                    croppedContainer.innerHTML = `
+                        <img src="${croppedCanvas.toDataURL()}" alt="裁剪结果">
+                        <div class="label">裁剪结果</div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                            置信度: ${(result.confidence * 100).toFixed(1)}%<br>
+                            处理时间: ${result.processingTime}ms
+                        </div>
+                    `
+
+                    demoContainer.innerHTML = ''
+                    demoContainer.appendChild(originalContainer)
+                    demoContainer.appendChild(croppedContainer)
+
+                    updateStatus(`裁剪演示完成 - 置信度: ${(result.confidence * 100).toFixed(1)}%`, 'success')
+                    log(`裁剪演示完成: ${type}, 置信度 ${(result.confidence * 100).toFixed(1)}%`)
+
+                } else {
+                    demoContainer.innerHTML = '<p style="color: #e74c3c;">裁剪失败</p>'
+                    updateStatus('裁剪演示失败', 'error')
+                }
+
+            } catch (error) {
+                updateStatus('裁剪演示出错', 'error')
+                log('裁剪演示错误: ' + error.message, 'error')
+            }
+        }
+
+        // 生成演示图像
+        function generateDemoImage(ctx, width, height, type) {
+            // 绘制背景
+            ctx.fillStyle = '#f0f0f0'
+            ctx.fillRect(0, 0, width, height)
+
+            switch (type) {
+                case 'centered':
+                    // 居中矩形主体
+                    ctx.fillStyle = '#333333'
+                    ctx.fillRect(width * 0.25, height * 0.25, width * 0.5, height * 0.5)
+                    break
+
+                case 'offset':
+                    // 偏移圆形主体
+                    ctx.fillStyle = '#666666'
+                    ctx.beginPath()
+                    ctx.arc(width * 0.7, height * 0.6, width * 0.15, 0, 2 * Math.PI)
+                    ctx.fill()
+                    break
+
+                case 'multiple':
+                    // 多个主体
+                    ctx.fillStyle = '#444444'
+                    ctx.fillRect(width * 0.1, height * 0.1, width * 0.3, height * 0.3)
+                    ctx.fillStyle = '#777777'
+                    ctx.fillRect(width * 0.6, height * 0.5, width * 0.3, height * 0.2)
+                    break
+
+                case 'complex':
+                    // 复杂背景 + 主体
+                    for (let i = 0; i < 20; i++) {
+                        ctx.fillStyle = `hsl(${Math.random() * 360}, 30%, ${50 + Math.random() * 20}%)`
+                        ctx.fillRect(
+                            Math.random() * width,
+                            Math.random() * height,
+                            Math.random() * 30 + 10,
+                            Math.random() * 30 + 10
+                        )
+                    }
+                    ctx.fillStyle = '#000000'
+                    ctx.fillRect(width * 0.3, height * 0.3, width * 0.4, height * 0.4)
+                    break
+
+                case 'contrast':
+                    // 低对比度
+                    ctx.fillStyle = '#e0e0e0'
+                    ctx.fillRect(0, 0, width, height)
+                    ctx.fillStyle = '#c0c0c0'
+                    ctx.fillRect(width * 0.2, height * 0.2, width * 0.6, height * 0.6)
+                    break
+            }
+        }
+
+        // 清空控制台
+        window.clearConsole = function() {
+            consoleElement.innerHTML = '控制台已清空...'
+        }
+
+        // 页面加载完成提示
+        log('智能裁剪验证测试页面已加载完成', 'success')
+        log('点击"开始全面验证"开始测试', 'info')
+    </script>
+</body>
+</html>

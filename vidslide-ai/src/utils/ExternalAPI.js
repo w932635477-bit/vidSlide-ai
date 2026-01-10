@@ -53,7 +53,7 @@ export class ExternalAPI {
 
      */
 
-    if(this.apis[apiName]) {
+    if (this.apis[apiName]) {
       this.apis[apiName].accessKey = accessKey
       console.log(`${apiName} API已配置`)
     } else {
@@ -84,10 +84,10 @@ export class ExternalAPI {
    * @throws {Error} 当所有API都不可用或搜索失败时抛出错误
    */
   async /**
-  * searchAssets 方法
-  * VidSlide AI 功能实现
-  */
- searchAssets(query, options = {}) {
+   * searchAssets 方法
+   * VidSlide AI 功能实现
+   */
+  async searchAssets(query, options = {}) {
     const {
       type = 'photo', // photo, video, illustration
       orientation = 'all', // landscape, portrait, squarish
@@ -121,7 +121,7 @@ export class ExternalAPI {
 
      */
 
-    for(const apiResult of apiResults) {
+    for (const apiResult of apiResults) {
       results.push(...apiResult)
     }
 
@@ -137,10 +137,10 @@ export class ExternalAPI {
    * @returns {Promise<Array>} 素材列表
    */
   async /**
-  * searchFromAPI 方法
-  * VidSlide AI 功能实现
-  */
- searchFromAPI(apiName, query, options = {}) {
+   * searchFromAPI 方法
+   * VidSlide AI 功能实现
+   */
+  async searchFromAPI(apiName, query, options = {}) {
     const cacheKey = `${apiName}_${query}_${JSON.stringify(options)}`
     const cached = this.getFromCache(cacheKey)
 
@@ -155,8 +155,7 @@ export class ExternalAPI {
 
      */
 
-
-    if(cached) {
+    if (cached) {
       return cached
     }
 
@@ -169,7 +168,7 @@ export class ExternalAPI {
 
      */
 
-    if(!config || !config.accessKey) {
+    if (!config || !config.accessKey) {
       throw new Error(`${apiName} API未配置`)
     }
 
@@ -186,16 +185,15 @@ export class ExternalAPI {
 
      */
 
-
-    switch(apiName) {
-      case 'unsplash':
-        results = await this.searchUnsplash(query, options)
-        break
-      case 'pexels':
-        results = await this.searchPexels(query, options)
-        break
-      default:
-        throw new Error(`不支持的API: ${apiName}`)
+    switch (apiName) {
+    case 'unsplash':
+      results = await this.searchUnsplash(query, options)
+      break
+    case 'pexels':
+      results = await this.searchPexels(query, options)
+      break
+    default:
+      throw new Error(`不支持的API: ${apiName}`)
     }
 
     // 缓存结果
@@ -210,11 +208,11 @@ export class ExternalAPI {
    * @param {Object} options - 搜索选项
    * @returns {Promise<Array>} Unsplash素材列表
    */
-  async /**
-  * searchUnsplash 方法
-  * VidSlide AI 功能实现
-  */
- searchUnsplash(query, options = {}) {
+  /**
+   * searchUnsplash 方法
+   * VidSlide AI 功能实现
+   */
+  async searchUnsplash(query, options = {}) {
     const { orientation, color, limit = 10, page = 1 } = options
     const config = this.apis.unsplash
 
@@ -236,8 +234,7 @@ export class ExternalAPI {
 
      */
 
-
-    if(orientation && orientation !== 'all') {
+    if (orientation && orientation !== 'all') {
       params.append('orientation', orientation)
     }
 
@@ -252,8 +249,7 @@ export class ExternalAPI {
 
      */
 
-
-    if(color) {
+    if (color) {
       params.append('color', color)
     }
 
@@ -269,7 +265,7 @@ export class ExternalAPI {
 
        */
 
-      if(!response.ok) {
+      if (!response.ok) {
         throw new Error(`Unsplash API错误: ${response.status}`)
       }
 
@@ -305,11 +301,11 @@ export class ExternalAPI {
         isDownloaded: false,
         fileSize: 0 // 需要下载后才能知道
       }))
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('Unsplash搜索失败:', error)
       throw error
     }
@@ -321,11 +317,11 @@ export class ExternalAPI {
    * @param {Object} options - 搜索选项
    * @returns {Promise<Array>} Pexels素材列表
    */
-  async /**
-  * searchPexels 方法
-  * VidSlide AI 功能实现
-  */
- searchPexels(query, options = {}) {
+  /**
+   * searchPexels 方法
+   * VidSlide AI 功能实现
+   */
+  async searchPexels(query, options = {}) {
     const { orientation, limit = 10, page = 1 } = options
     const config = this.apis.pexels
 
@@ -346,8 +342,7 @@ export class ExternalAPI {
 
      */
 
-
-    if(orientation && orientation !== 'all') {
+    if (orientation && orientation !== 'all') {
       params.append('orientation', orientation)
     }
 
@@ -371,8 +366,7 @@ export class ExternalAPI {
 
        */
 
-
-      if(!response.ok) {
+      if (!response.ok) {
         throw new Error(`Pexels API错误: ${response.status}`)
       }
 
@@ -407,11 +401,7 @@ export class ExternalAPI {
         isDownloaded: false,
         fileSize: 0
       }))
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
       console.error('Pexels搜索失败:', error)
       throw error
     }
@@ -422,11 +412,11 @@ export class ExternalAPI {
    * @param {Object} options - 获取选项
    * @returns {Promise<Array>} 热门素材列表
    */
-  async /**
-  * getPopularAssets 方法
-  * VidSlide AI 功能实现
-  */
- getPopularAssets(options = {}) {
+  /**
+   * getPopularAssets 方法
+   * VidSlide AI 功能实现
+   */
+  async getPopularAssets(options = {}) {
     const { limit = 20 } = options
 
     const results = []
@@ -454,8 +444,7 @@ export class ExternalAPI {
 
      */
 
-
-    for(const apiResult of apiResults) {
+    for (const apiResult of apiResults) {
       results.push(...apiResult)
     }
 
@@ -468,11 +457,11 @@ export class ExternalAPI {
    * @param {Object} options - 获取选项
    * @returns {Promise<Array>} 热门素材列表
    */
-  async /**
-  * getPopularFromAPI 方法
-  * VidSlide AI 功能实现
-  */
- getPopularFromAPI(apiName, options = {}) {
+  /**
+   * getPopularFromAPI 方法
+   * VidSlide AI 功能实现
+   */
+  async getPopularFromAPI(apiName, options = {}) {
     const { limit = 10 } = options
     const cacheKey = `${apiName}_popular_${limit}`
     const cached = this.getFromCache(cacheKey)
@@ -488,8 +477,7 @@ export class ExternalAPI {
 
      */
 
-
-    if(cached) {
+    if (cached) {
       return cached
     }
 
@@ -502,7 +490,7 @@ export class ExternalAPI {
 
      */
 
-    if(!config || !config.accessKey) {
+    if (!config || !config.accessKey) {
       throw new Error(`${apiName} API未配置`)
     }
 
@@ -519,16 +507,15 @@ export class ExternalAPI {
 
      */
 
-
-    switch(apiName) {
-      case 'unsplash':
-        results = await this.getUnsplashPopular(limit)
-        break
-      case 'pexels':
-        results = await this.getPexelsPopular(limit)
-        break
-      default:
-        throw new Error(`不支持的API: ${apiName}`)
+    switch (apiName) {
+    case 'unsplash':
+      results = await this.getUnsplashPopular(limit)
+      break
+    case 'pexels':
+      results = await this.getPexelsPopular(limit)
+      break
+    default:
+      throw new Error(`不支持的API: ${apiName}`)
     }
 
     this.setCache(cacheKey, results)
@@ -540,11 +527,11 @@ export class ExternalAPI {
    * @param {number} limit - 数量限制
    * @returns {Promise<Array>} 热门素材列表
    */
-  async /**
-  * getUnsplashPopular 方法
-  * VidSlide AI 功能实现
-  */
- getUnsplashPopular(limit = 10) {
+  /**
+   * getUnsplashPopular 方法
+   * VidSlide AI 功能实现
+   */
+  async getUnsplashPopular(limit = 10) {
     const config = this.apis.unsplash
     const url = `${config.baseUrl}/photos?client_id=${config.accessKey}&per_page=${limit}&order_by=popular`
 
@@ -557,7 +544,7 @@ export class ExternalAPI {
 
      */
 
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error(`Unsplash API错误: ${response.status}`)
     }
 
@@ -570,11 +557,11 @@ export class ExternalAPI {
    * @param {number} limit - 数量限制
    * @returns {Promise<Array>} 热门素材列表
    */
-  async /**
-  * getPexelsPopular 方法
-  * VidSlide AI 功能实现
-  */
- getPexelsPopular(limit = 10) {
+  /**
+   * getPexelsPopular 方法
+   * VidSlide AI 功能实现
+   */
+  async getPexelsPopular(limit = 10) {
     const config = this.apis.pexels
     const url = `${config.baseUrl}/curated?per_page=${limit}`
 
@@ -595,8 +582,7 @@ export class ExternalAPI {
 
      */
 
-
-    if(!response.ok) {
+    if (!response.ok) {
       throw new Error(`Pexels API错误: ${response.status}`)
     }
 
@@ -609,11 +595,11 @@ export class ExternalAPI {
    * @param {Object} asset - 素材对象
    * @returns {Promise<Blob>} 素材文件
    */
-  async /**
-  * downloadAsset 方法
-  * VidSlide AI 功能实现
-  */
- downloadAsset(asset) {
+  /**
+   * downloadAsset 方法
+   * VidSlide AI 功能实现
+   */
+  async downloadAsset(asset) {
     /**
 
      * if 方法
@@ -622,7 +608,7 @@ export class ExternalAPI {
 
      */
 
-    if(!asset.downloadUrl) {
+    if (!asset.downloadUrl) {
       throw new Error('素材没有下载链接')
     }
 
@@ -636,17 +622,17 @@ export class ExternalAPI {
 
        */
 
-      if(!response.ok) {
+      if (!response.ok) {
         throw new Error(`下载失败: ${response.status}`)
       }
 
       const blob = await response.blob()
       return blob
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('下载素材失败:', error)
       throw new Error('下载素材失败，请检查网络连接')
     }
@@ -861,7 +847,7 @@ export class ExternalAPI {
 
      */
 
-    for(let i = shuffled.length - 1; i > 0; i--) {
+    for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
     }

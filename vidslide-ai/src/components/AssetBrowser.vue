@@ -14,30 +14,17 @@
   - 响应式设计和用户体验优化
 -->
 <template>
-  <div
-class="asset-browser" role="main"
-aria-label="素材浏览器"
->
+  <div class="asset-browser" role="main" aria-label="素材浏览器">
     <!-- 浏览器头部 -->
-    <header
-class="browser-header" role="banner"
->
+    <header class="browser-header" role="banner">
       <div class="header-left">
-        <h1 id="asset-browser-title">
-素材浏览器
-</h1>
-        <el-tag
-:type="getStatusColor()" size="small"
-aria-label="浏览器状态"
->
+        <h1 id="asset-browser-title">素材浏览器</h1>
+        <el-tag :type="getStatusColor()" size="small" aria-label="浏览器状态">
           {{ getStatusText() }}
         </el-tag>
       </div>
 
-      <div
-class="header-actions" role="toolbar"
-aria-label="浏览器操作"
->
+      <div class="header-actions" role="toolbar" aria-label="浏览器操作">
         <el-button
           type="primary"
           size="small"
@@ -51,10 +38,7 @@ aria-label="浏览器操作"
           </el-icon>
           刷新
         </el-button>
-        <span
-v-if="isLoading" id="loading-status"
-class="sr-only"
->正在加载素材...</span>
+        <span v-if="isLoading" id="loading-status" class="sr-only">正在加载素材...</span>
 
         <el-button
           type="success"
@@ -71,14 +55,9 @@ class="sr-only"
     </header>
 
     <!-- 搜索和过滤区域 -->
-    <section
-class="search-filters" aria-labelledby="search-filters-heading"
->
-      <h2 id="search-filters-heading"
-class="sr-only"
->
-搜索和过滤选项
-</h2>
+    <section class="search-filters" aria-labelledby="search-filters-heading">
+      <h2
+id="search-filters-heading" class="sr-only">搜索和过滤选项</h2>
       <div class="search-row">
         <el-input
           v-model="searchQuery"
@@ -95,14 +74,9 @@ class="sr-only"
             </el-icon>
           </template>
         </el-input>
-        <span
-id="search-help" class="sr-only"
->输入关键词搜索图片、视频或音频素材</span>
+        <span id="search-help" class="sr-only">输入关键词搜索图片、视频或音频素材</span>
 
-        <el-select
-v-model="selectedCategory" placeholder="分类"
-clearable @change="applyFilters"
->
+        <el-select v-model="selectedCategory" placeholder="分类" clearable @change="applyFilters">
           <el-option
             v-for="category in categories"
             :key="category.id"
@@ -113,48 +87,23 @@ clearable @change="applyFilters"
           </el-option>
         </el-select>
 
-        <el-select
-v-model="selectedType" placeholder="类型"
-clearable @change="applyFilters"
->
-          <el-option
-label="图片" value="image"
-/>
-          <el-option
-label="视频" value="video"
-/>
-          <el-option
-label="音频" value="audio"
-/>
+        <el-select v-model="selectedType" placeholder="类型" clearable @change="applyFilters">
+          <el-option label="图片" value="image" />
+          <el-option label="视频" value="video" />
+          <el-option label="音频" value="audio" />
         </el-select>
 
-        <el-select
-v-model="sortBy" placeholder="排序"
-@change="applySorting"
->
-          <el-option
-label="最新使用" value="lastUsed"
-/>
-          <el-option
-label="创建时间" value="createdAt"
-/>
-          <el-option
-label="名称" value="name"
-/>
-          <el-option
-label="大小" value="fileSize"
-/>
+        <el-select v-model="sortBy" placeholder="排序" @change="applySorting">
+          <el-option label="最新使用" value="lastUsed" />
+          <el-option label="创建时间" value="createdAt" />
+          <el-option label="名称" value="name" />
+          <el-option label="大小" value="fileSize" />
         </el-select>
       </div>
 
       <div class="filter-row">
-        <el-checkbox-group
-v-model="colorFilters" @change="applyFilters"
->
-          <el-checkbox
-v-for="color in supportedColors" :key="color.id"
-:label="color.id"
->
+        <el-checkbox-group v-model="colorFilters" @change="applyFilters">
+          <el-checkbox v-for="color in supportedColors" :key="color.id" :label="color.id">
             {{ color.name }}
           </el-checkbox>
         </el-checkbox-group>
@@ -170,49 +119,27 @@ v-for="color in supportedColors" :key="color.id"
   </div>
 
   <!-- 素材网格 -->
-  <section
-class="assets-grid" aria-labelledby="assets-grid-heading"
-role="region"
->
-    <h2 id="assets-grid-heading"
-class="sr-only"
->
-素材列表
-</h2>
+  <section class="assets-grid" aria-labelledby="assets-grid-heading" role="region">
+    <h2
+id="assets-grid-heading" class="sr-only">素材列表</h2>
 
     <!-- 加载状态 -->
-    <div
-v-if="isLoading" class="loading-state"
-aria-live="polite" aria-label="正在加载素材"
->
-      <el-icon
-class="is-loading" aria-hidden="true"
->
+    <div v-if="isLoading" class="loading-state" aria-live="polite" aria-label="正在加载素材">
+      <el-icon class="is-loading" aria-hidden="true">
         <Loading />
       </el-icon>
       <p>正在加载素材...</p>
     </div>
 
     <!-- 空状态 -->
-    <div
-v-else-if="assets.length === 0" class="empty-state"
-aria-live="polite"
->
-      <el-empty
-:description="getEmptyDescription()" :image-size="100"
->
+    <div v-else-if="assets.length === 0" class="empty-state" aria-live="polite">
+      <el-empty :description="getEmptyDescription()" :image-size="100">
         <template #image>
-          <el-icon
-size="100" class="empty-icon"
-aria-hidden="true"
->
+          <el-icon size="100" class="empty-icon" aria-hidden="true">
             <Picture />
           </el-icon>
         </template>
-        <el-button
-v-if="searchQuery" type="primary"
-aria-label="清除搜索条件" @click="clearSearch"
->
+        <el-button v-if="searchQuery" type="primary" aria-label="清除搜索条件" @click="clearSearch">
           清除搜索
         </el-button>
         <el-button
@@ -261,22 +188,16 @@ aria-label="清除搜索条件" @click="clearSearch"
             :src="asset.thumbnail"
             :alt="asset.name"
             @error="handleImageError"
-          >
-          <div
-v-else class="thumbnail-placeholder"
->
+          />
+          <div v-else class="thumbnail-placeholder">
             <el-icon size="32">
               <Picture />
             </el-icon>
           </div>
 
           <!-- 下载状态指示器 -->
-          <div
-v-if="asset.isDownloaded" class="download-indicator"
->
-            <el-icon
-size="16" color="#67C23A"
->
+          <div v-if="asset.isDownloaded" class="download-indicator">
+            <el-icon size="16" color="#67C23A">
               <Check />
             </el-icon>
           </div>
@@ -288,9 +209,7 @@ size="16" color="#67C23A"
             :class="getCopyrightClass(asset.copyrightInfo)"
             :aria-label="getCopyrightStatusText(asset.copyrightInfo)"
           >
-            <el-icon
-size="16" aria-hidden="true"
->
+            <el-icon size="16" aria-hidden="true">
               <Warning v-if="asset.copyrightInfo.status === 'unknown'" />
               <SuccessFilled v-else-if="asset.copyrightInfo.isSafe" />
               <CircleClose v-else />
@@ -299,18 +218,12 @@ size="16" aria-hidden="true"
         </div>
 
         <!-- 素材信息 -->
-        <div
-:id="`asset-info-${asset.id}`" class="asset-info"
->
-          <h3
-class="asset-name" :title="asset.name"
->
+        <div :id="`asset-info-${asset.id}`" class="asset-info">
+          <h3 class="asset-name" :title="asset.name">
             {{ asset.name }}
           </h3>
           <div class="asset-meta">
-            <span
-class="asset-source" aria-label="来源"
->
+            <span class="asset-source" aria-label="来源">
               {{ getSourceDisplayName(asset.source) }}
             </span>
             <span
@@ -321,19 +234,13 @@ class="asset-source" aria-label="来源"
               {{ formatFileSize(asset.fileSize) }}
             </span>
           </div>
-          <div
-v-if="asset.author" class="asset-author"
-:aria-label="`作者: ${asset.author.name}`"
->
+          <div v-if="asset.author" class="asset-author" :aria-label="`作者: ${asset.author.name}`">
             by {{ asset.author.name }}
           </div>
         </div>
 
         <!-- 操作按钮 -->
-        <div
-class="asset-actions" role="group"
-:aria-label="`${asset.name}的操作`"
->
+        <div class="asset-actions" role="group" :aria-label="`${asset.name}的操作`">
           <el-button
             v-if="!asset.isDownloaded"
             type="primary"
@@ -360,10 +267,7 @@ class="asset-actions" role="group"
             :aria-label="`${asset.name}的更多操作`"
             @command="cmd => handleAssetAction(cmd, asset)"
           >
-            <el-button
-size="small" :aria-label="`打开${asset.name}的操作菜单`"
-@click.stop
->
+            <el-button size="small" :aria-label="`打开${asset.name}的操作菜单`" @click.stop>
               <el-icon aria-hidden="true">
                 <More />
               </el-icon>
@@ -394,9 +298,7 @@ size="small" :aria-label="`打开${asset.name}的操作菜单`"
     </div>
 
     <!-- 分页 -->
-    <div
-v-if="totalAssets > pageSize" class="pagination"
->
+    <div v-if="totalAssets > pageSize" class="pagination">
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -468,10 +370,7 @@ v-if="totalAssets > pageSize" class="pagination"
               <ol>
                 <li>
                   访问
-                  <a
-href="https://www.pexels.com/api/" target="_blank"
-rel="noopener noreferrer"
->
+                  <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer">
                     Pexels API
                   </a>
                 </li>
@@ -500,13 +399,8 @@ rel="noopener noreferrer"
       </div>
 
       <template #footer>
-        <el-button @click="cancelApiConfig">
-取消
-</el-button>
-        <el-button
-type="primary" :loading="configuringApis"
-@click="confirmApiConfig"
->
+        <el-button @click="cancelApiConfig"> 取消 </el-button>
+        <el-button type="primary" :loading="configuringApis" @click="confirmApiConfig">
           确认配置
         </el-button>
       </template>
@@ -520,12 +414,41 @@ type="primary" :loading="configuringApis"
       :before-close="closePreview"
     >
       <div class="asset-preview">
+        <!-- 分辨率选择器 -->
+        <div class="preview-controls">
+          <div class="resolution-selector">
+            <label>预览质量:</label>
+            <select v-model="currentPreviewResolution" @change="updatePreviewImage">
+              <option
+                v-for="resolution in previewResolutions"
+                :key="resolution.value"
+                :value="resolution.value"
+              >
+                {{ resolution.label }}
+              </option>
+            </select>
+          </div>
+          <div v-if="previewLoading" class="preview-loading">
+            <el-icon class="is-loading">
+              <Loading />
+            </el-icon>
+            正在生成预览...
+          </div>
+        </div>
+
         <div class="preview-image">
           <img
-            v-if="previewAssetData?.url"
-            :src="previewAssetData.url"
-            :alt="previewAssetData.name"
-          >
+            v-if="currentPreviewUrl"
+            :src="currentPreviewUrl"
+            :alt="previewAssetData?.name"
+            class="preview-img"
+          />
+          <div v-else class="preview-placeholder">
+            <el-icon size="48">
+              <Picture />
+            </el-icon>
+            <p>暂无预览</p>
+          </div>
         </div>
 
         <div class="preview-info">
@@ -547,9 +470,7 @@ type="primary" :loading="configuringApis"
             </dl>
           </div>
 
-          <div
-v-if="previewAssetData?.author" class="info-section"
->
+          <div v-if="previewAssetData?.author" class="info-section">
             <h4>作者信息</h4>
             <dl class="info-list">
               <dt>姓名:</dt>
@@ -569,9 +490,7 @@ v-if="previewAssetData?.author" class="info-section"
             </dl>
           </div>
 
-          <div
-v-if="previewAssetData?.copyrightInfo" class="info-section"
->
+          <div v-if="previewAssetData?.copyrightInfo" class="info-section">
             <h4>版权信息</h4>
             <div class="copyright-status">
               <el-tag :type="getCopyrightTagType(previewAssetData.copyrightInfo)">
@@ -579,9 +498,7 @@ v-if="previewAssetData?.copyrightInfo" class="info-section"
               </el-tag>
             </div>
 
-            <dl
-v-if="previewAssetData.copyrightInfo.license" class="info-list"
->
+            <dl v-if="previewAssetData.copyrightInfo.license" class="info-list">
               <dt>许可证:</dt>
               <dd>{{ previewAssetData.copyrightInfo.license.name }}</dd>
               <dt>描述:</dt>
@@ -594,9 +511,7 @@ v-if="previewAssetData.copyrightInfo.license" class="info-list"
             >
               <h5>⚠️ 注意事项</h5>
               <ul>
-                <li
-v-for="warning in previewAssetData.copyrightInfo.warnings" :key="warning"
->
+                <li v-for="warning in previewAssetData.copyrightInfo.warnings" :key="warning">
                   {{ warning }}
                 </li>
               </ul>
@@ -606,9 +521,7 @@ v-for="warning in previewAssetData.copyrightInfo.warnings" :key="warning"
       </div>
 
       <template #footer>
-        <el-button @click="closePreview">
-关闭
-</el-button>
+        <el-button @click="closePreview"> 关闭 </el-button>
         <el-button
           v-if="!previewAssetData?.isDownloaded"
           type="primary"
@@ -718,6 +631,19 @@ const previewDialogVisible = ref(false)
 
 // 当前预览的素材数据
 const previewAssetData = ref(null)
+
+// 多分辨率预览配置
+const previewResolutions = [
+  { label: '低清 (256px)', value: 'low', maxSize: 256, quality: 0.6 },
+  { label: '中等 (512px)', value: 'medium', maxSize: 512, quality: 0.8 },
+  { label: '高清 (1024px)', value: 'high', maxSize: 1024, quality: 0.9 },
+  { label: '原图', value: 'original', maxSize: null, quality: 1.0 }
+]
+
+const currentPreviewResolution = ref('medium')
+const previewImageCache = ref(new Map()) // 预览图像缓存
+const currentPreviewUrl = ref('') // 当前预览URL
+const previewLoading = ref(false) // 预览加载状态
 
 // API配置对话框显示状态
 const apiConfigDialogVisible = ref(false)
@@ -996,6 +922,9 @@ const previewAsset = asset => {
   previewAssetData.value = asset
   previewDialogVisible.value = true
   emit('asset-previewed', asset)
+
+  // 初始化预览
+  updatePreviewImage()
 }
 
 /**
@@ -1012,6 +941,109 @@ const previewAsset = asset => {
 const closePreview = () => {
   previewDialogVisible.value = false
   previewAssetData.value = null
+  currentPreviewUrl.value = ''
+}
+
+/**
+ * 更新预览图像
+ */
+const updatePreviewImage = async () => {
+  if (!previewAssetData.value?.url) {
+    currentPreviewUrl.value = ''
+    return
+  }
+
+  const asset = previewAssetData.value
+  const resolution = currentPreviewResolution.value
+  const cacheKey = `${asset.id}_${resolution}`
+
+  // 检查缓存
+  if (previewImageCache.value.has(cacheKey)) {
+    currentPreviewUrl.value = previewImageCache.value.get(cacheKey)
+    return
+  }
+
+  previewLoading.value = true
+
+  try {
+    const previewUrl = await generatePreviewImage(asset.url, resolution)
+    currentPreviewUrl.value = previewUrl
+
+    // 缓存预览图像
+    previewImageCache.value.set(cacheKey, previewUrl)
+
+    // 限制缓存大小
+    if (previewImageCache.value.size > 50) {
+      const firstKey = previewImageCache.value.keys().next().value
+      previewImageCache.value.delete(firstKey)
+    }
+  } catch (error) {
+    console.error('生成预览图像失败:', error)
+    // 降级到原始图像
+    currentPreviewUrl.value = asset.url
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+/**
+ * 生成预览图像
+ */
+const generatePreviewImage = async (originalUrl, resolution) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+
+        const resolutionConfig = previewResolutions.find(r => r.value === resolution)
+        if (!resolutionConfig) {
+          resolve(originalUrl)
+          return
+        }
+
+        let { width, height } = img
+
+        // 计算缩放尺寸
+        if (resolutionConfig.maxSize) {
+          const maxSize = resolutionConfig.maxSize
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width
+              width = maxSize
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height
+              height = maxSize
+            }
+          }
+        }
+
+        // 设置canvas尺寸
+        canvas.width = Math.round(width)
+        canvas.height = Math.round(height)
+
+        // 绘制图像
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+        // 转换为DataURL
+        const previewUrl = canvas.toDataURL('image/jpeg', resolutionConfig.quality)
+        resolve(previewUrl)
+      } catch (error) {
+        reject(error)
+      }
+    }
+
+    img.onerror = () => {
+      reject(new Error('图像加载失败'))
+    }
+
+    img.src = originalUrl
+  })
 }
 
 const downloadAsset = async asset => {
@@ -1706,6 +1738,69 @@ onUnmounted(() => {
   flex: 1;
   max-height: 400px;
   overflow-y: auto;
+}
+
+/* 多分辨率预览样式 */
+.preview-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.resolution-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resolution-selector label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.resolution-selector select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.preview-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.preview-loading .el-icon {
+  color: #007aff;
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #999;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 2px dashed #ddd;
+}
+
+.preview-placeholder .el-icon {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.preview-placeholder p {
+  margin: 0;
+  font-size: 14px;
 }
 
 .info-section {

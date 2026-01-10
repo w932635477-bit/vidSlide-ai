@@ -4,9 +4,8 @@
 <!-- PipTemplate 组件模板 -->
 <template>
   <div class="pip-template">
-    <img src="/assets/templates/pip-template.png"
-alt="画中画效果模板" class="template-image"
-/>
+    <img
+src="/assets/templates/pip-template.png" alt="画中画效果模板" class="template-image" />
   </div>
 </template>
 

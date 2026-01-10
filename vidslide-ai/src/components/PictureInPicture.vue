@@ -7,18 +7,11 @@
   支持位置调节、大小控制、样式选择、动画效果等高级功能
 -->
 <template>
-  <aside
-class="picture-in-picture" role="complementary"
-aria-label="画中画效果控制面板"
->
+  <aside class="picture-in-picture" role="complementary" aria-label="画中画效果控制面板">
     <!-- 画中画控制面板 - 主要的用户交互区域 -->
-    <section
-class="pip-controls" aria-labelledby="pip-controls-heading"
->
+    <section class="pip-controls" aria-labelledby="pip-controls-heading">
       <header class="control-header">
-        <h2 id="pip-controls-heading">
-画中画效果
-</h2>
+        <h2 id="pip-controls-heading">画中画效果</h2>
         <!-- 状态指示器：显示画中画是否激活 -->
         <el-tag
           :type="isPipActive ? 'success' : 'info'"
@@ -32,16 +25,9 @@ class="pip-controls" aria-labelledby="pip-controls-heading"
 
       <!-- 位置选择 -->
       <fieldset class="control-section">
-        <legend class="control-label">
-显示位置
-</legend>
-        <div
-class="position-grid" role="radiogroup"
-aria-labelledby="position-label"
->
-          <span
-id="position-label" class="sr-only"
->选择画中画显示位置</span>
+        <legend class="control-label">显示位置</legend>
+        <div class="position-grid" role="radiogroup" aria-labelledby="position-label">
+          <span id="position-label" class="sr-only">选择画中画显示位置</span>
           <div
             v-for="position in positionOptions"
             :key="position.id"
@@ -55,9 +41,7 @@ id="position-label" class="sr-only"
             @keydown.enter="setPosition(position.id)"
             @keydown.space.prevent="setPosition(position.id)"
           >
-            <div
-class="position-icon" aria-hidden="true"
->
+            <div class="position-icon" aria-hidden="true">
               {{ position.icon }}
             </div>
             <span class="position-name">{{ position.name }}</span>
@@ -79,18 +63,13 @@ class="position-icon" aria-hidden="true"
             :aria-valuetext="`画中画大小: ${pipConfig.size}百分比`"
             @change="updatePipConfig"
           />
-          <div class="size-display"
-aria-live="polite"
->
-{{ pipConfig.size }}%
-</div>
+          <div
+class="size-display" aria-live="polite">{{ pipConfig.size }}%</div>
         </div>
 
         <!-- 样式选择 -->
         <div class="control-section">
-          <label
-class="control-label" for="style-radio-group"
->视觉样式</label>
+          <label class="control-label" for="style-radio-group">视觉样式</label>
           <el-radio-group
             id="style-radio-group"
             v-model="pipConfig.style"
@@ -98,23 +77,15 @@ class="control-label" for="style-radio-group"
             aria-label="选择画中画视觉样式"
             @change="updatePipConfig"
           >
-            <el-radio-button label="circle">
-圆形
-</el-radio-button>
-            <el-radio-button label="rounded">
-圆角
-</el-radio-button>
-            <el-radio-button label="square">
-方形
-</el-radio-button>
+            <el-radio-button label="circle"> 圆形 </el-radio-button>
+            <el-radio-button label="rounded"> 圆角 </el-radio-button>
+            <el-radio-button label="square"> 方形 </el-radio-button>
           </el-radio-group>
         </div>
 
         <!-- 动画设置 -->
         <div class="control-section">
-          <label
-class="control-label" for="animation-select"
->入场动画</label>
+          <label class="control-label" for="animation-select">入场动画</label>
           <el-select
             id="animation-select"
             v-model="pipConfig.animation"
@@ -122,27 +93,39 @@ class="control-label" for="animation-select"
             size="small"
             @change="updatePipConfig"
           >
-            <el-option label="fade-in"
-value="fade-in"
->
-淡入
-</el-option>
-            <el-option label="scale-in"
-value="scale-in"
->
-缩放
-</el-option>
-            <el-option label="slide-in"
-value="slide-in"
->
-滑入
-</el-option>
-            <el-option label="bounce-in"
-value="bounce-in"
->
-弹跳
-</el-option>
+            <el-option
+label="fade-in" value="fade-in"> 淡入 </el-option>
+            <el-option
+label="scale-in" value="scale-in"> 缩放 </el-option>
+            <el-option
+label="slide-in" value="slide-in"> 滑入 </el-option>
+            <el-option
+label="bounce-in" value="bounce-in"> 弹跳 </el-option>
           </el-select>
+        </div>
+
+        <!-- 人脸跟踪控制 -->
+        <div v-if="faceTrackingSupported" class="control-section">
+          <label class="control-label">高级功能</label>
+          <div class="face-tracking-controls">
+            <el-checkbox
+              v-model="faceTrackingEnabled"
+              :disabled="!faceTracker || !props.videoElement"
+              @change="toggleFaceTracking"
+            >
+              启用智能人脸跟踪
+            </el-checkbox>
+
+            <div
+              v-if="faceTrackingEnabled && trackingPerformance.faceDetected"
+              class="tracking-status"
+            >
+              <el-tag size="small" type="success">
+                人脸已检测 (置信度: {{ Math.round(trackingPerformance.confidence * 100) }}%)
+              </el-tag>
+              <small class="tracking-fps"> 跟踪FPS: {{ trackingPerformance.fps }} </small>
+            </div>
+          </div>
         </div>
 
         <!-- 控制按钮 -->
@@ -156,22 +139,14 @@ value="bounce-in"
             {{ isPipActive ? '停止画中画' : '启动画中画' }}
           </el-button>
 
-          <el-button
-type="warning" size="small"
-:disabled="!isPipActive" @click="resetToDefault"
->
+          <el-button type="warning" size="small" :disabled="!isPipActive" @click="resetToDefault">
             重置默认
           </el-button>
         </div>
 
         <!-- 画中画预览区域 -->
-        <div
-v-if="isPipActive" class="pip-preview"
-:style="previewStyle"
->
-          <div
-class="pip-container" :style="containerStyle"
->
+        <div v-if="isPipActive" class="pip-preview" :style="previewStyle">
+          <div class="pip-container" :style="containerStyle">
             <div class="pip-content">
               <!-- 这里会显示实际的画中画内容 -->
               <div class="pip-placeholder">
@@ -184,16 +159,11 @@ class="pip-container" :style="containerStyle"
           </div>
 
           <!-- 背景遮罩 -->
-          <div
-v-if="pipConfig.showOverlay" class="pip-overlay"
-:style="overlayStyle"
-/>
+          <div v-if="pipConfig.showOverlay" class="pip-overlay" :style="overlayStyle" />
         </div>
 
         <!-- 性能监控 -->
-        <div
-v-if="showPerformanceInfo" class="performance-info"
->
+        <div v-if="showPerformanceInfo" class="performance-info">
           <small class="performance-text">
             渲染时间: {{ renderTime }}ms | FPS: {{ currentFps }}
           </small>
@@ -230,29 +200,30 @@ v-if="showPerformanceInfo" class="performance-info"
  * - Canvas 2D渲染集成
  */
 
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { VideoPlay } from '@element-plus/icons-vue'
+import { AdvancedFaceTracker, checkFaceTrackingSupport } from '../utils/advancedFaceTracker.js'
 
 // Props (暂时未使用 - 组件正在重构中)
-// const props = defineProps({
-//   videoElement: {
-//     type: HTMLVideoElement,
-//     default: null
-//   },
-//   canvasElement: {
-//     type: HTMLCanvasElement,
-//     default: null
-//   },
-//   isActive: {
-//     type: Boolean,
-//     default: false
-//   },
-//   autoTrigger: {
-//     type: Boolean,
-//     default: true
-//   }
-// })
+const props = defineProps({
+  videoElement: {
+    type: HTMLVideoElement,
+    default: null
+  },
+  canvasElement: {
+    type: HTMLCanvasElement,
+    default: null
+  },
+  isActive: {
+    type: Boolean,
+    default: false
+  },
+  autoTrigger: {
+    type: Boolean,
+    default: true
+  }
+})
 
 // Emits
 const emit = defineEmits([
@@ -288,6 +259,16 @@ const currentFps = ref(60) // 当前帧率
 const animationFrame = ref(null) // 动画帧ID
 let lastFrameTime = 0 // 上一帧时间戳
 let frameCount = 0 // 帧计数器
+
+// 人脸跟踪器
+const faceTracker = ref(null)
+const faceTrackingEnabled = ref(false)
+const faceTrackingSupported = ref(false)
+const trackingPerformance = ref({
+  fps: 0,
+  confidence: 0,
+  faceDetected: false
+})
 
 // 可选的画中画位置
 const positionOptions = [
@@ -508,16 +489,16 @@ const applyEntranceAnimation = async () => {
 
 const applyExitAnimation = () => {
   return new Promise(resolve => {
-    const pipElementExit = document.querySelector('.pip-container')
-    if (!pipElementExit) {
+    const pipElement = document.querySelector('.pip-container')
+    if (!pipElement) {
       resolve()
       return
     }
 
-    pipElementExit.classList.add('pip-fade-out')
+    pipElement.classList.add('pip-fade-out')
 
     setTimeout(() => {
-      pipElementExit.classList.remove('pip-fade-out')
+      pipElement.classList.remove('pip-fade-out')
       resolve()
     }, 300)
   })
@@ -629,14 +610,125 @@ watch(
   }
 )
 
-onMounted(() => {
+// 人脸跟踪事件处理函数
+const handleFaceDetected = data => {
+  console.log('🎯 人脸检测到:', data)
+  trackingPerformance.value.faceDetected = true
+  trackingPerformance.value.confidence = data.confidence
+
+  // 如果启用了人脸跟踪且画中画未激活，可以考虑自动激活
+  if (faceTrackingEnabled.value && !isPipActive.value && props.autoTrigger) {
+    console.log('🤖 检测到人脸，考虑自动激活画中画')
+    // 这里可以添加自动激活逻辑
+  }
+}
+
+const handleFaceLost = () => {
+  console.log('👤 人脸丢失')
+  trackingPerformance.value.faceDetected = false
+  trackingPerformance.value.confidence = 0
+}
+
+const handleTrackingUpdate = data => {
+  // 更新跟踪性能数据
+  trackingPerformance.value.confidence = data.confidence
+
+  // 如果画中画激活且启用了人脸跟踪，可以根据人脸位置调整画中画位置
+  if (isPipActive.value && faceTrackingEnabled.value && data.faceBounds) {
+    const faceCenterX = data.faceBounds.centerX
+    const faceCenterY = data.faceBounds.centerY
+
+    // 简单的智能定位逻辑：根据人脸位置调整画中画位置
+    if (faceCenterX < 0.3) {
+      pipConfig.value.position = 'top-left'
+    } else if (faceCenterX > 0.7) {
+      pipConfig.value.position = 'top-right'
+    } else if (faceCenterY < 0.3) {
+      pipConfig.value.position = 'bottom-left'
+    } else {
+      pipConfig.value.position = 'bottom-right'
+    }
+  }
+}
+
+const handleTrackingPerformance = performance => {
+  trackingPerformance.value.fps = performance.fps
+}
+
+// 切换人脸跟踪
+const toggleFaceTracking = async () => {
+  if (!faceTrackingSupported.value) {
+    ElMessage.warning('您的浏览器不支持高级人脸跟踪功能')
+    return
+  }
+
+  if (!faceTracker.value) {
+    ElMessage.error('人脸跟踪器未初始化')
+    return
+  }
+
+  try {
+    if (faceTrackingEnabled.value) {
+      // 停止跟踪
+      faceTracker.value.stopTracking()
+      faceTrackingEnabled.value = false
+      console.log('⏹️ 人脸跟踪已停止')
+    } else {
+      // 开始跟踪
+      if (props.videoElement) {
+        await faceTracker.value.startTracking(props.videoElement)
+        faceTrackingEnabled.value = true
+        console.log('🎬 人脸跟踪已启动')
+      } else {
+        ElMessage.warning('请先加载视频')
+      }
+    }
+  } catch (error) {
+    console.error('切换人脸跟踪失败:', error)
+    ElMessage.error('人脸跟踪切换失败: ' + error.message)
+  }
+}
+
+onMounted(async () => {
   // 初始化设置
   console.log('PictureInPicture component mounted')
+
+  // 检查人脸跟踪支持
+  faceTrackingSupported.value = checkFaceTrackingSupport().overall
+
+  // 初始化人脸跟踪器
+  if (faceTrackingSupported.value) {
+    try {
+      faceTracker.value = new AdvancedFaceTracker({
+        maxNumFaces: 1,
+        smoothFactor: 0.8
+      })
+
+      await faceTracker.value.initialize()
+
+      // 设置事件监听器
+      faceTracker.value.addEventListener('faceDetected', handleFaceDetected)
+      faceTracker.value.addEventListener('faceLost', handleFaceLost)
+      faceTracker.value.addEventListener('trackingUpdate', handleTrackingUpdate)
+      faceTracker.value.addEventListener('performanceUpdate', handleTrackingPerformance)
+
+      console.log('✅ 人脸跟踪器初始化成功')
+    } catch (error) {
+      console.warn('❌ 人脸跟踪器初始化失败:', error)
+      faceTrackingSupported.value = false
+    }
+  }
 })
 
 onUnmounted(() => {
   // 清理资源
   stopPerformanceMonitoring()
+
+  // 清理人脸跟踪器
+  if (faceTracker.value) {
+    faceTracker.value.dispose()
+    faceTracker.value = null
+  }
 })
 </script>
 
@@ -921,6 +1013,38 @@ onUnmounted(() => {
 
   .pip-preview {
     margin-top: 16px;
+  }
+}
+
+/* 人脸跟踪控制样式 */
+.face-tracking-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tracking-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tracking-fps {
+  color: #666;
+  font-size: 12px;
+}
+
+/* 响应式设计中的人脸跟踪样式 */
+@media (max-width: 768px) {
+  .face-tracking-controls {
+    gap: 12px;
+  }
+
+  .tracking-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 }
 </style>

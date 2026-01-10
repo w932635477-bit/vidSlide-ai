@@ -638,15 +638,15 @@ export class VisualEffects {
      */
 
     switch (type) {
-      case 'ease-in':
-        return t * t
-      case 'ease-out':
-        return t * (2 - t)
-      case 'ease-in-out':
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-      case 'linear':
-      default:
-        return t
+    case 'ease-in':
+      return t * t
+    case 'ease-out':
+      return t * (2 - t)
+    case 'ease-in-out':
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
+    case 'linear':
+    default:
+      return t
     }
   }
 

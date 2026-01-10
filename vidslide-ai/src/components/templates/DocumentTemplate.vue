@@ -4,9 +4,8 @@
 <!-- DocumentTemplate 组件模板 -->
 <template>
   <div class="document-template">
-    <img src="/assets/templates/document-template.png"
-alt="文档展示模板" class="template-image"
-/>
+    <img
+src="/assets/templates/document-template.png" alt="文档展示模板" class="template-image" />
   </div>
 </template>
 

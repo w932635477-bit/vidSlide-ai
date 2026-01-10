@@ -253,11 +253,11 @@ let progress = 0; progress <= 100; progress += 20) {
       } = options
 
       // 实际实现中，这里会调用WASM转录功能
-      // /**
- * result 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description result 功能的具体实现
- */
+      /**
+       * result 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description result 功能的具体实现
+       */
 // result - 变量声明
 const result = await transcribe(audioFile, transcriptionOptions)
 

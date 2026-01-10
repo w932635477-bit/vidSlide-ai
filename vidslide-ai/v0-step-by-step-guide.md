@@ -3,16 +3,19 @@
 ## 📋 准备阶段 (10分钟)
 
 ### 第一步：确认网络环境
+
 - ✅ 确保你已经解决科学上网问题
 - ✅ 可以正常访问 [v0.dev](https://v0.dev)
 - ✅ 网络连接稳定（推荐使用稳定的网络环境）
 
 ### 第二步：准备设计材料
+
 - ✅ 已创建 `v0-template-requirements.md` (苹果风格需求文档)
 - ✅ 已创建 `v0-prompts.md` (专业提示词模板)
 - ✅ 已创建 `apple-designer-guide.md` (苹果设计指南)
 
 ### 第三步：复制核心提示词
+
 打开 `v0-prompts.md`，复制以下核心提示词到剪贴板：
 
 ```
@@ -111,6 +114,7 @@ Style: Enterprise PPT quality, clean, modern, professional
 如果初始设计需要优化，在V0聊天框中输入优化指令：
 
 **第一轮优化 - 强化苹果风格**：
+
 ```
 Please enhance the design with more authentic Apple aesthetics:
 
@@ -136,6 +140,7 @@ For all templates:
 ### 第九步：逐个优化模板 (15分钟)
 
 **优化画中画模板**：
+
 ```
 Focus on the Picture-in-Picture template:
 - Make it look exactly like iOS picture-in-picture player
@@ -146,6 +151,7 @@ Focus on the Picture-in-Picture template:
 ```
 
 **优化信息卡片模板**：
+
 ```
 Refine the Info Card template to match iOS notification style:
 - Large corner radius (24px)
@@ -156,6 +162,7 @@ Refine the Info Card template to match iOS notification style:
 ```
 
 **优化关键词高亮模板**：
+
 ```
 Improve Keyword Highlight template with macOS notification aesthetics:
 - Semi-transparent white background with blur
@@ -166,6 +173,7 @@ Improve Keyword Highlight template with macOS notification aesthetics:
 ```
 
 **优化文件展示模板**：
+
 ```
 Enhance Document Display with macOS Finder inspiration:
 - Realistic paper texture appearance
@@ -176,6 +184,7 @@ Enhance Document Display with macOS Finder inspiration:
 ```
 
 **优化标题文字模板**：
+
 ```
 Perfect the Title Text template with Apple TV elegance:
 - Pixel-perfect optical centering
@@ -188,6 +197,7 @@ Perfect the Title Text template with Apple TV elegance:
 ### 第十步：添加界面组件 (10分钟)
 
 **添加属性面板**：
+
 ```
 Now add a right-side property panel (300px width) for template customization:
 
@@ -208,6 +218,7 @@ Style with Apple design language: clean, grouped, generous spacing
 ```
 
 **添加时间轴编辑器**：
+
 ```
 Add a timeline editor at the bottom (200px height) with professional editing capabilities:
 
@@ -225,6 +236,7 @@ Make it look like professional video editing software with Apple polish
 ### 第十一步：响应式设计优化 (5分钟)
 
 **添加移动端适配**：
+
 ```
 Make the design fully responsive for different devices:
 
@@ -253,6 +265,7 @@ Mobile (<768px):
 ### 第十二步：视觉一致性检查 (5分钟)
 
 **统一视觉语言**：
+
 ```
 Ensure visual consistency across all 5 templates and components:
 
@@ -280,6 +293,7 @@ Spacing consistency:
 ### 第十三步：交互细节优化 (5分钟)
 
 **添加微交互**：
+
 ```
 Add subtle micro-interactions for professional polish:
 
@@ -302,6 +316,7 @@ Error states:
 ### 第十四步：性能和可访问性优化 (3分钟)
 
 **性能优化**：
+
 ```
 Optimize for performance:
 - Use efficient CSS animations (transform, opacity)
@@ -311,6 +326,7 @@ Optimize for performance:
 ```
 
 **可访问性**：
+
 ```
 Ensure accessibility compliance:
 - Sufficient color contrast ratios
@@ -329,68 +345,77 @@ Ensure accessibility compliance:
 
 **1. 导出完整设计**：
 
-   **找到导出按钮**：
-   - 在V0界面右上角，找到 **"Export"** 按钮（通常是下载图标或"Export"文字）
-   - 或者在设计预览区域上方找到 **"Download"** 或 **"Export"** 选项
-   - 如果是单个组件，右键点击组件选择"Export"
+**找到导出按钮**：
 
-   **选择导出格式**：
-   - **PNG格式**（推荐）: 高质量位图，适合预览和演示
-     - 分辨率选择: 2x (Retina) 或 4x (超高清)
-     - 背景: 透明背景（如果需要合成）或白色背景
-   - **SVG格式**: 矢量格式，可无限缩放，适合Web使用
-     - 保持矢量图形质量不变
-     - 文件更小，加载更快
-   - **React组件**: 如果需要代码形式（可选）
-     - 生成可直接使用的React代码
-     - 包含样式和交互逻辑
+- 在V0界面右上角，找到 **"Export"** 按钮（通常是下载图标或"Export"文字）
+- 或者在设计预览区域上方找到 **"Download"** 或 **"Export"** 选项
+- 如果是单个组件，右键点击组件选择"Export"
 
-   **为每个模板单独导出**：
-   - 逐个选中每个PPT模板
-   - 为每个模板设置合适的画布尺寸（建议1920x1080）
-   - 导出时命名规范：
-     ```
-     vidSlide-pip-template.png
-     vidSlide-info-card-template.png
-     vidSlide-keyword-highlight-template.png
-     vidSlide-document-display-template.png
-     vidSlide-title-text-template.png
-     ```
+**选择导出格式**：
+
+- **PNG格式**（推荐）: 高质量位图，适合预览和演示
+  - 分辨率选择: 2x (Retina) 或 4x (超高清)
+  - 背景: 透明背景（如果需要合成）或白色背景
+- **SVG格式**: 矢量格式，可无限缩放，适合Web使用
+  - 保持矢量图形质量不变
+  - 文件更小，加载更快
+- **React组件**: 如果需要代码形式（可选）
+  - 生成可直接使用的React代码
+  - 包含样式和交互逻辑
+
+**为每个模板单独导出**：
+
+- 逐个选中每个PPT模板
+- 为每个模板设置合适的画布尺寸（建议1920x1080）
+- 导出时命名规范：
+  ```
+  vidSlide-pip-template.png
+  vidSlide-info-card-template.png
+  vidSlide-keyword-highlight-template.png
+  vidSlide-document-display-template.png
+  vidSlide-title-text-template.png
+  ```
 
 **2. 导出属性面板和时间轴组件**：
-   - 选中右侧属性面板设计
-   - 导出为 `vidSlide-property-panel.png`
-   - 选中底部时间轴编辑器
-   - 导出为 `vidSlide-timeline-editor.png`
+
+- 选中右侧属性面板设计
+- 导出为 `vidSlide-property-panel.png`
+- 选中底部时间轴编辑器
+- 导出为 `vidSlide-timeline-editor.png`
 
 **3. 导出响应式版本**：
-   - 为每个断点导出单独版本：
-     - `vidSlide-templates-desktop.png` (1200px+)
-     - `vidSlide-templates-tablet.png` (768px-1199px)
-     - `vidSlide-templates-mobile.png` (<768px)
+
+- 为每个断点导出单独版本：
+  - `vidSlide-templates-desktop.png` (1200px+)
+  - `vidSlide-templates-tablet.png` (768px-1199px)
+  - `vidSlide-templates-mobile.png` (<768px)
 
 **导出质量设置**：
-   - **PNG设置**: 选择最高质量，开启抗锯齿
-   - **SVG设置**: 保持所有图层和样式
-   - **尺寸设置**: 确保导出尺寸与设计尺寸一致
-   - **背景设置**: 根据需要选择透明或指定背景色
+
+- **PNG设置**: 选择最高质量，开启抗锯齿
+- **SVG设置**: 保持所有图层和样式
+- **尺寸设置**: 确保导出尺寸与设计尺寸一致
+- **背景设置**: 根据需要选择透明或指定背景色
 
 **导出检查清单**：
-   - ✅ 所有5个模板都已导出
-   - ✅ 属性面板和时间轴已导出
-   - ✅ 响应式版本已导出
-   - ✅ 文件命名清晰规范
-   - ✅ 导出质量设置为最高
-   - ✅ 文件格式正确（PNG/SVG）
+
+- ✅ 所有5个模板都已导出
+- ✅ 属性面板和时间轴已导出
+- ✅ 响应式版本已导出
+- ✅ 文件命名清晰规范
+- ✅ 导出质量设置为最高
+- ✅ 文件格式正确（PNG/SVG）
 
 2. **组织文件结构**：
 
    **创建导出文件夹**：
+
    ```bash
    mkdir -p v0-design-exports/{templates,components,responsive,specifications}
    ```
 
    **推荐文件结构**：
+
    ```
    v0-design-exports/
    ├── templates/
@@ -413,15 +438,17 @@ Ensure accessibility compliance:
    ```
 
 **导出后质量验证**：
-   - 在预览软件中打开所有导出的文件
-   - 检查颜色是否准确还原（尤其金色#FFD700）
-   - 验证透明背景是否正确
-   - 确认文字清晰可读
-   - 测试SVG文件在不同缩放下是否保持质量
+
+- 在预览软件中打开所有导出的文件
+- 检查颜色是否准确还原（尤其金色#FFD700）
+- 验证透明背景是否正确
+- 确认文字清晰可读
+- 测试SVG文件在不同缩放下是否保持质量
 
 ### 第十六步：生成设计规格文档 (5分钟)
 
 **创建规格文档**：
+
 ```
 Create a design specification document including:
 
@@ -450,6 +477,7 @@ Create a design specification document including:
 ### 第十七步：质量检查清单 (3分钟)
 
 **最终质量检查**：
+
 - ✅ 所有5个模板都已设计完成
 - ✅ 苹果设计风格得到体现（圆角、阴影、留白）
 - ✅ 金色强调色使用统一
@@ -464,12 +492,14 @@ Create a design specification document including:
 ## 🎯 成功标准
 
 ### 设计质量标准
+
 - **苹果设计原则**: Clarity, Depth, Deference, Fluidity得到充分体现
 - **专业PPT品质**: 达到Keynote或Pages的设计水准
 - **用户体验**: 直观易用，功能强大但界面简洁
 - **技术可行性**: 设计元素都能在Web技术中实现
 
 ### 交付物清单
+
 - ✅ 5个模板的高质量设计图
 - ✅ 完整的UI组件设计（面板、时间轴）
 - ✅ 响应式适配设计
@@ -482,6 +512,7 @@ Create a design specification document including:
 ## 🚨 常见问题和解决方案
 
 ### V0生成问题
+
 **问题**: 生成时间过长或失败
 **解决**: 简化提示词，逐步生成，先做一个模板优化后再做其他
 
@@ -489,10 +520,12 @@ Create a design specification document including:
 **解决**: 明确强调"iOS design language", "macOS aesthetics", "Apple design principles"
 
 ### 设计一致性问题
+
 **问题**: 模板之间风格不统一
 **解决**: 使用统一的优化指令，确保所有模板使用相同的设计语言
 
 ### 技术实现问题
+
 **问题**: 某些效果可能难以实现
 **解决**: 提供备选方案，确保设计既美观又实用
 
@@ -501,6 +534,7 @@ Create a design specification document including:
 ## 🎉 完成标志
 
 当你看到：
+
 - ✅ 5个精美的苹果风格PPT模板
 - ✅ 专业的属性面板和时间轴编辑器
 - ✅ 完整的响应式设计

@@ -4,9 +4,8 @@
 <!-- KeywordTemplate 组件模板 -->
 <template>
   <div class="keyword-template">
-    <img src="/assets/templates/keyword-template.png"
-alt="关键词高亮模板" class="template-image"
-/>
+    <img
+src="/assets/templates/keyword-template.png" alt="关键词高亮模板" class="template-image" />
   </div>
 </template>
 
