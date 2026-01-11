@@ -86,67 +86,67 @@ class BackgroundRemovalValidator {
     ctx.fillRect(0, 0, width, height)
 
     switch (type) {
-    case 'person-centered':
-      // 居中人物 (简化为蓝色矩形)
-      ctx.fillStyle = '#4A90E2'
-      ctx.fillRect(width * 0.35, height * 0.2, width * 0.3, height * 0.6)
-      // 添加一些背景元素
-      ctx.fillStyle = '#95A5A6'
-      ctx.fillRect(width * 0.1, height * 0.1, width * 0.1, height * 0.1)
-      ctx.fillRect(width * 0.8, height * 0.8, width * 0.1, height * 0.1)
-      break
+      case 'person-centered':
+        // 居中人物 (简化为蓝色矩形)
+        ctx.fillStyle = '#4A90E2'
+        ctx.fillRect(width * 0.35, height * 0.2, width * 0.3, height * 0.6)
+        // 添加一些背景元素
+        ctx.fillStyle = '#95A5A6'
+        ctx.fillRect(width * 0.1, height * 0.1, width * 0.1, height * 0.1)
+        ctx.fillRect(width * 0.8, height * 0.8, width * 0.1, height * 0.1)
+        break
 
-    case 'person-offset':
-      // 偏移人物
-      ctx.fillStyle = '#4A90E2'
-      ctx.fillRect(width * 0.6, height * 0.3, width * 0.25, height * 0.5)
-      break
+      case 'person-offset':
+        // 偏移人物
+        ctx.fillStyle = '#4A90E2'
+        ctx.fillRect(width * 0.6, height * 0.3, width * 0.25, height * 0.5)
+        break
 
-    case 'no-person':
-      // 无人物，只有背景对象
-      ctx.fillStyle = '#E74C3C'
-      ctx.fillRect(width * 0.2, height * 0.2, width * 0.2, height * 0.2)
-      ctx.fillStyle = '#27AE60'
-      ctx.fillRect(width * 0.6, height * 0.5, width * 0.15, height * 0.15)
-      ctx.fillStyle = '#F39C12'
-      ctx.beginPath()
-      ctx.arc(width * 0.4, height * 0.7, width * 0.08, 0, 2 * Math.PI)
-      ctx.fill()
-      break
+      case 'no-person':
+        // 无人物，只有背景对象
+        ctx.fillStyle = '#E74C3C'
+        ctx.fillRect(width * 0.2, height * 0.2, width * 0.2, height * 0.2)
+        ctx.fillStyle = '#27AE60'
+        ctx.fillRect(width * 0.6, height * 0.5, width * 0.15, height * 0.15)
+        ctx.fillStyle = '#F39C12'
+        ctx.beginPath()
+        ctx.arc(width * 0.4, height * 0.7, width * 0.08, 0, 2 * Math.PI)
+        ctx.fill()
+        break
 
-    case 'complex-scene':
-      // 复杂场景
-      // 绘制多个背景对象
-      const colors = ['#E74C3C', '#27AE60', '#F39C12', '#9B59B6', '#1ABC9C']
-      for (let i = 0; i < 10; i++) {
-        ctx.fillStyle = colors[i % colors.length]
-        ctx.fillRect(
-          Math.random() * width * 0.8,
-          Math.random() * height * 0.8,
-          Math.random() * width * 0.1 + 20,
-          Math.random() * height * 0.1 + 20
-        )
-      }
-      // 添加人物
-      ctx.fillStyle = '#4A90E2'
-      ctx.fillRect(width * 0.4, height * 0.25, width * 0.2, height * 0.5)
-      break
+      case 'complex-scene':
+        // 复杂场景
+        // 绘制多个背景对象
+        const colors = ['#E74C3C', '#27AE60', '#F39C12', '#9B59B6', '#1ABC9C']
+        for (let i = 0; i < 10; i++) {
+          ctx.fillStyle = colors[i % colors.length]
+          ctx.fillRect(
+            Math.random() * width * 0.8,
+            Math.random() * height * 0.8,
+            Math.random() * width * 0.1 + 20,
+            Math.random() * height * 0.1 + 20
+          )
+        }
+        // 添加人物
+        ctx.fillStyle = '#4A90E2'
+        ctx.fillRect(width * 0.4, height * 0.25, width * 0.2, height * 0.5)
+        break
 
-    case 'small-person':
-      // 小人物
-      ctx.fillStyle = '#4A90E2'
-      ctx.fillRect(width * 0.45, height * 0.4, width * 0.1, height * 0.2)
-      // 大量背景干扰
-      for (let i = 0; i < 15; i++) {
-        ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 60%)`
-        ctx.fillRect(
-          Math.random() * width,
-          Math.random() * height,
-          Math.random() * 30 + 10,
-          Math.random() * 30 + 10
-        )
-      }
-      break
+      case 'small-person':
+        // 小人物
+        ctx.fillStyle = '#4A90E2'
+        ctx.fillRect(width * 0.45, height * 0.4, width * 0.1, height * 0.2)
+        // 大量背景干扰
+        for (let i = 0; i < 15; i++) {
+          ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 60%)`
+          ctx.fillRect(
+            Math.random() * width,
+            Math.random() * height,
+            Math.random() * 30 + 10,
+            Math.random() * 30 + 10
+          )
+        }
+        break
     }
   }
 

@@ -250,19 +250,19 @@ export class HtmlExporter {
     })
 
     switch (type) {
-    case 'text':
-      return `<div class="text-element" style="${elementStyle}">${content}</div>`
+      case 'text':
+        return `<div class="text-element" style="${elementStyle}">${content}</div>`
 
-    case 'image':
-      const dataUrl = this.assets.get(element.src) || element.src
-      return `<img class="image-element" src="${dataUrl}" style="${elementStyle}" alt="${element.alt || ''}">`
+      case 'image':
+        const dataUrl = this.assets.get(element.src) || element.src
+        return `<img class="image-element" src="${dataUrl}" style="${elementStyle}" alt="${element.alt || ''}">`
 
-    case 'shape':
-      const shapeClass = `shape-${element.shape || 'rectangle'}`
-      return `<div class="shape-element ${shapeClass}" style="${elementStyle}"></div>`
+      case 'shape':
+        const shapeClass = `shape-${element.shape || 'rectangle'}`
+        return `<div class="shape-element ${shapeClass}" style="${elementStyle}"></div>`
 
-    default:
-      return ''
+      default:
+        return ''
     }
   }
 

@@ -89,69 +89,69 @@ class MultiResolutionPreviewValidator {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
 
     switch (type) {
-    case 'small-image':
-      // 小图像 - 简单几何图形
-      ctx.fillRect(width * 0.2, height * 0.2, width * 0.6, height * 0.6)
-      break
+      case 'small-image':
+        // 小图像 - 简单几何图形
+        ctx.fillRect(width * 0.2, height * 0.2, width * 0.6, height * 0.6)
+        break
 
-    case 'medium-image':
-      // 中等图像 - 多个矩形
-      for (let i = 0; i < 5; i++) {
-        ctx.fillRect(
-          Math.random() * width * 0.8,
-          Math.random() * height * 0.8,
-          Math.random() * width * 0.2 + 20,
-          Math.random() * height * 0.2 + 20
-        )
-      }
-      break
+      case 'medium-image':
+        // 中等图像 - 多个矩形
+        for (let i = 0; i < 5; i++) {
+          ctx.fillRect(
+            Math.random() * width * 0.8,
+            Math.random() * height * 0.8,
+            Math.random() * width * 0.2 + 20,
+            Math.random() * height * 0.2 + 20
+          )
+        }
+        break
 
-    case 'large-image':
-      // 大图像 - 复杂图案
-      for (let i = 0; i < 20; i++) {
-        ctx.beginPath()
-        ctx.arc(
-          Math.random() * width,
-          Math.random() * height,
-          Math.random() * 50 + 10,
-          0,
-          2 * Math.PI
-        )
-        ctx.fill()
-      }
-      break
+      case 'large-image':
+        // 大图像 - 复杂图案
+        for (let i = 0; i < 20; i++) {
+          ctx.beginPath()
+          ctx.arc(
+            Math.random() * width,
+            Math.random() * height,
+            Math.random() * 50 + 10,
+            0,
+            2 * Math.PI
+          )
+          ctx.fill()
+        }
+        break
 
-    case 'portrait-image':
-      // 竖版图像 - 垂直排列的元素
-      for (let i = 0; i < 8; i++) {
-        const y = (height / 8) * i + 20
-        ctx.fillRect(width * 0.1, y, width * 0.8, 30)
-      }
-      break
+      case 'portrait-image':
+        // 竖版图像 - 垂直排列的元素
+        for (let i = 0; i < 8; i++) {
+          const y = (height / 8) * i + 20
+          ctx.fillRect(width * 0.1, y, width * 0.8, 30)
+        }
+        break
 
-    case 'complex-image':
-      // 复杂图像 - 网格图案
-      const gridSize = 50
-      for (let x = 0; x < width; x += gridSize) {
-        for (let y = 0; y < height; y += gridSize) {
-          if ((x / gridSize + y / gridSize) % 2 === 0) {
-            ctx.fillRect(x, y, gridSize, gridSize)
+      case 'complex-image':
+        // 复杂图像 - 网格图案
+        const gridSize = 50
+        for (let x = 0; x < width; x += gridSize) {
+          for (let y = 0; y < height; y += gridSize) {
+            if ((x / gridSize + y / gridSize) % 2 === 0) {
+              ctx.fillRect(x, y, gridSize, gridSize)
+            }
           }
         }
-      }
-      // 添加一些随机元素
-      for (let i = 0; i < 10; i++) {
-        ctx.beginPath()
-        ctx.arc(
-          Math.random() * width,
-          Math.random() * height,
-          Math.random() * 30 + 5,
-          0,
-          2 * Math.PI
-        )
-        ctx.fill()
-      }
-      break
+        // 添加一些随机元素
+        for (let i = 0; i < 10; i++) {
+          ctx.beginPath()
+          ctx.arc(
+            Math.random() * width,
+            Math.random() * height,
+            Math.random() * 30 + 5,
+            0,
+            2 * Math.PI
+          )
+          ctx.fill()
+        }
+        break
     }
 
     // 添加文字标识

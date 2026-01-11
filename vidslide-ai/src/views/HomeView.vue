@@ -6,7 +6,9 @@
     <nav class="vidslide-navbar">
       <div class="navbar-container">
         <!-- 左侧Logo -->
-        <a href="/" class="navbar-logo">
+        <a
+href="/" class="navbar-logo"
+>
           <div class="navbar-logo-icon">
             <div class="logo-icon-bg" />
             <div class="logo-icon-glow" />
@@ -21,17 +23,30 @@
 
         <!-- 中间导航链接 -->
         <div class="navbar-nav">
-          <a href="#features" class="navbar-nav-link">产品特点</a>
-          <a href="#workspace" class="navbar-nav-link">工作空间</a>
-          <a href="#pricing" class="navbar-nav-link">定价</a>
-          <a href="#about" class="navbar-nav-link">关于我们</a>
+          <a
+href="#features" class="navbar-nav-link"
+>产品特点</a>
+          <a
+href="#workspace" class="navbar-nav-link"
+>工作空间</a>
+          <a
+href="#pricing" class="navbar-nav-link"
+>定价</a>
+          <a
+href="#about" class="navbar-nav-link"
+>关于我们</a>
         </div>
 
         <!-- 右侧操作按钮 -->
         <div class="navbar-actions">
           <!-- 多语言切换按钮 -->
-          <div class="lang-switcher-wrapper" :class="{ 'show-menu': showLangMenu }">
-            <button class="btn-lang-switcher" @click="toggleLangMenu" :title="currentLang.name">
+          <div
+class="lang-switcher-wrapper" :class="{ 'show-menu': showLangMenu }"
+>
+            <button
+class="btn-lang-switcher" @click="toggleLangMenu"
+:title="currentLang.name"
+>
               <span class="lang-flag">{{ currentLang.flag }}</span>
               <span class="lang-code">{{ currentLang.code }}</span>
               <span class="lang-arrow">▼</span>
@@ -47,7 +62,10 @@
 
     <!-- 语言下拉菜单 - 使用Teleport渲染到body -->
     <Teleport to="body">
-      <div v-if="showLangMenu" class="lang-menu" :style="langMenuStyle" @click.stop>
+      <div
+v-if="showLangMenu" class="lang-menu"
+:style="langMenuStyle" @click.stop
+>
         <button
           v-for="lang in languages"
           :key="lang.code"
@@ -82,11 +100,18 @@
 
         <!-- 按钮组 -->
         <div class="hero-buttons">
-          <button class="btn-primary-large" onclick="window.location.hash = '#/workspace'">
+          <button
+class="btn-primary-large" onclick="window.location.hash = '#/workspace'"
+>
             免费开始 →
           </button>
-          <button class="btn-secondary-large" @click="watchDemo">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+          <button
+class="btn-secondary-large" @click="watchDemo"
+>
+            <svg
+viewBox="0 0 24 24" fill="currentColor"
+width="20" height="20"
+>
               <path d="M8 5v14l11-7z" />
             </svg>
             观看演示
@@ -150,7 +175,9 @@
               </div>
 
               <!-- 步骤1: 视频上传 -->
-              <div v-if="animationStep === 1" class="animation-step step-upload">
+              <div
+v-if="animationStep === 1" class="animation-step step-upload"
+>
                 <div class="upload-area">
                   <button class="upload-btn-left">
                     <span class="upload-icon">📤</span>
@@ -166,27 +193,38 @@
                   </div>
                 </div>
                 <div class="upload-progress">
-                  <div class="progress-bar" :style="{ width: uploadProgress + '%' }" />
+                  <div
+class="progress-bar" :style="{ width: uploadProgress + '%' }"
+/>
                 </div>
               </div>
 
               <!-- 步骤2: AI分析视频 -->
-              <div v-if="animationStep === 2" class="animation-step step-analyze">
+              <div
+v-if="animationStep === 2" class="animation-step step-analyze"
+>
                 <div class="analyze-container">
                   <div class="analyze-icon">🤖</div>
                   <div class="analyze-text">AI Analyzing Video...</div>
                   <div class="analyze-progress">
-                    <div class="progress-bar" :style="{ width: analyzeProgress + '%' }" />
+                    <div
+class="progress-bar" :style="{ width: analyzeProgress + '%' }"
+/>
                   </div>
                   <!-- 粒子效果 -->
                   <div class="particles">
-                    <div v-for="i in 12" :key="i" class="particle" :style="getParticleStyle(i)" />
+                    <div
+v-for="i in 12" :key="i"
+class="particle" :style="getParticleStyle(i)"
+/>
                   </div>
                 </div>
               </div>
 
               <!-- 步骤3: 生成PPT -->
-              <div v-if="animationStep === 3" class="animation-step step-generate">
+              <div
+v-if="animationStep === 3" class="animation-step step-generate"
+>
                 <div class="generate-container">
                   <div class="ppt-preview">
                     <div
@@ -200,7 +238,10 @@
                           {{ slide.title }}
                         </div>
                         <div class="slide-bullets">
-                          <div v-for="(bullet, bi) in slide.bullets" :key="bi" class="slide-bullet">
+                          <div
+v-for="(bullet, bi) in slide.bullets" :key="bi"
+class="slide-bullet"
+>
                             {{ bullet }}
                           </div>
                         </div>
@@ -211,13 +252,17 @@
                     <div class="progress-text">
                       Generating Slides: {{ currentSlideIndex + 1 }}/{{ pptSlides.length }}
                     </div>
-                    <div class="progress-bar" :style="{ width: generateProgress + '%' }" />
+                    <div
+class="progress-bar" :style="{ width: generateProgress + '%' }"
+/>
                   </div>
                 </div>
               </div>
 
               <!-- 步骤4: 合成视频 - 画中画效果 -->
-              <div v-if="animationStep === 4" class="animation-step step-compose">
+              <div
+v-if="animationStep === 4" class="animation-step step-compose"
+>
                 <div class="compose-container">
                   <div class="video-preview">
                     <div class="video-frame">
@@ -292,13 +337,17 @@
                   </div>
                   <div class="compose-progress">
                     <div class="progress-text">Composing Video with PPT Effects...</div>
-                    <div class="progress-bar" :style="{ width: composeProgress + '%' }" />
+                    <div
+class="progress-bar" :style="{ width: composeProgress + '%' }"
+/>
                   </div>
                 </div>
               </div>
 
               <!-- 步骤5: 完成 -->
-              <div v-if="animationStep === 5" class="animation-step step-done">
+              <div
+v-if="animationStep === 5" class="animation-step step-done"
+>
                 <div class="done-container">
                   <div class="done-icon-large">✅</div>
                   <div class="done-text">Video Ready!</div>
@@ -649,31 +698,31 @@ export default {
       let opacity = 1
 
       switch (effect) {
-      case 'fade':
-        opacity =
+        case 'fade':
+          opacity =
             slideProgress < 0.2
               ? slideProgress / 0.2
               : slideProgress > 0.8
                 ? (1 - slideProgress) / 0.2
                 : 1
-        break
-      case 'slide':
-        const slideX = slideProgress < 0.3 ? (0.3 - slideProgress) * 100 : 0
-        transform = `translateX(${slideX}px)`
-        break
-      case 'zoom':
-        const scale =
+          break
+        case 'slide':
+          const slideX = slideProgress < 0.3 ? (0.3 - slideProgress) * 100 : 0
+          transform = `translateX(${slideX}px)`
+          break
+        case 'zoom':
+          const scale =
             slideProgress < 0.3
               ? 0.5 + (slideProgress / 0.3) * 0.5
               : slideProgress > 0.7
                 ? 1 - ((slideProgress - 0.7) / 0.3) * 0.2
                 : 1
-        transform = `scale(${scale})`
-        break
-      case 'rotate':
-        const rotate = slideProgress < 0.3 ? (1 - slideProgress / 0.3) * 10 : 0
-        transform = `rotate(${rotate}deg)`
-        break
+          transform = `scale(${scale})`
+          break
+        case 'rotate':
+          const rotate = slideProgress < 0.3 ? (1 - slideProgress / 0.3) * 10 : 0
+          transform = `rotate(${rotate}deg)`
+          break
       }
 
       return {

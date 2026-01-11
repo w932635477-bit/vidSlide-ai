@@ -306,20 +306,20 @@ export class ErrorHandler {
      */
 
     switch (errorInfo.severity) {
-    case ERROR_SEVERITY.LOW:
-      ElMessage.warning(message)
-      break
-    case ERROR_SEVERITY.MEDIUM:
-      ElMessage.warning(message)
-      break
-    case ERROR_SEVERITY.HIGH:
-      ElMessage.error(message)
-      break
-    case ERROR_SEVERITY.CRITICAL:
-      ElMessage.error(message)
-      break
-    default:
-      ElMessage.error(message)
+      case ERROR_SEVERITY.LOW:
+        ElMessage.warning(message)
+        break
+      case ERROR_SEVERITY.MEDIUM:
+        ElMessage.warning(message)
+        break
+      case ERROR_SEVERITY.HIGH:
+        ElMessage.error(message)
+        break
+      case ERROR_SEVERITY.CRITICAL:
+        ElMessage.error(message)
+        break
+      default:
+        ElMessage.error(message)
     }
   }
 
@@ -351,101 +351,101 @@ export class ErrorHandler {
      */
 
     switch (errorInfo.type) {
-    case ERROR_TYPES.NETWORK:
-      suggestions.push(
-        {
-          action: 'check-connection',
-          label: '检查网络连接',
-          description: '确保您的网络连接正常',
-          autoFix: () => this.checkNetworkConnection()
-        },
-        {
-          action: 'retry',
-          label: '重试操作',
-          description: '等待网络恢复后重试',
-          autoFix: null
-        },
-        {
-          action: 'offline-mode',
-          label: '切换到离线模式',
-          description: '使用本地已下载的素材',
-          autoFix: null
-        }
-      )
-      break
+      case ERROR_TYPES.NETWORK:
+        suggestions.push(
+          {
+            action: 'check-connection',
+            label: '检查网络连接',
+            description: '确保您的网络连接正常',
+            autoFix: () => this.checkNetworkConnection()
+          },
+          {
+            action: 'retry',
+            label: '重试操作',
+            description: '等待网络恢复后重试',
+            autoFix: null
+          },
+          {
+            action: 'offline-mode',
+            label: '切换到离线模式',
+            description: '使用本地已下载的素材',
+            autoFix: null
+          }
+        )
+        break
 
-    case ERROR_TYPES.PERMISSION:
-      suggestions.push(
-        {
-          action: 'request-permission',
-          label: '请求权限',
-          description: '重新请求必要的权限',
-          autoFix: () => this.requestPermissions()
-        },
-        {
-          action: 'check-settings',
-          label: '检查浏览器设置',
-          description: '在浏览器设置中启用相关权限',
-          autoFix: null
-        }
-      )
-      break
+      case ERROR_TYPES.PERMISSION:
+        suggestions.push(
+          {
+            action: 'request-permission',
+            label: '请求权限',
+            description: '重新请求必要的权限',
+            autoFix: () => this.requestPermissions()
+          },
+          {
+            action: 'check-settings',
+            label: '检查浏览器设置',
+            description: '在浏览器设置中启用相关权限',
+            autoFix: null
+          }
+        )
+        break
 
-    case ERROR_TYPES.RESOURCE:
-      suggestions.push(
-        {
-          action: 'clear-cache',
-          label: '清理缓存',
-          description: '清理浏览器缓存释放内存',
-          autoFix: () => this.clearBrowserCache()
-        },
-        {
-          action: 'reduce-quality',
-          label: '降低质量设置',
-          description: '降低素材质量以减少内存使用',
-          autoFix: null
-        }
-      )
-      break
+      case ERROR_TYPES.RESOURCE:
+        suggestions.push(
+          {
+            action: 'clear-cache',
+            label: '清理缓存',
+            description: '清理浏览器缓存释放内存',
+            autoFix: () => this.clearBrowserCache()
+          },
+          {
+            action: 'reduce-quality',
+            label: '降低质量设置',
+            description: '降低素材质量以减少内存使用',
+            autoFix: null
+          }
+        )
+        break
 
-    case ERROR_TYPES.VALIDATION:
-      suggestions.push(
-        {
-          action: 'fix-input',
-          label: '修正输入内容',
-          description: '检查并修正输入内容的格式',
-          autoFix: null
-        },
-        {
-          action: 'show-examples',
-          label: '查看示例',
-          description: '查看正确格式的示例',
-          autoFix: null
-        }
-      )
-      break
+      case ERROR_TYPES.VALIDATION:
+        suggestions.push(
+          {
+            action: 'fix-input',
+            label: '修正输入内容',
+            description: '检查并修正输入内容的格式',
+            autoFix: null
+          },
+          {
+            action: 'show-examples',
+            label: '查看示例',
+            description: '查看正确格式的示例',
+            autoFix: null
+          }
+        )
+        break
 
-    default:
-      suggestions.push(
-        {
-          action: 'refresh',
-          label: '刷新页面',
-          description: '刷新页面重新加载应用',
-          autoFix: () => window.location.reload()
-        },
-        {
-          action: 'help-center',
-          label: '查看帮助中心',
-          description: '浏览常见问题和解决方案',
-          autoFix: () => window.open('/help', '_blank')
-        },
-        {
-          action: 'contact-support',
-          label: '联系技术支持',
-          description: '获取专业技术帮助',
-          autoFix: null
-        }
-      )
+      default:
+        suggestions.push(
+          {
+            action: 'refresh',
+            label: '刷新页面',
+            description: '刷新页面重新加载应用',
+            autoFix: () => window.location.reload()
+          },
+          {
+            action: 'help-center',
+            label: '查看帮助中心',
+            description: '浏览常见问题和解决方案',
+            autoFix: () => window.open('/help', '_blank')
+          },
+          {
+            action: 'contact-support',
+            label: '联系技术支持',
+            description: '获取专业技术帮助',
+            autoFix: null
+          }
+        )
     }
 
     return suggestions
@@ -466,17 +466,17 @@ export class ErrorHandler {
        */
 
       switch (action) {
-      case 'check-connection':
-        return await this.checkNetworkConnection()
-      case 'request-permission':
-        return await this.requestPermissions()
-      case 'clear-cache':
-        return await this.clearBrowserCache()
-      case 'refresh':
-        window.location.reload()
-        return true
-      default:
-        return false
+        case 'check-connection':
+          return await this.checkNetworkConnection()
+        case 'request-permission':
+          return await this.requestPermissions()
+        case 'clear-cache':
+          return await this.clearBrowserCache()
+        case 'refresh':
+          window.location.reload()
+          return true
+        default:
+          return false
       }
     } catch (error) {
       /**
@@ -558,24 +558,24 @@ export class ErrorHandler {
         <p><strong>可能的原因：</strong>${errorInfo.technicalMessage}</p>
 
         ${
-  errorInfo.solutions.length > 0
-    ? `
+          errorInfo.solutions.length > 0
+            ? `
           <p><strong>建议解决方案：</strong></p>
           <ul>
             ${errorInfo.solutions.map(solution => `<li>${solution}</li>`).join('')}
           </ul>
         `
-    : ''
-}
+            : ''
+        }
 
         ${
-  recoverySuggestions.length > 0
-    ? `
+          recoverySuggestions.length > 0
+            ? `
           <p><strong>快速修复：</strong></p>
           <div class="recovery-suggestions" style="margin: 12px 0;">
             ${recoverySuggestions
-    .map(
-      (suggestion, index) => `
+              .map(
+                (suggestion, index) => `
               <button
                 type="button"
                 class="recovery-btn"
@@ -596,12 +596,12 @@ export class ErrorHandler {
                 ${suggestion.label}
               </button>
             `
-    )
-    .join('')}
+              )
+              .join('')}
           </div>
         `
-    : ''
-}
+            : ''
+        }
 
         <div style="margin-top: 16px; padding: 12px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #007bff;">
           <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 14px;">💡 快速解决指南</h4>

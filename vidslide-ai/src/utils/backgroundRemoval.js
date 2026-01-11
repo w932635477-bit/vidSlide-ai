@@ -6,7 +6,7 @@
  * @version 1.0.0
  */
 
-import { getAssetManager } from './AssetManager.js'
+// import { getAssetManager } from './AssetManager.js' // 暂时不需要
 
 // TensorFlow.js 加载状态管理
 let tfReady = false
@@ -26,25 +26,27 @@ async function loadTensorFlow() {
     return tfLoadingPromise
   }
 
-  tfLoadingPromise = new Promise(async (resolve, reject) => {
-    try {
-      // 动态加载TensorFlow.js
-      if (typeof tf === 'undefined') {
-        const script = document.createElement('script')
-        script.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.8.0/dist/tf.min.js'
-        script.onload = () => {
-          console.log('TensorFlow.js loaded')
-          loadDeepLabModel().then(resolve).catch(reject)
+  tfLoadingPromise = new Promise((resolve, reject) => {
+    ;(async () => {
+      try {
+        // 动态加载TensorFlow.js
+        if (typeof tf === 'undefined') {
+          const script = document.createElement('script')
+          script.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.8.0/dist/tf.min.js'
+          script.onload = () => {
+            console.log('TensorFlow.js loaded')
+            loadDeepLabModel().then(resolve).catch(reject)
+          }
+          script.onerror = reject
+          document.head.appendChild(script)
+        } else {
+          await loadDeepLabModel()
+          resolve(deeplabModel)
         }
-        script.onerror = reject
-        document.head.appendChild(script)
-      } else {
-        await loadDeepLabModel()
-        resolve(deeplabModel)
+      } catch (error) {
+        reject(new Error('TensorFlow.js加载失败: ' + error.message))
       }
-    } catch (error) {
-      reject(new Error('TensorFlow.js加载失败: ' + error.message))
-    }
+    })()
   })
 
   return tfLoadingPromise
@@ -267,7 +269,7 @@ export class BackgroundRemoval {
    * @param {Object} processedImage - 处理后的图像
    * @returns {number} 置信度分数
    */
-  calculateSegmentationConfidence(maskData, processedImage) {
+  calculateSegmentationConfidence(maskData, _processedImage) {
     const totalPixels = maskData.length
     let personPixels = 0
 
@@ -311,7 +313,7 @@ export class BackgroundRemoval {
         const dataIndex = pixelIndex * 4
 
         // 获取掩码值 (0-1)
-        const maskValue = segmentationResult.maskData[pixelIndex]
+        // const maskValue = segmentationResult.maskData[pixelIndex] // 使用featheredMask替代
 
         // 应用边缘羽化
         const featheredMask = this.applyFeathering(

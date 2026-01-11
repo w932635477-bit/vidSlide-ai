@@ -481,22 +481,22 @@ class PerformanceTestSuite {
         () => {
           // 模拟不同复杂度的渲染操作
           switch (complexity) {
-          case 'simple':
-            ctx.fillStyle = '#4A90E2'
-            ctx.fillRect(0, 0, width, height)
-            break
-          case 'medium':
-            for (let i = 0; i < 10; i++) {
-              ctx.fillStyle = `hsl(${i * 36}, 70%, 60%)`
-              ctx.fillRect((i * width) / 10, 0, width / 10, height)
-            }
-            break
-          case 'complex':
-            for (let i = 0; i < 100; i++) {
-              ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 60%)`
-              ctx.fillRect(Math.random() * width, Math.random() * height, 50, 50)
-            }
-            break
+            case 'simple':
+              ctx.fillStyle = '#4A90E2'
+              ctx.fillRect(0, 0, width, height)
+              break
+            case 'medium':
+              for (let i = 0; i < 10; i++) {
+                ctx.fillStyle = `hsl(${i * 36}, 70%, 60%)`
+                ctx.fillRect((i * width) / 10, 0, width / 10, height)
+              }
+              break
+            case 'complex':
+              for (let i = 0; i < 100; i++) {
+                ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 60%)`
+                ctx.fillRect(Math.random() * width, Math.random() * height, 50, 50)
+              }
+              break
           }
           resolve()
         },

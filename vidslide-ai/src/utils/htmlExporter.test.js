@@ -118,7 +118,7 @@ describe('HtmlExporter', () => {
         theme: 'default'
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData, options)
+      const result = await exporter.exportToHtml(mockProjectData, options)
 
       expect(typeof result).toBe('string')
       expect(result).toContain('<!DOCTYPE html>')
@@ -136,7 +136,7 @@ describe('HtmlExporter', () => {
         theme: 'minimal'
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData, options)
+      const result = await exporter.exportToHtml(mockProjectData, options)
 
       expect(typeof result).toBe('string')
       expect(result).toContain('<!DOCTYPE html>')
@@ -149,7 +149,7 @@ describe('HtmlExporter', () => {
         slides: []
       }
 
-      const _result = await exporter.exportToHtml(emptyProjectData)
+      const result = await exporter.exportToHtml(emptyProjectData)
 
       expect(typeof result).toBe('string')
       expect(result).toContain('空项目')
@@ -181,7 +181,7 @@ describe('HtmlExporter', () => {
         }
       ]
 
-      const _result = exporter.generateSlidesHtml(slides)
+      const result = exporter.generateSlidesHtml(slides)
 
       expect(typeof result).toBe('string')
       expect(result).toContain('slide1')
@@ -200,7 +200,7 @@ describe('HtmlExporter', () => {
         }
       ]
 
-      const _result = exporter.generateSlidesHtml(slides)
+      const result = exporter.generateSlidesHtml(slides)
 
       expect(result).toContain('slide2')
       expect(result).toContain('纯文本幻灯片')
@@ -209,7 +209,7 @@ describe('HtmlExporter', () => {
 
   describe('generateStyles方法', () => {
     it('应该生成基础CSS样式', () => {
-      const _result = exporter.generateStyles('default')
+      const result = exporter.generateStyles('default')
 
       expect(typeof result).toBe('string')
       expect(result).toContain('.slide')
@@ -218,13 +218,13 @@ describe('HtmlExporter', () => {
     })
 
     it('应该支持不同的主题', () => {
-      const _result = exporter.generateStyles('dark')
+      const result = exporter.generateStyles('dark')
 
       expect(result).toContain('dark-theme')
     })
 
     it('应该处理无效主题', () => {
-      const _result = exporter.generateStyles('invalid-theme')
+      const result = exporter.generateStyles('invalid-theme')
 
       expect(result).toContain('default-theme') // 降级到默认主题
     })
@@ -233,7 +233,7 @@ describe('HtmlExporter', () => {
   describe('generateNavigation方法', () => {
     it('应该生成导航控件', () => {
       const slideCount = 3
-      const _result = exporter.generateNavigation(slideCount)
+      const result = exporter.generateNavigation(slideCount)
 
       expect(typeof result).toBe('string')
       expect(result).toContain('prev-slide')
@@ -243,7 +243,7 @@ describe('HtmlExporter', () => {
 
     it('应该处理单张幻灯片', () => {
       const slideCount = 1
-      const _result = exporter.generateNavigation(slideCount)
+      const result = exporter.generateNavigation(slideCount)
 
       expect(result).toContain('disabled') // 单张幻灯片时禁用导航
     })
@@ -258,7 +258,7 @@ describe('HtmlExporter', () => {
         slides: [{ id: 'slide1', content: '内容' }]
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData, { includeWatermark: true })
+      const result = await exporter.exportToHtml(mockProjectData, { includeWatermark: true })
 
       expect(result).toContain('VidSlide AI')
       expect(result).toContain('免费版')
@@ -272,7 +272,7 @@ describe('HtmlExporter', () => {
         slides: [{ id: 'slide1', content: '内容' }]
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData, { includeWatermark: true })
+      const result = await exporter.exportToHtml(mockProjectData, { includeWatermark: true })
 
       expect(result).toContain('VidSlide AI')
       expect(result).toContain('专业版')
@@ -288,7 +288,7 @@ describe('HtmlExporter', () => {
         slides: [{ id: 'slide1', content: '内容' }]
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData, { includeWatermark: true })
+      const result = await exporter.exportToHtml(mockProjectData, { includeWatermark: true })
 
       expect(result).toContain('VidSlide AI') // 应该降级到免费版水印
       expect(result).toContain('免费版')
@@ -302,7 +302,7 @@ describe('HtmlExporter', () => {
         slides: [{ id: 'slide1', content: '内容' }]
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData)
+      const result = await exporter.exportToHtml(mockProjectData)
 
       expect(result).toContain('<style>')
       expect(result).toContain('<script>')
@@ -315,7 +315,7 @@ describe('HtmlExporter', () => {
         slides: [{ id: 'slide1', content: '内容' }]
       }
 
-      const _result = await exporter.exportToHtml(mockProjectData)
+      const result = await exporter.exportToHtml(mockProjectData)
 
       expect(global.window.Blob).toHaveBeenCalled()
       expect(global.window.URL.createObjectURL).toHaveBeenCalled()
@@ -357,7 +357,7 @@ describe('HtmlExporter', () => {
       }))
 
       const startTime = Date.now()
-      const _result = exporter.generateSlidesHtml(largeSlides)
+      const result = exporter.generateSlidesHtml(largeSlides)
       const endTime = Date.now()
 
       expect(typeof result).toBe('string')

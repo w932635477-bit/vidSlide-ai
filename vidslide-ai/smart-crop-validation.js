@@ -87,52 +87,52 @@ class SmartCropValidator {
     ctx.fillRect(0, 0, width, height)
 
     switch (type) {
-    case 'centered-subject':
-      // 居中的矩形主体
-      ctx.fillStyle = '#333333'
-      ctx.fillRect(width * 0.3, height * 0.3, width * 0.4, height * 0.4)
-      break
+      case 'centered-subject':
+        // 居中的矩形主体
+        ctx.fillStyle = '#333333'
+        ctx.fillRect(width * 0.3, height * 0.3, width * 0.4, height * 0.4)
+        break
 
-    case 'offset-subject':
-      // 偏移的圆形主体
-      ctx.fillStyle = '#666666'
-      ctx.beginPath()
-      ctx.arc(width * 0.7, height * 0.6, width * 0.15, 0, 2 * Math.PI)
-      ctx.fill()
-      break
+      case 'offset-subject':
+        // 偏移的圆形主体
+        ctx.fillStyle = '#666666'
+        ctx.beginPath()
+        ctx.arc(width * 0.7, height * 0.6, width * 0.15, 0, 2 * Math.PI)
+        ctx.fill()
+        break
 
-    case 'multiple-objects':
-      // 多个主体
-      ctx.fillStyle = '#444444'
-      ctx.fillRect(width * 0.2, height * 0.2, width * 0.2, height * 0.2)
-      ctx.fillStyle = '#777777'
-      ctx.fillRect(width * 0.6, height * 0.5, width * 0.25, height * 0.15)
-      break
+      case 'multiple-objects':
+        // 多个主体
+        ctx.fillStyle = '#444444'
+        ctx.fillRect(width * 0.2, height * 0.2, width * 0.2, height * 0.2)
+        ctx.fillStyle = '#777777'
+        ctx.fillRect(width * 0.6, height * 0.5, width * 0.25, height * 0.15)
+        break
 
-    case 'complex-background':
-      // 复杂背景 + 主体
-      // 绘制复杂背景
-      for (let i = 0; i < 50; i++) {
-        ctx.fillStyle = `hsl(${Math.random() * 360}, 30%, ${50 + Math.random() * 20}%)`
-        ctx.fillRect(
-          Math.random() * width,
-          Math.random() * height,
-          Math.random() * 50 + 10,
-          Math.random() * 50 + 10
-        )
-      }
-      // 绘制主体
-      ctx.fillStyle = '#000000'
-      ctx.fillRect(width * 0.35, height * 0.35, width * 0.3, height * 0.3)
-      break
+      case 'complex-background':
+        // 复杂背景 + 主体
+        // 绘制复杂背景
+        for (let i = 0; i < 50; i++) {
+          ctx.fillStyle = `hsl(${Math.random() * 360}, 30%, ${50 + Math.random() * 20}%)`
+          ctx.fillRect(
+            Math.random() * width,
+            Math.random() * height,
+            Math.random() * 50 + 10,
+            Math.random() * 50 + 10
+          )
+        }
+        // 绘制主体
+        ctx.fillStyle = '#000000'
+        ctx.fillRect(width * 0.35, height * 0.35, width * 0.3, height * 0.3)
+        break
 
-    case 'minimal-contrast':
-      // 低对比度图像
-      ctx.fillStyle = '#e0e0e0'
-      ctx.fillRect(0, 0, width, height)
-      ctx.fillStyle = '#c0c0c0'
-      ctx.fillRect(width * 0.25, height * 0.25, width * 0.5, height * 0.5)
-      break
+      case 'minimal-contrast':
+        // 低对比度图像
+        ctx.fillStyle = '#e0e0e0'
+        ctx.fillRect(0, 0, width, height)
+        ctx.fillStyle = '#c0c0c0'
+        ctx.fillRect(width * 0.25, height * 0.25, width * 0.5, height * 0.5)
+        break
     }
   }
 
@@ -141,18 +141,18 @@ class SmartCropValidator {
    */
   getExpectedCrop(type, width, height) {
     switch (type) {
-    case 'centered-subject':
-      return { x: width * 0.25, y: height * 0.25, width: width * 0.5, height: height * 0.5 }
-    case 'offset-subject':
-      return { x: width * 0.55, y: height * 0.45, width: width * 0.3, height: height * 0.3 }
-    case 'multiple-objects':
-      return { x: width * 0.15, y: height * 0.15, width: width * 0.7, height: height * 0.5 }
-    case 'complex-background':
-      return { x: width * 0.3, y: height * 0.3, width: width * 0.4, height: height * 0.4 }
-    case 'minimal-contrast':
-      return { x: width * 0.2, y: height * 0.2, width: width * 0.6, height: height * 0.6 }
-    default:
-      return null
+      case 'centered-subject':
+        return { x: width * 0.25, y: height * 0.25, width: width * 0.5, height: height * 0.5 }
+      case 'offset-subject':
+        return { x: width * 0.55, y: height * 0.45, width: width * 0.3, height: height * 0.3 }
+      case 'multiple-objects':
+        return { x: width * 0.15, y: height * 0.15, width: width * 0.7, height: height * 0.5 }
+      case 'complex-background':
+        return { x: width * 0.3, y: height * 0.3, width: width * 0.4, height: height * 0.4 }
+      case 'minimal-contrast':
+        return { x: width * 0.2, y: height * 0.2, width: width * 0.6, height: height * 0.6 }
+      default:
+        return null
     }
   }
 

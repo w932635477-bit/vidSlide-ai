@@ -10,7 +10,9 @@
         <p>VidSlide AI 常见问题解答和技术支持</p>
       </header>
 
-      <nav class="help-nav" aria-label="帮助中心导航">
+      <nav
+class="help-nav" aria-label="帮助中心导航"
+>
         <div class="nav-tabs">
           <button
             v-for="tab in tabs"
@@ -26,29 +28,43 @@
 
       <main class="help-content">
         <!-- 常见问题 -->
-        <section v-if="activeTab === 'faq'" class="help-section">
+        <section
+v-if="activeTab === 'faq'" class="help-section"
+>
           <h2>❓ 常见问题</h2>
 
           <div class="faq-list">
-            <details v-for="faq in faqs" class="faq-item" :key="faq.id">
+            <details
+v-for="faq in faqs" class="faq-item"
+:key="faq.id"
+>
               <summary class="faq-question">
                 {{ faq.question }}
               </summary>
-              <div class="faq-answer" v-html="faq.answer" />
+              <div
+class="faq-answer" v-html="faq.answer"
+/>
             </details>
           </div>
         </section>
 
         <!-- 故障排除 -->
-        <section v-if="activeTab === 'troubleshooting'" class="help-section">
+        <section
+v-if="activeTab === 'troubleshooting'" class="help-section"
+>
           <h2>🔧 故障排除</h2>
 
           <div class="troubleshooting-grid">
-            <article v-for="issue in troubleshooting" :key="issue.id" class="troubleshoot-card">
+            <article
+v-for="issue in troubleshooting" :key="issue.id"
+class="troubleshoot-card"
+>
               <h3>{{ issue.title }}</h3>
               <p>{{ issue.description }}</p>
               <ol class="solution-steps">
-                <li v-for="step in issue.steps" :key="step">
+                <li
+v-for="step in issue.steps" :key="step"
+>
                   {{ step }}
                 </li>
               </ol>
@@ -57,7 +73,9 @@
         </section>
 
         <!-- 技术支持 -->
-        <section v-if="activeTab === 'support'" class="help-section">
+        <section
+v-if="activeTab === 'support'" class="help-section"
+>
           <h2>📞 技术支持</h2>
 
           <div class="support-options">
@@ -70,7 +88,10 @@
             <div class="support-card">
               <h3>📋 提交反馈</h3>
               <p>在GitHub上报告问题或建议新功能</p>
-              <a href="https://github.com/vidslide-ai/issues" target="_blank" class="support-link">
+              <a
+href="https://github.com/vidslide-ai/issues" target="_blank"
+class="support-link"
+>
                 GitHub Issues
               </a>
             </div>
@@ -78,7 +99,9 @@
             <div class="support-card">
               <h3>📖 文档中心</h3>
               <p>查看详细的使用文档和API参考</p>
-              <a href="/docs" class="support-link">查看文档</a>
+              <a
+href="/docs" class="support-link"
+>查看文档</a>
             </div>
           </div>
         </section>

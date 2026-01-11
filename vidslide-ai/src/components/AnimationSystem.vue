@@ -26,13 +26,16 @@
       <!-- 动画开关 -->
       <div class="control-group">
         <label>
-          <input v-model="animationsEnabled" type="checkbox" />
+          <input
+v-model="animationsEnabled" type="checkbox" />
           启用动画效果
         </label>
       </div>
 
       <!-- 动画速度设置 -->
-      <div v-if="animationsEnabled" class="control-group">
+      <div
+v-if="animationsEnabled" class="control-group"
+>
         <label>动画速度：</label>
         <select v-model="animationSpeed">
           <option value="slow">慢速 (1.0x)</option>
@@ -42,40 +45,50 @@
       </div>
 
       <!-- 时序同步控制 -->
-      <div v-if="animationsEnabled" class="control-group">
+      <div
+v-if="animationsEnabled" class="control-group"
+>
         <label>
-          <input v-model="timelineSync.enabled" type="checkbox" />
+          <input
+v-model="timelineSync.enabled" type="checkbox" />
           启用时序同步
         </label>
       </div>
 
-      <div v-if="animationsEnabled && timelineSync.enabled" class="control-group">
+      <div
+v-if="animationsEnabled && timelineSync.enabled" class="control-group"
+>
         <h5>语音同步设置：</h5>
 
         <label>
-          <input v-model="speechSyncConfig.keywordHighlight.enabled" type="checkbox" />
+          <input
+v-model="speechSyncConfig.keywordHighlight.enabled" type="checkbox" />
           关键词高亮同步
         </label>
 
         <label>
-          <input v-model="speechSyncConfig.textAnimation.enabled" type="checkbox" />
+          <input
+v-model="speechSyncConfig.textAnimation.enabled" type="checkbox" />
           文字渐入同步
         </label>
 
         <label>
-          <input v-model="speechSyncConfig.pipSync.enabled" type="checkbox" />
+          <input
+v-model="speechSyncConfig.pipSync.enabled" type="checkbox" />
           画中画同步
         </label>
       </div>
 
       <!-- 同步状态显示 -->
-      <div v-if="timelineSync.enabled" class="control-group">
+      <div
+v-if="timelineSync.enabled" class="control-group"
+>
         <label>同步状态：</label>
         <div class="sync-status">
           <span
             class="status-indicator"
             :style="{ backgroundColor: timelineSync.isPlaying ? '#27ae60' : '#bdc3c7' }"
-          ></span>
+          />
           {{ timelineSync.isPlaying ? '播放中' : '暂停' }} | 时间:
           {{ (timelineSync.currentTime / 1000).toFixed(1) }}s | 标记:
           {{ timelineSync.speechMarkers.length }} | 动画: {{ timelineSync.animationQueue.length }}
@@ -83,43 +96,58 @@
       </div>
 
       <!-- 性能监控显示 -->
-      <div v-if="animationsEnabled" class="control-group">
+      <div
+v-if="animationsEnabled" class="control-group"
+>
         <label>性能监控：</label>
         <div class="performance-status">
           FPS: {{ performanceStats.averageFPS.toFixed(1) }} | 帧数:
           {{ performanceStats.frameCount }} | GPU:
           {{ animationPool.gpuAccelerated ? '✅' : '❌' }} | WAAPI:
-          {{ animationPool.webAnimations ? '✅' : '❌' }}<br />
+          {{ animationPool.webAnimations ? '✅' : '❌' }}<br>
           内存: {{ (performanceStats.memoryUsage / 1024 / 1024).toFixed(1) }}MB | 池大小:
           {{ animationPool.active.size }}/{{ animationPool.maxPoolSize }}
         </div>
       </div>
 
       <!-- 动画类型选择 -->
-      <div v-if="animationsEnabled" class="control-group">
+      <div
+v-if="animationsEnabled" class="control-group"
+>
         <label>当前动画：</label>
         <div class="animation-status">
-          <span v-if="currentAnimation" class="active-animation">
+          <span
+v-if="currentAnimation" class="active-animation"
+>
             {{ currentAnimation.type }} - {{ currentAnimation.element }}
           </span>
-          <span v-else class="no-animation">无活跃动画</span>
+          <span
+v-else class="no-animation"
+>无活跃动画</span>
         </div>
       </div>
 
       <!-- 测试按钮 -->
       <div class="control-group">
-        <button class="test-btn" @click="testTextAnimation">测试文字动画</button>
-        <button class="test-btn" @click="testPipAnimation">测试画中画动画</button>
+        <button
+class="test-btn" @click="testTextAnimation">测试文字动画</button>
+        <button
+class="test-btn" @click="testPipAnimation">测试画中画动画</button>
       </div>
     </div>
 
     <!-- 动画预览区域 -->
-    <div v-if="animationsEnabled" class="animation-preview">
-      <div ref="textElement" class="preview-text">
+    <div
+v-if="animationsEnabled" class="animation-preview"
+>
+      <div
+ref="textElement" class="preview-text"
+>
         <span ref="keywordElement">关键词</span>
         动画演示
       </div>
-      <div ref="pipElement" class="preview-pip">画中画动画演示</div>
+      <div
+ref="pipElement" class="preview-pip">画中画动画演示</div>
     </div>
   </div>
 </template>
@@ -250,13 +278,7 @@ let lastFrameTime = 0
 const targetFPS = 60
 const frameInterval = 1000 / targetFPS
 
-// 性能监控
-const performanceStats = ref({
-  frameCount: 0,
-  droppedFrames: 0,
-  averageFPS: 0,
-  lastFrameTime: 0
-})
+// 性能监控已在上方声明
 
 // 缓动函数 - 优化版本
 const easingFunctions = {

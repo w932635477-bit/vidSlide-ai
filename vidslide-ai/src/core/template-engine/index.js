@@ -10,13 +10,21 @@ export { default as VisualEffects } from './VisualEffects.js'
 export { default as ConstraintSystem } from './ConstraintSystem.js'
 
 // 模板定义和配置
-export {
+import {
   TEMPLATE_TYPES,
   TEMPLATE_CONFIGS,
   TEMPLATE_TRIGGERS,
   DEFAULT_TEMPLATE,
   TEMPLATE_PRIORITY
 } from './TemplateDefinitions.js'
+
+export {
+  TEMPLATE_TYPES,
+  TEMPLATE_CONFIGS,
+  TEMPLATE_TRIGGERS,
+  DEFAULT_TEMPLATE,
+  TEMPLATE_PRIORITY
+}
 
 // 类型定义（用于TypeScript支持）
 export const TemplateEngineTypes = {

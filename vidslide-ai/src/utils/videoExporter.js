@@ -52,7 +52,7 @@ export class VideoExporter {
    * @param {Function} options.onError 错误回调
    */
   async exportVideo(options = {}) {
-    const {
+    let {
       canvas,
       duration = 30,
       frameRate = 30,

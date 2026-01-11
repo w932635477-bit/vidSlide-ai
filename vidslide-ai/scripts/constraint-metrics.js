@@ -468,17 +468,17 @@ if (require.main === module) {
    */
 
   switch (command) {
-  case 'report':
-    metrics.printReport()
-    break
-  case 'reset':
-    metrics.reset()
-    break
-  default:
-    console.log('使用方法:')
-    console.log('  node constraint-metrics.js report  # 显示报告')
-    console.log('  node constraint-metrics.js reset   # 重置数据')
-    break
+    case 'report':
+      metrics.printReport()
+      break
+    case 'reset':
+      metrics.reset()
+      break
+    default:
+      console.log('使用方法:')
+      console.log('  node constraint-metrics.js report  # 显示报告')
+      console.log('  node constraint-metrics.js reset   # 重置数据')
+      break
   }
 }
 

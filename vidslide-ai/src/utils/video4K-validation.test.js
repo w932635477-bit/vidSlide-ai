@@ -83,7 +83,7 @@ describe('Video4KValidator', () => {
 
   describe('WebCodecs 4K支持验证', () => {
     it('应该检测WebCodecs API可用性', async () => {
-      const _result = await validator.validateWebCodecs4K()
+      const result = await validator.validateWebCodecs4K()
 
       expect(result).toHaveProperty('supported')
       expect(result).toHaveProperty('browsers')
@@ -92,7 +92,7 @@ describe('Video4KValidator', () => {
     })
 
     it('应该测试VideoEncoder创建', async () => {
-      const _result = await validator.validateWebCodecs4K()
+      const result = await validator.validateWebCodecs4K()
 
       expect(global.VideoEncoder).toHaveBeenCalled()
     })
@@ -107,7 +107,7 @@ describe('Video4KValidator', () => {
 
       global.VideoEncoder.mockReturnValue(mockEncoder)
 
-      const _result = await validator.validateWebCodecs4K()
+      const result = await validator.validateWebCodecs4K()
 
       expect(mockEncoder.configure).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -121,7 +121,7 @@ describe('Video4KValidator', () => {
       delete global.VideoEncoder
       delete global.VideoDecoder
 
-      const _result = await validator.validateWebCodecs4K()
+      const result = await validator.validateWebCodecs4K()
 
       expect(result.supported).toBe(false)
       expect(result.error).toContain('WebCodecs API not supported')
@@ -130,7 +130,7 @@ describe('Video4KValidator', () => {
 
   describe('硬件加速检测', () => {
     it('应该检测GPU硬件加速能力', async () => {
-      const _result = await validator.validateHardwareAcceleration()
+      const result = await validator.validateHardwareAcceleration()
 
       expect(result).toHaveProperty('gpuAccelerated')
       expect(result).toHaveProperty('webglSupport')
@@ -149,7 +149,7 @@ describe('Video4KValidator', () => {
 
       global.document.createElement = vi.fn(() => mockCanvas)
 
-      const _result = await validator.validateHardwareAcceleration()
+      const result = await validator.validateHardwareAcceleration()
 
       expect(mockCanvas.getContext).toHaveBeenCalledWith('webgl')
       expect(result.gpuAccelerated).toBe(true)
@@ -173,7 +173,7 @@ describe('Video4KValidator', () => {
 
         global.document.createElement = vi.fn(() => mockCanvas)
 
-        const _result = await validator.validateHardwareAcceleration()
+        const result = await validator.validateHardwareAcceleration()
         expect(result.gpuAccelerated).toBe(expected)
       }
     })
@@ -181,7 +181,7 @@ describe('Video4KValidator', () => {
 
   describe('性能基准测试', () => {
     it('应该执行4K编码性能测试', async () => {
-      const _result = await validator.validatePerformanceBenchmark()
+      const result = await validator.validatePerformanceBenchmark()
 
       expect(result).toHaveProperty('encodingSpeed')
       expect(result).toHaveProperty('quality')
@@ -191,7 +191,7 @@ describe('Video4KValidator', () => {
 
     it('应该测量编码速度', async () => {
       const startTime = Date.now()
-      const _result = await validator.validatePerformanceBenchmark()
+      const result = await validator.validatePerformanceBenchmark()
       const endTime = Date.now()
 
       expect(endTime - startTime).toBeLessThan(5000) // Should complete within 5 seconds
@@ -206,7 +206,7 @@ describe('Video4KValidator', () => {
       ]
 
       for (const resolution of resolutions) {
-        const _result = await validator.validatePerformanceBenchmark()
+        const result = await validator.validatePerformanceBenchmark()
 
         expect(result).toHaveProperty('resolutions')
         expect(result.resolutions).toContain(resolution.name)
@@ -214,7 +214,7 @@ describe('Video4KValidator', () => {
     })
 
     it('应该提供性能优化建议', async () => {
-      const _result = await validator.validatePerformanceBenchmark()
+      const result = await validator.validatePerformanceBenchmark()
 
       expect(Array.isArray(result.recommendations)).toBe(true)
       expect(result.recommendations.length).toBeGreaterThan(0)
@@ -223,7 +223,7 @@ describe('Video4KValidator', () => {
 
   describe('内存管理验证', () => {
     it('应该验证4K编码内存使用', async () => {
-      const _result = await validator.validateMemoryManagement()
+      const result = await validator.validateMemoryManagement()
 
       expect(result).toHaveProperty('peakUsage')
       expect(result).toHaveProperty('memoryEfficiency')
@@ -234,7 +234,7 @@ describe('Video4KValidator', () => {
     it('应该监控内存峰值使用', async () => {
       const initialMemory = mockPerformance.memory.usedJSHeapSize
 
-      const _result = await validator.validateMemoryManagement()
+      const result = await validator.validateMemoryManagement()
 
       expect(result.peakUsage).toBeGreaterThanOrEqual(initialMemory)
       expect(result.memoryEfficiency).toBeDefined()
@@ -244,14 +244,14 @@ describe('Video4KValidator', () => {
       // Mock gc function
       window.gc = vi.fn()
 
-      const _result = await validator.validateMemoryManagement()
+      const result = await validator.validateMemoryManagement()
 
       expect(window.gc).toHaveBeenCalled()
       expect(result.garbageCollection).toBe(true)
     })
 
     it('应该提供内存优化建议', async () => {
-      const _result = await validator.validateMemoryManagement()
+      const result = await validator.validateMemoryManagement()
 
       expect(Array.isArray(result.recommendations)).toBe(true)
     })
@@ -261,7 +261,7 @@ describe('Video4KValidator', () => {
     it('应该测试不同浏览器对4K的支持', async () => {
       const browsers = ['Chrome', 'Firefox', 'Safari', 'Edge']
 
-      const _result = await validator.validateBrowserCompatibility()
+      const result = await validator.validateBrowserCompatibility()
 
       expect(result).toHaveProperty('browsers')
       browsers.forEach(browser => {
@@ -276,7 +276,7 @@ describe('Video4KValidator', () => {
         writable: true
       })
 
-      const _result = await validator.validateBrowserCompatibility()
+      const result = await validator.validateBrowserCompatibility()
 
       expect(result.browsers.Chrome.supportLevel).toBe('excellent')
     })
@@ -288,7 +288,7 @@ describe('Video4KValidator', () => {
         writable: true
       })
 
-      const _result = await validator.validateBrowserCompatibility()
+      const result = await validator.validateBrowserCompatibility()
 
       expect(result.browsers.Safari.supportLevel).toBe('limited')
       expect(result.browsers.Safari.limitations).toContain('WebCodecs')
@@ -297,7 +297,7 @@ describe('Video4KValidator', () => {
 
   describe('质量评估', () => {
     it('应该评估4K编码质量', async () => {
-      const _result = await validator.validateQuality()
+      const result = await validator.validateQuality()
 
       expect(result).toHaveProperty('visualQuality')
       expect(result).toHaveProperty('compressionRatio')
@@ -309,14 +309,14 @@ describe('Video4KValidator', () => {
       const qualitySettings = ['low', 'medium', 'high', 'ultra']
 
       for (const quality of qualitySettings) {
-        const _result = await validator.validateQuality()
+        const result = await validator.validateQuality()
 
         expect(result.qualitySettings).toContain(quality)
       }
     })
 
     it('应该检测编码伪影', async () => {
-      const _result = await validator.validateQuality()
+      const result = await validator.validateQuality()
 
       expect(typeof result.artifacts.blocking).toBe('boolean')
       expect(typeof result.artifacts.ringing).toBe('boolean')
@@ -326,7 +326,7 @@ describe('Video4KValidator', () => {
 
   describe('综合验证', () => {
     it('应该运行完整的4K验证流程', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(result).toHaveProperty('overallScore')
       expect(result).toHaveProperty('recommendations')
@@ -336,7 +336,7 @@ describe('Video4KValidator', () => {
     })
 
     it('应该计算综合评分', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(typeof result.overallScore).toBe('number')
       expect(result.overallScore).toBeGreaterThanOrEqual(0)
@@ -344,7 +344,7 @@ describe('Video4KValidator', () => {
     })
 
     it('应该提供实施建议', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(Array.isArray(result.recommendations)).toBe(true)
       expect(Array.isArray(result.nextSteps)).toBe(true)
@@ -353,7 +353,7 @@ describe('Video4KValidator', () => {
     })
 
     it('应该识别性能瓶颈', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(result).toHaveProperty('performanceProfile')
       expect(['high-end', 'mid-range', 'budget', 'unsupported']).toContain(
@@ -407,7 +407,7 @@ describe('Video4KValidator', () => {
         throw new Error('Encoder initialization failed')
       })
 
-      const _result = await validator.validateWebCodecs4K()
+      const result = await validator.validateWebCodecs4K()
 
       expect(result.success).toBe(false)
       expect(result.error).toContain('Encoder initialization failed')
@@ -422,7 +422,7 @@ describe('Video4KValidator', () => {
 
       global.document.createElement = vi.fn(() => mockCanvas)
 
-      const _result = await validator.validateHardwareAcceleration()
+      const result = await validator.validateHardwareAcceleration()
 
       expect(result.gpuAccelerated).toBe(false)
       expect(result.error).toContain('WebGL context failed')
@@ -431,7 +431,7 @@ describe('Video4KValidator', () => {
     it('应该处理内存不足错误', async () => {
       mockPerformance.memory.usedJSHeapSize = 450 * 1024 * 1024 // Near limit
 
-      const _result = await validator.validateMemoryManagement()
+      const result = await validator.validateMemoryManagement()
 
       expect(result.memoryEfficiency).toBeDefined()
       // Should provide recommendations for memory optimization
@@ -443,7 +443,7 @@ describe('Video4KValidator', () => {
       delete global.VideoDecoder
       delete global.WebGLRenderingContext
 
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(result.overallScore).toBeLessThan(30) // Very low score for unsupported browser
       expect(result.recommendations).toContain('浏览器不支持4K视频导出')

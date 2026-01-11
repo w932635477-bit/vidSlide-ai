@@ -28,7 +28,7 @@ export class IndexedDBStorage {
    * @returns {Promise<void>} 数据库初始化完成
    * @throws {Error} 当数据库初始化失败时抛出错误
    */
-  async /**
+  /**
    * initialize 方法
    * VidSlide AI 功能实现
    */
@@ -762,7 +762,7 @@ export class IndexedDBStorage {
    * 导出素材数据
    * @returns {Promise<string>} JSON字符串
    */
-  async /**
+  /**
    * exportData 方法
    * VidSlide AI 功能实现
    */
@@ -839,7 +839,7 @@ export class IndexedDBStorage {
    * 获取所有元数据（内部方法）
    * @returns {Promise<Array>}
    */
-  async /**
+  /**
    * getAllMetadata 方法
    * VidSlide AI 功能实现
    */
@@ -890,7 +890,7 @@ export class IndexedDBStorage {
    * 删除整个数据库
    * @returns {Promise<void>}
    */
-  async /**
+  /**
    * deleteDatabase 方法
    * VidSlide AI 功能实现
    */

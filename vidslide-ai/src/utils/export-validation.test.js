@@ -72,7 +72,7 @@ describe('ExportValidator', () => {
       global.window.VideoEncoder = vi.fn()
       global.window.VideoDecoder = vi.fn()
 
-      const _result = await validator.validateWebCodecs()
+      const result = await validator.validateWebCodecs()
 
       expect(result).toBe(true)
       expect(validator.results.webCodecs.supported).toBe(true)
@@ -82,7 +82,7 @@ describe('ExportValidator', () => {
       delete global.window.VideoEncoder
       delete global.window.VideoDecoder
 
-      const _result = await validator.validateWebCodecs()
+      const result = await validator.validateWebCodecs()
 
       expect(result).toBe(false)
       expect(validator.results.webCodecs.supported).toBe(false)
@@ -91,7 +91,7 @@ describe('ExportValidator', () => {
 
   describe('validateMediaRecorder方法', () => {
     it('应该验证MediaRecorder的基本功能', async () => {
-      const _result = await validator.validateMediaRecorder()
+      const result = await validator.validateMediaRecorder()
 
       expect(typeof result).toBe('boolean')
       expect(_consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('验证MediaRecorder支持'))
@@ -100,7 +100,7 @@ describe('ExportValidator', () => {
     it('应该处理MediaRecorder不可用的情况', async () => {
       delete global.window.MediaRecorder
 
-      const _result = await validator.validateMediaRecorder()
+      const result = await validator.validateMediaRecorder()
 
       expect(result).toBe(false)
       expect(validator.results.mediaRecorder.supported).toBe(false)
@@ -109,14 +109,14 @@ describe('ExportValidator', () => {
 
   describe('validateHtmlExport方法', () => {
     it('应该验证HTML导出的基本功能', async () => {
-      const _result = await validator.validateHtmlExport()
+      const result = await validator.validateHtmlExport()
 
       expect(typeof result).toBe('boolean')
       expect(_consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('验证HTML导出支持'))
     })
 
     it('应该测试DataURL生成功能', async () => {
-      const _result = await validator.validateHtmlExport()
+      const result = await validator.validateHtmlExport()
 
       // 验证是否测试了DataURL功能
       expect(_consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('DataURL'))
@@ -125,7 +125,7 @@ describe('ExportValidator', () => {
 
   describe('validatePdfGeneration方法', () => {
     it('应该验证PDF生成功能', async () => {
-      const _result = await validator.validatePdfGeneration()
+      const result = await validator.validatePdfGeneration()
 
       expect(typeof result).toBe('boolean')
       expect(_consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('验证PDF生成支持'))
@@ -134,7 +134,7 @@ describe('ExportValidator', () => {
 
   describe('validatePptxExport方法', () => {
     it('应该验证PPTX导出功能', async () => {
-      const _result = await validator.validatePptxExport()
+      const result = await validator.validatePptxExport()
 
       expect(typeof result).toBe('boolean')
       expect(_consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('验证PPTX导出支持'))
@@ -143,7 +143,7 @@ describe('ExportValidator', () => {
 
   describe('validateAll方法', () => {
     it('应该运行所有验证项目', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(typeof result).toBe('object')
       expect(result).toHaveProperty('overallScore')
@@ -154,7 +154,7 @@ describe('ExportValidator', () => {
     })
 
     it('应该计算总体得分', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(typeof result.overallScore).toBe('number')
       expect(result.overallScore).toBeGreaterThanOrEqual(0)
@@ -162,7 +162,7 @@ describe('ExportValidator', () => {
     })
 
     it('应该提供实施建议', async () => {
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(Array.isArray(result.recommendations)).toBe(true)
       expect(Array.isArray(result.nextSteps)).toBe(true)
@@ -194,7 +194,7 @@ describe('ExportValidator', () => {
       // Mock一个会失败的验证方法
       validator.validateWebCodecs = vi.fn().mockRejectedValue(new Error('验证失败'))
 
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(result).toBeDefined()
       expect(_consoleErrorSpy).toHaveBeenCalledWith(
@@ -206,7 +206,7 @@ describe('ExportValidator', () => {
     it('应该在部分验证失败时继续其他验证', async () => {
       validator.validateWebCodecs = vi.fn().mockRejectedValue(new Error('WebCodecs失败'))
 
-      const _result = await validator.validateAll()
+      const result = await validator.validateAll()
 
       expect(result).toBeDefined()
       // 其他验证应该仍然运行

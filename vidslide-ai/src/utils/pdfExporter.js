@@ -255,17 +255,17 @@ export class PdfExporter {
   async renderElement(pdf, element, pageWidth, pageHeight, quality) {
     try {
       switch (element.type) {
-      case 'text':
-        this.renderTextElement(pdf, element, pageWidth, pageHeight)
-        break
-      case 'image':
-        await this.renderImageElement(pdf, element, pageWidth, pageHeight, quality)
-        break
-      case 'shape':
-        this.renderShapeElement(pdf, element, pageWidth, pageHeight)
-        break
-      default:
-        console.warn(`不支持的元素类型: ${element.type}`)
+        case 'text':
+          this.renderTextElement(pdf, element, pageWidth, pageHeight)
+          break
+        case 'image':
+          await this.renderImageElement(pdf, element, pageWidth, pageHeight, quality)
+          break
+        case 'shape':
+          this.renderShapeElement(pdf, element, pageWidth, pageHeight)
+          break
+        default:
+          console.warn(`不支持的元素类型: ${element.type}`)
       }
     } catch (error) {
       console.warn(`元素渲染失败 (${element.type}):`, error)
@@ -308,15 +308,15 @@ export class PdfExporter {
       const textWidth = pdf.getTextWidth(line)
 
       switch (style.textAlign) {
-      case 'center':
-        textX = x - textWidth / 2
-        break
-      case 'right':
-        textX = x - textWidth
-        break
-      case 'justify':
-        // 两端对齐需要更复杂的处理，这里简化
-        break
+        case 'center':
+          textX = x - textWidth / 2
+          break
+        case 'right':
+          textX = x - textWidth
+          break
+        case 'justify':
+          // 两端对齐需要更复杂的处理，这里简化
+          break
       }
 
       pdf.text(line, textX, y + index * lineHeight)
@@ -346,11 +346,16 @@ export class PdfExporter {
     } catch (error) {
       console.warn('图片渲染失败:', error)
       // 绘制占位符
+      const placeholderX = ((position.x || 0) * pageWidth) / 100
+      const placeholderY = ((position.y || 0) * pageHeight) / 100
+      const placeholderWidth = ((size.width || 20) * pageWidth) / 100
+      const placeholderHeight = ((size.height || 20) * pageHeight) / 100
+
       pdf.setFillColor(200, 200, 200)
-      pdf.rect(x, y, width, height, 'F')
+      pdf.rect(placeholderX, placeholderY, placeholderWidth, placeholderHeight, 'F')
       pdf.setTextColor(100, 100, 100)
       pdf.setFontSize(10)
-      pdf.text('图片加载失败', x + 5, y + height / 2)
+      pdf.text('图片加载失败', placeholderX + 5, placeholderY + placeholderHeight / 2)
     }
   }
 
@@ -377,30 +382,30 @@ export class PdfExporter {
     }
 
     switch (shape) {
-    case 'rectangle':
-      if (style.fill) {
-        pdf.rect(x, y, width, height, 'F')
-      }
-      if (style.stroke) {
-        pdf.rect(x, y, width, height, 'S')
-      }
-      break
+      case 'rectangle':
+        if (style.fill) {
+          pdf.rect(x, y, width, height, 'F')
+        }
+        if (style.stroke) {
+          pdf.rect(x, y, width, height, 'S')
+        }
+        break
 
-    case 'circle':
-      const radius = Math.min(width, height) / 2
-      const centerX = x + width / 2
-      const centerY = y + height / 2
+      case 'circle':
+        const radius = Math.min(width, height) / 2
+        const centerX = x + width / 2
+        const centerY = y + height / 2
 
-      if (style.fill) {
-        pdf.circle(centerX, centerY, radius, 'F')
-      }
-      if (style.stroke) {
-        pdf.circle(centerX, centerY, radius, 'S')
-      }
-      break
+        if (style.fill) {
+          pdf.circle(centerX, centerY, radius, 'F')
+        }
+        if (style.stroke) {
+          pdf.circle(centerX, centerY, radius, 'S')
+        }
+        break
 
-    default:
-      console.warn(`不支持的形状: ${shape}`)
+      default:
+        console.warn(`不支持的形状: ${shape}`)
     }
   }
 

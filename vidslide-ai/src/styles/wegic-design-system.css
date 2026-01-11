@@ -46,23 +46,23 @@ body {
 
 :root {
   /* 桌面UI设计色彩系统 */
-  --primary-blue: #007AFF;
-  --primary-blue-dark: #0056CC;
-  --primary-blue-light: #4DA3FF;
-  --primary-blue-gradient: linear-gradient(135deg, #007AFF 0%, #0056CC 100%);
+  --primary-blue: #007aff;
+  --primary-blue-dark: #0056cc;
+  --primary-blue-light: #4da3ff;
+  --primary-blue-gradient: linear-gradient(135deg, #007aff 0%, #0056cc 100%);
 
   /* 辅助色彩 */
-  --accent-blue: #0A84FF;
-  --accent-red: #FF453A;
-  --text-white: #FFFFFF;
+  --accent-blue: #0a84ff;
+  --accent-red: #ff453a;
+  --text-white: #ffffff;
   --text-black: #000000;
-  --text-gray: #6B7280;
-  --text-gray-light: #9CA3AF;
+  --text-gray: #6b7280;
+  --text-gray-light: #9ca3af;
 
   /* 背景色彩 */
-  --bg-dark-blue: #0F1419;
-  --bg-dark-blue-2: #1C2330;
-  --bg-gradient: linear-gradient(135deg, #0F1419 0%, #1C2330 50%, #0F1419 100%);
+  --bg-dark-blue: #0f1419;
+  --bg-dark-blue-2: #1c2330;
+  --bg-gradient: linear-gradient(135deg, #0f1419 0%, #1c2330 50%, #0f1419 100%);
 
   /* 组件色彩 */
   --button-primary: var(--primary-blue);
@@ -71,7 +71,8 @@ body {
   --button-secondary-hover: rgba(255, 255, 255, 0.2);
 
   /* 字体系统 */
-  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-primary:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-heading: 'SF Pro Display', var(--font-primary);
   --font-body: 'SF Pro Text', var(--font-primary);
 
@@ -112,8 +113,8 @@ body {
   backdrop-filter: blur(50px) saturate(200%);
   -webkit-backdrop-filter: blur(50px) saturate(200%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.08) inset, 
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -172,19 +173,22 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
-    #007AFF 0%, 
-    #0051D5 25%,
-    #4DA3FF 50%,
-    #007AFF 75%,
-    #0051D5 100%);
+  background: linear-gradient(
+    135deg,
+    #007aff 0%,
+    #0051d5 25%,
+    #4da3ff 50%,
+    #007aff 75%,
+    #0051d5 100%
+  );
   background-size: 200% 200%;
   animation: gradient-shift-logo 3s ease infinite;
   border-radius: 10px;
 }
 
 @keyframes gradient-shift-logo {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -199,10 +203,12 @@ body {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(0, 122, 255, 0.6) 0%,
     rgba(77, 163, 255, 0.4) 50%,
-    rgba(0, 122, 255, 0.6) 100%);
+    rgba(0, 122, 255, 0.6) 100%
+  );
   border-radius: 12px;
   opacity: 0.8;
   filter: blur(8px);
@@ -211,7 +217,8 @@ body {
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
     transform: scale(1);
   }
@@ -225,10 +232,10 @@ body {
 .logo-letter {
   position: relative;
   z-index: 2;
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 800;
   font-size: 1.5rem;
-  text-shadow: 
+  text-shadow:
     0 2px 8px rgba(0, 0, 0, 0.3),
     0 0 20px rgba(255, 255, 255, 0.2);
   letter-spacing: -0.02em;
@@ -237,7 +244,7 @@ body {
 
 .navbar-logo:hover .logo-letter {
   transform: scale(1.1);
-  text-shadow: 
+  text-shadow:
     0 2px 12px rgba(0, 0, 0, 0.4),
     0 0 30px rgba(255, 255, 255, 0.3);
 }
@@ -280,11 +287,8 @@ body {
 }
 
 .logo-text-main {
-  color: #FFFFFF;
-  background: linear-gradient(135deg, 
-    #FFFFFF 0%,
-    rgba(255, 255, 255, 0.9) 50%,
-    #FFFFFF 100%);
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 50%, #ffffff 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -298,13 +302,10 @@ body {
 }
 
 .logo-text-ai {
-  color: #007AFF;
+  color: #007aff;
   font-weight: 800;
   font-size: 1.25rem;
-  background: linear-gradient(135deg, 
-    #007AFF 0%,
-    #4DA3FF 50%,
-    #007AFF 100%);
+  background: linear-gradient(135deg, #007aff 0%, #4da3ff 50%, #007aff 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -314,7 +315,8 @@ body {
 }
 
 @keyframes gradient-shift-ai {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -376,7 +378,7 @@ body {
   width: 36px;
   height: 36px;
   background: #000000;
-  color: #FFFFFF;
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   display: flex;
@@ -398,7 +400,7 @@ body {
 .btn-flag {
   width: 36px;
   height: 36px;
-  background: #FF453A;
+  background: #ff453a;
   border: none;
   border-radius: 6px;
   display: flex;
@@ -414,20 +416,20 @@ body {
 .btn-flag::before {
   content: '★';
   position: absolute;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 1rem;
   font-weight: bold;
 }
 
 .btn-flag:hover {
-  background: #FF5A4F;
+  background: #ff5a4f;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(255, 69, 58, 0.4);
 }
 
 .btn-login {
   background: transparent;
-  color: #FFFFFF;
+  color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
   font-weight: 500;
@@ -438,13 +440,13 @@ body {
 }
 
 .btn-login:hover {
-  color: #007AFF;
+  color: #007aff;
   background: rgba(255, 255, 255, 0.05);
 }
 
 .btn-signup {
-  background: #007AFF;
-  color: #FFFFFF;
+  background: #007aff;
+  color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -456,7 +458,7 @@ body {
 }
 
 .btn-signup:hover {
-  background: #0088FF;
+  background: #0088ff;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
 }
@@ -566,20 +568,31 @@ body {
 
 /* 动画效果 */
 @keyframes wegic-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes wegic-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 @keyframes wegic-glow {
-  0%, 100% { 
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(129, 87, 255, 0.3);
   }
-  50% { 
+  50% {
     box-shadow: 0 0 30px rgba(129, 87, 255, 0.5);
   }
 }
@@ -602,11 +615,11 @@ body {
     padding: 10px 20px;
     font-size: 14px;
   }
-  
+
   .wegic-card {
     padding: 16px;
   }
-  
+
   .wegic-heading-xl {
     font-size: clamp(2rem, 8vw, 3rem);
   }
@@ -627,8 +640,8 @@ body {
   backdrop-filter: blur(50px) saturate(200%);
   -webkit-backdrop-filter: blur(50px) saturate(200%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 1px 0 rgba(255, 255, 255, 0.08) inset, 
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -687,19 +700,22 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
-    #007AFF 0%, 
-    #0051D5 25%,
-    #4DA3FF 50%,
-    #007AFF 75%,
-    #0051D5 100%);
+  background: linear-gradient(
+    135deg,
+    #007aff 0%,
+    #0051d5 25%,
+    #4da3ff 50%,
+    #007aff 75%,
+    #0051d5 100%
+  );
   background-size: 200% 200%;
   animation: gradient-shift-logo 3s ease infinite;
   border-radius: 10px;
 }
 
 @keyframes gradient-shift-logo {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -714,10 +730,12 @@ body {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(0, 122, 255, 0.6) 0%,
     rgba(77, 163, 255, 0.4) 50%,
-    rgba(0, 122, 255, 0.6) 100%);
+    rgba(0, 122, 255, 0.6) 100%
+  );
   border-radius: 12px;
   opacity: 0.8;
   filter: blur(8px);
@@ -726,7 +744,8 @@ body {
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
     transform: scale(1);
   }
@@ -740,10 +759,10 @@ body {
 .logo-letter {
   position: relative;
   z-index: 2;
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 800;
   font-size: 1.5rem;
-  text-shadow: 
+  text-shadow:
     0 2px 8px rgba(0, 0, 0, 0.3),
     0 0 20px rgba(255, 255, 255, 0.2);
   letter-spacing: -0.02em;
@@ -752,7 +771,7 @@ body {
 
 .navbar-logo:hover .logo-letter {
   transform: scale(1.1);
-  text-shadow: 
+  text-shadow:
     0 2px 12px rgba(0, 0, 0, 0.4),
     0 0 30px rgba(255, 255, 255, 0.3);
 }
@@ -795,11 +814,8 @@ body {
 }
 
 .logo-text-main {
-  color: #FFFFFF;
-  background: linear-gradient(135deg, 
-    #FFFFFF 0%,
-    rgba(255, 255, 255, 0.9) 50%,
-    #FFFFFF 100%);
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 50%, #ffffff 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -813,13 +829,10 @@ body {
 }
 
 .logo-text-ai {
-  color: #007AFF;
+  color: #007aff;
   font-weight: 800;
   font-size: 1.25rem;
-  background: linear-gradient(135deg, 
-    #007AFF 0%,
-    #4DA3FF 50%,
-    #007AFF 100%);
+  background: linear-gradient(135deg, #007aff 0%, #4da3ff 50%, #007aff 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -829,7 +842,8 @@ body {
 }
 
 @keyframes gradient-shift-ai {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -891,7 +905,7 @@ body {
   width: 36px;
   height: 36px;
   background: #000000;
-  color: #FFFFFF;
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   display: flex;
@@ -913,7 +927,7 @@ body {
 .btn-flag {
   width: 36px;
   height: 36px;
-  background: #FF453A;
+  background: #ff453a;
   border: none;
   border-radius: 6px;
   display: flex;
@@ -929,20 +943,20 @@ body {
 .btn-flag::before {
   content: '★';
   position: absolute;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 1rem;
   font-weight: bold;
 }
 
 .btn-flag:hover {
-  background: #FF5A4F;
+  background: #ff5a4f;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(255, 69, 58, 0.4);
 }
 
 .btn-login {
   background: transparent;
-  color: #FFFFFF;
+  color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
   font-weight: 500;
@@ -953,13 +967,13 @@ body {
 }
 
 .btn-login:hover {
-  color: #007AFF;
+  color: #007aff;
   background: rgba(255, 255, 255, 0.05);
 }
 
 .btn-signup {
-  background: #007AFF;
-  color: #FFFFFF;
+  background: #007aff;
+  color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -971,7 +985,7 @@ body {
 }
 
 .btn-signup:hover {
-  background: #0088FF;
+  background: #0088ff;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
 }
@@ -990,11 +1004,11 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   /* 完全复刻图片：深蓝紫色调渐变背景 */
-  background: 
+  background:
     radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 122, 255, 0.2) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 100% 100%, rgba(88, 86, 214, 0.15) 0%, transparent 70%),
     radial-gradient(ellipse 50% 30% at 0% 100%, rgba(255, 45, 85, 0.1) 0%, transparent 70%),
-    linear-gradient(180deg, #0A0E14 0%, #0F1419 25%, #1A1F2E 50%, #0F1419 75%, #0A0E14 100%);
+    linear-gradient(180deg, #0a0e14 0%, #0f1419 25%, #1a1f2e 50%, #0f1419 75%, #0a0e14 100%);
   background-attachment: fixed;
   background-size: 100% 100%;
 }
@@ -1002,10 +1016,18 @@ body {
 /* 背景动态光效动画 - 苹果设计标准：微妙自然的呼吸效果 */
 @keyframes background-shift {
   0% {
-    background-position: 0% 0%, 100% 100%, 0% 100%, 0% 0%;
+    background-position:
+      0% 0%,
+      100% 100%,
+      0% 100%,
+      0% 0%;
   }
   100% {
-    background-position: 2% 2%, 98% 98%, 2% 98%, 0% 0%;
+    background-position:
+      2% 2%,
+      98% 98%,
+      2% 98%,
+      0% 0%;
   }
 }
 
@@ -1056,7 +1078,7 @@ body {
   width: 100%;
   padding-right: clamp(1rem, 3vw, 2rem);
   /* 苹果设计标准：优化的文字阴影，确保清晰可读 */
-  text-shadow: 
+  text-shadow:
     0 1px 8px rgba(0, 0, 0, 0.5),
     0 2px 16px rgba(0, 0, 0, 0.3);
   /* 添加微妙的入场延迟动画 */
@@ -1080,7 +1102,7 @@ body {
   font-weight: 500;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 122, 255, 0.15),
     0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1109,7 +1131,7 @@ body {
   background: rgba(0, 122, 255, 0.18);
   border-color: rgba(0, 122, 255, 0.35);
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(0, 122, 255, 0.25),
     0 0 0 0.5px rgba(255, 255, 255, 0.08) inset;
 }
@@ -1120,7 +1142,7 @@ body {
 .hero-tag-dot {
   width: 8px;
   height: 8px;
-  background: #007AFF;
+  background: #007aff;
   border-radius: 50%;
   animation: pulse-dot 2s ease-in-out infinite;
   box-shadow: 0 0 8px rgba(0, 122, 255, 0.6);
@@ -1139,11 +1161,11 @@ body {
   line-height: 1.1;
   margin-bottom: 1.75rem;
   /* 完全复刻图片：纯白色文字，无渐变 */
-  color: #FFFFFF;
+  color: #ffffff;
   letter-spacing: -0.05em;
   font-family: var(--font-heading);
   /* 增强文字阴影，确保清晰可读 */
-  text-shadow: 
+  text-shadow:
     0 2px 8px rgba(0, 0, 0, 0.5),
     0 4px 16px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -1152,7 +1174,8 @@ body {
 }
 
 @keyframes gradient-shift {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -1172,7 +1195,7 @@ body {
   font-weight: 400;
   letter-spacing: -0.015em;
   /* 苹果设计标准：优化的文字阴影 */
-  text-shadow: 
+  text-shadow:
     0 1px 4px rgba(0, 0, 0, 0.4),
     0 2px 8px rgba(0, 0, 0, 0.2);
   /* 添加入场动画 */
@@ -1191,8 +1214,8 @@ body {
    主按钮 - 完全复刻：蓝色背景，白色文字
    =========================================== */
 .btn-primary-large {
-  background: #007AFF;
-  color: #FFFFFF;
+  background: #007aff;
+  color: #ffffff;
   border: none;
   padding: 1.125rem 2.25rem;
   border-radius: 12px;
@@ -1204,7 +1227,7 @@ body {
   gap: 0.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   /* 深度阴影 */
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 122, 255, 0.4),
     0 2px 8px rgba(0, 122, 255, 0.2);
   letter-spacing: -0.01em;
@@ -1224,7 +1247,9 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
   transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
+  transition:
+    width 0.6s ease,
+    height 0.6s ease;
 }
 
 .btn-primary-large:hover::before {
@@ -1234,8 +1259,8 @@ body {
 
 .btn-primary-large:hover {
   transform: translateY(-2px) scale(1.02);
-  background: #0088FF;
-  box-shadow: 
+  background: #0088ff;
+  box-shadow:
     0 6px 20px rgba(0, 122, 255, 0.5),
     0 2px 8px rgba(0, 122, 255, 0.3);
 }
@@ -1262,7 +1287,7 @@ body {
    =========================================== */
 .btn-secondary-large {
   background: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
+  color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 1.125rem 2.25rem;
   border-radius: 12px;
@@ -1275,7 +1300,7 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.3),
     0 2px 4px rgba(0, 0, 0, 0.2);
   letter-spacing: -0.01em;
@@ -1295,7 +1320,9 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
+  transition:
+    width 0.6s ease,
+    height 0.6s ease;
 }
 
 .btn-secondary-large:hover::before {
@@ -1307,7 +1334,7 @@ body {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.4),
     0 2px 6px rgba(0, 0, 0, 0.3);
 }
@@ -1346,8 +1373,8 @@ body {
 }
 
 .indicator-dot.active {
-  border-color: #007AFF;
-  background: #007AFF;
+  border-color: #007aff;
+  background: #007aff;
   transform: scale(1.1);
   box-shadow: 0 0 8px rgba(0, 122, 255, 0.6);
 }
@@ -1384,7 +1411,7 @@ body {
   border-radius: 36px;
   padding: 12px;
   /* 完全复刻：多层阴影 + 蓝色光效 */
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset,
     0 0 60px rgba(0, 122, 255, 0.3),
@@ -1398,7 +1425,8 @@ body {
 }
 
 @keyframes float-phone {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotateY(0deg);
   }
   50% {
@@ -1566,8 +1594,8 @@ body {
    =========================================== */
 .upload-btn-left {
   background: rgba(0, 122, 255, 0.15);
-  border: 1px solid #007AFF;
-  color: #007AFF;
+  border: 1px solid #007aff;
+  color: #007aff;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-size: 0.75rem;
@@ -1617,16 +1645,18 @@ body {
   position: absolute;
   width: 4px;
   height: 60px;
-  background: linear-gradient(180deg, 
-    transparent 0%, 
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
     rgba(0, 122, 255, 0.8) 30%,
-    #007AFF 50%,
+    #007aff 50%,
     rgba(0, 122, 255, 0.8) 70%,
-    transparent 100%);
+    transparent 100%
+  );
   opacity: 0;
   animation: lightning-flash 2s ease-in-out infinite;
   filter: blur(1px);
-  box-shadow: 
+  box-shadow:
     0 0 10px rgba(0, 122, 255, 0.8),
     0 0 20px rgba(0, 122, 255, 0.4);
 }
@@ -1697,9 +1727,9 @@ body {
    AI Magic按钮 - 完全复刻：蓝色背景，圆角按钮
    =========================================== */
 .ai-magic-btn {
-  background: #007AFF;
+  background: #007aff;
   border: none;
-  color: #FFFFFF;
+  color: #ffffff;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -1709,15 +1739,15 @@ body {
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 122, 255, 0.4),
     0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
 }
 
 .ai-magic-btn:hover {
-  background: #0088FF;
+  background: #0088ff;
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 6px 16px rgba(0, 122, 255, 0.5),
     0 0 0 0.5px rgba(255, 255, 255, 0.15) inset;
 }
@@ -1765,7 +1795,7 @@ body {
 /* 进度条通用样式 */
 .progress-bar {
   height: 4px;
-  background: linear-gradient(90deg, #007AFF 0%, #4DA3FF 50%, #007AFF 100%);
+  background: linear-gradient(90deg, #007aff 0%, #4da3ff 50%, #007aff 100%);
   background-size: 200% 100%;
   border-radius: 2px;
   transition: width 0.3s ease;
@@ -1824,7 +1854,8 @@ body {
 }
 
 @keyframes pulse-analyze {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -1862,14 +1893,15 @@ body {
   position: absolute;
   width: 4px;
   height: 4px;
-  background: #007AFF;
+  background: #007aff;
   border-radius: 50%;
   animation: particle-float 2s ease-in-out infinite;
   box-shadow: 0 0 8px rgba(0, 122, 255, 0.8);
 }
 
 @keyframes particle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) scale(1);
     opacity: 0.6;
   }
@@ -1920,7 +1952,7 @@ body {
 .ppt-slide.active {
   opacity: 1;
   transform: scale(1);
-  border-color: #007AFF;
+  border-color: #007aff;
   box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
 }
 
@@ -1933,7 +1965,7 @@ body {
 .slide-title {
   font-size: 0.625rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #ffffff;
   margin-bottom: 0.25rem;
 }
 
@@ -2008,18 +2040,25 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
+  background: linear-gradient(
+    135deg,
     rgba(0, 0, 0, 0.6) 0%,
     rgba(0, 122, 255, 0.2) 50%,
-    rgba(0, 0, 0, 0.6) 100%);
+    rgba(0, 0, 0, 0.6) 100%
+  );
   z-index: 1;
 }
 
 .video-pattern {
   width: 100%;
   height: 100%;
-  background-image: 
-    repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0, 122, 255, 0.05) 10px, rgba(0, 122, 255, 0.05) 20px);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 122, 255, 0.05) 10px,
+    rgba(0, 122, 255, 0.05) 20px
+  );
   opacity: 0.3;
 }
 
@@ -2055,14 +2094,12 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(15, 20, 25, 0.95) 0%,
-    rgba(0, 122, 255, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(15, 20, 25, 0.95) 0%, rgba(0, 122, 255, 0.15) 100%);
   border: 2px solid rgba(0, 122, 255, 0.5);
   border-radius: 12px;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset,
     0 0 60px rgba(0, 122, 255, 0.4);
@@ -2084,8 +2121,8 @@ body {
 .overlay-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #FFFFFF;
-  text-shadow: 
+  color: #ffffff;
+  text-shadow:
     0 2px 8px rgba(0, 0, 0, 0.5),
     0 0 20px rgba(0, 122, 255, 0.3);
   margin-bottom: 1rem;
@@ -2110,7 +2147,7 @@ body {
   content: '•';
   position: absolute;
   left: 0;
-  color: #007AFF;
+  color: #007aff;
   font-size: 1.5rem;
   line-height: 1;
 }
@@ -2196,7 +2233,7 @@ body {
   right: 10%;
   bottom: 10%;
   border-radius: 12px;
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.5),
     0 0 0 2px rgba(0, 122, 255, 0.5),
     0 0 40px rgba(0, 122, 255, 0.3);
@@ -2214,9 +2251,7 @@ body {
 .pip-video-frame {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, 
-    rgba(0, 0, 0, 0.8) 0%,
-    rgba(0, 122, 255, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 122, 255, 0.3) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2231,7 +2266,8 @@ body {
 }
 
 @keyframes person-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -2275,7 +2311,7 @@ body {
 
 .timeline-progress {
   height: 100%;
-  background: linear-gradient(90deg, #007AFF 0%, #4DA3FF 100%);
+  background: linear-gradient(90deg, #007aff 0%, #4da3ff 100%);
   transition: width 0.3s ease;
   box-shadow: 0 0 10px rgba(0, 122, 255, 0.8);
   position: relative;
@@ -2288,7 +2324,7 @@ body {
   top: 50%;
   width: 12px;
   height: 12px;
-  background: #007AFF;
+  background: #007aff;
   border-radius: 50%;
   transform: translate(50%, -50%);
   box-shadow: 0 0 10px rgba(0, 122, 255, 0.8);
@@ -2315,7 +2351,7 @@ body {
 }
 
 .timeline-marker.active {
-  background: #007AFF;
+  background: #007aff;
   width: 6px;
   height: 6px;
   box-shadow: 0 0 8px rgba(0, 122, 255, 0.8);
@@ -2364,7 +2400,7 @@ body {
 .done-text {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #007AFF;
+  color: #007aff;
   text-shadow: 0 0 20px rgba(0, 122, 255, 0.5);
 }
 
@@ -2378,8 +2414,8 @@ body {
   bottom: 20%;
   left: 15%;
   background: rgba(0, 122, 255, 0.15);
-  border: 1px solid #007AFF;
-  color: #007AFF;
+  border: 1px solid #007aff;
+  color: #007aff;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -2388,7 +2424,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   z-index: 4;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 122, 255, 0.3),
     0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
 }
@@ -2490,16 +2526,18 @@ body {
   position: absolute;
   width: 3px;
   height: 120px;
-  background: linear-gradient(180deg, 
-    transparent 0%, 
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
     rgba(0, 122, 255, 0.6) 30%,
-    #007AFF 50%,
+    #007aff 50%,
     rgba(0, 122, 255, 0.6) 70%,
-    transparent 100%);
+    transparent 100%
+  );
   opacity: 0;
   animation: lightning-flash 3s ease-in-out infinite;
   filter: blur(1px);
-  box-shadow: 
+  box-shadow:
     0 0 15px rgba(0, 122, 255, 0.8),
     0 0 30px rgba(0, 122, 255, 0.4);
 }
@@ -2520,16 +2558,18 @@ body {
   position: absolute;
   width: 100%;
   height: 3px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
     rgba(0, 122, 255, 0.6) 30%,
-    #007AFF 50%,
+    #007aff 50%,
     rgba(0, 122, 255, 0.6) 70%,
-    transparent 100%);
+    transparent 100%
+  );
   opacity: 0;
   animation: line-sweep 4s ease-in-out infinite;
   filter: blur(1px);
-  box-shadow: 
+  box-shadow:
     0 0 10px rgba(0, 122, 255, 0.6),
     0 0 20px rgba(0, 122, 255, 0.3);
 }
@@ -2549,7 +2589,8 @@ body {
    =========================================== */
 
 @keyframes gradient-shift {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -2558,7 +2599,8 @@ body {
 }
 
 @keyframes pulse-dot {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -2569,7 +2611,8 @@ body {
 }
 
 @keyframes tech-lines {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
@@ -2578,16 +2621,20 @@ body {
 }
 
 @keyframes lightning-flash {
-  0%, 90%, 100% {
+  0%,
+  90%,
+  100% {
     opacity: 0;
   }
-  10%, 80% {
+  10%,
+  80% {
     opacity: 1;
   }
 }
 
 @keyframes line-sweep {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: translateX(-100%);
   }
@@ -2598,7 +2645,8 @@ body {
 }
 
 @keyframes cursor-point {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) scale(1);
     opacity: 1;
   }
@@ -2609,10 +2657,13 @@ body {
 }
 
 @keyframes lightning-flash {
-  0%, 90%, 100% {
+  0%,
+  90%,
+  100% {
     opacity: 0;
   }
-  5%, 85% {
+  5%,
+  85% {
     opacity: 1;
   }
 }
@@ -2633,14 +2684,14 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.2),
     0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
 }
@@ -2649,7 +2700,7 @@ body {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.25);
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.3),
     0 0 0 0.5px rgba(255, 255, 255, 0.08) inset;
 }
@@ -2688,7 +2739,7 @@ body {
   border-radius: 12px;
   padding: 0.5rem;
   min-width: 180px;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   z-index: 99999 !important; /* 最高优先级，确保显示在所有元素之上 */
@@ -2727,12 +2778,12 @@ body {
 
 .lang-menu-item:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .lang-menu-item.active {
   background: rgba(0, 122, 255, 0.15);
-  color: #007AFF;
+  color: #007aff;
   border: 1px solid rgba(0, 122, 255, 0.3);
 }
 

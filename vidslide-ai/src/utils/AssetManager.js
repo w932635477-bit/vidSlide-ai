@@ -259,9 +259,9 @@ export class AssetManager {
       averageLoadTime:
         this.performanceStats.loadTime.length > 0
           ? (
-            this.performanceStats.loadTime.reduce((a, b) => a + b, 0) /
+              this.performanceStats.loadTime.reduce((a, b) => a + b, 0) /
               this.performanceStats.loadTime.length
-          ).toFixed(2) + 'ms'
+            ).toFixed(2) + 'ms'
           : 'N/A'
     }
   }
@@ -484,7 +484,7 @@ export class AssetManager {
    * @fires AssetManager#popularAssetsLoaded - 热门素材加载完成时触发
    * @throws {Error} 当API不可用或网络错误时抛出
    */
-  async /**
+  /**
    * getPopularAssets 方法
    * VidSlide AI 功能实现
    */
@@ -687,8 +687,8 @@ export class AssetManager {
    * @param {string} assetId - 素材ID
    * @returns {Promise<void>}
    */
-  async /**
-   * deleteLocalAsset 方法
+  /**
+   * 删除本地素材
    * VidSlide AI 功能实现
    */
   async deleteLocalAsset(assetId) {
@@ -732,8 +732,8 @@ export class AssetManager {
    * 获取素材库统计信息
    * @returns {Promise<Object>} 统计信息
    */
-  async /**
-   * getLibraryStats 方法
+  /**
+   * 获取素材库统计信息
    * VidSlide AI 功能实现
    */
   async getLibraryStats() {
@@ -779,7 +779,7 @@ export class AssetManager {
    * @param {number} daysOld - 删除多少天前的未使用素材
    * @returns {Promise<number>} 删除的素材数量
    */
-  async /**
+  /**
    * cleanupExpiredAssets 方法
    * VidSlide AI 功能实现
    */
@@ -817,7 +817,7 @@ export class AssetManager {
    * 导出素材库数据
    * @returns {Promise<string>} JSON字符串
    */
-  async /**
+  /**
    * exportLibrary 方法
    * VidSlide AI 功能实现
    */
@@ -852,7 +852,7 @@ export class AssetManager {
    * @param {string} jsonData - JSON字符串
    * @returns {Promise<number>} 导入的素材数量
    */
-  async /**
+  /**
    * importLibrary 方法
    * VidSlide AI 功能实现
    */
@@ -887,7 +887,7 @@ export class AssetManager {
    * @param {Object} asset - 素材对象
    * @returns {Promise<Object>} 版权检查结果
    */
-  async /**
+  /**
    * checkAssetCopyright 方法
    * VidSlide AI 功能实现
    */
@@ -901,7 +901,7 @@ export class AssetManager {
    * @param {string} intendedUse - 预期用途
    * @returns {Promise<Object>} 验证结果
    */
-  async /**
+  /**
    * validateAssetUsage 方法
    * VidSlide AI 功能实现
    */
@@ -1083,7 +1083,7 @@ export class AssetManager {
   /**
    * 销毁资产管理器
    */
-  async /**
+  /**
    * destroy 方法
    * VidSlide AI 功能实现
    */

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最新时事图片搜索 - VidSlide AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .search-button {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .results-count {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .image-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-container {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 1rem;
+        }
+
+        .image-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .image-source {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            background: #667eea;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .image-date {
+            color: #999;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        .api-status {
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .api-status h3 {
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .api-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .api-item.not-configured {
+            border-left-color: #dc3545;
+        }
+
+        .api-item .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .api-item .status {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .examples {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .examples h3 {
+            margin-bottom: 1rem;
+            color: #495057;
+        }
+
+        .example-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .example-tag {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .example-tag:hover {
+            background: #5a67d8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📰 最新时事图片搜索</h1>
+            <p>为VidSlide AI用户提供最新的时事图片素材，支持马斯克、时政、科技等热门话题</p>
+        </div>
+
+        <div class="api-status">
+            <h3>🔧 API配置状态</h3>
+            <div class="api-grid" id="apiStatus">
+                <!-- API状态将通过JavaScript动态加载 -->
+            </div>
+        </div>
+
+        <div class="examples">
+            <h3>💡 搜索示例</h3>
+            <div class="example-tags">
+                <span class="example-tag" onclick="searchExample('Elon Musk')">Elon Musk</span>
+                <span class="example-tag" onclick="searchExample('White House')">White House</span>
+                <span class="example-tag" onclick="searchExample('AI technology')">AI Technology</span>
+                <span class="example-tag" onclick="searchExample('SpaceX')">SpaceX</span>
+                <span class="example-tag" onclick="searchExample('artificial intelligence')">Artificial Intelligence</span>
+                <span class="example-tag" onclick="searchExample('Tesla')">Tesla</span>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <form class="search-form" onsubmit="searchImages(event)">
+                <input type="text" id="searchInput" class="search-input"
+                       placeholder="输入关键词，如：马斯克、时事政治、AI发展..."
+                       value="Elon Musk">
+                <select id="timeRange" class="search-select">
+                    <option value="1d">过去24小时</option>
+                    <option value="7d" selected>过去一周</option>
+                    <option value="30d">过去一个月</option>
+                </select>
+                <button type="submit" class="search-button" id="searchButton">
+                    🔍 搜索图片
+                </button>
+            </form>
+        </div>
+
+        <div class="results-section">
+            <div id="resultsContent">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>准备搜索最新时事图片...</p>
+                    <p style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;">
+                        支持Google、Bing、NewsAPI等多源搜索
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API配置状态
+        const API_CONFIGS = {
+            googleSearch: { name: 'Google Search API', configured: false },
+            bingSearch: { name: 'Bing Search API', configured: false },
+            newsapi: { name: 'NewsAPI', configured: false },
+            twitter: { name: 'Twitter API', configured: false },
+            openai: { name: 'OpenAI API', configured: false }
+        }
+
+        // 当前搜索状态
+        let isSearching = false
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAPIStatus()
+        })
+
+        // 检查API配置状态
+        async function checkAPIStatus() {
+            const statusContainer = document.getElementById('apiStatus')
+
+            // 模拟API状态检查（实际需要后端支持）
+            const apiItems = Object.entries(API_CONFIGS).map(([key, config]) => `
+                <div class="api-item ${config.configured ? '' : 'not-configured'}">
+                    <div class="name">${config.name}</div>
+                    <div class="status">${config.configured ? '✅ 已配置' : '❌ 未配置'}</div>
+                </div>
+            `).join('')
+
+            statusContainer.innerHTML = apiItems
+        }
+
+        // 搜索示例
+        function searchExample(query) {
+            document.getElementById('searchInput').value = query
+            searchImages()
+        }
+
+        // 搜索图片
+        async function searchImages(event) {
+            if (event) event.preventDefault()
+
+            if (isSearching) return
+
+            const query = document.getElementById('searchInput').value.trim()
+            const timeRange = document.getElementById('timeRange').value
+            const searchButton = document.getElementById('searchButton')
+
+            if (!query) {
+                alert('请输入搜索关键词')
+                return
+            }
+
+            // 更新UI状态
+            isSearching = true
+            searchButton.disabled = true
+            searchButton.textContent = '🔄 搜索中...'
+
+            // 显示加载状态
+            showLoading(`正在搜索"${query}"的最新图片...`)
+
+            try {
+                const response = await fetch('http://localhost:8081/proxy-search-news-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        timeRange: timeRange,
+                        maxResults: 20
+                    })
+                })
+
+                const data = await response.json()
+
+                if (data.success) {
+                    displayResults(data)
+                } else {
+                    showError(`搜索失败: ${data.error || '未知错误'}`)
+                }
+
+            } catch (error) {
+                console.error('搜索错误:', error)
+                showError(`网络错误: ${error.message}`)
+            } finally {
+                isSearching = false
+                searchButton.disabled = false
+                searchButton.textContent = '🔍 搜索图片'
+            }
+        }
+
+        // 显示加载状态
+        function showLoading(message) {
+            const resultsContent = document.getElementById('resultsContent')
+            resultsContent.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>${message}</p>
+                    <p style="font-size: 0.9rem; color: #999; margin-top: 0.5rem;">
+                        正在从Google、Bing、NewsAPI等多源获取最新图片...
+                    </p>
+                </div>
+            `
+        }
+
+        // 显示搜索结果
+        function displayResults(data) {
+            const resultsContent = document.getElementById('resultsContent')
+
+            if (!data.images || data.images.length === 0) {
+                resultsContent.innerHTML = `
+                    <div class="results-header">
+                        <div class="results-title">🔍 搜索结果</div>
+                        <span class="results-count">0 个结果</span>
+                    </div>
+                    <div style="text-align: center; padding: 3rem; color: #666;">
+                        <p>😔 没有找到相关的最新图片</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                            可能的原因：API未配置、关键词过于具体、或该话题近期没有相关图片
+                        </p>
+                        <p style="font-size: 0.9rem; margin-top: 1rem; color: #999;">
+                            💡 建议：尝试更通用的关键词，或检查API配置状态
+                        </p>
+                    </div>
+                `
+                return
+            }
+
+            const resultsHtml = `
+                <div class="results-header">
+                    <div class="results-title">🎯 搜索结果 - "${data.query}"</div>
+                    <span class="results-count">${data.totalResults} 个结果</span>
+                </div>
+                <div class="images-grid">
+                    ${data.images.map(image => `
+                        <div class="image-card" onclick="openImage('${image.url}')">
+                            <div class="image-container">
+                                <img src="${image.url}" alt="${image.title}"
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBFcnJvcjwvdGV4dD48L3N2Zz4='; this.style.opacity='0.5';">
+                            </div>
+                            <div class="image-info">
+                                <div class="image-title">${truncateText(image.title, 60)}</div>
+                                <div class="image-meta">
+                                    <span class="image-source">${getSourceDisplayName(image.source)}</span>
+                                    <span class="image-date">${formatDate(image.publishedAt)}</span>
+                                </div>
+                                ${image.description ? `<div style="font-size: 0.8rem; color: #777; margin-top: 0.5rem;">${truncateText(image.description, 80)}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `
+
+            resultsContent.innerHTML = resultsHtml
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const resultsContent = document.getElementById('resultsContent')
+            resultsContent.innerHTML = `
+                <div class="error-message">
+                    <h3>❌ 搜索失败</h3>
+                    <p>${message}</p>
+                    <p style="font-size: 0.9rem; margin-top: 1rem; color: #721c24;">
+                        💡 检查建议：<br>
+                        • 确保代理服务器正在运行 (http://localhost:8081)<br>
+                        • 检查网络连接是否正常<br>
+                        • 确认API配置是否正确
+                    </p>
+                </div>
+            `
+        }
+
+        // 工具函数
+        function truncateText(text, maxLength) {
+            if (!text) return ''
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '未知时间'
+            try {
+                const date = new Date(dateString)
+                const now = new Date()
+                const diffTime = Math.abs(now - date)
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+                if (diffDays === 1) return '今天'
+                if (diffDays === 2) return '昨天'
+                if (diffDays <= 7) return `${diffDays - 1}天前`
+                if (diffDays <= 30) return `${Math.ceil(diffDays / 7)}周前`
+                return date.toLocaleDateString('zh-CN')
+            } catch (error) {
+                return '未知时间'
+            }
+        }
+
+        function getSourceDisplayName(source) {
+            const names = {
+                'google': 'Google',
+                'bing': 'Bing',
+                'newsapi': '新闻',
+                'twitter': 'Twitter',
+                'ai-generated': 'AI生成'
+            }
+            return names[source] || source.toUpperCase()
+        }
+
+        function openImage(url) {
+            window.open(url, '_blank', 'width=800,height=600')
+        }
+
+        // 页面加载完成后自动执行一次搜索
+        window.addEventListener('load', function() {
+            // 3秒后自动搜索示例关键词
+            setTimeout(() => {
+                if (!isSearching) {
+                    searchImages()
+                }
+            }, 3000)
+        })
+    </script>
+</body>
+</html>

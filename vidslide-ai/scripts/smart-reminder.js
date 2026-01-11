@@ -514,20 +514,20 @@ if (require.main === module) {
    */
 
   switch (command) {
-  case 'daily':
-    reminder.showReminder()
-    reminder.showProgress()
-    reminder.showDailySuggestions()
-    break
-  case 'progress':
-    reminder.showProgress()
-    break
-  case 'tasks':
-    reminder.showWeeklyTasks()
-    break
-  default:
-    reminder.showReminder()
-    break
+    case 'daily':
+      reminder.showReminder()
+      reminder.showProgress()
+      reminder.showDailySuggestions()
+      break
+    case 'progress':
+      reminder.showProgress()
+      break
+    case 'tasks':
+      reminder.showWeeklyTasks()
+      break
+    default:
+      reminder.showReminder()
+      break
   }
 }
 

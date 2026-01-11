@@ -167,34 +167,34 @@ export class PptxExporter {
 
     // 根据模板添加母版元素
     switch (template) {
-    case 'professional':
-      // 添加页脚和页码占位符
-      masterSlide.addText('{{slideNum}}', {
-        placeholder: 'slideNumber',
-        x: '90%',
-        y: '95%',
-        w: '10%',
-        h: 0.3,
-        fontSize: 10,
-        color: '666666',
-        align: 'right'
-      })
-      break
+      case 'professional':
+        // 添加页脚和页码占位符
+        masterSlide.addText('{{slideNum}}', {
+          placeholder: 'slideNumber',
+          x: '90%',
+          y: '95%',
+          w: '10%',
+          h: 0.3,
+          fontSize: 10,
+          color: '666666',
+          align: 'right'
+        })
+        break
 
-    case 'modern':
-      // 现代风格母版
-      masterSlide.addShape(pptx.ShapeType.rect, {
-        x: 0,
-        y: 0,
-        w: '100%',
-        h: '10%',
-        fill: { color: '007ACC' }
-      })
-      break
+      case 'modern':
+        // 现代风格母版
+        masterSlide.addShape(pptx.ShapeType.rect, {
+          x: 0,
+          y: 0,
+          w: '100%',
+          h: '10%',
+          fill: { color: '007ACC' }
+        })
+        break
 
-    case 'minimal':
-      // 极简风格 - 几乎空白
-      break
+      case 'minimal':
+        // 极简风格 - 几乎空白
+        break
     }
   }
 
@@ -256,20 +256,20 @@ export class PptxExporter {
   async addElementToSlide(slide, element, pptx) {
     try {
       switch (element.type) {
-      case 'text':
-        this.addTextElement(slide, element, pptx)
-        break
-      case 'image':
-        await this.addImageElement(slide, element, pptx)
-        break
-      case 'shape':
-        this.addShapeElement(slide, element, pptx)
-        break
-      case 'chart':
-        this.addChartElement(slide, element, pptx)
-        break
-      default:
-        console.warn(`PPTX导出不支持的元素类型: ${element.type}`)
+        case 'text':
+          this.addTextElement(slide, element, pptx)
+          break
+        case 'image':
+          await this.addImageElement(slide, element, pptx)
+          break
+        case 'shape':
+          this.addShapeElement(slide, element, pptx)
+          break
+        case 'chart':
+          this.addChartElement(slide, element, pptx)
+          break
+        default:
+          console.warn(`PPTX导出不支持的元素类型: ${element.type}`)
       }
     } catch (error) {
       console.warn(`PPTX元素添加失败 (${element.type}):`, error)
@@ -348,11 +348,16 @@ export class PptxExporter {
     } catch (error) {
       console.warn('PPTX图片添加失败:', error)
       // 添加占位符文本
+      const placeholderX = ((position.x || 0) / 100) * 10
+      const placeholderY = ((position.y || 0) / 100) * 5.625
+      const placeholderW = ((size.width || 30) / 100) * 10
+      const placeholderH = ((size.height || 20) / 100) * 5.625
+
       slide.addText('图片加载失败', {
-        x: x,
-        y: y,
-        w: w,
-        h: h,
+        x: placeholderX,
+        y: placeholderY,
+        w: placeholderW,
+        h: placeholderH,
         color: '999999',
         align: 'center',
         valign: 'middle'
@@ -380,26 +385,26 @@ export class PptxExporter {
       fill: style.fill ? { color: style.fill.replace('#', '') } : undefined,
       line: style.stroke
         ? {
-          color: style.stroke.replace('#', ''),
-          width: style.strokeWidth || 1
-        }
+            color: style.stroke.replace('#', ''),
+            width: style.strokeWidth || 1
+          }
         : undefined
     }
 
     // 根据形状类型添加
     switch (shape) {
-    case 'rectangle':
-      slide.addShape(pptx.ShapeType.rect, shapeOptions)
-      break
-    case 'circle':
-      slide.addShape(pptx.ShapeType.ellipse, shapeOptions)
-      break
-    case 'triangle':
-      slide.addShape(pptx.ShapeType.triangle, shapeOptions)
-      break
-    default:
-      console.warn(`PPTX不支持的形状: ${shape}`)
-      slide.addShape(pptx.ShapeType.rect, shapeOptions)
+      case 'rectangle':
+        slide.addShape(pptx.ShapeType.rect, shapeOptions)
+        break
+      case 'circle':
+        slide.addShape(pptx.ShapeType.ellipse, shapeOptions)
+        break
+      case 'triangle':
+        slide.addShape(pptx.ShapeType.triangle, shapeOptions)
+        break
+      default:
+        console.warn(`PPTX不支持的形状: ${shape}`)
+        slide.addShape(pptx.ShapeType.rect, shapeOptions)
     }
   }
 

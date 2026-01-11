@@ -126,7 +126,7 @@ export class TemplateRenderer {
    * @param {Object} options - 渲染选项
    * @returns {Promise<Object>} 渲染结果
    */
-  async /**
+  /**
    * renderTemplate 方法
    * VidSlide AI 功能实现
    */
@@ -220,7 +220,7 @@ export class TemplateRenderer {
    * @param {Object} options - 渲染选项
    * @returns {Promise<Object>} 渲染结果
    */
-  async /**
+  /**
    * renderTemplateContent 方法
    * VidSlide AI 功能实现
    */
@@ -240,23 +240,23 @@ export class TemplateRenderer {
      */
 
     switch (type) {
-    case TEMPLATE_TYPES.DIALOG_POPUP:
-      return this.renderDialogPopup(config, data, options)
+      case TEMPLATE_TYPES.DIALOG_POPUP:
+        return this.renderDialogPopup(config, data, options)
 
-    case TEMPLATE_TYPES.TIMELINE_DISPLAY:
-      return this.renderTimelineDisplay(config, data, options)
+      case TEMPLATE_TYPES.TIMELINE_DISPLAY:
+        return this.renderTimelineDisplay(config, data, options)
 
-    case TEMPLATE_TYPES.SPLIT_SCREEN:
-      return this.renderSplitScreen(config, data, options)
+      case TEMPLATE_TYPES.SPLIT_SCREEN:
+        return this.renderSplitScreen(config, data, options)
 
-    case TEMPLATE_TYPES.CHART_ANALYSIS:
-      return this.renderChartAnalysis(config, data, options)
+      case TEMPLATE_TYPES.CHART_ANALYSIS:
+        return this.renderChartAnalysis(config, data, options)
 
-    case TEMPLATE_TYPES.EMPHASIS_FOCUS:
-      return this.renderEmphasisFocus(config, data, options)
+      case TEMPLATE_TYPES.EMPHASIS_FOCUS:
+        return this.renderEmphasisFocus(config, data, options)
 
-    default:
-      throw new Error(`Unsupported template type: ${type}`)
+      default:
+        throw new Error(`Unsupported template type: ${type}`)
     }
   }
 
@@ -991,29 +991,29 @@ export class TemplateRenderer {
      */
 
     switch (position) {
-    case 'center':
-      return { x: centerX, y: centerY }
+      case 'center':
+        return { x: centerX, y: centerY }
 
-    case 'top-left':
-      return { x: margin, y: margin }
+      case 'top-left':
+        return { x: margin, y: margin }
 
-    case 'top-right':
-      return { x: this.width - width - margin, y: margin }
+      case 'top-right':
+        return { x: this.width - width - margin, y: margin }
 
-    case 'bottom-left':
-      return { x: margin, y: this.height - height - margin }
+      case 'bottom-left':
+        return { x: margin, y: this.height - height - margin }
 
-    case 'bottom-right':
-      return { x: this.width - width - margin, y: this.height - height - margin }
+      case 'bottom-right':
+        return { x: this.width - width - margin, y: this.height - height - margin }
 
-    case 'bottom':
-      return { x: centerX, y: this.height - height - margin }
+      case 'bottom':
+        return { x: centerX, y: this.height - height - margin }
 
-    case 'left-to-right':
-      return { x: margin, y: centerY }
+      case 'left-to-right':
+        return { x: margin, y: centerY }
 
-    default:
-      return { x: centerX, y: centerY }
+      default:
+        return { x: centerX, y: centerY }
     }
   }
 
@@ -1045,28 +1045,28 @@ export class TemplateRenderer {
      */
 
     switch (type) {
-    case 'fade-in-scale':
-      this.applyFadeInScaleAnimation(target, duration, easing)
-      break
+      case 'fade-in-scale':
+        this.applyFadeInScaleAnimation(target, duration, easing)
+        break
 
-    case 'progress-bar':
-      this.applyProgressBarAnimation(target, duration, easing)
-      break
+      case 'progress-bar':
+        this.applyProgressBarAnimation(target, duration, easing)
+        break
 
-    case 'slide-in-sync':
-      this.applySlideInSyncAnimation(target, duration, easing)
-      break
+      case 'slide-in-sync':
+        this.applySlideInSyncAnimation(target, duration, easing)
+        break
 
-    case 'data-animation':
-      this.applyDataAnimation(target, duration, easing)
-      break
+      case 'data-animation':
+        this.applyDataAnimation(target, duration, easing)
+        break
 
-    case 'fade-in-text':
-      this.applyFadeInTextAnimation(target, duration, easing)
-      break
+      case 'fade-in-text':
+        this.applyFadeInTextAnimation(target, duration, easing)
+        break
 
-    default:
-      console.warn(`Unsupported animation type: ${type}`)
+      default:
+        console.warn(`Unsupported animation type: ${type}`)
     }
   }
 
@@ -1385,8 +1385,8 @@ export class TemplateRenderer {
      */
 
     switch (violation.type) {
-    case 'TEXT_LENGTH':
-      /**
+      case 'TEXT_LENGTH':
+        /**
 
          * if 方法
 
@@ -1394,27 +1394,13 @@ export class TemplateRenderer {
 
          */
 
-      if (violation.field === 'text' && template.data.content) {
-        template.data.content = template.data.content.substring(0, violation.limit)
-      }
-      break
+        if (violation.field === 'text' && template.data.content) {
+          template.data.content = template.data.content.substring(0, violation.limit)
+        }
+        break
 
-    case 'POSITION_INVALID':
-      /**
-
-         * if 方法
-
-         * VidSlide AI 功能实现
-
-         */
-
-      if (violation.allowed && violation.allowed.length > 0) {
-        template.config.visual.position = violation.allowed[0]
-      }
-      break
-
-    case 'SIZE_TOO_SMALL':
-      /**
+      case 'POSITION_INVALID':
+        /**
 
          * if 方法
 
@@ -1422,13 +1408,13 @@ export class TemplateRenderer {
 
          */
 
-      if (violation.minimum) {
-        template.config.visual.size = { ...violation.minimum }
-      }
-      break
+        if (violation.allowed && violation.allowed.length > 0) {
+          template.config.visual.position = violation.allowed[0]
+        }
+        break
 
-    case 'SIZE_TOO_LARGE':
-      /**
+      case 'SIZE_TOO_SMALL':
+        /**
 
          * if 方法
 
@@ -1436,18 +1422,32 @@ export class TemplateRenderer {
 
          */
 
-      if (violation.maximum) {
-        template.config.visual.size = { ...violation.maximum }
-      }
-      break
+        if (violation.minimum) {
+          template.config.visual.size = { ...violation.minimum }
+        }
+        break
 
-    case 'CONTRAST_RATIO':
-      // 自动调整颜色以提高对比度
-      this.adjustColorsForContrast(template)
-      break
+      case 'SIZE_TOO_LARGE':
+        /**
 
-    default:
-      console.warn(`No auto-fix available for violation type: ${violation.type}`)
+         * if 方法
+
+         * VidSlide AI 功能实现
+
+         */
+
+        if (violation.maximum) {
+          template.config.visual.size = { ...violation.maximum }
+        }
+        break
+
+      case 'CONTRAST_RATIO':
+        // 自动调整颜色以提高对比度
+        this.adjustColorsForContrast(template)
+        break
+
+      default:
+        console.warn(`No auto-fix available for violation type: ${violation.type}`)
     }
   }
 

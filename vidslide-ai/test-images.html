@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>素材图片测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-image { margin: 10px; border: 2px solid #ccc; max-width: 300px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>素材图片加载测试</h1>
+    <p>如果图片能正常显示，说明素材库配置正确。</p>
+
+    <h2>计算机相关素材</h2>
+    <div>
+        <h3>Unsplash - Andras Vas</h3>
+        <img src="public/materials-test/computer/unsplash_Bd7gNnWJBkU.jpg"
+             alt="Computer - Unsplash"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <div>
+        <h3>Pexels - ThisIsEngineering</h3>
+        <img src="public/materials-test/computer/pexels_577585.jpeg"
+             alt="Computer - Pexels"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <h2>商业相关素材</h2>
+    <div>
+        <h3>Unsplash - Campaign Creators</h3>
+        <img src="public/materials-test/business/unsplash_qW_k6x5OfRc.jpg"
+             alt="Business - Unsplash"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <div>
+        <h3>Pexels - Andrea Piacquadio</h3>
+        <img src="public/materials-test/business/pexels_3184416.jpeg"
+             alt="Business - Pexels"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <h2>教育相关素材</h2>
+    <div>
+        <h3>Unsplash - Gemma Evans</h3>
+        <img src="public/materials-test/education/unsplash_lUaaKCUANVI.jpg"
+             alt="Education - Unsplash"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <div>
+        <h3>Pexels - Pixabay</h3>
+        <img src="public/materials-test/education/pexels_301926.jpeg"
+             alt="Education - Pexels"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <h2>科技相关素材</h2>
+    <div>
+        <h3>Unsplash - Nathan Dumlao</h3>
+        <img src="public/materials-test/technology/unsplash_oRKF_ZBJYGM.jpg"
+             alt="Technology - Unsplash"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <div>
+        <h3>Pexels - ThisIsEngineering</h3>
+        <img src="public/materials-test/technology/pexels_546819.jpeg"
+             alt="Technology - Pexels"
+             class="test-image"
+             onerror="this.style.border='2px solid red'; this.nextElementSibling.innerHTML='❌ 图片加载失败'"
+             onload="this.style.border='2px solid green'; this.nextElementSibling.innerHTML='✅ 图片加载成功'">
+        <div></div>
+    </div>
+
+    <div style="margin-top: 50px; padding: 20px; background: #f0f0f0; border-radius: 10px;">
+        <h2>测试说明</h2>
+        <ul>
+            <li>绿色边框：图片加载成功 ✅</li>
+            <li>红色边框：图片加载失败 ❌</li>
+            <li>如果所有图片都显示绿色边框，说明素材库配置正确</li>
+            <li>如果有图片显示红色边框，说明路径或文件名有问题</li>
+        </ul>
+        <p><strong>服务器地址：</strong> http://localhost:3000/test-images.html</p>
+    </div>
+</body>
+</html>

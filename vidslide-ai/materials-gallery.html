@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI 素材库展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .categories {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .category {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            background: #667eea;
+            color: white;
+            padding: 1rem 1.5rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .material-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .material-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .material-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .material-info {
+            padding: 1rem;
+        }
+
+        .material-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .material-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .material-source {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #495057;
+        }
+
+        .pexels {
+            background: #28a745;
+            color: white;
+        }
+
+        .unsplash {
+            background: #007bff;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            background: white;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 VidSlide AI 素材库</h1>
+        <p>自动获取的专业素材展示 - 基于4个用户群体需求优化</p>
+    </div>
+
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">8</div>
+                <div>总素材数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div>测试关键词</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div>素材来源</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div>下载成功率</div>
+            </div>
+        </div>
+
+        <div class="categories" id="materialsContainer">
+            <!-- 素材将通过JavaScript动态加载 -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🚀 VidSlide AI 自动素材获取系统 | 生成时间: 2026-01-11</p>
+    </div>
+
+    <script>
+        // 素材数据 - 修复路径问题
+        const materialsData = {
+            computer: [
+                {
+                    id: "Bd7gNnWJBkU",
+                    title: "computer",
+                    source: "unsplash",
+                    author: "Andras Vas",
+                    localPath: "public/materials-test/computer/unsplash_Bd7gNnWJBkU.jpg",
+                    downloadTime: "2026-01-11T04:11:25.040Z"
+                },
+                {
+                    id: "577585",
+                    title: "computer",
+                    source: "pexels",
+                    author: "ThisIsEngineering",
+                    localPath: "public/materials-test/computer/pexels_577585.jpeg",
+                    downloadTime: "2026-01-11T04:11:25.040Z"
+                }
+            ],
+            business: [
+                {
+                    id: "qW_k6x5OfRc",
+                    title: "business",
+                    source: "unsplash",
+                    author: "Campaign Creators",
+                    localPath: "public/materials-test/business/unsplash_qW_k6x5OfRc.jpg",
+                    downloadTime: "2026-01-11T04:11:28.040Z"
+                },
+                {
+                    id: "3184416",
+                    title: "business",
+                    source: "pexels",
+                    author: "Andrea Piacquadio",
+                    localPath: "public/materials-test/business/pexels_3184416.jpeg",
+                    downloadTime: "2026-01-11T04:11:28.040Z"
+                }
+            ],
+            education: [
+                {
+                    id: "lUaaKCUANVI",
+                    title: "education",
+                    source: "unsplash",
+                    author: "Gemma Evans",
+                    localPath: "public/materials-test/education/unsplash_lUaaKCUANVI.jpg",
+                    downloadTime: "2026-01-11T04:11:31.040Z"
+                },
+                {
+                    id: "301926",
+                    title: "education",
+                    source: "pexels",
+                    author: "Pixabay",
+                    localPath: "public/materials-test/education/pexels_301926.jpeg",
+                    downloadTime: "2026-01-11T04:11:31.040Z"
+                }
+            ],
+            technology: [
+                {
+                    id: "oRKF_ZBJYGM",
+                    title: "technology",
+                    source: "unsplash",
+                    author: "Nathan Dumlao",
+                    localPath: "public/materials-test/technology/unsplash_oRKF_ZBJYGM.jpg",
+                    downloadTime: "2026-01-11T04:11:35.040Z"
+                },
+                {
+                    id: "546819",
+                    title: "technology",
+                    source: "pexels",
+                    author: "ThisIsEngineering",
+                    localPath: "public/materials-test/technology/pexels_546819.jpeg",
+                    downloadTime: "2026-01-11T04:11:35.040Z"
+                }
+            ]
+        }
+
+        // 分类名称映射
+        const categoryNames = {
+            computer: "💻 计算机相关素材",
+            business: "💼 商业相关素材",
+            education: "📚 教育相关素材",
+            technology: "🚀 科技相关素材"
+        }
+
+        // 渲染素材库
+        function renderMaterials() {
+            const container = document.getElementById('materialsContainer')
+
+            Object.entries(materialsData).forEach(([category, materials]) => {
+                const categoryDiv = document.createElement('div')
+                categoryDiv.className = 'category'
+
+                categoryDiv.innerHTML = `
+                    <div class="category-header">
+                        ${categoryNames[category]}
+                    </div>
+                    <div class="materials-grid">
+                        ${materials.map(material => `
+                            <div class="material-card">
+                                <img src="${material.localPath}"
+                                     alt="${material.title}"
+                                     class="material-image"
+                                     loading="lazy">
+                                <div class="material-info">
+                                    <div class="material-title">${material.title}</div>
+                                    <div class="material-meta">📸 ${material.author}</div>
+                                    <div class="material-meta">🆔 ${material.id}</div>
+                                    <span class="material-source ${material.source}">${material.source}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `
+
+                container.appendChild(categoryDiv)
+            })
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', renderMaterials)
+    </script>
+</body>
+</html>

@@ -3,6 +3,8 @@
  * 集成免费素材API（Unsplash, Pexels等）
  */
 
+import { getTranslationService } from './translationService.js'
+
 /**
  * 外部API集成管理器
  * 统一管理多个免费素材API（Unsplash、Pexels等）
@@ -22,6 +24,11 @@ export class ExternalAPI {
       },
       pexels: {
         baseUrl: 'https://api.pexels.com/v1',
+        accessKey: null, // 需要用户配置
+        enabled: true
+      },
+      pixabay: {
+        baseUrl: 'https://pixabay.com/api/',
         accessKey: null, // 需要用户配置
         enabled: true
       }
@@ -83,7 +90,7 @@ export class ExternalAPI {
    * @returns {Object} asset[].copyrightInfo - 版权状态信息
    * @throws {Error} 当所有API都不可用或搜索失败时抛出错误
    */
-  async /**
+  /**
    * searchAssets 方法
    * VidSlide AI 功能实现
    */
@@ -98,11 +105,36 @@ export class ExternalAPI {
 
     const results = []
 
-    // 并行搜索所有启用的API
+    // 智能关键词翻译：将中文关键词翻译为英文以提升搜索效果
+    let searchQuery = query
+    try {
+      const translationService = getTranslationService()
+
+      // 检测是否包含中文字符
+      const hasChinese = /[\u4e00-\u9fa5]/.test(query)
+
+      if (hasChinese) {
+        console.log(`🔄 检测到中文关键词，正在翻译: "${query}"`)
+
+        // 将中文关键词翻译为英文
+        const translatedQuery = await translationService.translate(query, 'zh', 'en')
+
+        if (translatedQuery && translatedQuery !== query) {
+          searchQuery = translatedQuery
+          console.log(`✅ 关键词翻译完成: "${query}" → "${searchQuery}"`)
+        } else {
+          console.warn(`⚠️ 关键词翻译失败，使用原关键词: "${query}"`)
+        }
+      }
+    } catch (error) {
+      console.warn('关键词翻译服务不可用，使用原关键词:', error.message)
+    }
+
+    // 并行搜索所有启用的API（使用翻译后的关键词）
     const searchPromises = Object.entries(this.apis)
       .filter(([_, config]) => config.enabled && config.accessKey)
       .map(([apiName, config]) =>
-        this.searchFromAPI(apiName, query, { ...options, limit: Math.ceil(limit / 2) }).catch(
+        this.searchFromAPI(apiName, searchQuery, { ...options, limit: Math.ceil(limit / 2) }).catch(
           error => {
             console.warn(`${apiName}搜索失败:`, error)
             return []
@@ -136,7 +168,7 @@ export class ExternalAPI {
    * @param {Object} options - 搜索选项
    * @returns {Promise<Array>} 素材列表
    */
-  async /**
+  /**
    * searchFromAPI 方法
    * VidSlide AI 功能实现
    */
@@ -186,14 +218,17 @@ export class ExternalAPI {
      */
 
     switch (apiName) {
-    case 'unsplash':
-      results = await this.searchUnsplash(query, options)
-      break
-    case 'pexels':
-      results = await this.searchPexels(query, options)
-      break
-    default:
-      throw new Error(`不支持的API: ${apiName}`)
+      case 'unsplash':
+        results = await this.searchUnsplash(query, options)
+        break
+      case 'pexels':
+        results = await this.searchPexels(query, options)
+        break
+      case 'pixabay':
+        results = await this.searchPixabay(query, options)
+        break
+      default:
+        throw new Error(`不支持的API: ${apiName}`)
     }
 
     // 缓存结果
@@ -508,14 +543,17 @@ export class ExternalAPI {
      */
 
     switch (apiName) {
-    case 'unsplash':
-      results = await this.getUnsplashPopular(limit)
-      break
-    case 'pexels':
-      results = await this.getPexelsPopular(limit)
-      break
-    default:
-      throw new Error(`不支持的API: ${apiName}`)
+      case 'unsplash':
+        results = await this.getUnsplashPopular(limit)
+        break
+      case 'pexels':
+        results = await this.getPexelsPopular(limit)
+        break
+      case 'pixabay':
+        results = await this.getPixabayPopular(limit)
+        break
+      default:
+        throw new Error(`不支持的API: ${apiName}`)
     }
 
     this.setCache(cacheKey, results)
@@ -591,7 +629,107 @@ export class ExternalAPI {
   }
 
   /**
-   * 下载素材
+   * 搜索Pixabay素材
+   * @param {string} query - 搜索关键词
+   * @param {Object} options - 搜索选项
+   * @returns {Promise<Array>} Pixabay素材列表
+   */
+  /**
+   * searchPixabay 方法
+   * VidSlide AI 功能实现
+   */
+  async searchPixabay(query, options = {}) {
+    const { limit = 10, page = 1 } = options
+    const config = this.apis.pixabay
+
+    const params = new URLSearchParams({
+      key: config.accessKey,
+      q: query,
+      per_page: limit,
+      page,
+      lang: 'zh' // 支持中文搜索
+    })
+
+    const url = `${config.baseUrl}?${params}`
+
+    try {
+      const response = await fetch(url)
+      /**
+       * if 方法
+       * VidSlide AI 功能实现
+       */
+
+      if (!response.ok) {
+        throw new Error(`Pixabay API错误: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      return data.hits.map(hit => ({
+        id: `pixabay_${hit.id}`,
+        name: hit.tags || `Pixabay ${hit.id}`,
+        type: 'image',
+        category: 'photo',
+        source: 'pixabay',
+        url: hit.webformatURL,
+        thumbnail: hit.previewURL,
+        originalUrl: hit.largeImageURL,
+        width: hit.imageWidth,
+        height: hit.imageHeight,
+        author: {
+          name: hit.user,
+          username: hit.user,
+          profileUrl: `https://pixabay.com/users/${hit.user}/`
+        },
+        tags: hit.tags ? hit.tags.split(',').map(tag => tag.trim()) : [],
+        metadata: {
+          copyrightStatus: 'free',
+          license: 'Pixabay License',
+          sourceUrl: hit.pageURL,
+          downloadUrl: hit.largeImageURL,
+          createdAt: null,
+          likes: hit.likes,
+          downloads: hit.downloads,
+          views: hit.views
+        },
+        isDownloaded: false,
+        fileSize: 0
+      }))
+    } catch (error) {
+      console.error('Pixabay搜索失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 获取Pixabay热门素材
+   * @param {number} limit - 数量限制
+   * @returns {Promise<Array>} 热门素材列表
+   */
+  /**
+   * getPixabayPopular 方法
+   * VidSlide AI 功能实现
+   */
+  async getPixabayPopular(limit = 10) {
+    const config = this.apis.pixabay
+    const url = `${config.baseUrl}?key=${config.accessKey}&order=popular&per_page=${limit}&lang=zh`
+
+    const response = await fetch(url)
+    /**
+     * if 方法
+     * VidSlide AI 功能实现
+     */
+
+    if (!response.ok) {
+      throw new Error(`Pixabay API错误: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.hits.map(hit => this.transformPixabayHit(hit))
+  }
+
+  /**
+   * 转换Pexels照片数据
    * @param {Object} asset - 素材对象
    * @returns {Promise<Blob>} 素材文件
    */
@@ -776,6 +914,49 @@ export class ExternalAPI {
         createdAt: null,
         likes: null,
         downloads: null
+      },
+      isDownloaded: false,
+      fileSize: 0
+    }
+  }
+
+  /**
+   * 转换Pixabay照片数据
+   * @param {Object} hit - Pixabay hit对象
+   * @returns {Object} 标准化的素材对象
+   */
+  /**
+   * transformPixabayHit 方法
+   * VidSlide AI 功能实现
+   */
+
+  transformPixabayHit(hit) {
+    return {
+      id: `pixabay_${hit.id}`,
+      name: hit.tags || `Pixabay ${hit.id}`,
+      type: 'image',
+      category: 'photo',
+      source: 'pixabay',
+      url: hit.webformatURL,
+      thumbnail: hit.previewURL,
+      originalUrl: hit.largeImageURL,
+      width: hit.imageWidth,
+      height: hit.imageHeight,
+      author: {
+        name: hit.user,
+        username: hit.user,
+        profileUrl: `https://pixabay.com/users/${hit.user}/`
+      },
+      tags: hit.tags ? hit.tags.split(',').map(tag => tag.trim()) : [],
+      metadata: {
+        copyrightStatus: 'free',
+        license: 'Pixabay License',
+        sourceUrl: hit.pageURL,
+        downloadUrl: hit.largeImageURL,
+        createdAt: null,
+        likes: hit.likes,
+        downloads: hit.downloads,
+        views: hit.views
       },
       isDownloaded: false,
       fileSize: 0

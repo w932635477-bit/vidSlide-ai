@@ -7,9 +7,14 @@
   支持位置调节、大小控制、样式选择、动画效果等高级功能
 -->
 <template>
-  <aside class="picture-in-picture" role="complementary" aria-label="画中画效果控制面板">
+  <aside
+class="picture-in-picture" role="complementary"
+aria-label="画中画效果控制面板"
+>
     <!-- 画中画控制面板 - 主要的用户交互区域 -->
-    <section class="pip-controls" aria-labelledby="pip-controls-heading">
+    <section
+class="pip-controls" aria-labelledby="pip-controls-heading"
+>
       <header class="control-header">
         <h2 id="pip-controls-heading">画中画效果</h2>
         <!-- 状态指示器：显示画中画是否激活 -->
@@ -26,8 +31,13 @@
       <!-- 位置选择 -->
       <fieldset class="control-section">
         <legend class="control-label">显示位置</legend>
-        <div class="position-grid" role="radiogroup" aria-labelledby="position-label">
-          <span id="position-label" class="sr-only">选择画中画显示位置</span>
+        <div
+class="position-grid" role="radiogroup"
+aria-labelledby="position-label"
+>
+          <span
+id="position-label" class="sr-only"
+>选择画中画显示位置</span>
           <div
             v-for="position in positionOptions"
             :key="position.id"
@@ -41,7 +51,9 @@
             @keydown.enter="setPosition(position.id)"
             @keydown.space.prevent="setPosition(position.id)"
           >
-            <div class="position-icon" aria-hidden="true">
+            <div
+class="position-icon" aria-hidden="true"
+>
               {{ position.icon }}
             </div>
             <span class="position-name">{{ position.name }}</span>
@@ -69,7 +81,9 @@ class="size-display" aria-live="polite">{{ pipConfig.size }}%</div>
 
         <!-- 样式选择 -->
         <div class="control-section">
-          <label class="control-label" for="style-radio-group">视觉样式</label>
+          <label
+class="control-label" for="style-radio-group"
+>视觉样式</label>
           <el-radio-group
             id="style-radio-group"
             v-model="pipConfig.style"
@@ -85,7 +99,9 @@ class="size-display" aria-live="polite">{{ pipConfig.size }}%</div>
 
         <!-- 动画设置 -->
         <div class="control-section">
-          <label class="control-label" for="animation-select">入场动画</label>
+          <label
+class="control-label" for="animation-select"
+>入场动画</label>
           <el-select
             id="animation-select"
             v-model="pipConfig.animation"
@@ -105,7 +121,9 @@ label="bounce-in" value="bounce-in"> 弹跳 </el-option>
         </div>
 
         <!-- 人脸跟踪控制 -->
-        <div v-if="faceTrackingSupported" class="control-section">
+        <div
+v-if="faceTrackingSupported" class="control-section"
+>
           <label class="control-label">高级功能</label>
           <div class="face-tracking-controls">
             <el-checkbox
@@ -120,7 +138,9 @@ label="bounce-in" value="bounce-in"> 弹跳 </el-option>
               v-if="faceTrackingEnabled && trackingPerformance.faceDetected"
               class="tracking-status"
             >
-              <el-tag size="small" type="success">
+              <el-tag
+size="small" type="success"
+>
                 人脸已检测 (置信度: {{ Math.round(trackingPerformance.confidence * 100) }}%)
               </el-tag>
               <small class="tracking-fps"> 跟踪FPS: {{ trackingPerformance.fps }} </small>
@@ -139,14 +159,22 @@ label="bounce-in" value="bounce-in"> 弹跳 </el-option>
             {{ isPipActive ? '停止画中画' : '启动画中画' }}
           </el-button>
 
-          <el-button type="warning" size="small" :disabled="!isPipActive" @click="resetToDefault">
+          <el-button
+type="warning" size="small"
+:disabled="!isPipActive" @click="resetToDefault"
+>
             重置默认
           </el-button>
         </div>
 
         <!-- 画中画预览区域 -->
-        <div v-if="isPipActive" class="pip-preview" :style="previewStyle">
-          <div class="pip-container" :style="containerStyle">
+        <div
+v-if="isPipActive" class="pip-preview"
+:style="previewStyle"
+>
+          <div
+class="pip-container" :style="containerStyle"
+>
             <div class="pip-content">
               <!-- 这里会显示实际的画中画内容 -->
               <div class="pip-placeholder">
@@ -159,11 +187,16 @@ label="bounce-in" value="bounce-in"> 弹跳 </el-option>
           </div>
 
           <!-- 背景遮罩 -->
-          <div v-if="pipConfig.showOverlay" class="pip-overlay" :style="overlayStyle" />
+          <div
+v-if="pipConfig.showOverlay" class="pip-overlay"
+:style="overlayStyle"
+/>
         </div>
 
         <!-- 性能监控 -->
-        <div v-if="showPerformanceInfo" class="performance-info">
+        <div
+v-if="showPerformanceInfo" class="performance-info"
+>
           <small class="performance-text">
             渲染时间: {{ renderTime }}ms | FPS: {{ currentFps }}
           </small>
@@ -312,26 +345,26 @@ const containerStyle = computed(() => {
   let bottom = 'auto'
 
   switch (position) {
-  case 'top-left':
-    top = '10px'
-    left = '10px'
-    break
-  case 'top-right':
-    top = '10px'
-    right = '10px'
-    left = 'auto'
-    break
-  case 'bottom-left':
-    bottom = '10px'
-    left = '10px'
-    top = 'auto'
-    break
-  case 'bottom-right':
-    bottom = '10px'
-    right = '10px'
-    top = 'auto'
-    left = 'auto'
-    break
+    case 'top-left':
+      top = '10px'
+      left = '10px'
+      break
+    case 'top-right':
+      top = '10px'
+      right = '10px'
+      left = 'auto'
+      break
+    case 'bottom-left':
+      bottom = '10px'
+      left = '10px'
+      top = 'auto'
+      break
+    case 'bottom-right':
+      bottom = '10px'
+      right = '10px'
+      top = 'auto'
+      left = 'auto'
+      break
   }
 
   return {
@@ -451,20 +484,20 @@ const applyEntranceAnimation = async () => {
     let animationClass = ''
 
     switch (animation) {
-    case 'fade-in':
-      animationClass = 'pip-fade-in'
-      break
-    case 'scale-in':
-      animationClass = 'pip-scale-in'
-      break
-    case 'slide-in':
-      animationClass = 'pip-slide-in'
-      break
-    case 'bounce-in':
-      animationClass = 'pip-bounce-in'
-      break
-    default:
-      animationClass = 'pip-fade-in'
+      case 'fade-in':
+        animationClass = 'pip-fade-in'
+        break
+      case 'scale-in':
+        animationClass = 'pip-scale-in'
+        break
+      case 'slide-in':
+        animationClass = 'pip-slide-in'
+        break
+      case 'bounce-in':
+        animationClass = 'pip-bounce-in'
+        break
+      default:
+        animationClass = 'pip-fade-in'
     }
 
     pipElement.classList.add(animationClass)

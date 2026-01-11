@@ -4,14 +4,21 @@
 <template>
   <div class="user-adjustment-panel">
     <!-- 面板头部 -->
-    <header class="panel-header" role="banner">
-      <h2 id="panel-title" class="panel-title">
+    <header
+class="panel-header" role="banner"
+>
+      <h2
+id="panel-title" class="panel-title"
+>
         <el-icon aria-hidden="true">
           <setting />
         </el-icon>
         {{ currentTemplate?.name || '模板设置' }}
       </h2>
-      <div class="panel-actions" role="toolbar" aria-label="面板操作">
+      <div
+class="panel-actions" role="toolbar"
+aria-label="面板操作"
+>
         <el-tag
           :type="complianceScore >= 80 ? 'success' : complianceScore >= 60 ? 'warning' : 'danger'"
           size="small"
@@ -31,12 +38,18 @@
         >
           应用更改
         </el-button>
-        <span v-if="isApplying" id="applying-status" class="sr-only">正在应用更改...</span>
+        <span
+v-if="isApplying" id="applying-status"
+class="sr-only"
+>正在应用更改...</span>
       </div>
     </header>
 
     <!-- 面板内容 -->
-    <main class="panel-content" role="main" aria-labelledby="panel-title">
+    <main
+class="panel-content" role="main"
+aria-labelledby="panel-title"
+>
       <!-- 基本设置 -->
       <div class="setting-section">
         <h4 class="section-title">
@@ -45,8 +58,12 @@
         </h4>
 
         <!-- 位置选择 (仅画中画) -->
-        <div v-if="isPictureInPicture" class="setting-item">
-          <label class="setting-label" for="position-select">位置</label>
+        <div
+v-if="isPictureInPicture" class="setting-item"
+>
+          <label
+class="setting-label" for="position-select"
+>位置</label>
           <el-select
             id="position-select"
             v-model="adjustments.position"
@@ -56,21 +73,38 @@
             aria-describedby="position-help"
             @change="onAdjustmentChange"
           >
-            <el-option label="左上角" value="top-left" />
-            <el-option label="右上角" value="top-right" />
-            <el-option label="左下角" value="bottom-left" />
-            <el-option label="右下角" value="bottom-right" />
-            <el-option label="居中" value="center" />
+            <el-option
+label="左上角" value="top-left"
+/>
+            <el-option
+label="右上角" value="top-right"
+/>
+            <el-option
+label="左下角" value="bottom-left"
+/>
+            <el-option
+label="右下角" value="bottom-right"
+/>
+            <el-option
+label="居中" value="center"
+/>
           </el-select>
-          <span id="position-help" class="sr-only">选择画中画效果在视频中的显示位置</span>
-          <div v-if="validationErrors.position" class="error-tip" role="alert" aria-live="polite">
+          <span
+id="position-help" class="sr-only"
+>选择画中画效果在视频中的显示位置</span>
+          <div
+v-if="validationErrors.position" class="error-tip"
+role="alert" aria-live="polite"
+>
             {{ validationErrors.position }}
           </div>
         </div>
 
         <!-- 大小调整 -->
         <div class="setting-item">
-          <label class="setting-label" for="size-slider">大小</label>
+          <label
+class="setting-label" for="size-slider"
+>大小</label>
           <el-slider
             id="size-slider"
             v-model="adjustments.size"
@@ -86,7 +120,10 @@
           />
           <div
 class="size-display" aria-live="polite">{{ adjustments.size }}%</div>
-          <div v-if="validationErrors.size" class="error-tip" role="alert" aria-live="polite">
+          <div
+v-if="validationErrors.size" class="error-tip"
+role="alert" aria-live="polite"
+>
             {{ validationErrors.size }}
           </div>
         </div>
@@ -102,11 +139,15 @@ class="size-display" aria-live="polite">{{ adjustments.size }}%</div>
               :class="{ active: adjustments.colorTheme === color.id }"
               @click="selectColorTheme(color.id)"
             >
-              <div class="color-preview" :style="{ background: color.preview }" />
+              <div
+class="color-preview" :style="{ background: color.preview }"
+/>
               <span class="color-name">{{ color.name }}</span>
             </div>
           </div>
-          <div v-if="validationErrors.color" class="error-tip">
+          <div
+v-if="validationErrors.color" class="error-tip"
+>
             {{ validationErrors.color }}
           </div>
         </div>
@@ -121,7 +162,9 @@ class="size-display" aria-live="polite">{{ adjustments.size }}%</div>
 
         <!-- 文字内容编辑 -->
         <div class="setting-item">
-          <label class="setting-label" for="title-input">标题</label>
+          <label
+class="setting-label" for="title-input"
+>标题</label>
           <el-input
             id="title-input"
             v-model="adjustments.title"
@@ -137,7 +180,9 @@ id="title-help" class="sr-only">为模板元素设置主要标题文本</div>
         </div>
 
         <div class="setting-item">
-          <label class="setting-label" for="subtitle-input">副标题</label>
+          <label
+class="setting-label" for="subtitle-input"
+>副标题</label>
           <el-input
             id="subtitle-input"
             v-model="adjustments.subtitle"
@@ -153,7 +198,9 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
         </div>
 
         <!-- 多行内容 (仅信息卡片) -->
-        <div v-if="isInfoCard" class="setting-item">
+        <div
+v-if="isInfoCard" class="setting-item"
+>
           <label class="setting-label">内容行</label>
           <div class="content-lines">
             <div
@@ -170,7 +217,9 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
                 :aria-describedby="`content-line-help-${index}`"
                 @input="onAdjustmentChange"
               />
-              <div :id="`content-line-help-${index}`" class="sr-only">
+              <div
+:id="`content-line-help-${index}`" class="sr-only"
+>
                 信息卡片的第{{ index + 1 }}行显示内容
               </div>
               <el-button
@@ -196,7 +245,9 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
         </div>
 
         <!-- 数据内容 (仅图表) -->
-        <div v-if="isChart" class="setting-item">
+        <div
+v-if="isChart" class="setting-item"
+>
           <label class="setting-label">图表数据</label>
           <div class="chart-data-editor">
             <div
@@ -253,21 +304,27 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
         <div class="setting-item">
           <label class="setting-label">当前素材</label>
           <div class="current-material">
-            <div v-if="currentMaterial" class="material-preview">
+            <div
+v-if="currentMaterial" class="material-preview"
+>
               <img
                 v-if="currentMaterial.type === 'image'"
                 :src="currentMaterial.url"
                 alt="当前素材"
                 class="material-image"
               />
-              <div v-else class="material-placeholder">
+              <div
+v-else class="material-placeholder"
+>
                 <el-icon size="32">
                   <video-play />
                 </el-icon>
                 <span>{{ currentMaterial.name }}</span>
               </div>
             </div>
-            <div v-else class="no-material">
+            <div
+v-else class="no-material"
+>
               <el-icon size="24">
                 <picture />
               </el-icon>
@@ -288,12 +345,17 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
               :on-error="onUploadError"
               accept="image/*,video/*"
             >
-              <el-button size="small" type="primary" :loading="isUploading">
+              <el-button
+size="small" type="primary"
+:loading="isUploading"
+>
                 <el-icon><upload /></el-icon>
                 上传新素材
               </el-button>
             </el-upload>
-            <el-button size="small" @click="openMaterialLibrary">
+            <el-button
+size="small" @click="openMaterialLibrary"
+>
               <el-icon><folder /></el-icon>
               从库中选择
             </el-button>
@@ -371,7 +433,9 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
         :height="previewSize.height"
         class="preview-canvas-element"
       />
-      <div v-if="isPreviewLoading" class="preview-loading">
+      <div
+v-if="isPreviewLoading" class="preview-loading"
+>
         <el-icon class="is-loading">
           <loading />
         </el-icon>
@@ -389,7 +453,9 @@ id="subtitle-help" class="sr-only">为模板元素设置辅助标题文本</div>
   </div>
 
   <!-- 智能提示区域 -->
-  <div v-if="smartSuggestions.length > 0" class="suggestions-section">
+  <div
+v-if="smartSuggestions.length > 0" class="suggestions-section"
+>
     <h4 class="suggestions-title">
       <el-icon><light-bulb /></el-icon>
       智能建议
@@ -419,7 +485,7 @@ import {
   Picture,
   Timer,
   View,
-  Bulb,
+  InfoFilled,
   Upload,
   Folder,
   Delete,

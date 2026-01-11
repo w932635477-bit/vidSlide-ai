@@ -14,31 +14,31 @@
  */
 class DeviceDetector {
   static /**
-  * getDeviceCapabilities 方法
-  * VidSlide AI 功能实现
-  */
- getDeviceCapabilities() {
+   * getDeviceCapabilities 方法
+   * VidSlide AI 功能实现
+   */
+  getDeviceCapabilities() {
     /**
- * memory 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description memory 功能的具体实现
- */
-// memory - 变量声明
-const memory = navigator.deviceMemory || 4 // 默认4GB
+     * memory 函数
+     * VidSlide AI 紧急补齐阶段功能实现
+     * @description memory 功能的具体实现
+     */
+    // memory - 变量声明
+    const memory = navigator.deviceMemory || 4 // 默认4GB
     /**
- * cores 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description cores 功能的具体实现
- */
-// cores - 变量声明
-const cores = navigator.hardwareConcurrency || 4 // 默认4核
+     * cores 函数
+     * VidSlide AI 紧急补齐阶段功能实现
+     * @description cores 功能的具体实现
+     */
+    // cores - 变量声明
+    const cores = navigator.hardwareConcurrency || 4 // 默认4核
     /**
- * isChrome 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description isChrome 功能的具体实现
- */
-// isChrome - 变量声明
-const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+     * isChrome 函数
+     * VidSlide AI 紧急补齐阶段功能实现
+     * @description isChrome 功能的具体实现
+     */
+    // isChrome - 变量声明
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
 
     return {
       memory,
@@ -98,12 +98,12 @@ export class WhisperService {
       }
     } else {
       /**
- * reasons 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description reasons 功能的具体实现
- */
-// reasons - 变量声明
-const reasons = []
+       * reasons 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description reasons 功能的具体实现
+       */
+      // reasons - 变量声明
+      const reasons = []
       /**
 
        * if 方法
@@ -112,7 +112,7 @@ const reasons = []
 
        */
 
-      if(!this.wasmAvailable) {
+      if (!this.wasmAvailable) {
         reasons.push('AI语音转录功能正在开发中')
       }
       /**
@@ -123,7 +123,7 @@ const reasons = []
 
        */
 
-      if(!this.capabilities.isHighPerformance) {
+      if (!this.capabilities.isHighPerformance) {
         reasons.push('设备性能不足（推荐内存≥4GB，CPU≥4核）')
       }
       /**
@@ -134,7 +134,7 @@ const reasons = []
 
        */
 
-      if(!this.capabilities.isChrome) {
+      if (!this.capabilities.isChrome) {
         reasons.push('仅Chrome浏览器支持')
       }
 
@@ -146,12 +146,11 @@ const reasons = []
     }
   }
 
-  // 初始化Whisper模型
-  async /**
-  * initialize 方法
-  * VidSlide AI 功能实现
-  */
- initialize(progressCallback = null) {
+  /**
+   * 初始化Whisper模型
+   * VidSlide AI 功能实现
+   */
+  async initialize(progressCallback = null) {
     if (this.isInitialized) return true
 
     try {
@@ -166,7 +165,7 @@ const reasons = []
 
        */
 
-      if(progressCallback) {
+      if (progressCallback) {
         /**
 
          * for 方法
@@ -175,13 +174,7 @@ const reasons = []
 
          */
 
-        for(/**
- * progress 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description progress 功能的具体实现
- */
-// progress - 变量声明
-let progress = 0; progress <= 100; progress += 20) {
+        for (let progress = 0; progress <= 100; progress += 20) {
           await new Promise(resolve => setTimeout(resolve, 200))
           progressCallback(progress / 100)
         }
@@ -199,11 +192,11 @@ let progress = 0; progress <= 100; progress += 20) {
 
       this.isInitialized = true
       return true
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('Whisper初始化失败:', error)
       throw new Error(`语音转录初始化失败：${error.message}`)
     } finally {
@@ -211,12 +204,11 @@ let progress = 0; progress <= 100; progress += 20) {
     }
   }
 
-  // 转录音频文件
-  async /**
-  * transcribeAudio 方法
-  * VidSlide AI 功能实现
-  */
- transcribeAudio(audioFile, options = {}) {
+  /**
+   * 转录音频文件
+   * VidSlide AI 功能实现
+   */
+  async transcribeAudio(audioFile, options = {}) {
     /**
 
      * if 方法
@@ -225,7 +217,7 @@ let progress = 0; progress <= 100; progress += 20) {
 
      */
 
-    if(!this.isInitialized) {
+    if (!this.isInitialized) {
       throw new Error('Whisper服务未初始化，请先调用initialize()')
     }
 
@@ -240,16 +232,15 @@ let progress = 0; progress <= 100; progress += 20) {
 
      */
 
-
-    if(!this.wasmAvailable) {
+    if (!this.wasmAvailable) {
       throw new Error('AI语音转录功能正在开发中，请使用手动输入模式')
     }
 
     try {
       const {
         language = 'zh', // 默认中文
-        translate = false, // 是否翻译成英文
-        onProgress = null
+        translate: _translate = false, // 是否翻译成英文
+        onProgress: _onProgress = null
       } = options
 
       // 实际实现中，这里会调用WASM转录功能
@@ -258,17 +249,17 @@ let progress = 0; progress <= 100; progress += 20) {
        * VidSlide AI 紧急补齐阶段功能实现
        * @description result 功能的具体实现
        */
-// result - 变量声明
-const result = await transcribe(audioFile, transcriptionOptions)
+      // result - 变量声明
+      const _result = await this.simulateTranscription(audioFile, { language })
 
       // 临时返回模拟结果
       /**
- * transcription 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description transcription 功能的具体实现
- */
-// transcription - 变量声明
-const transcription = {
+       * transcription 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description transcription 功能的具体实现
+       */
+      // transcription - 变量声明
+      const transcription = {
         text: '语音转录功能正在开发中，请手动输入文字内容',
         segments: [
           {
@@ -283,88 +274,87 @@ const transcription = {
       }
 
       return transcription
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('语音转录失败:', error)
       throw new Error(`语音转录失败：${error.message}`)
     }
   }
 
-  // 从视频文件提取音频并转录
-  async /**
-  * transcribeFromVideo 方法
-  * VidSlide AI 功能实现
-  */
- transcribeFromVideo(videoFile, options = {}) {
+  /**
+   * 从视频文件提取音频并转录
+   * VidSlide AI 功能实现
+   */
+  async transcribeFromVideo(videoFile, options = {}) {
     try {
       // 提取音频轨道
       /**
- * audioBuffer 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description audioBuffer 功能的具体实现
- */
-// audioBuffer - 变量声明
-const audioBuffer = await this.extractAudioFromVideo(videoFile)
+       * audioBuffer 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description audioBuffer 功能的具体实现
+       */
+      // audioBuffer - 变量声明
+      const audioBuffer = await this.extractAudioFromVideo(videoFile)
 
       // 创建音频文件
       /**
- * audioBlob 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description audioBlob 功能的具体实现
- */
-// audioBlob - 变量声明
-const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' })
+       * audioBlob 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description audioBlob 功能的具体实现
+       */
+      // audioBlob - 变量声明
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/wav' })
       /**
- * audioFile 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description audioFile 功能的具体实现
- */
-// audioFile - 变量声明
-const audioFile = new File([audioBlob], 'extracted_audio.wav', { type: 'audio/wav' })
+       * audioFile 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description audioFile 功能的具体实现
+       */
+      // audioFile - 变量声明
+      const audioFile = new File([audioBlob], 'extracted_audio.wav', { type: 'audio/wav' })
 
       // 转录音频
       return await this.transcribeAudio(audioFile, options)
-    } /**
-  * catch 方法
-  * VidSlide AI 功能实现
-  */
- catch(error) {
+    } catch (error) {
+      /**
+       * catch 方法
+       * VidSlide AI 功能实现
+       */
       console.error('视频音频提取失败:', error)
       throw new Error(`音频提取失败：${error.message}`)
     }
   }
 
   // 从视频文件提取音频（基础实现）
-  async /**
-  * extractAudioFromVideo 方法
-  * VidSlide AI 功能实现
-  */
- extractAudioFromVideo(videoFile) {
+  /**
+   * extractAudioFromVideo 方法
+   * VidSlide AI 功能实现
+   */
+  extractAudioFromVideo(videoFile) {
     return new Promise((resolve, reject) => {
       /**
- * video 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description video 功能的具体实现
- */
-// video - 变量声明
-const video = document.createElement('video')
+       * video 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description video 功能的具体实现
+       */
+      // video - 变量声明
+      const video = document.createElement('video')
       /**
- * canvas 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description canvas 功能的具体实现
- */
-// canvas - 变量声明
-const canvas = document.createElement('canvas')
+       * canvas 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description canvas 功能的具体实现
+       */
+      // canvas - 变量声明
+      const canvas = document.createElement('canvas')
       /**
- * ctx 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description ctx 功能的具体实现
- */
-// ctx - 变量声明
-const ctx = canvas.getContext('2d')
+       * ctx 函数
+       * VidSlide AI 紧急补齐阶段功能实现
+       * @description ctx 功能的具体实现
+       */
+      // ctx - 变量声明
+      const _ctx = canvas.getContext('2d')
 
       video.preload = 'metadata'
       video.src = URL.createObjectURL(videoFile)
@@ -373,19 +363,19 @@ const ctx = canvas.getContext('2d')
         // 对于基础实现，我们只返回一个空的音频buffer
         // 实际项目中需要使用Web Audio API或MediaRecorder来提取音频
         /**
- * audioContext 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description audioContext 功能的具体实现
- */
-// audioContext - 变量声明
-const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+         * audioContext 函数
+         * VidSlide AI 紧急补齐阶段功能实现
+         * @description audioContext 功能的具体实现
+         */
+        // audioContext - 变量声明
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)()
         /**
- * buffer 函数
- * VidSlide AI 紧急补齐阶段功能实现
- * @description buffer 功能的具体实现
- */
-// buffer - 变量声明
-const buffer = audioContext.createBuffer(
+         * buffer 函数
+         * VidSlide AI 紧急补齐阶段功能实现
+         * @description buffer 功能的具体实现
+         */
+        // buffer - 变量声明
+        const buffer = audioContext.createBuffer(
           1,
           video.duration * audioContext.sampleRate,
           audioContext.sampleRate
@@ -402,12 +392,11 @@ const buffer = audioContext.createBuffer(
     })
   }
 
-  // 清理资源
-  async /**
-  * dispose 方法
-  * VidSlide AI 功能实现
-  */
- dispose() {
+  /**
+   * 清理资源
+   * VidSlide AI 功能实现
+   */
+  dispose() {
     /**
 
      * if 方法
@@ -416,7 +405,7 @@ const buffer = audioContext.createBuffer(
 
      */
 
-    if(this.model) {
+    if (this.model) {
       // Whisper库的清理方法（如果有的话）
       // await this.model.dispose()
       this.model = null
@@ -470,7 +459,7 @@ export function getWhisperService() {
 
    */
 
-  if(!whisperInstance) {
+  if (!whisperInstance) {
     whisperInstance = new WhisperService()
   }
   return whisperInstance

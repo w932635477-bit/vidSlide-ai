@@ -1,5 +1,8 @@
-/** * AssetBrowser.vue * VidSlide AI - 紧急补齐阶段 *
-实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统 */
+/**
+ * AssetBrowser.vue
+ * VidSlide AI - 紧急补齐阶段
+ * 实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统
+ */
 
 <!--
   VidSlide AI - 素材浏览器组件
@@ -14,17 +17,28 @@
   - 响应式设计和用户体验优化
 -->
 <template>
-  <div class="asset-browser" role="main" aria-label="素材浏览器">
+  <div
+class="asset-browser" role="main"
+aria-label="素材浏览器"
+>
     <!-- 浏览器头部 -->
-    <header class="browser-header" role="banner">
+    <header
+class="browser-header" role="banner"
+>
       <div class="header-left">
         <h1 id="asset-browser-title">素材浏览器</h1>
-        <el-tag :type="getStatusColor()" size="small" aria-label="浏览器状态">
+        <el-tag
+:type="getStatusColor()" size="small"
+aria-label="浏览器状态"
+>
           {{ getStatusText() }}
         </el-tag>
       </div>
 
-      <div class="header-actions" role="toolbar" aria-label="浏览器操作">
+      <div
+class="header-actions" role="toolbar"
+aria-label="浏览器操作"
+>
         <el-button
           type="primary"
           size="small"
@@ -38,7 +52,10 @@
           </el-icon>
           刷新
         </el-button>
-        <span v-if="isLoading" id="loading-status" class="sr-only">正在加载素材...</span>
+        <span
+v-if="isLoading" id="loading-status"
+class="sr-only"
+>正在加载素材...</span>
 
         <el-button
           type="success"
@@ -54,8 +71,24 @@
       </div>
     </header>
 
+    <!-- 智能调度器状态 -->
+    <section
+class="dispatcher-section" aria-labelledby="dispatcher-section-heading"
+>
+      <h3
+id="dispatcher-section-heading" class="sr-only">智能调度器状态</h3>
+      <DispatcherStatus
+        :search-query="searchQuery"
+        :is-searching="isLoading"
+        :current-strategy="dispatcherStrategy"
+        @strategy-changed="handleStrategyChanged"
+      />
+    </section>
+
     <!-- 搜索和过滤区域 -->
-    <section class="search-filters" aria-labelledby="search-filters-heading">
+    <section
+class="search-filters" aria-labelledby="search-filters-heading"
+>
       <h2
 id="search-filters-heading" class="sr-only">搜索和过滤选项</h2>
       <div class="search-row">
@@ -74,9 +107,14 @@ id="search-filters-heading" class="sr-only">搜索和过滤选项</h2>
             </el-icon>
           </template>
         </el-input>
-        <span id="search-help" class="sr-only">输入关键词搜索图片、视频或音频素材</span>
+        <span
+id="search-help" class="sr-only"
+>输入关键词搜索图片、视频或音频素材</span>
 
-        <el-select v-model="selectedCategory" placeholder="分类" clearable @change="applyFilters">
+        <el-select
+v-model="selectedCategory" placeholder="分类"
+clearable @change="applyFilters"
+>
           <el-option
             v-for="category in categories"
             :key="category.id"
@@ -87,23 +125,48 @@ id="search-filters-heading" class="sr-only">搜索和过滤选项</h2>
           </el-option>
         </el-select>
 
-        <el-select v-model="selectedType" placeholder="类型" clearable @change="applyFilters">
-          <el-option label="图片" value="image" />
-          <el-option label="视频" value="video" />
-          <el-option label="音频" value="audio" />
+        <el-select
+v-model="selectedType" placeholder="类型"
+clearable @change="applyFilters"
+>
+          <el-option
+label="图片" value="image"
+/>
+          <el-option
+label="视频" value="video"
+/>
+          <el-option
+label="音频" value="audio"
+/>
         </el-select>
 
-        <el-select v-model="sortBy" placeholder="排序" @change="applySorting">
-          <el-option label="最新使用" value="lastUsed" />
-          <el-option label="创建时间" value="createdAt" />
-          <el-option label="名称" value="name" />
-          <el-option label="大小" value="fileSize" />
+        <el-select
+v-model="sortBy" placeholder="排序"
+@change="applySorting"
+>
+          <el-option
+label="最新使用" value="lastUsed"
+/>
+          <el-option
+label="创建时间" value="createdAt"
+/>
+          <el-option
+label="名称" value="name"
+/>
+          <el-option
+label="大小" value="fileSize"
+/>
         </el-select>
       </div>
 
       <div class="filter-row">
-        <el-checkbox-group v-model="colorFilters" @change="applyFilters">
-          <el-checkbox v-for="color in supportedColors" :key="color.id" :label="color.id">
+        <el-checkbox-group
+v-model="colorFilters" @change="applyFilters"
+>
+          <el-checkbox
+v-for="color in supportedColors" :key="color.id"
+:label="color.id"
+>
             {{ color.name }}
           </el-checkbox>
         </el-checkbox-group>
@@ -119,27 +182,46 @@ id="search-filters-heading" class="sr-only">搜索和过滤选项</h2>
   </div>
 
   <!-- 素材网格 -->
-  <section class="assets-grid" aria-labelledby="assets-grid-heading" role="region">
+  <section
+class="assets-grid" aria-labelledby="assets-grid-heading"
+role="region"
+>
     <h2
 id="assets-grid-heading" class="sr-only">素材列表</h2>
 
     <!-- 加载状态 -->
-    <div v-if="isLoading" class="loading-state" aria-live="polite" aria-label="正在加载素材">
-      <el-icon class="is-loading" aria-hidden="true">
+    <div
+v-if="isLoading" class="loading-state"
+aria-live="polite" aria-label="正在加载素材"
+>
+      <el-icon
+class="is-loading" aria-hidden="true"
+>
         <Loading />
       </el-icon>
       <p>正在加载素材...</p>
     </div>
 
     <!-- 空状态 -->
-    <div v-else-if="assets.length === 0" class="empty-state" aria-live="polite">
-      <el-empty :description="getEmptyDescription()" :image-size="100">
+    <div
+v-else-if="assets.length === 0" class="empty-state"
+aria-live="polite"
+>
+      <el-empty
+:description="getEmptyDescription()" :image-size="100"
+>
         <template #image>
-          <el-icon size="100" class="empty-icon" aria-hidden="true">
+          <el-icon
+size="100" class="empty-icon"
+aria-hidden="true"
+>
             <Picture />
           </el-icon>
         </template>
-        <el-button v-if="searchQuery" type="primary" aria-label="清除搜索条件" @click="clearSearch">
+        <el-button
+v-if="searchQuery" type="primary"
+aria-label="清除搜索条件" @click="clearSearch"
+>
           清除搜索
         </el-button>
         <el-button
@@ -189,15 +271,21 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             :alt="asset.name"
             @error="handleImageError"
           />
-          <div v-else class="thumbnail-placeholder">
+          <div
+v-else class="thumbnail-placeholder"
+>
             <el-icon size="32">
               <Picture />
             </el-icon>
           </div>
 
           <!-- 下载状态指示器 -->
-          <div v-if="asset.isDownloaded" class="download-indicator">
-            <el-icon size="16" color="#67C23A">
+          <div
+v-if="asset.isDownloaded" class="download-indicator"
+>
+            <el-icon
+size="16" color="#67C23A"
+>
               <Check />
             </el-icon>
           </div>
@@ -209,7 +297,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             :class="getCopyrightClass(asset.copyrightInfo)"
             :aria-label="getCopyrightStatusText(asset.copyrightInfo)"
           >
-            <el-icon size="16" aria-hidden="true">
+            <el-icon
+size="16" aria-hidden="true"
+>
               <Warning v-if="asset.copyrightInfo.status === 'unknown'" />
               <SuccessFilled v-else-if="asset.copyrightInfo.isSafe" />
               <CircleClose v-else />
@@ -218,12 +308,18 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
         </div>
 
         <!-- 素材信息 -->
-        <div :id="`asset-info-${asset.id}`" class="asset-info">
-          <h3 class="asset-name" :title="asset.name">
+        <div
+:id="`asset-info-${asset.id}`" class="asset-info"
+>
+          <h3
+class="asset-name" :title="asset.name"
+>
             {{ asset.name }}
           </h3>
           <div class="asset-meta">
-            <span class="asset-source" aria-label="来源">
+            <span
+class="asset-source" aria-label="来源"
+>
               {{ getSourceDisplayName(asset.source) }}
             </span>
             <span
@@ -234,13 +330,19 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
               {{ formatFileSize(asset.fileSize) }}
             </span>
           </div>
-          <div v-if="asset.author" class="asset-author" :aria-label="`作者: ${asset.author.name}`">
+          <div
+v-if="asset.author" class="asset-author"
+:aria-label="`作者: ${asset.author.name}`"
+>
             by {{ asset.author.name }}
           </div>
         </div>
 
         <!-- 操作按钮 -->
-        <div class="asset-actions" role="group" :aria-label="`${asset.name}的操作`">
+        <div
+class="asset-actions" role="group"
+:aria-label="`${asset.name}的操作`"
+>
           <el-button
             v-if="!asset.isDownloaded"
             type="primary"
@@ -267,7 +369,10 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             :aria-label="`${asset.name}的更多操作`"
             @command="cmd => handleAssetAction(cmd, asset)"
           >
-            <el-button size="small" :aria-label="`打开${asset.name}的操作菜单`" @click.stop>
+            <el-button
+size="small" :aria-label="`打开${asset.name}的操作菜单`"
+@click.stop
+>
               <el-icon aria-hidden="true">
                 <More />
               </el-icon>
@@ -298,7 +403,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
     </div>
 
     <!-- 分页 -->
-    <div v-if="totalAssets > pageSize" class="pagination">
+    <div
+v-if="totalAssets > pageSize" class="pagination"
+>
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -370,7 +477,10 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
               <ol>
                 <li>
                   访问
-                  <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer">
+                  <a
+href="https://www.pexels.com/api/" target="_blank"
+rel="noopener noreferrer"
+>
                     Pexels API
                   </a>
                 </li>
@@ -381,6 +491,38 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             <el-input
               v-model="apiKeys.pexels"
               placeholder="输入Pexels API Key"
+              type="password"
+              show-password
+              class="api-key-input"
+            />
+          </div>
+        </div>
+
+        <div class="api-config-section">
+          <h4 class="section-title">
+            <el-icon><Picture /></el-icon>
+            Pixabay API (可选)
+          </h4>
+          <div class="api-info">
+            <p>Pixabay提供免费的图片、视频和音乐素材，支持中文搜索。</p>
+            <div class="api-steps">
+              <ol>
+                <li>
+                  访问
+                  <a
+href="https://pixabay.com/api/docs/" target="_blank"
+rel="noopener noreferrer"
+>
+                    Pixabay API
+                  </a>
+                </li>
+                <li>注册账号并获取API Key</li>
+                <li>复制 "API Key" 并粘贴到下方</li>
+              </ol>
+            </div>
+            <el-input
+              v-model="apiKeys.pixabay"
+              placeholder="输入Pixabay API Key"
               type="password"
               show-password
               class="api-key-input"
@@ -400,7 +542,10 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
 
       <template #footer>
         <el-button @click="cancelApiConfig"> 取消 </el-button>
-        <el-button type="primary" :loading="configuringApis" @click="confirmApiConfig">
+        <el-button
+type="primary" :loading="configuringApis"
+@click="confirmApiConfig"
+>
           确认配置
         </el-button>
       </template>
@@ -418,7 +563,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
         <div class="preview-controls">
           <div class="resolution-selector">
             <label>预览质量:</label>
-            <select v-model="currentPreviewResolution" @change="updatePreviewImage">
+            <select
+v-model="currentPreviewResolution" @change="updatePreviewImage"
+>
               <option
                 v-for="resolution in previewResolutions"
                 :key="resolution.value"
@@ -428,7 +575,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
               </option>
             </select>
           </div>
-          <div v-if="previewLoading" class="preview-loading">
+          <div
+v-if="previewLoading" class="preview-loading"
+>
             <el-icon class="is-loading">
               <Loading />
             </el-icon>
@@ -443,7 +592,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             :alt="previewAssetData?.name"
             class="preview-img"
           />
-          <div v-else class="preview-placeholder">
+          <div
+v-else class="preview-placeholder"
+>
             <el-icon size="48">
               <Picture />
             </el-icon>
@@ -470,7 +621,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             </dl>
           </div>
 
-          <div v-if="previewAssetData?.author" class="info-section">
+          <div
+v-if="previewAssetData?.author" class="info-section"
+>
             <h4>作者信息</h4>
             <dl class="info-list">
               <dt>姓名:</dt>
@@ -490,7 +643,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             </dl>
           </div>
 
-          <div v-if="previewAssetData?.copyrightInfo" class="info-section">
+          <div
+v-if="previewAssetData?.copyrightInfo" class="info-section"
+>
             <h4>版权信息</h4>
             <div class="copyright-status">
               <el-tag :type="getCopyrightTagType(previewAssetData.copyrightInfo)">
@@ -498,7 +653,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
               </el-tag>
             </div>
 
-            <dl v-if="previewAssetData.copyrightInfo.license" class="info-list">
+            <dl
+v-if="previewAssetData.copyrightInfo.license" class="info-list"
+>
               <dt>许可证:</dt>
               <dd>{{ previewAssetData.copyrightInfo.license.name }}</dd>
               <dt>描述:</dt>
@@ -511,7 +668,9 @@ id="assets-grid-heading" class="sr-only">素材列表</h2>
             >
               <h5>⚠️ 注意事项</h5>
               <ul>
-                <li v-for="warning in previewAssetData.copyrightInfo.warnings" :key="warning">
+                <li
+v-for="warning in previewAssetData.copyrightInfo.warnings" :key="warning"
+>
                   {{ warning }}
                 </li>
               </ul>
@@ -562,6 +721,8 @@ import {
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getAssetManager } from '../utils/AssetManager.js'
+import { API_CONFIGS } from '../config/api-keys.js'
+import DispatcherStatus from './DispatcherStatus.vue'
 
 // Props
 const props = defineProps({
@@ -611,6 +772,9 @@ const colorFilters = ref([])
 // 是否只显示已下载的素材
 const showDownloadedOnly = ref(false)
 
+// 智能调度器策略
+const dispatcherStrategy = ref('balanced')
+
 // 当前页码
 const currentPage = ref(1)
 
@@ -651,7 +815,8 @@ const apiConfigDialogVisible = ref(false)
 // API密钥存储对象
 const apiKeys = ref({
   unsplash: '',
-  pexels: ''
+  pexels: '',
+  pixabay: ''
 })
 
 // API配置加载状态
@@ -701,12 +866,50 @@ const getEmptyDescription = () => {
 // 方法
 
 /**
+ * 自动配置API密钥
+ * 从预定义配置中自动设置API密钥，提升用户体验
+ */
+const autoConfigureAPIs = async () => {
+  try {
+    let configuredCount = 0
+
+    // 配置Unsplash API
+    if (API_CONFIGS.unsplash?.accessKey && !assetManager.externalAPI.apis.unsplash.accessKey) {
+      assetManager.configureAPI('unsplash', API_CONFIGS.unsplash.accessKey)
+      configuredCount++
+    }
+
+    // 配置Pexels API
+    if (API_CONFIGS.pexels?.apiKey && !assetManager.externalAPI.apis.pexels.accessKey) {
+      assetManager.configureAPI('pexels', API_CONFIGS.pexels.apiKey)
+      configuredCount++
+    }
+
+    // 配置Pixabay API
+    if (API_CONFIGS.pixabay?.apiKey && !assetManager.externalAPI.apis.pixabay.accessKey) {
+      assetManager.configureAPI('pixabay', API_CONFIGS.pixabay.apiKey)
+      configuredCount++
+    }
+
+    if (configuredCount > 0) {
+      console.log(`自动配置了${configuredCount}个API密钥`)
+    }
+  } catch (error) {
+    console.warn('自动配置API密钥失败:', error)
+    // 不显示错误消息，因为这是自动过程
+  }
+}
+
+/**
  * 初始化素材浏览器组件
  * 设置资产管理器并加载初始素材数据
  */
 const initializeBrowser = async () => {
   try {
     await assetManager.initialize()
+
+    // 自动配置API密钥 (如果还没有配置的话)
+    await autoConfigureAPIs()
 
     // 设置事件监听
     assetManager.on('downloadCompleted', handleDownloadCompleted)
@@ -870,6 +1073,39 @@ const debouncedSearch = () => {
 const clearSearch = () => {
   searchQuery.value = ''
   loadAssets()
+}
+
+/**
+ * 处理调度策略变更
+ * @param {string} strategy - 新的调度策略
+ */
+const handleStrategyChanged = strategy => {
+  console.log('调度策略变更为:', strategy)
+
+  // 保存用户偏好设置
+  localStorage.setItem('vidslide_dispatcher_strategy', strategy)
+
+  // 如果当前有搜索查询，重新执行搜索以应用新策略
+  if (searchQuery.value.trim()) {
+    loadAssets()
+  }
+
+  ElMessage.success(`已切换到${getStrategyDisplayName(strategy)}模式`)
+}
+
+/**
+ * 获取策略显示名称
+ * @param {string} strategy - 策略键
+ * @returns {string} 显示名称
+ */
+const getStrategyDisplayName = strategy => {
+  const names = {
+    speed: '速度优先',
+    quality: '质量优先',
+    balanced: '平衡模式',
+    auto: '智能自动'
+  }
+  return names[strategy] || strategy
 }
 
 /**
@@ -1077,36 +1313,36 @@ const handleAssetAction = async command => {
   const { action, asset } = command
 
   switch (action) {
-  case 'preview':
-    previewAsset(asset)
-    break
-  case 'info':
-    previewAsset(asset)
-    break
-  case 'delete':
-    try {
-      await ElMessageBox.confirm(
-        `确定要删除素材"${asset.name}"吗？此操作不可恢复。`,
-        '确认删除',
-        {
-          confirmButtonText: '删除',
-          cancelButtonText: '取消',
-          type: 'warning'
+    case 'preview':
+      previewAsset(asset)
+      break
+    case 'info':
+      previewAsset(asset)
+      break
+    case 'delete':
+      try {
+        await ElMessageBox.confirm(
+          `确定要删除素材"${asset.name}"吗？此操作不可恢复。`,
+          '确认删除',
+          {
+            confirmButtonText: '删除',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        await assetManager.deleteLocalAsset(asset.id)
+        ElMessage.success('素材已删除')
+
+        // 刷新列表
+        await loadAssets()
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('删除素材失败:', error)
+          ElMessage.error('删除素材失败')
         }
-      )
-
-      await assetManager.deleteLocalAsset(asset.id)
-      ElMessage.success('素材已删除')
-
-      // 刷新列表
-      await loadAssets()
-    } catch (error) {
-      if (error !== 'cancel') {
-        console.error('删除素材失败:', error)
-        ElMessage.error('删除素材失败')
       }
-    }
-    break
+      break
   }
 }
 
@@ -1176,7 +1412,7 @@ const showApiConfigDialog = () => {
   if (savedKeys) {
     try {
       const parsedKeys = JSON.parse(savedKeys)
-      apiKeys.value = { ...apiKeys.value, ...parsedKeys }
+      apiKeys.value = { unsplash: '', pexels: '', pixabay: '', ...parsedKeys }
     } catch (error) {
       console.warn('加载保存的API密钥失败:', error)
     }
@@ -1204,6 +1440,12 @@ const confirmApiConfig = async () => {
     // 配置Pexels API
     if (apiKeys.value.pexels.trim()) {
       assetManager.configureAPI('pexels', apiKeys.value.pexels.trim())
+      configuredCount++
+    }
+
+    // 配置Pixabay API
+    if (apiKeys.value.pixabay.trim()) {
+      assetManager.configureAPI('pixabay', apiKeys.value.pixabay.trim())
       configuredCount++
     }
 
@@ -1235,7 +1477,7 @@ const confirmApiConfig = async () => {
  */
 const cancelApiConfig = () => {
   apiConfigDialogVisible.value = false
-  apiKeys.value = { unsplash: '', pexels: '' }
+  apiKeys.value = { unsplash: '', pexels: '', pixabay: '' }
 }
 
 // 工具函数
@@ -1376,6 +1618,12 @@ watch(
 
 // 生命周期
 onMounted(async () => {
+  // 加载用户保存的调度策略偏好
+  const savedStrategy = localStorage.getItem('vidslide_dispatcher_strategy')
+  if (savedStrategy) {
+    dispatcherStrategy.value = savedStrategy
+  }
+
   await initializeBrowser()
 })
 
@@ -1391,6 +1639,14 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* 智能调度器状态区域 */
+.dispatcher-section {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e4e7ed;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
   background: #ffffff;
 }

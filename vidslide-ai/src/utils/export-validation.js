@@ -553,10 +553,10 @@ export class ExportValidation {
       timing: performance.timing,
       memory: memory
         ? {
-          used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + 'MB',
-          total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + 'MB',
-          limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + 'MB'
-        }
+            used: Math.round(memory.usedJSHeapSize / 1024 / 1024) + 'MB',
+            total: Math.round(memory.totalJSHeapSize / 1024 / 1024) + 'MB',
+            limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024) + 'MB'
+          }
         : 'not available'
     }
   }
@@ -580,23 +580,23 @@ export class ExportValidation {
 <body>
     <h1>${data.title}</h1>
     ${data.slides
-    .map(
-      slide => `
+      .map(
+        slide => `
         <div class="slide">
             ${slide.background ? `<img class="background" src="${slide.background}" alt="背景">` : ''}
             ${slide.elements
-    .map(
-      element => `
+              .map(
+                element => `
                 <div class="element" style="left: ${element.x}px; top: ${element.y}px;">
                     ${element.content}
                 </div>
             `
-    )
-    .join('')}
+              )
+              .join('')}
         </div>
     `
-    )
-    .join('')}
+      )
+      .join('')}
 </body>
 </html>`
   }

@@ -204,7 +204,7 @@ export class CopyrightChecker {
    * @returns {string} result.lastChecked - 最后检查时间
    * @throws {Error} 当检查过程中发生严重错误时抛出
    */
-  async /**
+  /**
    * checkCopyright 方法
    * VidSlide AI 功能实现
    */
@@ -606,15 +606,15 @@ export class CopyrightChecker {
      */
 
     switch (source) {
-    case 'unsplash':
-      attribution = `Photo by ${author.name} on Unsplash`
-      break
-    case 'pexels':
-      attribution = `Photo by ${author.name} on Pexels`
-      break
-    default:
-      attribution = `© ${author.name}`
-      /**
+      case 'unsplash':
+        attribution = `Photo by ${author.name} on Unsplash`
+        break
+      case 'pexels':
+        attribution = `Photo by ${author.name} on Pexels`
+        break
+      default:
+        attribution = `© ${author.name}`
+        /**
 
          * if 方法
 
@@ -622,9 +622,9 @@ export class CopyrightChecker {
 
          */
 
-      if (license.name) {
-        attribution += ` (${license.name})`
-      }
+        if (license.name) {
+          attribution += ` (${license.name})`
+        }
     }
 
     return attribution
@@ -659,18 +659,18 @@ export class CopyrightChecker {
      */
 
     switch (usage) {
-    case 'commercial':
-      return license.commercial
-    case 'personal':
-      return license.private
-    case 'web':
-      return license.redistribution
-    case 'print':
-      return license.redistribution
-    case 'modification':
-      return license.modification
-    default:
-      return false
+      case 'commercial':
+        return license.commercial
+      case 'personal':
+        return license.private
+      case 'web':
+        return license.redistribution
+      case 'print':
+        return license.redistribution
+      case 'modification':
+        return license.modification
+      default:
+        return false
     }
   }
 
@@ -769,7 +769,7 @@ export class CopyrightChecker {
    * @param {string} intendedUse - 预期用途
    * @returns {Promise<Object>} 验证结果
    */
-  async /**
+  /**
    * validateAssetUsage 方法
    * VidSlide AI 功能实现
    */

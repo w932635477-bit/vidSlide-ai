@@ -6,13 +6,21 @@
   集成P0+P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统
 -->
 <template>
-  <div class="video-editor-view" role="application" aria-label="VidSlide AI 视频编辑器">
+  <div
+class="video-editor-view" role="application"
+aria-label="VidSlide AI 视频编辑器"
+>
     <!-- 视频上传区域 -->
-    <section v-if="!videoSrc" class="upload-section" role="region" aria-labelledby="upload-heading">
+    <section
+v-if="!videoSrc" class="upload-section"
+role="region" aria-labelledby="upload-heading"
+>
       <div class="upload-container">
         <h3 id="upload-heading">📤 上传视频</h3>
         <p>选择您要转换为PPT的视频文件</p>
-        <label for="video-file-input" class="sr-only">选择视频文件</label>
+        <label
+for="video-file-input" class="sr-only"
+>选择视频文件</label>
         <input
           id="video-file-input"
           type="file"
@@ -21,23 +29,37 @@
           aria-describedby="upload-description"
           @change="handleFileSelect"
         />
-        <div id="upload-description" class="sr-only">
+        <div
+id="upload-description" class="sr-only"
+>
           支持MP4、AVI、MOV等常见视频格式，文件大小不超过500MB
         </div>
       </div>
     </section>
 
     <!-- 视频编辑区域 -->
-    <main v-else class="editor-section" role="main" aria-labelledby="editor-heading">
+    <main
+v-else class="editor-section"
+role="main" aria-labelledby="editor-heading"
+>
       <div class="editor-layout">
         <!-- 左侧工具栏 -->
-        <aside class="left-panel" role="complementary" aria-label="编辑工具面板">
-          <section class="panel-section" role="region" aria-labelledby="template-section-heading">
+        <aside
+class="left-panel" role="complementary"
+aria-label="编辑工具面板"
+>
+          <section
+class="panel-section" role="region"
+aria-labelledby="template-section-heading"
+>
             <h4 id="template-section-heading">🎨 模板选择</h4>
             <TemplateSelector @template-selected="handleTemplateSelected" />
           </section>
 
-          <section class="panel-section" role="region" aria-labelledby="adjustment-section-heading">
+          <section
+class="panel-section" role="region"
+aria-labelledby="adjustment-section-heading"
+>
             <h4 id="adjustment-section-heading">⚙️ 参数调整</h4>
             <UserAdjustmentPanel
               v-if="selectedTemplate"
@@ -49,7 +71,10 @@
         </aside>
 
         <!-- 主编辑区 -->
-        <section class="main-editor" role="region" aria-labelledby="editor-heading">
+        <section
+class="main-editor" role="region"
+aria-labelledby="editor-heading"
+>
           <h2
 id="editor-heading" class="sr-only">视频编辑主区域</h2>
 
@@ -66,7 +91,10 @@ id="editor-heading" class="sr-only">视频编辑主区域</h2>
             />
 
             <!-- 画中画控制 -->
-            <div v-if="pipEnabled" class="pip-controls" role="region" aria-label="画中画效果控制">
+            <div
+v-if="pipEnabled" class="pip-controls"
+role="region" aria-label="画中画效果控制"
+>
               <PictureInPicture
                 :video-element="videoElement"
                 :pip-element="pipElement"
@@ -79,7 +107,10 @@ id="editor-heading" class="sr-only">视频编辑主区域</h2>
           </div>
 
           <!-- 动画控制 -->
-          <section class="animation-controls" role="region" aria-labelledby="animation-heading">
+          <section
+class="animation-controls" role="region"
+aria-labelledby="animation-heading"
+>
             <h3
 id="animation-heading" class="sr-only">动画效果控制</h3>
             <AnimationSystem
@@ -94,8 +125,14 @@ id="animation-heading" class="sr-only">动画效果控制</h3>
       </div>
 
       <!-- 右侧素材面板 -->
-      <aside class="right-panel" role="complementary" aria-label="素材和监控面板">
-        <section class="panel-section" role="region" aria-labelledby="asset-section-heading">
+      <aside
+class="right-panel" role="complementary"
+aria-label="素材和监控面板"
+>
+        <section
+class="panel-section" role="region"
+aria-labelledby="asset-section-heading"
+>
           <h4 id="asset-section-heading">🖼️ 素材浏览器</h4>
           <AssetBrowser
             aria-label="素材资源浏览器和选择器"
@@ -104,7 +141,10 @@ id="animation-heading" class="sr-only">动画效果控制</h3>
           />
         </section>
 
-        <section class="panel-section" role="region" aria-labelledby="monitor-section-heading">
+        <section
+class="panel-section" role="region"
+aria-labelledby="monitor-section-heading"
+>
           <h4 id="monitor-section-heading">📊 性能监控</h4>
           <PerformanceMonitor
             :auto-start="true"
@@ -119,7 +159,10 @@ id="animation-heading" class="sr-only">动画效果控制</h3>
   </div>
 
   <!-- 底部控制栏 -->
-  <footer class="bottom-toolbar" role="toolbar" aria-label="编辑器操作控制栏">
+  <footer
+class="bottom-toolbar" role="toolbar"
+aria-label="编辑器操作控制栏"
+>
     <button
       class="export-btn"
       aria-label="导出演示结果"
@@ -128,7 +171,10 @@ id="animation-heading" class="sr-only">动画效果控制</h3>
     >
       导出
     </button>
-    <div v-if="exportStatus" id="export-status" class="sr-only" aria-live="polite">
+    <div
+v-if="exportStatus" id="export-status"
+class="sr-only" aria-live="polite"
+>
       {{ exportStatus }}
     </div>
     <button
@@ -485,47 +531,47 @@ const handleCanvasKeydown = event => {
   const cmdKey = isMac ? metaKey : ctrlKey
 
   switch (key) {
-  case 's':
-    if (cmdKey) {
-      event.preventDefault()
-      // 保存当前状态
-      console.log('保存状态')
-    }
-    break
-  case 'z':
-    if (cmdKey) {
-      event.preventDefault()
-      // 撤销操作
-      console.log('撤销操作')
-    }
-    break
-  case 'y':
-    if (cmdKey) {
-      event.preventDefault()
-      // 重做操作
-      console.log('重做操作')
-    }
-    break
-  case 'e':
-    if (cmdKey) {
-      event.preventDefault()
-      openExportDialog()
-    }
-    break
-  case 'p':
-    if (cmdKey) {
-      event.preventDefault()
-      previewPPT()
-    }
-    break
-  case 'Escape':
-    // 取消当前操作或关闭弹窗
-    console.log('取消操作')
-    break
-  case 'Tab':
-    // 处理Tab导航
-    handleTabNavigation(event)
-    break
+    case 's':
+      if (cmdKey) {
+        event.preventDefault()
+        // 保存当前状态
+        console.log('保存状态')
+      }
+      break
+    case 'z':
+      if (cmdKey) {
+        event.preventDefault()
+        // 撤销操作
+        console.log('撤销操作')
+      }
+      break
+    case 'y':
+      if (cmdKey) {
+        event.preventDefault()
+        // 重做操作
+        console.log('重做操作')
+      }
+      break
+    case 'e':
+      if (cmdKey) {
+        event.preventDefault()
+        openExportDialog()
+      }
+      break
+    case 'p':
+      if (cmdKey) {
+        event.preventDefault()
+        previewPPT()
+      }
+      break
+    case 'Escape':
+      // 取消当前操作或关闭弹窗
+      console.log('取消操作')
+      break
+    case 'Tab':
+      // 处理Tab导航
+      handleTabNavigation(event)
+      break
   }
 }
 
