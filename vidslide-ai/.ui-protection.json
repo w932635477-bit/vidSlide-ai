@@ -1,0 +1,51 @@
+{
+  "protectedFiles": [
+    "src/views/HomeView.vue",
+    "src/views/TestWorkspace.vue",
+    "src/components/**/*.vue",
+    "src/styles/*.css"
+  ],
+  "uiIntegrityChecks": {
+    "HomeView.vue": {
+      "criticalElements": [
+        "hero-section",
+        "product-features",
+        "pricing-section",
+        "contact-section"
+      ],
+      "requiredClasses": [
+        "hero-section",
+        "feature-card",
+        "pricing-card"
+      ]
+    },
+    "TestWorkspace.vue": {
+      "criticalElements": [
+        "workspace-container",
+        "toolbar-left",
+        "main-canvas",
+        "timeline-footer"
+      ],
+      "requiredClasses": [
+        "tool-btn",
+        "progress-bar",
+        "timeline-track"
+      ]
+    }
+  },
+  "autoBackup": {
+    "enabled": true,
+    "interval": "1h",
+    "retention": "7d",
+    "backupDir": ".ui-backups"
+  },
+  "changeDetection": {
+    "enabled": true,
+    "ignorePatterns": [
+      "node_modules/**",
+      ".git/**",
+      "*.log",
+      ".DS_Store"
+    ]
+  }
+}

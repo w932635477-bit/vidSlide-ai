@@ -22,7 +22,10 @@
     "test-materials": "node scripts/test-material-fetcher.js",
     "test-apis": "node scripts/simple-api-test.js",
     "test-quick-materials": "node scripts/quick-material-test.js",
-    "pre-commit": "npm run check-constraints"
+    "ui-integrity-check": "node scripts/ui-integrity-check.js check",
+    "ui-integrity-snapshot": "node scripts/ui-integrity-check.js snapshot",
+    "ui-protection-monitor": "node scripts/ui-protection-monitor.js",
+    "pre-commit": "npm run check-constraints && npm run ui-integrity-check"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",

@@ -11,7 +11,7 @@ import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router
  * 紧急补齐阶段功能实现
  */
 const router = createRouter({
-  history: createWebHashHistory(import.meta.env.BASE_URL),
+  history: createWebHistory('/'),
   routes: [
     {
       path: '/',
@@ -26,7 +26,7 @@ const router = createRouter({
     {
       path: '/workspace',
       name: 'workspace',
-      component: () => import('../views/WorkspaceView.vue')
+      component: () => import('../views/TestWorkspace.vue')
     },
     {
       path: '/help',

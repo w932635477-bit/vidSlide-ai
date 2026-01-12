@@ -23,18 +23,10 @@ href="/" class="navbar-logo"
 
         <!-- 中间导航链接 -->
         <div class="navbar-nav">
-          <a
-href="#features" class="navbar-nav-link"
->产品特点</a>
-          <a
-href="#workspace" class="navbar-nav-link"
->工作空间</a>
-          <a
-href="#pricing" class="navbar-nav-link"
->定价</a>
-          <a
-href="#about" class="navbar-nav-link"
->关于我们</a>
+          <router-link to="/#features" class="navbar-nav-link">产品特点</router-link>
+          <router-link to="/workspace" class="navbar-nav-link">工作空间</router-link>
+          <router-link to="/#pricing" class="navbar-nav-link">定价</router-link>
+          <router-link to="/#about" class="navbar-nav-link">关于我们</router-link>
         </div>
 
         <!-- 右侧操作按钮 -->
@@ -101,8 +93,10 @@ v-if="showLangMenu" class="lang-menu"
         <!-- 按钮组 -->
         <div class="hero-buttons">
           <button
-class="btn-primary-large" onclick="window.location.hash = '#/workspace'"
->
+            class="btn-primary-large"
+            @click="testFunction"
+            onclick="console.log('HTML onclick fired'); window.testVue();"
+          >
             免费开始 →
           </button>
           <button
@@ -486,11 +480,28 @@ export default {
       }, 3000) // 每3秒切换一步
     },
 
+    goToWorkspace() {
+      // 临时使用直接跳转测试
+      console.log('goToWorkspace called')
+      window.location.href = '/workspace'
+    },
+
+    testFunction() {
+      console.log('🎯 Vue testFunction called!')
+      alert('Vue方法执行成功！')
+      // 测试路由跳转
+      this.goToWorkspace()
+    },
+
+    goToWorkspace() {
+      // 使用Vue Router跳转到工作页面
+      this.$router.push('/workspace')
+    },
+
     startFree() {
       // 跳转到工作页面
-      console.log('Start Free button clicked')
-      // 直接使用hash模式跳转
-      window.location.hash = '#/workspace'
+      console.log('🆓 Start Free button clicked')
+      this.goToWorkspace()
     },
 
     watchDemo() {
@@ -500,28 +511,42 @@ export default {
     },
 
     toggleLangMenu(event) {
-      this.showLangMenu = !this.showLangMenu
-      if (this.showLangMenu) {
-        // 计算下拉菜单位置
-        this.$nextTick(() => {
-          const button = event.target.closest('.btn-lang-switcher')
-          if (button) {
-            const rect = button.getBoundingClientRect()
-            this.langMenuStyle = {
-              position: 'fixed',
-              top: `${rect.bottom + 8}px`,
-              right: `${window.innerWidth - rect.right}px`,
-              zIndex: '99999'
+      console.log('🌐 toggleLangMenu called with event:', event)
+      console.log('当前showLangMenu状态:', this.showLangMenu)
+
+      try {
+        this.showLangMenu = !this.showLangMenu
+        console.log('✅ showLangMenu切换到:', this.showLangMenu)
+
+        if (this.showLangMenu) {
+          // 计算下拉菜单位置
+          this.$nextTick(() => {
+            console.log('📍 计算菜单位置')
+            const button = event.target.closest('.btn-lang-switcher')
+            if (button) {
+              const rect = button.getBoundingClientRect()
+              this.langMenuStyle = {
+                position: 'fixed',
+                top: `${rect.bottom + 8}px`,
+                right: `${window.innerWidth - rect.right}px`,
+                zIndex: '99999'
+              }
+              console.log('✅ 菜单位置设置成功:', this.langMenuStyle)
+            } else {
+              console.warn('⚠️ 未找到按钮元素')
             }
+          })
+        } else {
+          // 重置样式
+          this.langMenuStyle = {
+            position: 'fixed',
+            top: '0px',
+            right: '0px'
           }
-        })
-      } else {
-        // 重置样式
-        this.langMenuStyle = {
-          position: 'fixed',
-          top: '0px',
-          right: '0px'
+          console.log('✅ 菜单样式重置成功')
         }
+      } catch (error) {
+        console.error('❌ toggleLangMenu执行失败:', error)
       }
     },
 

@@ -35,6 +35,22 @@
   <body>
     <div id="app"></div>
 
+    <script>
+      // 超级简单的测试
+      console.log('🔍 基础JavaScript测试');
+      window.testBasic = function() {
+        console.log('✅ 基础函数调用成功');
+        alert('基础JavaScript工作正常！');
+      };
+    </script>
+    <script type="module">
+      console.log('🚀 ES模块开始执行');
+      // 简单的ES模块测试
+      window.testModule = function() {
+        console.log('✅ ES模块函数调用成功');
+        alert('ES模块工作正常！');
+      };
+    </script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

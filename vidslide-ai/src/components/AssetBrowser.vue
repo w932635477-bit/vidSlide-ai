@@ -1,8 +1,5 @@
-/**
- * AssetBrowser.vue
- * VidSlide AI - 紧急补齐阶段
- * 实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统
- */
+/** * AssetBrowser.vue * VidSlide AI - 紧急补齐阶段 *
+实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统 */
 
 <!--
   VidSlide AI - 素材浏览器组件
@@ -1646,9 +1643,6 @@ onUnmounted(() => {
   padding: 12px 16px;
   border-bottom: 1px solid #e4e7ed;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-}
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
-  background: #ffffff;
 }
 
 .browser-header {

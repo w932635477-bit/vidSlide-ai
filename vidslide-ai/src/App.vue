@@ -8,6 +8,8 @@
 </template>
 
 <script setup>
+import TestWorkspace from './views/TestWorkspace.vue'
+
 // 全局状态
 // const isDark = ref(false) // 暂时不需要暗色模式
 </script>

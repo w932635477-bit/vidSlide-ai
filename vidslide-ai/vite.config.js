@@ -10,6 +10,41 @@ export default defineConfig({
     strictPort: false,
     // 允许跨域访问
     cors: true,
+    // 代理百度API请求
+    proxy: {
+      '/api/baidu': {
+        target: 'https://aip.baidubce.com',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api\/baidu/, ''),
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('proxy error', err)
+          })
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Sending Request to Baidu API:', req.method, req.url)
+          })
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received Response from Baidu API:', proxyRes.statusCode, req.url)
+          })
+        }
+      },
+      '/api/translate': {
+        target: 'https://fanyi-api.baidu.com',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api\/translate/, ''),
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('translation proxy error', err)
+          })
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Sending Request to Baidu Translate:', req.method, req.url)
+          })
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received Response from Baidu Translate:', proxyRes.statusCode, req.url)
+          })
+        }
+      }
+    },
     // 额外网络配置
     open: false,
     fs: {
