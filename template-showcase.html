@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI 模板效果展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3em;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .template-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .template-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .template-info {
+            padding: 25px;
+        }
+
+        .template-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .template-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .template-features {
+            list-style: none;
+        }
+
+        .template-features li {
+            padding: 5px 0;
+            color: #555;
+            font-size: 0.9em;
+        }
+
+        .template-features li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .templates-showcase {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            color: white;
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .templates-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .template-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .template-item h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .template-item p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+        }
+
+        .template-image-large {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin: 20px auto;
+            display: block;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 VidSlide AI 模板效果展示</h1>
+            <p>5种专业PPT模板，智能匹配您的内容</p>
+        </div>
+
+        <div class="templates-showcase">
+            <h2 class="section-title">✨ 模板效果预览</h2>
+
+            <!-- 画中画模板 -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h3 style="color: white; font-size: 2em; margin-bottom: 20px;">🎭 画中画效果模板</h3>
+                <img src="assets/templates/pip-template.png" alt="画中画效果模板" class="template-image-large">
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1em; margin-top: 15px;">
+                    视频与内容并排显示，适合讲解演示。支持人脸智能跟踪和无缝切换。
+                </p>
+            </div>
+
+            <!-- 信息卡片模板 -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h3 style="color: white; font-size: 2em; margin-bottom: 20px;">📋 信息卡片模板</h3>
+                <img src="assets/templates/info-card-template.png" alt="信息卡片模板" class="template-image-large">
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1em; margin-top: 15px;">
+                    清晰的信息展示，适合数据呈现。支持多行内容和自定义颜色。
+                </p>
+            </div>
+
+            <!-- 关键词高亮模板 -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h3 style="color: white; font-size: 2em; margin-bottom: 20px;">🎯 关键词高亮模板</h3>
+                <img src="assets/templates/keyword-template.png" alt="关键词高亮模板" class="template-image-large">
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1em; margin-top: 15px;">
+                    突出显示重点词汇，增强记忆效果。支持中英文双语显示。
+                </p>
+            </div>
+
+            <!-- 文档展示模板 -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h3 style="color: white; font-size: 2em; margin-bottom: 20px;">📄 文档展示模板</h3>
+                <img src="assets/templates/document-template.png" alt="文档展示模板" class="template-image-large">
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1em; margin-top: 15px;">
+                    文档内容清晰展示，适合资料分享。支持多文档重叠显示。
+                </p>
+            </div>
+
+            <!-- 标题文字模板 -->
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h3 style="color: white; font-size: 2em; margin-bottom: 20px;">📝 标题文字模板</h3>
+                <img src="assets/templates/title-template.png" alt="标题文字模板" class="template-image-large">
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.1em; margin-top: 15px;">
+                    醒目的标题设计，适合章节开头。支持自定义字体和动画效果。
+                </p>
+            </div>
+
+            <div class="templates-list">
+                <div class="template-item">
+                    <h3>🎨 专业设计</h3>
+                    <p>所有模板都经过专业设计师精心设计，确保视觉效果达到企业级标准。</p>
+                </div>
+                <div class="template-item">
+                    <h3>🤖 AI智能</h3>
+                    <p>基于内容分析自动推荐最适合的模板，减少手动选择的时间。</p>
+                </div>
+                <div class="template-item">
+                    <h3>📱 响应式</h3>
+                    <p>完美适配桌面、平板和手机等各种设备，保证在任何屏幕上都有最佳显示效果。</p>
+                </div>
+                <div class="template-item">
+                    <h3>🎭 动画效果</h3>
+                    <p>丰富的动画效果库，支持淡入、缩放、滑动等多种专业动画。</p>
+                </div>
+                <div class="template-item">
+                    <h3>🎨 自定义</h3>
+                    <p>支持颜色、字体、位置等多项自定义设置，满足个性化需求。</p>
+                </div>
+                <div class="template-item">
+                    <h3>⚡ 高性能</h3>
+                    <p>基于WebGL和Canvas优化，确保流畅的渲染性能。</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="vidslide-ai/index.html" class="back-link">🚀 体验完整应用</a>
+        </div>
+    </div>
+
+    <script>
+        // 添加一些交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.template-image-large');
+
+            images.forEach(img => {
+                img.addEventListener('load', function() {
+                    this.style.opacity = '0';
+                    this.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        this.style.opacity = '1';
+                    }, 100);
+                });
+            });
+
+            // 添加滚动动画
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.transform = 'translateY(0)';
+                        entry.target.style.opacity = '1';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.template-item').forEach(item => {
+                item.style.transform = 'translateY(30px)';
+                item.style.opacity = '0';
+                item.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+                observer.observe(item);
+            });
+        });
+    </script>
+</body>
+</html>
