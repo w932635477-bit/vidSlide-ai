@@ -205,15 +205,17 @@ export default {
 <style scoped>
 .keyword-template {
   position: relative;
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-  border-radius: 24px;
+  background: #f8f9fa;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 背景层 */
+/* 背景层 - 苹果风格的微妙背景 */
 .background-layer {
   position: absolute;
   top: 0;
@@ -228,10 +230,10 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image:
-    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-  background-size: 200px 200px;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(0,123,255,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(52,199,89,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255,59,48,0.02) 0%, transparent 50%);
 }
 
 .bg-gradient {
@@ -240,12 +242,10 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg,
-    rgba(102, 126, 234, 0.1) 0%,
-    rgba(118, 75, 162, 0.1) 25%,
-    rgba(240, 147, 251, 0.1) 50%,
-    rgba(79, 172, 254, 0.1) 75%,
-    rgba(67, 233, 123, 0.1) 100%);
+  background: linear-gradient(135deg,
+    rgba(0,123,255,0.02) 0%,
+    rgba(52,199,89,0.02) 50%,
+    rgba(255,59,48,0.02) 100%);
 }
 
 /* 内容区域 */
@@ -292,24 +292,24 @@ export default {
   flex: 1;
 }
 
-/* 关键词卡片 */
+/* 关键词卡片 - 苹果风格卡片 */
 .keyword-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   animation: keywordFadeIn 0.8s ease-out forwards;
   opacity: 0;
   transform: translateY(20px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .keyword-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 @keyframes keywordFadeIn {

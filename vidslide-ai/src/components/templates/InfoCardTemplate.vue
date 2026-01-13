@@ -173,17 +173,19 @@ export default {
 <style scoped>
 .info-card-template {
   position: relative;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  border-radius: 24px;
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  padding: 60px;
+  padding: 48px;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 背景装饰 */
+/* 背景装饰 - 苹果风格的微妙装饰 */
 .background-decoration {
   position: absolute;
   top: 0;
@@ -197,65 +199,66 @@ export default {
 .bg-shape {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(0,123,255,0.04) 0%, rgba(0,123,255,0.02) 100%);
   backdrop-filter: blur(40px);
 }
 
 .shape-1 {
-  width: 300px;
-  height: 300px;
-  top: -150px;
-  right: -150px;
-  animation: float 6s ease-in-out infinite;
+  width: 240px;
+  height: 240px;
+  top: -120px;
+  right: -120px;
+  animation: subtle-float 8s ease-in-out infinite;
 }
 
 .shape-2 {
-  width: 200px;
-  height: 200px;
-  bottom: -100px;
-  left: -100px;
-  animation: float 8s ease-in-out infinite reverse;
+  width: 160px;
+  height: 160px;
+  bottom: -80px;
+  left: -80px;
+  animation: subtle-float 12s ease-in-out infinite reverse;
 }
 
 .shape-3 {
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   top: 50%;
   left: 20%;
-  animation: float 10s ease-in-out infinite;
+  animation: subtle-float 16s ease-in-out infinite;
 }
 
-@keyframes float {
+@keyframes subtle-float {
   0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translateY(0px) scale(1);
   }
   50% {
-    transform: translateY(-20px) rotate(180deg);
+    transform: translateY(-8px) scale(1.02);
   }
 }
 
-/* 标题区域 */
+/* 标题区域 - 苹果风格的排版 */
 .title-section {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 56px;
   position: relative;
   z-index: 2;
 }
 
 .main-title {
-  font-size: 4em;
-  font-weight: 800;
-  color: #2c3e50;
-  margin-bottom: 0.5em;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-size: 3.2em;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 0.75em;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
 }
 
 .subtitle {
-  font-size: 1.8em;
-  color: #7f8c8d;
+  font-size: 1.4em;
+  color: #86868b;
   font-weight: 400;
   margin: 0;
+  line-height: 1.3;
 }
 
 /* 卡片网格 */
@@ -286,40 +289,40 @@ export default {
   grid-template-columns: repeat(4, 1fr);
 }
 
-/* 信息卡片 */
+/* 信息卡片 - 苹果风格卡片设计 */
 .info-card {
-  background: white;
-  border-radius: 20px;
-  padding: 40px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .info-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .card-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   position: relative;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, var(--card-color) 0%, rgba(var(--card-color-rgb), 0.8) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .icon-svg {
-  width: 40px;
-  height: 40px;
-  color: white;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  width: 32px;
+  height: 32px;
+  color: #ffffff;
 }
 
 .card-content {
@@ -327,36 +330,29 @@ export default {
 }
 
 .card-title {
-  font-size: 1.4em;
+  font-size: 1.2em;
   font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 12px;
+  color: #1d1d1f;
+  margin-bottom: 8px;
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .card-value {
-  font-size: 3em;
-  font-weight: 800;
+  font-size: 2.4em;
+  font-weight: 700;
   color: var(--card-color);
   margin-bottom: 8px;
   line-height: 1.1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .card-description {
-  font-size: 1em;
-  color: #7f8c8d;
+  font-size: 0.95em;
+  color: #86868b;
   line-height: 1.4;
   margin: 0;
-}
-
-.card-decoration {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  opacity: 0.8;
+  font-weight: 400;
 }
 
 /* 数据来源 */
@@ -421,25 +417,25 @@ export default {
   .info-card-template {
     width: 100% !important;
     height: auto !important;
-    min-height: 800px;
-    padding: 30px 20px;
-    border-radius: 16px;
+    min-height: 720px;
+    padding: 32px 24px;
+    border-radius: 12px;
   }
 
   .main-title {
-    font-size: 2.2em;
+    font-size: 2.4em;
   }
 
   .subtitle {
-    font-size: 1.1em;
+    font-size: 1.2em;
   }
 
   .title-section {
-    margin-bottom: 40px;
+    margin-bottom: 48px;
   }
 
   .cards-grid {
-    gap: 20px;
+    gap: 16px;
   }
 
   .cards-grid.grid-2,
@@ -450,26 +446,27 @@ export default {
 
   .info-card {
     padding: 24px;
-    border-radius: 16px;
+    border-radius: 12px;
   }
 
   .card-icon {
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
     margin-bottom: 16px;
+    border-radius: 10px;
   }
 
   .icon-svg {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
   }
 
   .card-title {
-    font-size: 1.2em;
+    font-size: 1.1em;
   }
 
   .card-value {
-    font-size: 2.2em;
+    font-size: 2em;
   }
 
   .card-description {
@@ -478,7 +475,7 @@ export default {
 
   .data-source {
     position: static;
-    margin-top: 30px;
+    margin-top: 32px;
     text-align: center;
     display: inline-block;
     margin-left: auto;

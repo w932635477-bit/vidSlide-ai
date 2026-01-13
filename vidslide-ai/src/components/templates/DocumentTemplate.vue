@@ -174,14 +174,16 @@ export default {
 <style scoped>
 .document-template {
   position: relative;
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border-radius: 24px;
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  padding: 60px;
+  padding: 48px;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   perspective: 1000px;
 }
 
@@ -199,40 +201,40 @@ export default {
 .bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(0,123,255,0.03) 0%, rgba(52,199,89,0.03) 100%);
   backdrop-filter: blur(20px);
 }
 
 .circle-1 {
-  width: 200px;
-  height: 200px;
-  top: -100px;
-  right: -100px;
-  animation: circleFloat 8s ease-in-out infinite;
+  width: 160px;
+  height: 160px;
+  top: -80px;
+  right: -80px;
+  animation: subtle-circle-float 12s ease-in-out infinite;
 }
 
 .circle-2 {
-  width: 150px;
-  height: 150px;
-  bottom: -75px;
-  left: -75px;
-  animation: circleFloat 10s ease-in-out infinite reverse;
+  width: 120px;
+  height: 120px;
+  bottom: -60px;
+  left: -60px;
+  animation: subtle-circle-float 16s ease-in-out infinite reverse;
 }
 
 .circle-3 {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   top: 50%;
   left: 25%;
-  animation: circleFloat 12s ease-in-out infinite;
+  animation: subtle-circle-float 20s ease-in-out infinite;
 }
 
-@keyframes circleFloat {
+@keyframes subtle-circle-float {
   0%, 100% {
     transform: translateY(0px) scale(1);
   }
   50% {
-    transform: translateY(-20px) scale(1.1);
+    transform: translateY(-6px) scale(1.02);
   }
 }
 

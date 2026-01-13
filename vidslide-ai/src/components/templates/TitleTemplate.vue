@@ -199,15 +199,17 @@ export default {
 <style scoped>
 .title-template {
   position: relative;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 24px;
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 动态背景 */
+/* 微妙的背景装饰 */
 .dynamic-background {
   position: absolute;
   top: 0;
@@ -220,40 +222,40 @@ export default {
 .bg-layer {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(0,123,255,0.03) 0%, rgba(52,199,89,0.03) 100%);
   backdrop-filter: blur(20px);
 }
 
 .layer-1 {
-  width: 400px;
-  height: 400px;
-  top: -200px;
-  right: -200px;
-  animation: bgFloat 8s ease-in-out infinite;
+  width: 280px;
+  height: 280px;
+  top: -140px;
+  right: -140px;
+  animation: subtle-bg-float 12s ease-in-out infinite;
 }
 
 .layer-2 {
-  width: 300px;
-  height: 300px;
-  bottom: -150px;
-  left: -150px;
-  animation: bgFloat 12s ease-in-out infinite reverse;
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  left: -100px;
+  animation: subtle-bg-float 16s ease-in-out infinite reverse;
 }
 
 .layer-3 {
-  width: 200px;
-  height: 200px;
+  width: 140px;
+  height: 140px;
   top: 40%;
   left: 30%;
-  animation: bgFloat 16s ease-in-out infinite;
+  animation: subtle-bg-float 20s ease-in-out infinite;
 }
 
-@keyframes bgFloat {
+@keyframes subtle-bg-float {
   0%, 100% {
     transform: translateY(0px) scale(1);
   }
   50% {
-    transform: translateY(-30px) scale(1.1);
+    transform: translateY(-8px) scale(1.02);
   }
 }
 
@@ -278,12 +280,12 @@ export default {
 }
 
 .main-title {
-  font-weight: 900;
-  margin-bottom: 20px;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: titleSlideIn 1s ease-out;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: #1d1d1f;
+  animation: titleSlideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes titleSlideIn {

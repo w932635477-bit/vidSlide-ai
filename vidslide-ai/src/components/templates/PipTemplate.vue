@@ -187,145 +187,157 @@ export default {
 <style scoped>
 .pip-template {
   position: relative;
-  background: #f8f9fa;
-  border-radius: 24px;
+  background: #ffffff;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 主内容区域 */
+/* 主内容区域 - 苹果风格的卡片设计 */
 .main-content {
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  color: #1d1d1f;
+  border-radius: 0 12px 12px 0;
+  position: relative;
+}
+
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0,123,255,0.02) 0%, rgba(0,123,255,0.01) 100%);
+  border-radius: inherit;
 }
 
 .content-placeholder {
+  position: relative;
+  z-index: 1;
   text-align: left;
-  max-width: 600px;
+  max-width: 520px;
 }
 
 .content-placeholder h2 {
-  font-size: 3.5em;
+  font-size: 2.8em;
   font-weight: 700;
-  margin-bottom: 1em;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  margin-bottom: 1.2em;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: #1d1d1f;
 }
 
 .content-placeholder p {
-  font-size: 1.8em;
-  line-height: 1.4;
-  margin-bottom: 2em;
-  opacity: 0.9;
+  font-size: 1.4em;
+  line-height: 1.5;
+  margin-bottom: 2.4em;
+  color: #86868b;
+  font-weight: 400;
 }
 
 .content-bullets {
-  font-size: 1.4em;
-  line-height: 1.6;
+  font-size: 1.2em;
+  line-height: 1.7;
+  color: #1d1d1f;
 }
 
 .bullet-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 0.8em;
+  margin-bottom: 1.2em;
+  padding: 0.8em 0;
 }
 
 .bullet-dot {
-  color: #ffd700;
-  font-weight: bold;
-  margin-right: 0.8em;
-  font-size: 1.2em;
+  color: #007aff;
+  font-weight: 600;
+  margin-right: 1em;
+  font-size: 1.1em;
   margin-top: 0.1em;
+  opacity: 0.8;
 }
 
-/* 画中画视频窗口 */
+/* 画中画视频窗口 - 苹果风格的卡片设计 */
 .pip-window {
-  background: #000;
+  background: #1d1d1f;
+  border-radius: 12px;
   position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .video-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
-              linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
-              linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background: linear-gradient(135deg, #2c2c2e 0%, #1c1c1e 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  border-radius: 12px;
 }
 
 .play-button {
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
 .play-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.play-button:active {
+  transform: scale(0.95);
 }
 
 .video-overlay {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9em;
+  bottom: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.85em;
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-/* 人脸跟踪指示器 */
+/* 人脸跟踪指示器 - 苹果风格 */
 .face-tracking-indicator {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 12px;
-  height: 12px;
-  background: #ff4757;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  background: #ff3b30;
   border-radius: 50%;
-  border: 2px solid white;
-  animation: tracking-pulse 2s infinite;
-}
-
-.tracking-dot {
-  width: 100%;
-  height: 100%;
-  background: #ff4757;
-  border-radius: 50%;
-  animation: tracking-dot-pulse 1s infinite;
+  box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
+  animation: tracking-pulse 2s ease-in-out infinite;
 }
 
 @keyframes tracking-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 8px rgba(255, 71, 87, 0);
-  }
-}
-
-@keyframes tracking-dot-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
+    box-shadow: 0 0 0 6px rgba(255, 59, 48, 0);
   }
 }
 
@@ -376,8 +388,9 @@ export default {
   .pip-template {
     width: 100% !important;
     height: auto !important;
-    min-height: 600px;
+    min-height: 560px;
     border-radius: 12px;
+    padding: 24px;
   }
 
   .main-content,
@@ -385,32 +398,39 @@ export default {
     position: static !important;
     width: 100% !important;
     height: auto !important;
-    border-radius: 0;
+    border-radius: 8px;
   }
 
   .main-content {
     order: 2;
-    min-height: 400px;
-    padding: 30px 20px !important;
+    min-height: 360px;
+    padding: 32px !important;
+    margin-top: 16px;
   }
 
   .pip-window {
     order: 1;
-    height: 250px !important;
-    border-radius: 12px;
-    margin: 20px;
+    height: 200px !important;
+    border-radius: 8px;
   }
 
   .content-placeholder {
     text-align: center;
+    max-width: 100%;
   }
 
   .content-placeholder h2 {
-    font-size: 2em;
+    font-size: 1.8em;
+    margin-bottom: 1em;
   }
 
   .content-placeholder p {
-    font-size: 1.1em;
+    font-size: 1em;
+    margin-bottom: 1.5em;
+  }
+
+  .content-bullets {
+    font-size: 1em;
   }
 
   .template-decoration {
