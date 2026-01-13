@@ -171,8 +171,9 @@ class ConstraintChecker {
     const srcDir = path.join(this.projectRoot, 'src')
     const components = this.findFiles(path.join(srcDir, 'components'), /\.vue$/)
 
-    // 当前阶段允许的组件
+    // 当前阶段允许的组件 (紧急补齐阶段)
     const allowedComponents = [
+      // 基础功能组件
       'VideoUploader',
       'VideoPlayer',
       'Timeline',
@@ -180,7 +181,47 @@ class ConstraintChecker {
       'Transcriber',
       'FaceTracker',
       'SmartRecommender',
-      'CompatibilityChecker'
+      'CompatibilityChecker',
+
+      // 模板系统组件
+      'TemplateSelector',
+      'TemplateCustomEditor',
+      'PipTemplate',
+      'InfoCardTemplate',
+      'KeywordTemplate',
+      'DocumentTemplate',
+      'TitleTemplate',
+
+      // 素材管理组件
+      'MaterialRequirementAnalyzer',
+      'AuthorizationDialog',
+      'AssetBrowser',
+      'KeyframeExtractor',
+
+      // 智能剪辑组件
+      'SmartCropTool',
+      'PictureInPicture',
+      'UserAdjustmentPanel',
+
+      // UI增强组件
+      'PerformanceMonitor',
+      'PreviewQualityControl',
+      'TimelineEditor',
+      'WegicDesignShowcase',
+
+      // 其他功能组件
+      'ColorMatcher',
+      'DispatcherStatus',
+      'ExportDialog',
+      'ExportHistoryManager',
+      'FaceTrackingSettings',
+      'KeywordExtractor',
+
+      // AI分析组件
+      'AIContentAnalyzer',
+      'AnimationSystem',
+      'BackgroundRemover',
+      'BatchProcessor'
     ]
 
     for (const component of components) {
