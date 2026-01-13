@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最小化Vue测试</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>{{ message }}</h1>
+    <button @click="changeMessage">点击改变消息</button>
+    <p>点击计数: {{ count }}</p>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          message: 'Hello Vue!',
+          count: 0
+        }
+      },
+      methods: {
+        changeMessage() {
+          this.message = '消息已改变!';
+          this.count++;
+          console.log('Vue方法执行成功:', this.count);
+        }
+      }
+    }).mount('#app');
+
+    console.log('最小化Vue应用已创建');
+  </script>
+</body>
+</html>

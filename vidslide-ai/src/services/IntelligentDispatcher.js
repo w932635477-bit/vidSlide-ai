@@ -171,8 +171,15 @@ class IntelligentDispatcher {
    * 生成缓存键
    */
   generateCacheKey(keyword, options) {
+    // 使用简单哈希方法，避免btoa的字符限制
     const key = `${keyword}_${JSON.stringify(options)}_${Date.now()}`
-    return btoa(key).slice(0, 32) // 简化为32字符
+    let hash = 0
+    for (let i = 0; i < key.length; i++) {
+      const char = key.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // 转换为32位整数
+    }
+    return Math.abs(hash).toString(36).slice(0, 16) // 16字符的36进制字符串
   }
 
   /**

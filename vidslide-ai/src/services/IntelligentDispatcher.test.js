@@ -200,7 +200,12 @@ describe('IntelligentDispatcher', () => {
     })
 
     it('应该为复杂关键词选择并行策略', () => {
-      const analysis = { language: 'mixed', confidence: 0.6, patterns: [{ matched: true }], category: 'mixed_with_patterns' }
+      const analysis = {
+        language: 'mixed',
+        confidence: 0.6,
+        patterns: [{ matched: true }],
+        category: 'mixed_with_patterns'
+      }
 
       const strategy = dispatcher.selectStrategy(analysis, {})
       expect(strategy.name).toBe('parallel_platforms')

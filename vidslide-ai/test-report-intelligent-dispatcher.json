@@ -1,0 +1,163 @@
+{
+  "timestamp": "2026-01-11T11:53:56.384Z",
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "tests": [
+      {
+        "name": "关键词分析测试",
+        "passed": true,
+        "message": "准确率: 100.0%, 时间: 0.0ms",
+        "metrics": {
+          "accuracy": 1,
+          "time": 0
+        }
+      },
+      {
+        "name": "平台评估测试",
+        "passed": true,
+        "message": "准确率: 100.0%, 时间: 0.0ms",
+        "metrics": {
+          "accuracy": 1,
+          "time": 0
+        }
+      },
+      {
+        "name": "翻译服务测试",
+        "passed": true,
+        "message": "成功率: 100.0%, 平均时间: 0.0ms",
+        "metrics": {
+          "successRate": 1,
+          "avgTime": 0
+        }
+      },
+      {
+        "name": "单平台策略测试",
+        "passed": true,
+        "message": "成功率: 100.0%, 平均时间: 0.0ms",
+        "metrics": {
+          "successRate": 1,
+          "avgTime": 0,
+          "times": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "多平台并行策略测试",
+        "passed": true,
+        "message": "成功率: 100.0%, 平均时间: 0.5ms",
+        "metrics": {
+          "successRate": 1,
+          "avgTime": 0.5,
+          "times": [
+            0,
+            1
+          ]
+        }
+      },
+      {
+        "name": "渐进式扩展策略测试",
+        "passed": true,
+        "message": "成功率: 100.0%, 平均时间: 0.0ms",
+        "metrics": {
+          "successRate": 1,
+          "avgTime": 0,
+          "times": [
+            0,
+            0
+          ]
+        }
+      },
+      {
+        "name": "性能指标测试",
+        "passed": true,
+        "message": "平均总时间: 0.1ms, 分析时间: 0.1ms",
+        "metrics": {
+          "analysisTime": {
+            "avg": 0.07692307692307693,
+            "min": 0,
+            "max": 1,
+            "count": 13
+          },
+          "dispatchTime": {
+            "avg": 0,
+            "min": 0,
+            "max": 0,
+            "count": 13
+          },
+          "translationTime": {
+            "avg": 0,
+            "min": 0,
+            "max": 0,
+            "count": 13
+          },
+          "totalTime": {
+            "avg": 0.07692307692307693,
+            "min": 0,
+            "max": 1,
+            "count": 13
+          }
+        }
+      },
+      {
+        "name": "内存使用测试",
+        "passed": true,
+        "message": "内存增加: 0.0MB",
+        "metrics": {
+          "initialMemory": 52428800,
+          "finalMemory": 52428800,
+          "memoryIncrease": 0
+        }
+      },
+      {
+        "name": "错误处理测试",
+        "passed": true,
+        "message": "错误处理正确率: 75.0%",
+        "metrics": {
+          "successRate": 0.75
+        }
+      },
+      {
+        "name": "负载测试",
+        "passed": true,
+        "message": "并发20个请求，成功率: 100.0%, 平均时间: 0.0ms",
+        "metrics": {
+          "totalTime": 0,
+          "avgTime": 0,
+          "successRate": 1,
+          "successCount": 20
+        }
+      }
+    ]
+  },
+  "performance": {
+    "analysisTime": {
+      "avg": 0.011764705882352941,
+      "min": 0,
+      "max": 1,
+      "count": 85
+    },
+    "dispatchTime": {
+      "avg": 0,
+      "min": 0,
+      "max": 0,
+      "count": 85
+    },
+    "translationTime": {
+      "avg": 0,
+      "min": 0,
+      "max": 0,
+      "count": 85
+    },
+    "totalTime": {
+      "avg": 0.011764705882352941,
+      "min": 0,
+      "max": 1,
+      "count": 85
+    }
+  },
+  "canProceed": true
+}

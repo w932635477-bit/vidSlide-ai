@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>素材搜索测试 - VidSlide AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .result {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: rgba(255,0,0,0.1);
+            border-left: 4px solid #ff4444;
+        }
+        .success {
+            background: rgba(0,255,0,0.1);
+            border-left: 4px solid #44ff44;
+        }
+        .material-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .material-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .material-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #ccc;
+        }
+        .material-title {
+            font-size: 12px;
+            margin: 8px 0 4px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .material-source {
+            font-size: 10px;
+            color: rgba(255,255,255,0.7);
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 VidSlide AI 素材搜索测试</h1>
+
+    <div class="container">
+        <h3>测试素材搜索功能</h3>
+        <input type="text" id="searchKeyword" class="test-input" placeholder="输入关键词，如：绿色能源、人工智能、团队合作" value="绿色能源">
+        <br>
+        <button class="test-btn" onclick="testSearch()">测试搜索</button>
+        <button class="test-btn" onclick="testTranslation()">测试翻译</button>
+        <button class="test-btn" onclick="clearResults()">清空结果</button>
+        <button class="test-btn" onclick="showStats()">显示统计</button>
+    </div>
+
+    <div class="container">
+        <h3>搜索结果</h3>
+        <div id="results"></div>
+        <div id="materialGrid" class="material-grid" style="display: none;"></div>
+    </div>
+
+    <script type="module">
+        import materialService from './src/services/MaterialService.js'
+        import TranslationService from './src/services/utils/IntelligentDispatcher/TranslationService.js'
+
+        let translationService = null
+
+        // 初始化服务
+        async function initializeServices() {
+            try {
+                addResult('🚀 正在初始化服务...', 'info')
+
+                // 初始化素材服务
+                await materialService.initialize()
+                addResult('✅ 素材服务初始化完成', 'success')
+
+                // 初始化翻译服务
+                translationService = new TranslationService()
+                await translationService.initialize()
+                addResult('✅ 翻译服务初始化完成', 'success')
+
+                addResult('🎯 所有服务已就绪，可以开始测试！', 'success')
+            } catch (error) {
+                addResult(`❌ 服务初始化失败: ${error.message}`, 'error')
+                console.error('初始化错误:', error)
+            }
+        }
+
+        // 添加结果
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results')
+            const div = document.createElement('div')
+            div.className = `result ${type}`
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            results.appendChild(div)
+            results.scrollTop = results.scrollHeight
+        }
+
+        // 显示素材网格
+        function showMaterialGrid(materials) {
+            const grid = document.getElementById('materialGrid')
+            grid.innerHTML = ''
+            grid.style.display = 'grid'
+
+            materials.forEach(material => {
+                const item = document.createElement('div')
+                item.className = 'material-item'
+
+                const img = document.createElement('img')
+                img.className = 'material-img'
+                img.src = material.dataUrl || material.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2NjYyIvPjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+5L2g5aW9PC90ZXh0Pjwvc3ZnPg=='
+                img.onerror = () => {
+                    img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2NjYyIvPjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+5L2g5aW9PC90ZXh0Pjwvc3ZnPg=='
+                }
+
+                const title = document.createElement('div')
+                title.className = 'material-title'
+                title.textContent = material.title || '未命名素材'
+
+                const source = document.createElement('div')
+                source.className = 'material-source'
+                source.textContent = `来源: ${material.source || '未知'}`
+
+                item.appendChild(img)
+                item.appendChild(title)
+                item.appendChild(source)
+                grid.appendChild(item)
+            })
+        }
+
+        // 测试搜索
+        window.testSearch = async function() {
+            const keyword = document.getElementById('searchKeyword').value.trim()
+            if (!keyword) {
+                addResult('请输入搜索关键词', 'error')
+                return
+            }
+
+            addResult(`🔍 开始搜索: "${keyword}"`)
+
+            try {
+                const results = await materialService.searchMaterials(keyword, {
+                    limit: 6,
+                    includeStats: true
+                })
+
+                if (results.success) {
+                    addResult(`✅ 搜索成功: 找到 ${results.materials.length} 个素材`, 'success')
+                    addResult(`📊 搜索统计: ${JSON.stringify(results.searchStats, null, 2)}`)
+
+                    if (results.materials.length > 0) {
+                        showMaterialGrid(results.materials)
+                        addResult(`🎨 显示 ${results.materials.length} 个素材预览`, 'success')
+                    } else {
+                        document.getElementById('materialGrid').style.display = 'none'
+                        addResult('📭 未找到匹配的素材', 'info')
+                    }
+                } else {
+                    addResult(`❌ 搜索失败: ${results.error}`, 'error')
+                    document.getElementById('materialGrid').style.display = 'none'
+                }
+            } catch (error) {
+                addResult(`💥 搜索异常: ${error.message}`, 'error')
+                console.error('搜索错误:', error)
+                document.getElementById('materialGrid').style.display = 'none'
+            }
+        }
+
+        // 测试翻译
+        window.testTranslation = async function() {
+            const keyword = document.getElementById('searchKeyword').value.trim()
+            if (!keyword) {
+                addResult('请输入关键词进行翻译测试', 'error')
+                return
+            }
+
+            if (!translationService) {
+                addResult('翻译服务未初始化', 'error')
+                return
+            }
+
+            addResult(`🌐 测试翻译: "${keyword}"`)
+
+            try {
+                const translated = await translationService.translate(keyword)
+                addResult(`✅ 翻译结果: "${keyword}" → "${translated}"`, 'success')
+            } catch (error) {
+                addResult(`❌ 翻译失败: ${error.message}`, 'error')
+            }
+        }
+
+        // 清空结果
+        window.clearResults = function() {
+            document.getElementById('results').innerHTML = ''
+            document.getElementById('materialGrid').style.display = 'none'
+        }
+
+        // 显示统计
+        window.showStats = async function() {
+            try {
+                const stats = await materialService.getServiceStats()
+                addResult('📊 素材库统计:', 'info')
+                addResult(JSON.stringify(stats, null, 2), 'info')
+            } catch (error) {
+                addResult(`❌ 获取统计失败: ${error.message}`, 'error')
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeServices()
+        })
+    </script>
+</body>
+</html>

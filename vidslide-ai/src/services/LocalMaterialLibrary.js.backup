@@ -1,0 +1,308 @@
+  /**
+   * 生成海边场景素材
+   */
+  generateBeachScene() {
+    const scenes = [
+      {
+        id: 'beach-sunset',
+        name: '海边日落',
+        subcategory: '风景',
+        industry: '生活',
+        scene: '展示',
+        style: '写实',
+        type: 'svg',
+        semanticTags: ['海边', '日落', '风景', '自然'],
+        relatedConcepts: ['度假', '宁静', '美丽', '自然'],
+        contextKeywords: ['海边', '日落', '风景'],
+        dataUrl: this.generateBeachSunsetSvg(),
+        thumbnailUrl: this.generateBeachSunsetSvg(),
+        dimensions: { width: 600, height: 400 }
+      },
+      {
+        id: 'beach-tropical',
+        name: '热带海滩',
+        subcategory: '风景',
+        industry: '生活',
+        scene: '展示',
+        style: '明亮',
+        type: 'svg',
+        semanticTags: ['海滩', '热带', '椰子树', '度假'],
+        relatedConcepts: ['假期', '放松', '阳光', '海水'],
+        contextKeywords: ['海滩', '热带', '椰子树'],
+        dataUrl: this.generateBeachTropicalSvg(),
+        thumbnailUrl: this.generateBeachTropicalSvg(),
+        dimensions: { width: 600, height: 400 }
+      },
+      {
+        id: 'beach-storm',
+        name: '海边风暴',
+        subcategory: '风景',
+        industry: '生活',
+        scene: '展示',
+        style: '戏剧性',
+        type: 'svg',
+        semanticTags: ['海边', '风暴', '波涛', '力量'],
+        relatedConcepts: ['力量', '激情', '变化', '自然之力'],
+        contextKeywords: ['风暴', '波涛', '力量'],
+        dataUrl: this.generateBeachStormSvg(),
+        thumbnailUrl: this.generateBeachStormSvg(),
+        dimensions: { width: 600, height: 400 }
+      }
+    ];
+
+    return scenes;
+  }
+
+  /**
+   * 生成海边日落SVG
+   */
+  generateBeachSunsetSvg() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+      <!-- 天空渐变 -->
+      <defs>
+        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#FF6B35"/>
+          <stop offset="30%" style="stop-color:#F7931E"/>
+          <stop offset="70%" style="stop-color:#FFD23F"/>
+          <stop offset="100%" style="stop-color:#87CEEB"/>
+        </linearGradient>
+
+        <!-- 海水渐变 -->
+        <linearGradient id="oceanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#1E90FF"/>
+          <stop offset="50%" style="stop-color:#4169E1"/>
+          <stop offset="100%" style="stop-color:#000080"/>
+        </linearGradient>
+
+        <!-- 沙滩渐变 -->
+        <linearGradient id="sandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#F4E4BC"/>
+          <stop offset="100%" style="stop-color:#D2B48C"/>
+        </linearGradient>
+      </defs>
+
+      <!-- 天空 -->
+      <rect width="600" height="250" fill="url(#skyGradient)"/>
+
+      <!-- 太阳 -->
+      <circle cx="150" cy="120" r="35" fill="#FFD23F" opacity="0.8"/>
+      <circle cx="150" cy="120" r="25" fill="#FFA500"/>
+      <circle cx="150" cy="120" r="15" fill="#FF8C00"/>
+
+      <!-- 云朵 -->
+      <circle cx="100" cy="80" r="15" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="115" cy="75" r="18" fill="rgba(255,255,255,0.6)"/>
+      <circle cx="130" cy="80" r="15" fill="rgba(255,255,255,0.6)"/>
+
+      <circle cx="400" cy="60" r="12" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="415" cy="58" r="15" fill="rgba(255,255,255,0.5)"/>
+      <circle cx="430" cy="60" r="12" fill="rgba(255,255,255,0.5)"/>
+
+      <!-- 海面 -->
+      <rect x="0" y="250" width="600" height="100" fill="url(#oceanGradient)"/>
+
+      <!-- 海浪 -->
+      <path d="M0 280 Q100 260 200 280 T400 280 Q500 300 600 280 L600 350 L0 350 Z" fill="#4682B4" opacity="0.7"/>
+      <path d="M0 300 Q120 285 240 300 T480 300 Q550 315 600 300 L600 350 L0 350 Z" fill="#5F9EA0" opacity="0.5"/>
+      <path d="M0 320 Q150 310 300 320 T600 320 L600 350 L0 350 Z" fill="#87CEEB" opacity="0.3"/>
+
+      <!-- 沙滩 -->
+      <rect x="0" y="350" width="600" height="50" fill="url(#sandGradient)"/>
+
+      <!-- 贝壳 -->
+      <ellipse cx="80" cy="370" rx="8" ry="4" fill="#FFE4B5" opacity="0.8"/>
+      <ellipse cx="85" cy="372" rx="6" ry="3" fill="#DEB887" opacity="0.9"/>
+
+      <ellipse cx="520" cy="375" rx="10" ry="5" fill="#FFE4B5" opacity="0.7"/>
+      <ellipse cx="525" cy="377" rx="7" ry="3.5" fill="#DEB887" opacity="0.8"/>
+
+      <!-- 椰子树 -->
+      <rect x="480" y="320" width="8" height="30" fill="#8B4513"/>
+      <circle cx="484" cy="315" r="25" fill="#228B22"/>
+      <circle cx="484" cy="305" r="20" fill="#32CD32"/>
+      <circle cx="475" cy="310" r="15" fill="#228B22"/>
+      <circle cx="493" cy="310" r="15" fill="#228B22"/>
+
+      <!-- 椰子 -->
+      <circle cx="484" cy="325" r="4" fill="#8B4513"/>
+      <circle cx="475" cy="320" r="3" fill="#654321"/>
+      <circle cx="493" cy="318" r="3.5" fill="#654321"/>
+    </svg>`;
+
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }
+
+  /**
+   * 生成热带海滩SVG
+   */
+  generateBeachTropicalSvg() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+      <!-- 天空 -->
+      <rect width="600" height="200" fill="#87CEEB"/>
+      <circle cx="450" cy="80" r="40" fill="#FFD700" opacity="0.9"/>
+      <circle cx="450" cy="80" r="30" fill="#FFA500"/>
+
+      <!-- 云朵 -->
+      <circle cx="100" cy="60" r="20" fill="rgba(255,255,255,0.8)"/>
+      <circle cx="120" cy="55" r="25" fill="rgba(255,255,255,0.8)"/>
+      <circle cx="140" cy="60" r="20" fill="rgba(255,255,255,0.8)"/>
+      <circle cx="160" cy="65" r="15" fill="rgba(255,255,255,0.8)"/>
+
+      <circle cx="300" cy="70" r="18" fill="rgba(255,255,255,0.7)"/>
+      <circle cx="318" cy="68" r="22" fill="rgba(255,255,255,0.7)"/>
+      <circle cx="338" cy="70" r="18" fill="rgba(255,255,255,0.7)"/>
+
+      <!-- 椰子树 -->
+      <rect x="50" y="180" width="12" height="120" fill="#654321"/>
+      <ellipse cx="56" cy="180" rx="35" ry="45" fill="#228B22"/>
+      <ellipse cx="56" cy="165" rx="30" ry="40" fill="#32CD32"/>
+      <ellipse cx="45" cy="175" rx="25" ry="35" fill="#228B22"/>
+      <ellipse cx="67" cy="175" rx="25" ry="35" fill="#228B22"/>
+      <circle cx="56" cy="195" r="6" fill="#8B4513"/>
+      <circle cx="50" cy="190" r="5" fill="#654321"/>
+      <circle cx="62" cy="188" r="4.5" fill="#654321"/>
+
+      <rect x="150" y="170" width="10" height="110" fill="#654321"/>
+      <ellipse cx="155" cy="170" rx="30" ry="40" fill="#228B22"/>
+      <ellipse cx="155" cy="155" rx="25" ry="35" fill="#32CD32"/>
+      <ellipse cx="145" cy="165" rx="20" ry="30" fill="#228B22"/>
+      <ellipse cx="165" cy="165" rx="20" ry="30" fill="#228B22"/>
+      <circle cx="155" cy="185" r="5" fill="#8B4513"/>
+      <circle cx="150" cy="180" r="4" fill="#654321"/>
+      <circle cx="160" cy="178" r="4.5" fill="#654321"/>
+
+      <!-- 海面 -->
+      <rect x="0" y="300" width="600" height="100" fill="#1E90FF"/>
+
+      <!-- 海浪 -->
+      <path d="M0 320 Q80 310 160 320 T320 320 Q400 330 480 320 T640 320 L640 400 L0 400 Z" fill="#4682B4" opacity="0.8"/>
+      <path d="M0 340 Q100 335 200 340 T400 340 Q500 345 600 340 L600 400 L0 400 Z" fill="#5F9EA0" opacity="0.6"/>
+      <path d="M0 360 Q120 358 240 360 T480 360 Q550 362 600 360 L600 400 L0 400 Z" fill="#87CEEB" opacity="0.4"/>
+
+      <!-- 沙滩 -->
+      <rect x="0" y="350" width="600" height="50" fill="#F4E4BC"/>
+
+      <!-- 沙滩细节 -->
+      <circle cx="100" cy="375" r="3" fill="#D2B48C" opacity="0.8"/>
+      <circle cx="150" cy="378" r="2.5" fill="#DEB887" opacity="0.9"/>
+      <circle cx="200" cy="372" r="3.5" fill="#D2B48C" opacity="0.7"/>
+      <circle cx="250" cy="376" r="2" fill="#DEB887" opacity="0.8"/>
+      <circle cx="300" cy="374" r="3" fill="#D2B48C" opacity="0.9"/>
+      <circle cx="350" cy="379" r="2.5" fill="#DEB887" opacity="0.7"/>
+      <circle cx="400" cy="373" r="3.5" fill="#D2B48C" opacity="0.8"/>
+      <circle cx="450" cy="377" r="2" fill="#DEB887" opacity="0.9"/>
+      <circle cx="500" cy="375" r="3" fill="#D2B48C" opacity="0.7"/>
+
+      <!-- 贝壳 -->
+      <ellipse cx="80" cy="370" rx="6" ry="3" fill="#FFE4B5" opacity="0.8"/>
+      <ellipse cx="85" cy="372" rx="4" ry="2" fill="#DEB887" opacity="0.9"/>
+      <ellipse cx="520" cy="375" rx="8" ry="4" fill="#FFE4B5" opacity="0.7"/>
+      <ellipse cx="525" cy="377" rx="5" ry="2.5" fill="#DEB887" opacity="0.8"/>
+
+      <!-- 棕榈树 -->
+      <rect x="450" y="200" width="8" height="150" fill="#8B4513"/>
+      <ellipse cx="454" cy="200" rx="30" ry="25" fill="#228B22"/>
+      <ellipse cx="454" cy="190" rx="25" ry="20" fill="#32CD32"/>
+      <ellipse cx="444" cy="195" rx="20" ry="18" fill="#228B22"/>
+      <ellipse cx="464" cy="195" rx="20" ry="18" fill="#228B22"/>
+      <ellipse cx="434" cy="205" rx="15" ry="12" fill="#228B22"/>
+      <ellipse cx="474" cy="205" rx="15" ry="12" fill="#228B22"/>
+    </svg>`;
+
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }
+
+  /**
+   * 生成海边风暴SVG
+   */
+  generateBeachStormSvg() {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+      <!-- 风暴天空 -->
+      <defs>
+        <radialGradient id="stormGradient" cx="50%" cy="30%" r="70%">
+          <stop offset="0%" style="stop-color:#2C3E50"/>
+          <stop offset="50%" style="stop-color:#34495E"/>
+          <stop offset="100%" style="stop-color:#7F8C8D"/>
+        </radialGradient>
+
+        <linearGradient id="oceanStorm" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#2E8B57"/>
+          <stop offset="30%" style="stop-color:#006994"/>
+          <stop offset="100%" style="stop-color:#000080"/>
+        </linearGradient>
+      </defs>
+
+      <!-- 黑暗天空 -->
+      <rect width="600" height="280" fill="url(#stormGradient)"/>
+
+      <!-- 闪电 -->
+      <path d="M350 50 L365 80 L355 85 L370 120 L360 125 L375 160 L365 155 L355 180 L350 175 L340 200 L335 195 L325 170 L330 165 L320 140 L325 135 L315 110 L320 105 L310 80 L315 75 Z"
+            fill="none" stroke="#FFD700" stroke-width="3" opacity="0.9"/>
+      <path d="M350 50 L365 80 L355 85 L370 120 L360 125 L375 160 L365 155 L355 180 L350 175 L340 200 L335 195 L325 170 L330 165 L320 140 L325 135 L315 110 L320 105 L310 80 L315 75 Z"
+            fill="none" stroke="#FFF" stroke-width="1" opacity="0.7"/>
+
+      <!-- 乌云 -->
+      <circle cx="80" cy="60" r="25" fill="#2C3E50" opacity="0.8"/>
+      <circle cx="105" cy="55" r="30" fill="#34495E" opacity="0.8"/>
+      <circle cx="130" cy="60" r="25" fill="#2C3E50" opacity="0.8"/>
+      <circle cx="150" cy="65" r="20" fill="#34495E" opacity="0.8"/>
+
+      <circle cx="250" cy="70" r="22" fill="#2C3E50" opacity="0.7"/>
+      <circle cx="272" cy="68" r="28" fill="#34495E" opacity="0.7"/>
+      <circle cx="295" cy="70" r="22" fill="#2C3E50" opacity="0.7"/>
+      <circle cx="315" cy="75" r="18" fill="#34495E" opacity="0.7"/>
+
+      <circle cx="450" cy="50" r="20" fill="#2C3E50" opacity="0.9"/>
+      <circle cx="470" cy="48" r="25" fill="#34495E" opacity="0.9"/>
+      <circle cx="490" cy="50" r="20" fill="#2C3E50" opacity="0.9"/>
+      <circle cx="510" cy="55" r="15" fill="#34495E" opacity="0.9"/>
+
+      <!-- 暴风雨海面 -->
+      <rect x="0" y="280" width="600" height="120" fill="url(#oceanStorm)"/>
+
+      <!-- 巨浪 -->
+      <path d="M0 300 Q50 250 100 300 T200 300 Q250 320 300 300 T400 300 Q450 280 500 300 T600 300 L600 400 L0 400 Z"
+            fill="#4682B4" opacity="0.9"/>
+      <path d="M0 320 Q60 280 120 320 T240 320 Q300 340 360 320 T480 320 Q540 300 600 320 L600 400 L0 400 Z"
+            fill="#5F9EA0" opacity="0.8"/>
+      <path d="M0 340 Q70 310 140 340 T280 340 Q350 360 420 340 T560 340 Q580 350 600 340 L600 400 L0 400 Z"
+            fill="#87CEEB" opacity="0.6"/>
+
+      <!-- 浪花 -->
+      <circle cx="80" cy="290" r="8" fill="#FFF" opacity="0.7"/>
+      <circle cx="85" cy="285" r="5" fill="#FFF" opacity="0.9"/>
+      <circle cx="150" cy="295" r="6" fill="#FFF" opacity="0.8"/>
+      <circle cx="155" cy="290" r="4" fill="#FFF" opacity="0.9"/>
+      <circle cx="220" cy="285" r="7" fill="#FFF" opacity="0.6"/>
+      <circle cx="225" cy="280" r="4" fill="#FFF" opacity="0.8"/>
+      <circle cx="290" cy="295" r="5" fill="#FFF" opacity="0.7"/>
+      <circle cx="295" cy="290" r="3" fill="#FFF" opacity="0.9"/>
+      <circle cx="360" cy="285" r="8" fill="#FFF" opacity="0.6"/>
+      <circle cx="365" cy="280" r="5" fill="#FFF" opacity="0.8"/>
+      <circle cx="430" cy="290" r="6" fill="#FFF" opacity="0.7"/>
+      <circle cx="435" cy="285" r="4" fill="#FFF" opacity="0.9"/>
+      <circle cx="500" cy="295" r="7" fill="#FFF" opacity="0.8"/>
+      <circle cx="505" cy="290" r="5" fill="#FFF" opacity="0.9"/>
+
+      <!-- 沙滩 (被海浪冲刷) -->
+      <rect x="0" y="350" width="600" height="50" fill="#D2B48C"/>
+
+      <!-- 散落的椰子树残枝 -->
+      <rect x="100" y="330" width="6" height="20" fill="#654321"/>
+      <ellipse cx="103" cy="330" rx="12" ry="8" fill="#8B4513"/>
+      <rect x="350" y="325" width="5" height="25" fill="#654321"/>
+      <ellipse cx="352.5" cy="325" rx="10" ry="7" fill="#8B4513"/>
+
+      <!-- 雨滴效果 -->
+      <line x1="50" y1="200" x2="55" y2="230" stroke="#87CEEB" stroke-width="2" opacity="0.6"/>
+      <line x1="120" y1="180" x2="125" y2="210" stroke="#87CEEB" stroke-width="1.5" opacity="0.7"/>
+      <line x1="180" y1="190" x2="185" y2="220" stroke="#87CEEB" stroke-width="2" opacity="0.5"/>
+      <line x1="250" y1="170" x2="255" y2="200" stroke="#87CEEB" stroke-width="1.5" opacity="0.8"/>
+      <line x1="320" y1="200" x2="325" y2="230" stroke="#87CEEB" stroke-width="2" opacity="0.6"/>
+      <line x1="400" y1="180" x2="405" y2="210" stroke="#87CEEB" stroke-width="1.5" opacity="0.7"/>
+      <line x1="480" y1="190" x2="485" y2="220" stroke="#87CEEB" stroke-width="2" opacity="0.5"/>
+      <line x1="550" y1="170" x2="555" y2="200" stroke="#87CEEB" stroke-width="1.5" opacity="0.8"/>
+    </svg>`;
+
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  }

@@ -18,10 +18,13 @@ export class AssetManager {
    * 初始化所有子模块但不立即连接数据库
    * 包含性能优化：懒加载、缓存、内存管理
    */
-  constructor() {
+  constructor(options = {}) {
     this.storage = new IndexedDBStorage()
     this.externalAPI = new ExternalAPI()
     this.copyrightChecker = new CopyrightChecker()
+
+    // 配置选项
+    this.autoCache = options.autoCache !== false // 默认开启自动缓存
 
     this.isInitialized = false
     this.eventListeners = new Map()

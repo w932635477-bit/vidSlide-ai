@@ -7,7 +7,7 @@
 // 浏览器存储API模拟
 Object.defineProperty(window, 'localStorage', {
   value: {
-    getItem: vi.fn((key) => {
+    getItem: vi.fn(key => {
       if (key === 'vidslide_dispatcher_strategy') return 'balanced'
       return null
     }),
@@ -194,15 +194,15 @@ Object.defineProperty(global, 'crypto', {
       encrypt: vi.fn(() => Promise.resolve(new ArrayBuffer(0))),
       decrypt: vi.fn(() => Promise.resolve(new ArrayBuffer(0)))
     },
-    getRandomValues: vi.fn((array) => array)
+    getRandomValues: vi.fn(array => array)
   },
   writable: true,
   configurable: true
 })
 
 // btoa/atob函数模拟
-global.btoa = vi.fn((str) => Buffer.from(str, 'binary').toString('base64'))
-global.atob = vi.fn((str) => Buffer.from(str, 'base64').toString('binary'))
+global.btoa = vi.fn(str => Buffer.from(str, 'binary').toString('base64'))
+global.atob = vi.fn(str => Buffer.from(str, 'base64').toString('binary'))
 
 // 其他浏览器API
 global.matchMedia = vi.fn(() => ({
@@ -213,8 +213,8 @@ global.matchMedia = vi.fn(() => ({
   removeEventListener: vi.fn()
 }))
 
-global.requestAnimationFrame = vi.fn((callback) => setTimeout(callback, 16))
-global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id))
+global.requestAnimationFrame = vi.fn(callback => setTimeout(callback, 16))
+global.cancelAnimationFrame = vi.fn(id => clearTimeout(id))
 
 // Intersection Observer模拟
 global.IntersectionObserver = vi.fn(() => ({
@@ -232,7 +232,7 @@ global.ResizeObserver = vi.fn(() => ({
 
 // 控制台方法模拟（避免测试中的console调用出错）
 global.console = {
-  ...console,
+  ...console
   // 可以在这里添加特定的console方法模拟
 }
 

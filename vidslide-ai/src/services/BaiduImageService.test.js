@@ -14,7 +14,7 @@ global.crypto = {
   subtle: {
     digest: vi.fn(() => Promise.resolve(new ArrayBuffer(16)))
   },
-  getRandomValues: vi.fn((array) => array)
+  getRandomValues: vi.fn(array => array)
 }
 
 describe('BaiduImageService', () => {
@@ -49,10 +49,11 @@ describe('BaiduImageService', () => {
     it('应该成功获取Access Token', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'test_access_token_123',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'test_access_token_123',
+            expires_in: 2592000
+          })
       })
 
       const token = await service.getAccessToken()
@@ -69,10 +70,11 @@ describe('BaiduImageService', () => {
       // 第一次调用
       global.fetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'cached_token_456',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'cached_token_456',
+            expires_in: 2592000
+          })
       })
 
       await service.getAccessToken()
@@ -88,10 +90,11 @@ describe('BaiduImageService', () => {
       global.fetch.mockResolvedValue({
         ok: false,
         status: 400,
-        json: () => Promise.resolve({
-          error: 'invalid_client',
-          error_description: 'Invalid client credentials'
-        })
+        json: () =>
+          Promise.resolve({
+            error: 'invalid_client',
+            error_description: 'Invalid client credentials'
+          })
       })
 
       const token = await service.getAccessToken()
@@ -112,38 +115,40 @@ describe('BaiduImageService', () => {
   describe('图片搜索', () => {
     beforeEach(() => {
       // Mock成功的Access Token获取
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('oauth/2.0/token')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              access_token: 'mock_token_789',
-              expires_in: 2592000
-            })
+            json: () =>
+              Promise.resolve({
+                access_token: 'mock_token_789',
+                expires_in: 2592000
+              })
           })
         }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            data: [
-              {
-                thumbURL: 'https://img.baidu.com/thumb1.jpg',
-                middleURL: 'https://img.baidu.com/middle1.jpg',
-                objURL: 'https://img.baidu.com/original1.jpg',
-                fromPageTitleEnc: '美丽的风景',
-                width: 1920,
-                height: 1080
-              },
-              {
-                thumbURL: 'https://img.baidu.com/thumb2.jpg',
-                middleURL: 'https://img.baidu.com/middle2.jpg',
-                objURL: 'https://img.baidu.com/original2.jpg',
-                fromPageTitleEnc: '山水画',
-                width: 1280,
-                height: 720
-              }
-            ]
-          })
+          json: () =>
+            Promise.resolve({
+              data: [
+                {
+                  thumbURL: 'https://img.baidu.com/thumb1.jpg',
+                  middleURL: 'https://img.baidu.com/middle1.jpg',
+                  objURL: 'https://img.baidu.com/original1.jpg',
+                  fromPageTitleEnc: '美丽的风景',
+                  width: 1920,
+                  height: 1080
+                },
+                {
+                  thumbURL: 'https://img.baidu.com/thumb2.jpg',
+                  middleURL: 'https://img.baidu.com/middle2.jpg',
+                  objURL: 'https://img.baidu.com/original2.jpg',
+                  fromPageTitleEnc: '山水画',
+                  width: 1280,
+                  height: 720
+                }
+              ]
+            })
         })
       })
     })
@@ -174,23 +179,25 @@ describe('BaiduImageService', () => {
     })
 
     it('应该处理搜索API失败', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('oauth')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              access_token: 'mock_token',
-              expires_in: 2592000
-            })
+            json: () =>
+              Promise.resolve({
+                access_token: 'mock_token',
+                expires_in: 2592000
+              })
           })
         }
         return Promise.resolve({
           ok: false,
           status: 403,
-          json: () => Promise.resolve({
-            error_code: 403,
-            error_msg: 'Forbidden'
-          })
+          json: () =>
+            Promise.resolve({
+              error_code: 403,
+              error_msg: 'Forbidden'
+            })
         })
       })
 
@@ -214,21 +221,23 @@ describe('BaiduImageService', () => {
     })
 
     it('应该处理空的搜索结果', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('oauth')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              access_token: 'mock_token',
-              expires_in: 2592000
-            })
+            json: () =>
+              Promise.resolve({
+                access_token: 'mock_token',
+                expires_in: 2592000
+              })
           })
         }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            data: [] // 空结果
-          })
+          json: () =>
+            Promise.resolve({
+              data: [] // 空结果
+            })
         })
       })
 
@@ -246,10 +255,11 @@ describe('BaiduImageService', () => {
 
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'mock_token',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'mock_token',
+            expires_in: 2592000
+          })
       })
 
       await service.searchImages('stats_test', 1)
@@ -264,10 +274,11 @@ describe('BaiduImageService', () => {
 
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'mock_token',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'mock_token',
+            expires_in: 2592000
+          })
       })
 
       const result = await service.searchImages('limit_test', 1)
@@ -279,30 +290,32 @@ describe('BaiduImageService', () => {
 
   describe('数据格式化', () => {
     it('应该正确格式化图片数据', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('oauth')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              access_token: 'mock_token',
-              expires_in: 2592000
-            })
+            json: () =>
+              Promise.resolve({
+                access_token: 'mock_token',
+                expires_in: 2592000
+              })
           })
         }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            data: [
-              {
-                thumbURL: 'thumb.jpg',
-                middleURL: 'middle.jpg',
-                objURL: 'original.jpg',
-                fromPageTitleEnc: '测试图片',
-                width: 800,
-                height: 600
-              }
-            ]
-          })
+          json: () =>
+            Promise.resolve({
+              data: [
+                {
+                  thumbURL: 'thumb.jpg',
+                  middleURL: 'middle.jpg',
+                  objURL: 'original.jpg',
+                  fromPageTitleEnc: '测试图片',
+                  width: 800,
+                  height: 600
+                }
+              ]
+            })
         })
       })
 
@@ -319,27 +332,29 @@ describe('BaiduImageService', () => {
     })
 
     it('应该处理缺失的图片属性', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('oauth')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              access_token: 'mock_token',
-              expires_in: 2592000
-            })
+            json: () =>
+              Promise.resolve({
+                access_token: 'mock_token',
+                expires_in: 2592000
+              })
           })
         }
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            data: [
-              {
-                // 缺少一些属性
-                objURL: 'original.jpg'
-                // 没有thumbURL, middleURL, fromPageTitleEnc等
-              }
-            ]
-          })
+          json: () =>
+            Promise.resolve({
+              data: [
+                {
+                  // 缺少一些属性
+                  objURL: 'original.jpg'
+                  // 没有thumbURL, middleURL, fromPageTitleEnc等
+                }
+              ]
+            })
         })
       })
 
@@ -357,20 +372,22 @@ describe('BaiduImageService', () => {
       // 第一次调用成功
       global.fetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'expired_token',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'expired_token',
+            expires_in: 2592000
+          })
       })
 
       // 第二次搜索失败（token过期）
       global.fetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: () => Promise.resolve({
-          error_code: 401,
-          error_msg: 'Access token expired'
-        })
+        json: () =>
+          Promise.resolve({
+            error_code: 401,
+            error_msg: 'Access token expired'
+          })
       })
 
       const result = await service.searchImages('expired_token_test', 1)
@@ -380,12 +397,19 @@ describe('BaiduImageService', () => {
     })
 
     it('应该处理网络超时', async () => {
-      global.fetch.mockImplementation(() =>
-        new Promise((resolve) => setTimeout(() => resolve({
-          ok: false,
-          status: 408,
-          statusText: 'Request Timeout'
-        }), 100))
+      global.fetch.mockImplementation(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: false,
+                  status: 408,
+                  statusText: 'Request Timeout'
+                }),
+              100
+            )
+          )
       )
 
       const result = await service.searchImages('timeout', 1)
@@ -396,14 +420,15 @@ describe('BaiduImageService', () => {
     })
 
     it('应该处理JSON解析错误', async () => {
-      global.fetch.mockImplementation((url) => {
+      global.fetch.mockImplementation(url => {
         if (url.includes('oauth')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({
-              access_token: 'mock_token',
-              expires_in: 2592000
-            })
+            json: () =>
+              Promise.resolve({
+                access_token: 'mock_token',
+                expires_in: 2592000
+              })
           })
         }
         return Promise.resolve({
@@ -423,10 +448,11 @@ describe('BaiduImageService', () => {
     it('应该支持并发搜索', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'concurrent_token',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'concurrent_token',
+            expires_in: 2592000
+          })
       })
 
       const promises = [
@@ -446,9 +472,9 @@ describe('BaiduImageService', () => {
 
     it('应该在高负载下保持稳定', async () => {
       // 模拟高负载场景
-      const promises = Array(10).fill().map((_, i) =>
-        service.searchImages(`load_test_${i}`, 1)
-      )
+      const promises = Array(10)
+        .fill()
+        .map((_, i) => service.searchImages(`load_test_${i}`, 1))
 
       const results = await Promise.all(promises)
 
@@ -538,24 +564,28 @@ describe('BaiduImageService', () => {
 
 // 辅助函数
 function mockNormalResponse() {
-  global.fetch.mockImplementation((url) => {
+  global.fetch.mockImplementation(url => {
     if (url.includes('oauth')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({
-          access_token: 'normal_token',
-          expires_in: 2592000
-        })
+        json: () =>
+          Promise.resolve({
+            access_token: 'normal_token',
+            expires_in: 2592000
+          })
       })
     }
     return Promise.resolve({
       ok: true,
-      json: () => Promise.resolve({
-        data: [{
-          objURL: 'https://example.com/image.jpg',
-          fromPageTitleEnc: '正常图片'
-        }]
-      })
+      json: () =>
+        Promise.resolve({
+          data: [
+            {
+              objURL: 'https://example.com/image.jpg',
+              fromPageTitleEnc: '正常图片'
+            }
+          ]
+        })
     })
   })
 }

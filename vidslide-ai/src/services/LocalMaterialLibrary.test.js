@@ -255,7 +255,7 @@ describe('LocalMaterialLibrary', () => {
         expect(materials.length).toBeGreaterThan(0)
         // 检查是否按评分排序
         for (let i = 1; i < materials.length; i++) {
-          expect(materials[i-1][1]).toBeGreaterThanOrEqual(materials[i][1])
+          expect(materials[i - 1][1]).toBeGreaterThanOrEqual(materials[i][1])
         }
       })
     })
@@ -428,9 +428,9 @@ describe('LocalMaterialLibrary', () => {
     })
 
     it('应该支持高并发搜索', async () => {
-      const promises = Array(10).fill().map((_, i) =>
-        library.searchMaterials(`并发测试${i}`)
-      )
+      const promises = Array(10)
+        .fill()
+        .map((_, i) => library.searchMaterials(`并发测试${i}`))
 
       const startTime = Date.now()
       const results = await Promise.all(promises)
@@ -453,7 +453,7 @@ describe('LocalMaterialLibrary', () => {
     it('应该处理数据库操作失败', async () => {
       global.indexedDB.open.mockReturnValue({
         onsuccess: null,
-        onerror: vi.fn((e) => e.target.error = new Error('DB Error')),
+        onerror: vi.fn(e => (e.target.error = new Error('DB Error'))),
         result: null
       })
 
@@ -545,7 +545,12 @@ describe('LocalMaterialLibrary', () => {
     it('应该支持复杂的查询场景', async () => {
       // 添加多样化的测试数据
       const testData = [
-        { id: 'complex_1', title: '自然风景', category: 'background', tags: ['nature', 'landscape'] },
+        {
+          id: 'complex_1',
+          title: '自然风景',
+          category: 'background',
+          tags: ['nature', 'landscape']
+        },
         { id: 'complex_2', title: '城市夜景', category: 'background', tags: ['city', 'night'] },
         { id: 'complex_3', title: '科技图标', category: 'element', tags: ['tech', 'icon'] },
         { id: 'complex_4', title: '商务图表', category: 'element', tags: ['business', 'chart'] }

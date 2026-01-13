@@ -18,13 +18,7 @@ import {
   TEMPLATE_PRIORITY
 } from './TemplateDefinitions.js'
 
-export {
-  TEMPLATE_TYPES,
-  TEMPLATE_CONFIGS,
-  TEMPLATE_TRIGGERS,
-  DEFAULT_TEMPLATE,
-  TEMPLATE_PRIORITY
-}
+export { TEMPLATE_TYPES, TEMPLATE_CONFIGS, TEMPLATE_TRIGGERS, DEFAULT_TEMPLATE, TEMPLATE_PRIORITY }
 
 // 类型定义（用于TypeScript支持）
 export const TemplateEngineTypes = {

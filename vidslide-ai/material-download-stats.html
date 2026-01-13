@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI 素材下载统计</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        .keyword-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .keyword-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .keyword-item:last-child {
+            border-bottom: none;
+        }
+        .keyword-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .keyword-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .source-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .source-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 VidSlide AI 素材下载统计</h1>
+
+        <div id="status" class="status">
+            <p>点击"开始统计"获取准确的素材下载数据</p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button id="analyzeBtn" class="btn">开始统计</button>
+            <button id="refreshBtn" class="btn" disabled>刷新数据</button>
+        </div>
+
+        <div class="stats-grid" id="statsGrid" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-label">总素材数量</div>
+                <div class="stat-number" id="totalMaterials">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">外部素材</div>
+                <div class="stat-number" id="externalMaterials">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">本地素材</div>
+                <div class="stat-number" id="localMaterials">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">下载完成率</div>
+                <div class="stat-number" id="completionRate">0%</div>
+            </div>
+        </div>
+
+        <div id="progressSection" style="display: none;">
+            <h3>📊 下载进度</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <p id="progressText">正在分析素材库...</p>
+        </div>
+
+        <div id="sourceBreakdown" style="display: none;">
+            <h3>🔍 按来源分布</h3>
+            <div class="source-breakdown" id="sourceGrid"></div>
+        </div>
+
+        <div id="keywordSection" style="display: none;">
+            <h3>✅ 已下载关键词统计</h3>
+            <div class="keyword-list" id="keywordList"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import LocalMaterialLibrary from './src/services/LocalMaterialLibrary.js'
+
+        class MaterialStatsAnalyzer {
+            constructor() {
+                this.library = null
+                this.stats = {
+                    totalMaterials: 0,
+                    externalMaterials: 0,
+                    localMaterials: 0,
+                    bySource: {},
+                    byCategory: {},
+                    downloadedKeywords: [],
+                    expectedTotalDownloads: 0
+                }
+            }
+
+            async initialize() {
+                try {
+                    this.updateStatus('正在初始化素材库...', 'warning')
+                    this.library = LocalMaterialLibrary
+                    await this.library.initialize()
+                    this.updateStatus('素材库初始化完成', 'success')
+                    return true
+                } catch (error) {
+                    this.updateStatus(`初始化失败: ${error.message}`, 'error')
+                    return false
+                }
+            }
+
+            async analyzeMaterials() {
+                try {
+                    this.updateProgress('正在分析素材库统计...', 10)
+
+                    // 获取基础统计
+                    const libraryStats = await this.library.getStatistics()
+                    console.log('基础统计:', libraryStats)
+
+                    // 处理异步统计结果
+                    if (libraryStats && typeof libraryStats.then === 'function') {
+                        // 如果返回的是Promise，等待它
+                        const actualStats = await libraryStats
+                        console.log('实际统计:', actualStats)
+                        Object.assign(libraryStats, actualStats)
+                    }
+
+                    // 从统计信息中提取数据
+                    this.stats.totalMaterials = libraryStats.totalMaterials || 0
+                    this.stats.externalMaterials = libraryStats.cachedMaterials || 0
+                    this.stats.localMaterials = (libraryStats.totalMaterials || 0) - (libraryStats.cachedMaterials || 0)
+
+                    this.updateProgress('分析素材来源分布...', 40)
+
+                    // 使用多种查询来统计不同关键词的素材
+                    const testQueries = [
+                        '团队合作', '商务会议', '公司发展', '市场分析', '战略规划',
+                        '知识学习', '技能培训', '在线教育', '教学互动', '课程设计',
+                        '人工智能', '大数据', '云计算', '物联网', '区块链',
+                        '健康生活', '家庭和谐', '品质生活', '休闲娱乐', '运动健身'
+                    ]
+
+                    const downloadedKeywords = []
+                    let totalExternalMaterials = 0
+
+                    this.updateProgress('统计关键词下载情况...', 70)
+
+                    // 统计每个关键词的下载情况
+                    for (const keyword of testQueries) {
+                        try {
+                            const searchResults = this.library.searchMaterials(keyword, { limit: 50 })
+                            // searchMaterials返回对象，包含local、cached、total属性
+                            const externalCount = searchResults.cached ? searchResults.cached.length : 0
+                            const totalCount = searchResults.total || 0
+
+                            if (externalCount > 0) {
+                                downloadedKeywords.push({
+                                    keyword,
+                                    externalMaterials: externalCount,
+                                    totalMaterials: totalCount
+                                })
+                                totalExternalMaterials += externalCount
+                            }
+                        } catch (error) {
+                            console.warn(`搜索"${keyword}"失败:`, error.message)
+                        }
+                    }
+
+                    this.stats.downloadedKeywords = downloadedKeywords
+                    this.stats.expectedTotalDownloads = totalExternalMaterials
+
+                    // 按来源统计 (基于缓存统计)
+                    this.stats.bySource = {
+                        'local': this.stats.localMaterials,
+                        'baidu': libraryStats.cachedMaterials || 0
+                    }
+
+                    this.updateProgress('分析关键词下载情况...', 70)
+
+                    // 分析下载进度
+                    await this.analyzeDownloadProgress()
+
+                    this.updateProgress('生成统计报告...', 100)
+
+                    this.displayResults()
+                    this.updateStatus('统计分析完成！', 'success')
+
+                } catch (error) {
+                    console.error('分析失败:', error)
+                    this.updateStatus(`分析失败: ${error.message}`, 'error')
+                }
+            }
+
+            async analyzeDownloadProgress() {
+                const popularKeywords = [
+                    '团队合作', '商务会议', '公司发展', '市场分析', '战略规划',
+                    '知识学习', '技能培训', '在线教育', '教学互动', '课程设计',
+                    '人工智能', '大数据', '云计算', '物联网', '区块链',
+                    '健康生活', '家庭和谐', '品质生活', '休闲娱乐', '运动健身',
+                    '成功', '目标', '挑战', '机遇', '改变'
+                ]
+
+                const downloadedKeywords = []
+
+                for (const keyword of popularKeywords) {
+                    try {
+                        const searchResults = this.library.searchMaterials(keyword, { limit: 100 })
+                        // searchMaterials返回对象，包含local、cached、total属性
+                        const externalCount = searchResults.cached ? searchResults.cached.length : 0
+                        const totalCount = searchResults.total || 0
+
+                        if (externalCount > 0) {
+                            downloadedKeywords.push({
+                                keyword,
+                                externalMaterials: externalCount,
+                                totalMaterials: totalCount
+                            })
+                        }
+                    } catch (error) {
+                        console.warn(`分析关键词"${keyword}"失败:`, error.message)
+                    }
+                }
+
+                this.stats.downloadedKeywords = downloadedKeywords
+                this.stats.expectedTotalDownloads = downloadedKeywords.reduce((sum, item) => sum + item.externalMaterials, 0)
+            }
+
+            displayResults() {
+                // 显示统计卡片
+                document.getElementById('statsGrid').style.display = 'grid'
+                document.getElementById('totalMaterials').textContent = this.stats.totalMaterials
+                document.getElementById('externalMaterials').textContent = this.stats.externalMaterials
+                document.getElementById('localMaterials').textContent = this.stats.localMaterials
+
+                const completionRate = this.stats.expectedTotalDownloads > 0 ?
+                    ((this.stats.externalMaterials / this.stats.expectedTotalDownloads) * 100).toFixed(1) + '%' : 'N/A'
+                document.getElementById('completionRate').textContent = completionRate
+
+                // 显示来源分布
+                this.displaySourceBreakdown()
+
+                // 显示关键词统计
+                this.displayKeywordStats()
+
+                // 隐藏进度条
+                document.getElementById('progressSection').style.display = 'none'
+            }
+
+            displaySourceBreakdown() {
+                document.getElementById('sourceBreakdown').style.display = 'block'
+                const sourceGrid = document.getElementById('sourceGrid')
+                sourceGrid.innerHTML = ''
+
+                Object.entries(this.stats.bySource).forEach(([source, count]) => {
+                    const item = document.createElement('div')
+                    item.className = 'source-item'
+                    item.innerHTML = `
+                        <div style="font-weight: bold; font-size: 1.2em;">${source}</div>
+                        <div style="font-size: 1.5em; color: #667eea; margin: 5px 0;">${count}</div>
+                        <div>张素材</div>
+                    `
+                    sourceGrid.appendChild(item)
+                })
+            }
+
+            displayKeywordStats() {
+                if (this.stats.downloadedKeywords.length === 0) {
+                    return
+                }
+
+                document.getElementById('keywordSection').style.display = 'block'
+                const keywordList = document.getElementById('keywordList')
+                keywordList.innerHTML = ''
+
+                this.stats.downloadedKeywords.forEach(item => {
+                    const keywordItem = document.createElement('div')
+                    keywordItem.className = 'keyword-item'
+                    keywordItem.innerHTML = `
+                        <span class="keyword-name">"${item.keyword}"</span>
+                        <span class="keyword-count">${item.externalMaterials} 张外部素材</span>
+                    `
+                    keywordList.appendChild(keywordItem)
+                })
+            }
+
+            updateStatus(message, type = 'info') {
+                const statusEl = document.getElementById('status')
+                statusEl.textContent = message
+                statusEl.className = `status ${type}`
+            }
+
+            updateProgress(message, percentage) {
+                document.getElementById('progressSection').style.display = 'block'
+                document.getElementById('progressText').textContent = message
+                document.getElementById('progressFill').style.width = `${percentage}%`
+            }
+
+            async runAnalysis() {
+                const analyzeBtn = document.getElementById('analyzeBtn')
+                const refreshBtn = document.getElementById('refreshBtn')
+
+                analyzeBtn.disabled = true
+                analyzeBtn.textContent = '分析中...'
+
+                try {
+                    const initialized = await this.initialize()
+                    if (initialized) {
+                        await this.analyzeMaterials()
+                    }
+                } finally {
+                    analyzeBtn.disabled = false
+                    analyzeBtn.textContent = '开始统计'
+                    refreshBtn.disabled = false
+                }
+            }
+        }
+
+        // 初始化分析器
+        const analyzer = new MaterialStatsAnalyzer()
+
+        // 绑定按钮事件
+        document.getElementById('analyzeBtn').addEventListener('click', () => {
+            analyzer.runAnalysis()
+        })
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            analyzer.runAnalysis()
+        })
+
+        // 页面加载时的提示
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎯 VidSlide AI 素材下载统计工具已就绪')
+            console.log('点击"开始统计"按钮获取准确的素材下载数据')
+        })
+    </script>
+</body>
+</html>

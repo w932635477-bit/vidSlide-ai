@@ -4,7 +4,7 @@
 
 ### **API密钥配置** ✅
 ```
-AppID: 7396711
+AppID: 121803874
 API Key: LRmz9hG2wXyjHSiI9xJBUGEH
 Secret Key: MWS1oFHwjRMPALu83ZggXROg6fmkodUP
 ```

@@ -4,6 +4,7 @@
  */
 
 import { getTranslationService } from './translationService.js'
+import BaiduImageService from '../services/BaiduImageService.js'
 
 /**
  * 外部API集成管理器
@@ -16,7 +17,15 @@ export class ExternalAPI {
    * 初始化支持的API配置和缓存系统
    */
   constructor() {
+    this.baiduService = new BaiduImageService()
+
     this.apis = {
+      baidu: {
+        name: '百度图片',
+        baseUrl: 'https://image.baidu.com',
+        accessKey: 'configured', // 百度API已配置
+        enabled: true
+      },
       unsplash: {
         baseUrl: 'https://api.unsplash.com',
         accessKey: null, // 需要用户配置
@@ -218,6 +227,9 @@ export class ExternalAPI {
      */
 
     switch (apiName) {
+      case 'baidu':
+        results = await this.searchBaidu(query, options)
+        break
       case 'unsplash':
         results = await this.searchUnsplash(query, options)
         break
@@ -235,6 +247,49 @@ export class ExternalAPI {
     this.setCache(cacheKey, results)
 
     return results
+  }
+
+  /**
+   * 搜索百度图片素材
+   * @param {string} query - 搜索关键词
+   * @param {Object} options - 搜索选项
+   * @returns {Promise<Array>} 百度图片素材列表
+   */
+  /**
+   * searchBaidu 方法
+   * VidSlide AI 功能实现
+   */
+  async searchBaidu(query, options = {}) {
+    try {
+      const results = await this.baiduService.searchImages(query, options)
+
+      if (results.success && results.images) {
+        // 转换百度API结果格式为ExternalAPI标准格式
+        return results.images.map(img => ({
+          id: img.id,
+          name: img.title || img.tags?.join(' ') || query,
+          type: 'photo',
+          source: 'baidu',
+          url: img.thumbnail,
+          originalUrl: img.downloadUrl,
+          author: img.author || '百度图片',
+          copyrightInfo: {
+            status: 'free',
+            isSafe: true,
+            license: '百度图片'
+          },
+          width: img.width,
+          height: img.height,
+          tags: img.tags || [query],
+          createdAt: new Date().toISOString()
+        }))
+      }
+
+      return []
+    } catch (error) {
+      console.error('百度搜索失败:', error)
+      return []
+    }
   }
 
   /**

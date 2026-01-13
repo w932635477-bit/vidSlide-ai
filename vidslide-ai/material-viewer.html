@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI 本地素材查看器</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: #718096;
+        }
+
+        .btn.secondary:hover {
+            background: #4a5568;
+        }
+
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .material-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .material-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .material-image {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 1.2em;
+            overflow: hidden;
+        }
+
+        .material-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .material-image img:hover {
+            transform: scale(1.05);
+        }
+
+        .image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            font-size: 2em;
+        }
+
+        .material-info {
+            padding: 15px;
+        }
+
+        .material-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2d3748;
+        }
+
+        .material-meta {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .source-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .source-baidu { background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%); color: #1890ff; border: 1px solid #91d5ff; }
+        .source-pexels { background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%); color: #52c41a; border: 1px solid #b7eb8f; }
+        .source-unsplash { background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%); color: #fa8c16; border: 1px solid #ffd591; }
+        .source-pixabay { background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%); color: #722ed1; border: 1px solid #d3adf7; }
+        .source-demo { background: linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%); color: #f5222d; border: 1px solid #ff7875; }
+        .source-local { background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%); color: #389e0d; border: 1px solid #73d13d; }
+        .source-unknown { background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%); color: #8c8c8c; border: 1px solid #d9d9d9; }
+
+        .material-id {
+            font-family: monospace;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75em;
+        }
+
+        .material-meta.description {
+            margin-top: 5px;
+            font-style: italic;
+            color: #4a5568;
+        }
+
+        .material-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .category-tag.business {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .category-tag.education {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .category-tag.technology {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+
+        .category-tag.lifestyle {
+            background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+        }
+
+        .category-tag.common {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        .more-tag {
+            background: #cbd5e0;
+            color: #2d3748;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #718096;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar label {
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .filter-bar select, .filter-bar input {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 VidSlide AI 本地素材查看器</h1>
+            <p>查看和浏览本地缓存的素材资源</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>预置素材</h3>
+                <div class="number" id="presetCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>缓存素材</h3>
+                <div class="number" id="cachedCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>缓存大小</h3>
+                <div class="number" id="cacheSize">0 B</div>
+            </div>
+            <div class="stat-card">
+                <h3>命中率</h3>
+                <div class="number" id="hitRate">0%</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-buttons">
+                <button class="btn" onclick="loadMaterials()">🔄 刷新素材列表</button>
+                <button class="btn secondary" onclick="clearCache()">🗑️ 清理缓存</button>
+                <button class="btn secondary" onclick="exportStats()">📊 导出统计</button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <label>搜索:</label>
+            <input type="text" id="searchInput" placeholder="输入关键词搜索..." onkeyup="filterMaterials()">
+
+            <label>分类:</label>
+            <select id="categoryFilter" onchange="filterMaterials()">
+                <option value="">全部</option>
+                <option value="business">商务</option>
+                <option value="education">教育</option>
+                <option value="technology">科技</option>
+                <option value="lifestyle">生活</option>
+            </select>
+
+            <label>来源:</label>
+            <select id="sourceFilter" onchange="filterMaterials()">
+                <option value="">全部</option>
+                <option value="baidu">百度图片</option>
+                <option value="demo">演示素材</option>
+            </select>
+
+            <span id="resultCount"></span>
+        </div>
+
+        <div id="materialsContainer">
+            <div class="loading">正在加载素材列表...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import library from './src/services/LocalMaterialLibrary.js'
+
+        let allMaterials = []
+        let filteredMaterials = []
+
+        // 初始化
+        async function init() {
+            console.log('🚀 启动VidSlide AI素材查看器...')
+
+            try {
+                // 检查IndexedDB支持
+                if (!window.indexedDB) {
+                    throw new Error('您的浏览器不支持IndexedDB，无法查看本地素材')
+                }
+
+                // 检查是否为无痕模式
+                const isIncognito = !(window.indexedDB && window.localStorage)
+                if (isIncognito) {
+                    console.warn('⚠️ 检测到隐私浏览模式，数据可能无法持久保存')
+                    showPrivacyModeWarning()
+                }
+
+                await library.initialize()
+                console.log('✅ 素材库初始化成功')
+
+                updateStats()
+                await loadMaterials()
+
+            } catch (error) {
+                console.error('❌ 初始化失败:', error)
+                document.getElementById('materialsContainer').innerHTML = `
+                    <div class="error">
+                        <h3>❌ 初始化失败</h3>
+                        <p><strong>错误信息:</strong> ${error.message}</p>
+                        <p><strong>可能的原因:</strong></p>
+                        <ul style="text-align: left; margin: 10px 0;">
+                            <li>• 浏览器不支持IndexedDB</li>
+                            <li>• 隐私模式阻止数据存储</li>
+                            <li>• 浏览器存储空间不足</li>
+                            <li>• 素材库服务异常</li>
+                        </ul>
+                        <p><strong>解决方案:</strong></p>
+                        <ul style="text-align: left; margin: 10px 0;">
+                            <li>1. 尝试普通浏览器模式（非无痕/隐私模式）</li>
+                            <li>2. 清除浏览器缓存和存储数据</li>
+                            <li>3. <a href="local-material-library-initializer.html">重新初始化素材库</a></li>
+                        </ul>
+                        <button class="btn" onclick="init()" style="margin-top: 15px;">🔄 重试初始化</button>
+                    </div>
+                `
+            }
+        }
+
+        // 显示隐私模式警告
+        function showPrivacyModeWarning() {
+            const warning = document.createElement('div')
+            warning.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #fff3cd;
+                color: #856404;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                max-width: 300px;
+                font-size: 14px;
+                border-left: 4px solid #ffc107;
+            `
+            warning.innerHTML = `
+                <strong>⚠️ 隐私模式检测</strong><br>
+                您正在使用隐私浏览模式。<br>
+                素材数据可能无法持久保存。<br>
+                <button onclick="this.parentElement.remove()" style="margin-top: 8px; padding: 4px 8px; background: #856404; color: white; border: none; border-radius: 4px; cursor: pointer;">知道了</button>
+            `
+            document.body.appendChild(warning)
+
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                if (warning.parentElement) {
+                    warning.remove()
+                }
+            }, 8000)
+        }
+
+        // 更新统计信息
+        async function updateStats() {
+            try {
+                const stats = await library.getStatistics()
+                document.getElementById('presetCount').textContent = stats.presetMaterials || 0
+                document.getElementById('cachedCount').textContent = stats.cachedMaterials || 0
+                document.getElementById('cacheSize').textContent = library.formatBytes(stats.cacheSize) || '0 B'
+                document.getElementById('hitRate').textContent = stats.cacheHitRate || '0%'
+            } catch (error) {
+                console.error('获取统计失败:', error)
+            }
+        }
+
+        // 加载素材列表
+        window.loadMaterials = async function() {
+            const container = document.getElementById('materialsContainer')
+            container.innerHTML = '<div class="loading">正在加载素材列表...</div>'
+
+            try {
+                console.log('🔄 开始加载素材列表...')
+                allMaterials = []
+
+                // 首先尝试获取所有可能的缓存素材
+                // 使用更全面的关键词列表
+                const keywords = [
+                    // 商务类
+                    '团队合作', '商务会议', '公司发展', '市场分析', '战略规划',
+                    '企业文化', '领导力', '创新科技', '客户服务', '绩效考核',
+                    '项目管理', '数据分析', '商业智能', '数字化转型',
+                    // 教育类
+                    '知识学习', '技能培训', '在线教育', '教学互动', '课程设计',
+                    '学生成长', '教师发展', '教育科技', '学习方法', '考试系统',
+                    // 科技类
+                    '人工智能', '大数据', '云计算', '物联网', '区块链',
+                    '移动应用', '用户体验', '产品设计', '技术创新', '研发团队',
+                    // 生活类
+                    '健康生活', '家庭和谐', '品质生活', '休闲娱乐', '运动健身',
+                    // 通用类
+                    '成功', '目标', '挑战', '机遇', '改变'
+                ]
+
+                console.log(`🔍 将搜索 ${keywords.length} 个关键词...`)
+
+                let searchCount = 0
+                const maxConcurrent = 3 // 限制并发数量
+                const batches = []
+
+                // 分批处理关键词
+                for (let i = 0; i < keywords.length; i += maxConcurrent) {
+                    batches.push(keywords.slice(i, i + maxConcurrent))
+                }
+
+                for (const batch of batches) {
+                    const promises = batch.map(async (keyword) => {
+                        try {
+                            console.log(`🔍 搜索关键词: "${keyword}"`)
+                            const results = await library.searchMaterials(keyword)
+                            searchCount++
+
+                            if (results && results.cached && results.cached.length > 0) {
+                                console.log(`✅ "${keyword}" 找到 ${results.cached.length} 个缓存素材`)
+                                // 避免重复添加
+                                for (const material of results.cached) {
+                                    if (material && material.id && !allMaterials.find(m => m.id === material.id)) {
+                                        allMaterials.push(material)
+                                    }
+                                }
+                                return results.cached.length
+                            } else {
+                                console.log(`⚠️ "${keyword}" 无缓存素材`)
+                                return 0
+                            }
+                        } catch (error) {
+                            console.warn(`❌ 搜索"${keyword}"失败:`, error.message)
+                            searchCount++
+                            return 0
+                        }
+                    })
+
+                    await Promise.all(promises)
+
+                    // 更新进度
+                    const progress = (searchCount / keywords.length) * 100
+                    console.log(`📊 搜索进度: ${Math.round(progress)}% (${searchCount}/${keywords.length})`)
+                }
+
+                console.log(`🎯 素材加载完成，共找到 ${allMaterials.length} 个素材`)
+
+                // 如果没有找到缓存素材，提供重新初始化的选项
+                if (allMaterials.length === 0) {
+                    container.innerHTML = `
+                        <div class="error">
+                            <h3>📭 暂无缓存素材</h3>
+                            <p>可能是因为：</p>
+                            <ul style="text-align: left; margin: 10px 0;">
+                                <li>• 素材库还未初始化</li>
+                                <li>• 浏览器隐私设置阻止了数据存储</li>
+                                <li>• 缓存数据已被清理</li>
+                            </ul>
+                            <p><strong>解决方案：</strong></p>
+                            <p>1. <a href="local-material-library-initializer.html" style="color: #007bff;">运行素材库初始化</a></p>
+                            <p>2. 尝试普通浏览器模式（非无痕模式）</p>
+                            <p>3. 检查浏览器是否允许本地存储</p>
+                            <button class="btn" onclick="loadMaterials()" style="margin-top: 10px;">🔄 重新加载</button>
+                        </div>
+                    `
+                    return
+                }
+
+                // 验证素材数据的完整性
+                const validMaterials = allMaterials.filter(material =>
+                    material && material.id && (material.dataUrl || material.thumbnailUrl)
+                )
+
+                console.log(`✅ 有效素材: ${validMaterials.length}/${allMaterials.length}`)
+
+                allMaterials = validMaterials
+                filteredMaterials = [...allMaterials]
+                renderMaterials()
+
+            } catch (error) {
+                console.error('❌ 加载素材失败:', error)
+                container.innerHTML = `
+                    <div class="error">
+                        <h3>❌ 加载素材失败</h3>
+                        <p>错误信息: ${error.message}</p>
+                        <p>可能的原因：</p>
+                        <ul style="text-align: left; margin: 10px 0;">
+                            <li>• IndexedDB访问被阻止</li>
+                            <li>• 浏览器隐私设置限制</li>
+                            <li>• 素材库服务未正确初始化</li>
+                        </ul>
+                        <button class="btn" onclick="loadMaterials()" style="margin-top: 10px;">🔄 重试</button>
+                        <button class="btn secondary" onclick="clearAllData()" style="margin-top: 10px; margin-left: 10px;">🗑️ 清除所有数据</button>
+                    </div>
+                `
+            }
+        }
+
+        // 渲染素材列表
+        function renderMaterials() {
+            const container = document.getElementById('materialsContainer')
+
+            if (filteredMaterials.length === 0) {
+                container.innerHTML = `
+                    <div class="loading">
+                        <h3>🔍 没有找到匹配的素材</h3>
+                        <p>尝试调整搜索条件或清除过滤器</p>
+                        <button class="btn" onclick="clearFilters()" style="margin-top: 10px;">清除过滤器</button>
+                    </div>
+                `
+                return
+            }
+
+            console.log(`🎨 渲染 ${filteredMaterials.length} 个素材`)
+
+            const html = `
+                <div class="materials-grid">
+                    ${filteredMaterials.map((material, index) => `
+                        <div class="material-card" data-index="${index}">
+                            <div class="material-image">
+                                ${material.dataUrl ?
+                                    `<img data-src="${material.dataUrl}"
+                                          alt="${material.title || '素材图片'}"
+                                          onload="handleImageLoad(this)"
+                                          onerror="handleImageError(this)"
+                                          style="display: none;">` :
+                                    material.thumbnailUrl ?
+                                    `<img data-src="${material.thumbnailUrl}"
+                                          alt="${material.title || '缩略图'}"
+                                          onload="handleImageLoad(this)"
+                                          onerror="handleImageError(this)"
+                                          style="display: none;">` :
+                                    ''
+                                }
+                                <div class="image-placeholder">
+                                    ${getCategoryIcon(material.category)}
+                                    <br><small>${material.title || '加载中...'}</small>
+                                </div>
+                            </div>
+                            <div class="material-info">
+                                <div class="material-title" title="${material.title || '无标题'}">
+                                    ${material.title || '无标题'}
+                                </div>
+                                <div class="material-meta">
+                                    <span class="source-badge source-${material.source || 'unknown'}">
+                                        ${getSourceDisplayName(material.source)}
+                                    </span>
+                                    <span class="material-id">ID: ${material.id ? material.id.slice(-6) : 'N/A'}</span>
+                                </div>
+                                ${material.description ?
+                                    `<div class="material-meta description" title="${material.description}">
+                                        ${material.description.length > 50 ? material.description.substring(0, 50) + '...' : material.description}
+                                    </div>` : ''
+                                }
+                                <div class="material-tags">
+                                    ${material.category ? `<span class="tag category-tag ${material.category}">${getCategoryDisplayName(material.category)}</span>` : ''}
+                                    ${(material.tags || []).slice(0, 2).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                    ${(material.tags || []).length > 2 ? `<span class="tag more-tag">+${(material.tags || []).length - 2}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `
+
+            container.innerHTML = html
+            updateResultCount()
+
+            // 立即加载可见的图片
+            setTimeout(() => {
+                loadLazyImages()
+            }, 100)
+        }
+
+        // 获取来源显示名称
+        function getSourceDisplayName(source) {
+            const sourceMap = {
+                'baidu': '百度图片',
+                'pexels': 'Pexels',
+                'unsplash': 'Unsplash',
+                'pixabay': 'Pixabay',
+                'demo': '演示素材',
+                'local': '本地素材'
+            }
+            return sourceMap[source] || source || '未知来源'
+        }
+
+        // 获取分类显示名称
+        function getCategoryDisplayName(category) {
+            const categoryMap = {
+                'business': '商务',
+                'education': '教育',
+                'technology': '科技',
+                'lifestyle': '生活',
+                'common': '通用'
+            }
+            return categoryMap[category] || category || '未分类'
+        }
+
+        // 获取分类图标
+        function getCategoryIcon(category) {
+            const iconMap = {
+                'business': '💼',
+                'education': '📚',
+                'technology': '🤖',
+                'lifestyle': '🏠',
+                'common': '⭐',
+                'external': '🌐'
+            }
+            return iconMap[category] || '📷'
+        }
+
+        // 处理图片加载成功
+        function handleImageLoad(img) {
+            img.style.display = 'block'
+            const placeholder = img.parentElement.querySelector('.image-placeholder')
+            if (placeholder) {
+                placeholder.style.display = 'none'
+            }
+        }
+
+        // 处理图片加载失败
+        function handleImageError(img) {
+            img.style.display = 'none'
+            const placeholder = img.parentElement.querySelector('.image-placeholder')
+            if (placeholder) {
+                placeholder.innerHTML = '📷<br><small>加载失败</small>'
+                placeholder.style.display = 'flex'
+            }
+        }
+
+        // 检查元素是否在视口内
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect()
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            )
+        }
+
+        // 清除过滤器
+        window.clearFilters = function() {
+            document.getElementById('searchInput').value = ''
+            document.getElementById('categoryFilter').value = ''
+            document.getElementById('sourceFilter').value = ''
+            filteredMaterials = [...allMaterials]
+            renderMaterials()
+        }
+
+        // 过滤素材
+        window.filterMaterials = function() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase()
+            const categoryFilter = document.getElementById('categoryFilter').value
+            const sourceFilter = document.getElementById('sourceFilter').value
+
+            filteredMaterials = allMaterials.filter(material => {
+                // 搜索过滤
+                const matchesSearch = !searchTerm ||
+                    (material.title && material.title.toLowerCase().includes(searchTerm)) ||
+                    (material.description && material.description.toLowerCase().includes(searchTerm)) ||
+                    (material.tags && material.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+
+                // 分类过滤
+                const matchesCategory = !categoryFilter || material.category === categoryFilter
+
+                // 来源过滤
+                const matchesSource = !sourceFilter || material.source === sourceFilter
+
+                return matchesSearch && matchesCategory && matchesSource
+            })
+
+            renderMaterials()
+        }
+
+        // 更新结果计数
+        function updateResultCount() {
+            const countEl = document.getElementById('resultCount')
+            countEl.textContent = `显示 ${filteredMaterials.length} / ${allMaterials.length} 个素材`
+        }
+
+        // 清理缓存
+        window.clearCache = async function() {
+            if (confirm('确定要清理所有缓存的素材吗？此操作不可恢复。')) {
+                try {
+                    await library.cleanupCache({ targetSize: 0, force: true })
+                    allMaterials = []
+                    filteredMaterials = []
+                    updateStats()
+                    loadMaterials()
+                    alert('✅ 缓存已清理')
+                } catch (error) {
+                    alert('❌ 清理失败: ' + error.message)
+                }
+            }
+        }
+
+        // 导出统计
+        window.exportStats = async function() {
+            try {
+                const stats = await library.getStatistics()
+                const data = {
+                    timestamp: new Date().toISOString(),
+                    stats: stats,
+                    totalMaterials: allMaterials.length,
+                    filteredMaterials: filteredMaterials.length,
+                    materials: allMaterials.map(m => ({
+                        id: m.id,
+                        title: m.title,
+                        category: m.category,
+                        source: m.source,
+                        tags: m.tags,
+                        hasImage: !!(m.dataUrl || m.thumbnailUrl)
+                    }))
+                }
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `vidslide-materials-${new Date().toISOString().slice(0, 10)}.json`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+
+                alert('✅ 统计数据已导出！')
+            } catch (error) {
+                alert('❌ 导出失败: ' + error.message)
+            }
+        }
+
+        // 清除所有数据
+        window.clearAllData = async function() {
+            if (confirm('⚠️ 确定要清除所有本地素材数据吗？\n\n这将删除：\n• 所有缓存的素材\n• 搜索索引\n• 使用统计\n\n此操作不可恢复！')) {
+                try {
+                    // 清理缓存
+                    await library.cleanupCache({ targetSize: 0, force: true })
+
+                    // 重置本地变量
+                    allMaterials = []
+                    filteredMaterials = []
+
+                    // 重新初始化库
+                    await library.initialize()
+
+                    // 更新UI
+                    updateStats()
+                    loadMaterials()
+
+                    alert('✅ 所有数据已清除，素材库已重新初始化')
+                } catch (error) {
+                    alert('❌ 清除失败: ' + error.message)
+                    console.error('清除数据失败:', error)
+                }
+            }
+        }
+
+        // 处理图片懒加载
+        let lazyLoadThrottle = false
+        window.addEventListener('scroll', () => {
+            if (!lazyLoadThrottle) {
+                lazyLoadThrottle = true
+                requestAnimationFrame(() => {
+                    loadLazyImages()
+                    lazyLoadThrottle = false
+                })
+            }
+        })
+
+        // 处理图片加载成功
+        window.handleImageLoad = function(img) {
+            img.style.display = 'block'
+            const placeholder = img.parentElement.querySelector('.image-placeholder')
+            if (placeholder) {
+                placeholder.style.display = 'none'
+            }
+            console.log('✅ 图片加载成功')
+        }
+
+        // 处理图片加载失败
+        window.handleImageError = function(img) {
+            console.warn('❌ 图片加载失败:', img.src)
+            img.style.display = 'none'
+            const placeholder = img.parentElement.querySelector('.image-placeholder')
+            if (placeholder) {
+                placeholder.innerHTML = '📷<br><small>加载失败</small>'
+                placeholder.style.display = 'flex'
+            }
+        }
+
+        function loadLazyImages() {
+            const images = document.querySelectorAll('img[data-src]')
+            images.forEach(img => {
+                if (isElementInViewport(img)) {
+                    img.src = img.getAttribute('data-src')
+                    img.removeAttribute('data-src')
+                }
+            })
+        }
+
+        // 页面加载完成后立即加载可见图片
+        window.addEventListener('load', () => {
+            loadLazyImages()
+        })
+
+        // 启动应用
+        init()
+    </script>
+</body>
+</html>

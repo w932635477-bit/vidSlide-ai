@@ -22,7 +22,7 @@ class FreeAPIService {
         usedThisMonth: 0,
         priority: 'medium',
         lastUsed: 0,
-        accessKey: '563492ad6f91700001000001d0e5c1d0b4c94e8b8b5c5b5c' // 示例key，需要替换为实际的
+        accessKey: 'J5I7XwR4QFUfDERCjGBdQw70EO28x543C54PZiTEOOugNQEOREvFnVC0' // 新的Pexels API Key
       },
       pixabay: {
         name: 'Pixabay',
@@ -45,23 +45,24 @@ class FreeAPIService {
       // }
     }
 
+    // 初始化使用量监控器和代理管理器
     this.usageMonitor = new UsageMonitor(this.apis)
-    this.proxyManager = new SmartProxyManager()
+    // 使用原生fetch，不需要proxy manager
 
-    // 每月重置使用量
-    this.scheduleMonthlyReset()
+    // 延迟到第一次使用时重置（避免Node.js环境问题）
+    // this.scheduleMonthlyReset()
   }
 
   /**
    * 搜索图片
    */
   async searchImages(query, _options = {}) {
-    const { limit = 10, orientation = 'landscape', imageType = 'photo' } = options
+    const { limit = 10, orientation = 'landscape', imageType = 'photo' } = _options
 
     console.log(`🔍 免费API搜索: "${query}", 限制: ${limit}`)
 
     // 选择最佳API
-    const selectedAPI = this.selectBestAPI(query, options)
+    const selectedAPI = this.selectBestAPI(query, _options)
 
     if (!selectedAPI) {
       console.warn('⚠️ 所有免费API都已达到月额度限制')
@@ -83,21 +84,34 @@ class FreeAPIService {
       } else {
         console.warn(`❌ ${selectedAPI.name}搜索失败:`, result.error)
         // 尝试备用API
-        return await this.tryFallbackAPI(query, selectedAPI.name, options)
+        return await this.tryFallbackAPI(query, selectedAPI.name, _options)
       }
     } catch (error) {
       console.error(`💥 ${selectedAPI.name}搜索异常:`, error)
       this.recordUsage(selectedAPI.name, true) // 记录失败
 
       // 尝试备用API
-      return await this.tryFallbackAPI(query, selectedAPI.name, options)
+      return await this.tryFallbackAPI(query, selectedAPI.name, _options)
     }
   }
 
   /**
    * 选择最佳API
    */
-  selectBestAPI(query, options) {
+  selectBestAPI(query, _options) {
+    const { platform } = _options
+
+    // 如果指定了平台，直接使用该平台
+    if (platform && this.apis[platform]) {
+      const requestedAPI = this.apis[platform]
+      if (requestedAPI.usedThisMonth < requestedAPI.monthlyLimit) {
+        return requestedAPI
+      } else {
+        console.warn(`⚠️ 请求的平台 ${platform} 已达到月额度限制`)
+        return null
+      }
+    }
+
     // 过滤未超限的API
     const availableAPIs = Object.values(this.apis).filter(
       api => api.usedThisMonth < api.monthlyLimit
@@ -110,7 +124,7 @@ class FreeAPIService {
     // 计算每个API的评分
     const scoredAPIs = availableAPIs.map(api => ({
       ...api,
-      score: this.calculateAPIScore(api, query, options)
+      score: this.calculateAPIScore(api, query, _options)
     }))
 
     // 按评分排序，选择最高分
@@ -223,7 +237,7 @@ class FreeAPIService {
     const url = `${this.apis.unsplash.baseUrl}/search/photos?${params}`
 
     try {
-      const response = await this.proxyManager.fetch(url, {
+      const response = await fetch(url, {
         headers: {
           Authorization: `Client-ID ${this.apis.unsplash.accessKey}`
         }
@@ -266,7 +280,7 @@ class FreeAPIService {
     const url = `${this.apis.pexels.baseUrl}/search?${params}`
 
     try {
-      const response = await this.proxyManager.fetch(url, {
+      const response = await fetch(url, {
         headers: {
           Authorization: this.apis.pexels.accessKey
         }
@@ -311,7 +325,7 @@ class FreeAPIService {
     const url = `${this.apis.pixabay.baseUrl}/?${params}`
 
     try {
-      const response = await this.proxyManager.fetch(url)
+      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`)
@@ -390,31 +404,39 @@ class FreeAPIService {
    * 保存使用统计
    */
   saveUsageStats() {
-    const stats = {}
-    Object.entries(this.apis).forEach(([key, api]) => {
-      stats[key] = {
-        usedThisMonth: api.usedThisMonth,
-        lastUsed: api.lastUsed
-      }
-    })
+    // 只在浏览器环境中保存到localStorage
+    if (typeof localStorage !== 'undefined') {
+      const stats = {}
+      Object.entries(this.apis).forEach(([key, api]) => {
+        stats[key] = {
+          usedThisMonth: api.usedThisMonth,
+          lastUsed: api.lastUsed
+        }
+      })
 
-    localStorage.setItem('freeAPIUsage', JSON.stringify(stats))
+      localStorage.setItem('freeAPIUsage', JSON.stringify(stats))
+    }
   }
 
   /**
    * 加载使用统计
    */
   loadUsageStats() {
-    try {
-      const stats = JSON.parse(localStorage.getItem('freeAPIUsage') || '{}')
-      Object.entries(stats).forEach(([key, data]) => {
-        if (this.apis[key]) {
-          this.apis[key].usedThisMonth = data.usedThisMonth || 0
-          this.apis[key].lastUsed = data.lastUsed || 0
-        }
-      })
-    } catch (error) {
-      console.warn('加载API使用统计失败:', error)
+    // 只在浏览器环境中从localStorage加载
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const stats = JSON.parse(localStorage.getItem('freeAPIUsage') || '{}')
+        Object.entries(stats).forEach(([key, data]) => {
+          if (this.apis[key]) {
+            this.apis[key].usedThisMonth = data.usedThisMonth || 0
+            this.apis[key].lastUsed = data.lastUsed || 0
+          }
+        })
+      } catch (error) {
+        console.warn('加载API使用统计失败:', error)
+      }
+    } else {
+      console.log('🔄 Node.js环境：跳过localStorage加载')
     }
   }
 
@@ -422,6 +444,12 @@ class FreeAPIService {
    * 每月重置使用量
    */
   scheduleMonthlyReset() {
+    // Node.js环境直接跳过
+    if (typeof localStorage === 'undefined') {
+      console.log('🔄 Node.js环境：跳过localStorage重置检查')
+      return
+    }
+
     // 检查是否需要重置 (每月1号)
     const now = new Date()
     const lastReset = localStorage.getItem('lastUsageReset')
@@ -559,5 +587,11 @@ class SmartProxyManager {
   }
 }
 
-// 导出单例实例
-export default new FreeAPIService()
+// 导出单例实例（延迟创建，避免Node.js环境问题）
+let instance = null
+export default (() => {
+  if (!instance) {
+    instance = new FreeAPIService()
+  }
+  return instance
+})()

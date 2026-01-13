@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直接素材下载器</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .progress { width: 100%; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #28a745; width: 0%; transition: width 0.3s; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f8f8; padding: 10px; height: 300px; overflow-y: auto; font-family: monospace; }
+        .stats { display: flex; gap: 20px; margin: 20px 0; }
+        .stat { text-align: center; }
+        .number { font-size: 2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🎯 直接素材下载器 (跳过百度API)</h1>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="number" id="downloaded">0</div>
+            <div>已下载</div>
+        </div>
+        <div class="stat">
+            <div class="number" id="target">800</div>
+            <div>目标数量</div>
+        </div>
+        <div class="stat">
+            <div class="number" id="keywords">0</div>
+            <div>处理关键词</div>
+        </div>
+    </div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <button onclick="startDownload()">🚀 开始下载</button>
+        <button onclick="stopDownload()">⏹️ 停止下载</button>
+        <button onclick="clearAll()">🗑️ 清空素材</button>
+        <button onclick="checkStatus()">🔍 检查状态</button>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <!-- 动态加载ES6模块 -->
+
+    <script>
+        let isRunning = false;
+        let downloadedCount = 0;
+        let processedKeywords = 0;
+        const targetCount = 800;
+
+        // 英文关键词列表
+        const englishKeywords = [
+            'business meeting', 'corporate presentation', 'marketing strategy', 'sales growth',
+            'brand identity', 'digital marketing', 'content marketing', 'social media',
+            'customer success', 'business analytics', 'market research', 'competitive analysis',
+            'online education', 'distance learning', 'e-learning platform', 'educational technology',
+            'student engagement', 'learning management', 'professional training', 'skill development'
+        ];
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        async function initialize() {
+            try {
+                log('🚀 初始化服务...');
+
+                // 动态导入所有服务
+                const [
+                    { default: LocalMaterialLibrary },
+                    { default: MaterialService },
+                    { default: FreeAPIService },
+                    { default: IntelligentDispatcher },
+                    { default: TranslationService },
+                    { default: BaiduImageService },
+                    { default: UnsplashAPI }
+                ] = await Promise.all([
+                    import('./src/services/LocalMaterialLibrary.js'),
+                    import('./src/services/MaterialService.js'),
+                    import('./src/services/FreeAPIService.js'),
+                    import('./src/services/IntelligentDispatcher.js'),
+                    import('./src/services/utils/IntelligentDispatcher/TranslationService.js'),
+                    import('./src/services/BaiduImageService.js'),
+                    import('./src/services/UnsplashAPI.js')
+                ]);
+
+                // 将服务保存到全局变量
+                window.LocalMaterialLibrary = LocalMaterialLibrary;
+                window.MaterialService = MaterialService;
+                window.FreeAPIService = FreeAPIService;
+                window.IntelligentDispatcher = IntelligentDispatcher;
+                window.TranslationService = TranslationService;
+                window.BaiduImageService = BaiduImageService;
+                window.UnsplashAPI = UnsplashAPI;
+
+                log('✅ 所有服务加载完成');
+
+                // 初始化本地素材库
+                if (LocalMaterialLibrary && typeof LocalMaterialLibrary.initialize === 'function') {
+                    await LocalMaterialLibrary.initialize();
+                    log('✅ 本地素材库初始化完成');
+                }
+
+                // 初始化素材服务
+                if (MaterialService && typeof MaterialService.initialize === 'function') {
+                    await MaterialService.initialize();
+                    log('✅ 素材服务初始化完成');
+                }
+
+                return true;
+            } catch (error) {
+                log('❌ 初始化失败: ' + error.message);
+                console.error('Initialization error:', error);
+                return false;
+            }
+        }
+
+        async function startDownload() {
+            if (isRunning) {
+                log('⚠️ 下载已在进行中');
+                return;
+            }
+
+            isRunning = true;
+            log('🎯 开始下载素材，目标: ' + targetCount + ' 张');
+
+            try {
+                const success = await initialize();
+                if (!success) return;
+
+                // 并发下载关键词
+                const concurrency = 3;
+                const batches = chunkArray(englishKeywords, concurrency);
+
+                for (const batch of batches) {
+                    if (!isRunning || downloadedCount >= targetCount) break;
+
+                    log(`📦 处理批次 (${batches.indexOf(batch) + 1}/${batches.length})`);
+
+                    const promises = batch.map(keyword => downloadKeyword(keyword));
+                    await Promise.allSettled(promises);
+
+                    updateUI();
+                    await delay(1000); // 避免请求过于频繁
+                }
+
+                log('🎉 下载完成！');
+                await checkStatus();
+
+            } catch (error) {
+                log('❌ 下载失败: ' + error.message);
+            } finally {
+                isRunning = false;
+            }
+        }
+
+        async function downloadKeyword(keyword) {
+            try {
+                log(`🔍 下载: "${keyword}"`);
+
+                // 直接调用免费API
+                const results = await searchFreeAPIs(keyword);
+                if (results && results.length > 0) {
+                    let cached = 0;
+                    for (const material of results) {
+                        try {
+                            await window.LocalMaterialLibrary.cacheMaterial(material);
+                            cached++;
+                        } catch (e) {
+                            // 去重或缓存失败，跳过
+                        }
+                    }
+
+                    if (cached > 0) {
+                        downloadedCount += cached;
+                        processedKeywords++;
+                        log(`💾 "${keyword}": 缓存了 ${cached} 张素材 (累计: ${downloadedCount})`);
+                    }
+                }
+
+            } catch (error) {
+                log(`⚠️ "${keyword}" 失败: ${error.message}`);
+            }
+        }
+
+        async function searchFreeAPIs(keyword) {
+            const platforms = ['unsplash', 'pexels', 'pixabay'];
+            const allResults = [];
+
+            for (const platform of platforms) {
+                try {
+                    log(`🌐 尝试 ${platform}...`);
+
+                    const results = await window.FreeAPIService.searchImages(keyword, {
+                        limit: 2, // 每个平台最多2张
+                        platform: platform
+                    });
+
+                    if (results.success && results.images && results.images.length > 0) {
+                        const materials = results.images.map(img => ({
+                            id: `${platform}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            title: `${keyword} - ${platform}`,
+                            url: img.url || img.src || img.thumbnail,
+                            thumbnail: img.thumbnail || img.url || img.src,
+                            source: platform,
+                            category: guessCategory(keyword),
+                            tags: [keyword, platform],
+                            width: img.width || 800,
+                            height: img.height || 600,
+                            size: img.size || 0,
+                            timestamp: Date.now()
+                        }));
+
+                        allResults.push(...materials);
+                        log(`✅ ${platform}: 找到 ${materials.length} 张素材`);
+                    }
+                } catch (error) {
+                    log(`⚠️ ${platform} 失败: ${error.message}`);
+                }
+            }
+
+            return allResults;
+        }
+
+        function guessCategory(keyword) {
+            const categories = {
+                'business': ['business', 'corporate', 'meeting', 'presentation', 'marketing', 'sales', 'brand'],
+                'education': ['education', 'learning', 'training', 'student', 'teaching', 'knowledge', 'skill'],
+                'technology': ['technology', 'ai', 'machine learning', 'data', 'cloud', 'cybersecurity', 'blockchain'],
+                'design': ['design', 'ui', 'ux', 'graphic', 'creative', 'visual', 'brand'],
+                'health': ['health', 'medical', 'fitness', 'wellness', 'patient', 'nutrition'],
+                'environment': ['environment', 'green', 'sustainable', 'eco', 'climate', 'renewable'],
+                'finance': ['finance', 'investment', 'wealth', 'financial', 'portfolio', 'banking'],
+                'travel': ['travel', 'tourism', 'adventure', 'luxury', 'cultural', 'nature'],
+                'art': ['art', 'cultural', 'museum', 'creative', 'painting', 'sculpture'],
+                'sports': ['sports', 'fitness', 'athletic', 'training', 'performance', 'gaming']
+            };
+
+            for (const [category, keywords] of Object.entries(categories)) {
+                if (keywords.some(k => keyword.toLowerCase().includes(k))) {
+                    return category;
+                }
+            }
+
+            return 'general';
+        }
+
+        async function checkStatus() {
+            try {
+                const stats = await window.LocalMaterialLibrary.getStatistics();
+                log(`📊 素材库状态: ${stats.cachedMaterials || 0} 个素材, ${formatBytes(stats.cacheSize || 0)}`);
+                updateUI();
+            } catch (error) {
+                log('❌ 检查状态失败: ' + error.message);
+            }
+        }
+
+        async function clearAll() {
+            if (confirm('确定要清空所有素材吗？')) {
+                try {
+                    await window.LocalMaterialLibrary.clearAllMaterials();
+                    downloadedCount = 0;
+                    processedKeywords = 0;
+                    log('✅ 素材已清空');
+                    updateUI();
+                } catch (error) {
+                    log('❌ 清空失败: ' + error.message);
+                }
+            }
+        }
+
+        function stopDownload() {
+            isRunning = false;
+            log('⏹️ 下载已停止');
+        }
+
+        function updateUI() {
+            document.getElementById('downloaded').textContent = downloadedCount;
+            document.getElementById('keywords').textContent = processedKeywords;
+
+            const progress = Math.min((downloadedCount / targetCount) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function chunkArray(array, size) {
+            const chunks = [];
+            for (let i = 0; i < array.length; i += size) {
+                chunks.push(array.slice(i, i + size));
+            }
+            return chunks;
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 页面加载完成
+        window.addEventListener('load', () => {
+            log('🎯 直接素材下载器已就绪');
+            log('📋 关键词数量: ' + englishKeywords.length);
+            log('🎯 目标: ' + targetCount + ' 张素材');
+            log('🔄 并发: 3 个关键词同时处理');
+        });
+    </script>
+</body>
+</html>

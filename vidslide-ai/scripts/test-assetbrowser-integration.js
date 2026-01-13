@@ -172,7 +172,9 @@ async function testAssetBrowserIntegration() {
       console.log(`   📊 置信度: ${(result.confidence * 100).toFixed(1)}%`)
 
       if (result.translation) {
-        console.log(`   🌐 翻译: "${result.translation.original}" → "${result.translation.translated}"`)
+        console.log(
+          `   🌐 翻译: "${result.translation.original}" → "${result.translation.translated}"`
+        )
       }
 
       const strategyCorrect = result.strategy.name === testCase.expected

@@ -1,32 +1,78 @@
 /**
- * VidSlide AI 本地素材库服务
- * 实现零成本的本地优先素材策略
+ * VidSlide AI 本地素材库管理系统
+ * 实现分层存储策略：本地预置 + 智能缓存 + 按需获取
  */
-
 class LocalMaterialLibrary {
   constructor() {
-    this.dbName = 'VidSlideMaterials'
-    this.dbVersion = 2
-    this.db = null
-    this.materials = new Map()
-    this.synonymDictionary = this.buildSynonymDictionary()
-    this.invertedIndex = new Map() // 倒排索引: term -> [materialId, score]
-    this.materialTerms = new Map() // materialId -> [terms]
+    // 分层存储管理
+    this.presetStore = new PresetMaterialStore() // 本地预置素材库
+    this.cacheStore = new SmartCacheStore() // 智能缓存库
+    this.runtimeStore = new RuntimeMaterialStore() // 运行时临时存储
+
+    // 平台优先级（国内用户优化）
+    this.platformPriority = {
+      baidu: 10, // 百度图片 - 国内用户首选
+      preset: 9, // 本地预置 - 最快访问
+      pexels: 8, // Pexels - 高质量免费
+      unsplash: 6, // Unsplash - 专业摄影
+      pixabay: 4 // Pixabay - 矢量图丰富
+    }
+
+    // 初始化状态
     this.isInitialized = false
+    this.stats = {
+      presetMaterials: 0,
+      cachedMaterials: 0,
+      cacheSize: 0,
+      totalAccess: 0,
+      cacheHits: 0,
+      lastCleanup: null,
+      // 去重统计
+      deduplicationStats: {
+        urlDuplicates: 0,
+        hashDuplicates: 0,
+        titleDuplicates: 0,
+        totalDuplicatesPrevented: 0
+      }
+    }
+
+    // 去重索引
+    this.deduplicationIndex = {
+      urls: new Set(), // URL去重
+      hashes: new Set(), // 内容哈希去重
+      titles: new Set(), // 标题去重
+      metadata: new Map() // 元数据索引
+    }
   }
 
   /**
-   * 初始化素材库
+   * 初始化本地素材库
    */
   async initialize() {
     if (this.isInitialized) return
 
     try {
-      await this.openDatabase()
-      await this.loadMaterials()
-      await this.buildInvertedIndex()
+      console.log('🏗️ 初始化VidSlide AI本地素材库...')
+
+      // 初始化各层存储
+      await Promise.all([
+        this.presetStore.initialize(),
+        this.cacheStore.initialize(),
+        this.runtimeStore.initialize()
+      ])
+
+      // 加载统计信息
+      await this.loadStats()
+
+      // 启动定期清理任务
+      this.startCleanupTimer()
+
       this.isInitialized = true
-      console.log('🎨 本地素材库初始化完成')
+      console.log('✅ 本地素材库初始化完成')
+      console.log(`📊 预置素材: ${this.stats.presetMaterials} 个`)
+      console.log(
+        `💾 缓存素材: ${this.stats.cachedMaterials} 个 (${this.formatBytes(this.stats.cacheSize)})`
+      )
     } catch (error) {
       console.error('❌ 本地素材库初始化失败:', error)
       throw error
@@ -34,676 +80,1023 @@ class LocalMaterialLibrary {
   }
 
   /**
-   * 打开IndexedDB数据库
-   */
-  async openDatabase() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.dbVersion)
-
-      request.onerror = () => reject(request.error)
-      request.onsuccess = () => {
-        this.db = request.result
-        resolve()
-      }
-
-      request.onupgradeneeded = event => {
-        const db = event.target.result
-
-        // 素材存储
-        if (!db.objectStoreNames.contains('materials')) {
-          const materialStore = db.createObjectStore('materials', { keyPath: 'id' })
-          materialStore.createIndex('category', 'category', { unique: false })
-          materialStore.createIndex('subcategory', 'subcategory', { unique: false })
-          materialStore.createIndex('tags', 'tags', { unique: false, multiEntry: true })
-          materialStore.createIndex('usageCount', 'usageCount', { unique: false })
-        }
-
-        // 搜索索引存储
-        if (!db.objectStoreNames.contains('searchIndex')) {
-          const indexStore = db.createObjectStore('searchIndex', { keyPath: 'term' })
-          indexStore.createIndex('materials', 'materialIds', { unique: false, multiEntry: true })
-        }
-
-        // 元数据存储
-        if (!db.objectStoreNames.contains('metadata')) {
-          db.createObjectStore('metadata', { keyPath: 'key' })
-        }
-      }
-    })
-  }
-
-  /**
-   * 加载所有素材
-   */
-  async loadMaterials() {
-    const materials = await this.getAllMaterials()
-
-    if (materials.length === 0) {
-      // 首次运行，加载预置素材
-      await this.loadPresetMaterials()
-    } else {
-      // 加载现有素材到内存
-      materials.forEach(material => {
-        this.materials.set(material.id, material)
-      })
-    }
-
-    console.log(`📚 已加载 ${this.materials.size} 个本地素材`)
-  }
-
-  /**
-   * 加载预置素材数据
-   */
-  async loadPresetMaterials() {
-    const presetMaterials = this.generatePresetMaterials()
-    const batchSize = 50
-
-    for (let i = 0; i < presetMaterials.length; i += batchSize) {
-      const batch = presetMaterials.slice(i, i + batchSize)
-      await this.addMaterialsBatch(batch)
-    }
-
-    console.log(`✨ 已加载 ${presetMaterials.length} 个预置素材`)
-  }
-
-  /**
-   * 生成预置素材数据
-   */
-  generatePresetMaterials() {
-    const materials = []
-
-    // 图标素材 (开源图标库)
-    const iconCategories = {
-      feather: [
-        'home',
-        'user',
-        'settings',
-        'search',
-        'heart',
-        'star',
-        'check',
-        'x',
-        'plus',
-        'minus'
-      ],
-      hero: ['academic-cap', 'adjustments', 'annotation', 'archive', 'arrow-circle-down'],
-      lucide: ['activity', 'airplay', 'alarm-clock', 'align-center', 'align-justify']
-    }
-
-    Object.entries(iconCategories).forEach(([library, icons]) => {
-      icons.forEach(icon => {
-        materials.push({
-          id: `${library}-${icon}`,
-          category: 'icons',
-          subcategory: library,
-          name: icon,
-          type: 'svg',
-          tags: [icon, library],
-          keywords: [icon, library, '图标'],
-          dataUrl: this.generateIconDataUrl(icon, library),
-          thumbnailUrl: this.generateIconDataUrl(icon, library),
-          dimensions: { width: 24, height: 24 },
-          usageCount: 0,
-          lastUsed: null,
-          createdAt: Date.now()
-        })
-      })
-    })
-
-    // 图表素材
-    const chartTypes = ['bar', 'line', 'pie', 'area', 'scatter']
-    chartTypes.forEach(type => {
-      materials.push({
-        id: `chart-${type}`,
-        category: 'charts',
-        subcategory: 'basic',
-        name: `${type} chart`,
-        type: 'svg',
-        tags: [type, 'chart', '图表'],
-        keywords: [type, 'chart', '图表', '数据', '统计'],
-        dataUrl: this.generateChartDataUrl(type),
-        thumbnailUrl: this.generateChartDataUrl(type),
-        dimensions: { width: 200, height: 150 },
-        usageCount: 0,
-        lastUsed: null,
-        createdAt: Date.now()
-      })
-    })
-
-    // 几何形状
-    const shapes = ['circle', 'square', 'triangle', 'star', 'hexagon']
-    shapes.forEach(shape => {
-      materials.push({
-        id: `shape-${shape}`,
-        category: 'decorative',
-        subcategory: 'shapes',
-        name: shape,
-        type: 'svg',
-        tags: [shape, 'shape', '形状'],
-        keywords: [shape, '形状', '几何', '图形'],
-        dataUrl: this.generateShapeDataUrl(shape),
-        thumbnailUrl: this.generateShapeDataUrl(shape),
-        dimensions: { width: 100, height: 100 },
-        usageCount: 0,
-        lastUsed: null,
-        createdAt: Date.now()
-      })
-    })
-
-    // 颜色块
-    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange']
-    colors.forEach(color => {
-      materials.push({
-        id: `color-${color}`,
-        category: 'decorative',
-        subcategory: 'colors',
-        name: color,
-        type: 'svg',
-        tags: [color, 'color', '颜色'],
-        keywords: [color, '颜色', '色彩'],
-        dataUrl: this.generateColorDataUrl(color),
-        thumbnailUrl: this.generateColorDataUrl(color),
-        dimensions: { width: 100, height: 100 },
-        usageCount: 0,
-        lastUsed: null,
-        createdAt: Date.now()
-      })
-    })
-
-    // 数字和符号
-    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    const symbols = ['+', '-', '×', '÷', '=', '>', '<', '?', '!']
-
-    ;[...numbers, ...symbols].forEach(symbol => {
-      materials.push({
-        id: `symbol-${symbol}`,
-        category: 'education',
-        subcategory: 'symbols',
-        name: symbol,
-        type: 'svg',
-        tags: [symbol, 'symbol', '符号'],
-        keywords: [symbol, '符号', '数学', '数字'],
-        dataUrl: this.generateSymbolDataUrl(symbol),
-        thumbnailUrl: this.generateSymbolDataUrl(symbol),
-        dimensions: { width: 60, height: 80 },
-        usageCount: 0,
-        lastUsed: null,
-        createdAt: Date.now()
-      })
-    })
-
-    return materials
-  }
-
-  /**
-   * 生成图标的Data URL (简化实现)
-   */
-  generateIconDataUrl(_icon, _library) {
-    // 这里应该是实际的SVG数据
-    // 为了演示，我们生成简单的占位符
-    const svg =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>'
-    return `data:image/svg+xml;base64,${btoa(svg)}`
-  }
-
-  /**
-   * 生成图表的Data URL
-   */
-  generateChartDataUrl(type) {
-    // 简化的图表SVG
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150"><rect width="200" height="150" fill="#f0f0f0"/><text x="100" y="75" text-anchor="middle" font-family="Arial" font-size="14" fill="#666">${type} chart</text></svg>`
-    return `data:image/svg+xml;base64,${btoa(svg)}`
-  }
-
-  /**
-   * 生成形状的Data URL
-   */
-  generateShapeDataUrl(shape) {
-    let svg = ''
-    switch (shape) {
-      case 'circle':
-        svg =
-          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#4A90E2"/></svg>'
-        break
-      case 'square':
-        svg =
-          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="80" height="80" x="10" y="10" fill="#7ED321"/></svg>'
-        break
-      case 'triangle':
-        svg =
-          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="#F5A623"/></svg>'
-        break
-      case 'star':
-        svg =
-          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><polygon points="50,10 61,35 88,35 69,57 78,82 50,69 22,82 31,57 12,35 39,35" fill="#D0021B"/></svg>'
-        break
-      default:
-        svg =
-          '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="80" height="80" x="10" y="10" fill="#9B9B9B"/></svg>'
-    }
-    return `data:image/svg+xml;base64,${btoa(svg)}`
-  }
-
-  /**
-   * 生成颜色的Data URL
-   */
-  generateColorDataUrl(color) {
-    const colorMap = {
-      red: '#FF6B6B',
-      blue: '#4A90E2',
-      green: '#7ED321',
-      yellow: '#F5A623',
-      purple: '#9013FE',
-      orange: '#FF9500'
-    }
-    const hexColor = colorMap[color] || '#9B9B9B'
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="${hexColor}"/></svg>`
-    return `data:image/svg+xml;base64,${btoa(svg)}`
-  }
-
-  /**
-   * 生成符号的Data URL
-   */
-  generateSymbolDataUrl(symbol) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="80" viewBox="0 0 60 80"><text x="30" y="50" text-anchor="middle" font-family="Arial" font-size="36" fill="#333">${symbol}</text></svg>`
-    return `data:image/svg+xml;base64,${btoa(svg)}`
-  }
-
-  /**
-   * 构建同义词词典
-   */
-  buildSynonymDictionary() {
-    return {
-      // 商业关键词
-      增长: ['上涨', '增加', '提升', '发展', '进步'],
-      销售: ['营销', '推广', '市场', '客户', '业绩'],
-      利润: ['收益', '收入', '回报', '盈利', '获利'],
-      成本: ['费用', '开支', '支出', '花费'],
-
-      // 科技关键词
-      创新: ['创造', '突破', '变革', '技术', '研发'],
-      数字: ['数字化', '在线', '网络', '互联网', '智能'],
-      效率: ['效能', '生产力', '优化', '改进', '提升'],
-      数据: ['信息', '资料', '统计', '分析'],
-
-      // 教育关键词
-      学习: ['教育', '培训', '知识', '技能', '能力'],
-      学生: ['学员', '学者', '学习者', '受教育者'],
-      教师: ['老师', '导师', '教员', '教育工作者'],
-      课程: ['科目', '学科', '教程', '教学内容'],
-
-      // 生活关键词
-      健康: ['保健', '养生', '医疗', '疾病', '治疗'],
-      运动: ['体育', '健身', '锻炼', '活动'],
-      美食: ['食物', '菜肴', '烹饪', '饮食'],
-      旅行: ['旅游', '出行', '度假', '出游'],
-
-      // 通用关键词
-      好: ['优秀', '优质', '良好', '出色', '卓越'],
-      快: ['快速', '迅速', '高效', '敏捷', '即时'],
-      多: ['众多', '大量', '丰富', '充足'],
-      新: ['最新', '新型', '创新', '现代'],
-
-      // 形状关键词
-      圆形: ['圆圈', '圆', '球形', '环形'],
-      方形: ['正方形', '矩形', '四边形', '方块'],
-      三角形: ['三角', '三边形'],
-      星形: ['星星', '星号', '五角星'],
-
-      // 颜色关键词
-      红色: ['红', '朱红', '鲜红', '大红'],
-      蓝色: ['蓝', '湛蓝', '天蓝', '深蓝'],
-      绿色: ['绿', '翠绿', '墨绿', '浅绿'],
-      黄色: ['黄', '金黄', '明黄', '淡黄'],
-      黑色: ['黑', '乌黑', '深黑'],
-      白色: ['白', '雪白', '纯白']
-    }
-  }
-
-  /**
-   * 扩展关键词
-   */
-  expandKeywords(keywords) {
-    const expanded = new Set()
-
-    keywords.forEach(keyword => {
-      // 添加原始关键词
-      expanded.add(keyword.toLowerCase())
-
-      // 添加同义词
-      const synonyms = this.synonymDictionary[keyword] || []
-      synonyms.forEach(synonym => expanded.add(synonym.toLowerCase()))
-
-      // 添加部分匹配
-      if (keyword.length > 2) {
-        Object.entries(this.synonymDictionary).forEach(([key, values]) => {
-          if (key.includes(keyword) || keyword.includes(key)) {
-            expanded.add(key.toLowerCase())
-            values.forEach(value => expanded.add(value.toLowerCase()))
-          }
-        })
-      }
-    })
-
-    return Array.from(expanded)
-  }
-
-  /**
-   * 构建倒排索引
-   */
-  async buildInvertedIndex() {
-    this.invertedIndex.clear()
-    this.materialTerms.clear()
-
-    for (const [id, material] of this.materials) {
-      const terms = await this.extractTerms(material)
-      this.materialTerms.set(id, terms)
-
-      terms.forEach(term => {
-        if (!this.invertedIndex.has(term)) {
-          this.invertedIndex.set(term, [])
-        }
-
-        const score = this.calculateRelevanceScore(term, material)
-        this.invertedIndex.get(term).push([id, score])
-      })
-    }
-
-    // 排序优化查询性能
-    for (const [term, entries] of this.invertedIndex) {
-      entries.sort((a, b) => b[1] - a[1]) // 按评分降序
-    }
-
-    console.log(`🔍 已构建倒排索引，包含 ${this.invertedIndex.size} 个搜索词`)
-  }
-
-  /**
-   * 提取素材的搜索词
-   */
-  async extractTerms(material) {
-    const terms = new Set()
-
-    // 添加基本信息
-    ;[material.name, material.category, material.subcategory].filter(Boolean).forEach(text => {
-      text.split(/[\s\-_]/).forEach(word => {
-        if (word.length > 1) terms.add(word.toLowerCase())
-      })
-    })
-
-    // 添加标签
-    material.tags?.forEach(tag => {
-      tag.split(/[\s\-_]/).forEach(word => {
-        if (word.length > 1) terms.add(word.toLowerCase())
-      })
-    })
-
-    // 添加关键词
-    material.keywords?.forEach(keyword => {
-      keyword.split(/[\s\-_]/).forEach(word => {
-        if (word.length > 1) terms.add(word.toLowerCase())
-      })
-    })
-
-    return Array.from(terms)
-  }
-
-  /**
-   * 计算相关度评分
-   */
-  calculateRelevanceScore(term, material) {
-    let score = 0
-
-    // 名称匹配 (最高权重)
-    if (material.name?.toLowerCase().includes(term)) {
-      score += 1.0
-    }
-
-    // 关键词匹配
-    if (material.keywords?.some(k => k.toLowerCase().includes(term))) {
-      score += 0.8
-    }
-
-    // 标签匹配
-    if (material.tags?.some(t => t.toLowerCase().includes(term))) {
-      score += 0.6
-    }
-
-    // 分类匹配
-    if (
-      material.category?.toLowerCase().includes(term) ||
-      material.subcategory?.toLowerCase().includes(term)
-    ) {
-      score += 0.4
-    }
-
-    // 使用频率加成
-    if (material.usageCount > 0) {
-      score += Math.min(material.usageCount / 100, 0.2)
-    }
-
-    // 最近使用加成
-    if (material.lastUsed) {
-      const daysSinceUsed = (Date.now() - material.lastUsed) / (1000 * 60 * 60 * 24)
-      if (daysSinceUsed < 7) {
-        score += 0.1
-      } else if (daysSinceUsed < 30) {
-        score += 0.05
-      }
-    }
-
-    return score
-  }
-
-  /**
    * 智能搜索素材
+   * 优先级：预置库 → 缓存库 → 按需获取
    */
   async searchMaterials(query, options = {}) {
-    const { limit = 20, minScore = 0.1, category = null, context: _context = {} } = options
-
-    if (!query || query.trim().length === 0) {
-      return { materials: [], totalCount: 0, fromCache: false }
+    if (!this.isInitialized) {
+      await this.initialize()
     }
 
-    // 扩展关键词
-    const keywords = query.split(/[\s,，]+/).filter(k => k.length > 0)
-    const expandedKeywords = this.expandKeywords(keywords)
+    this.stats.totalAccess++
 
-    console.log(`🔍 搜索关键词: "${query}" -> 扩展为: [${expandedKeywords.join(', ')}]`)
+    const results = {
+      local: [],
+      cached: [],
+      total: 0
+    }
 
-    // 搜索匹配的素材
-    const materialScores = new Map()
+    // 1. 搜索本地预置库（最快）
+    const presetResults = await this.presetStore.search(query, options)
+    if (presetResults.length > 0) {
+      results.local = presetResults
+      results.total += presetResults.length
+      console.log(`🎯 本地预置库找到 ${presetResults.length} 个匹配素材`)
+    }
 
-    for (const keyword of expandedKeywords) {
-      if (!this.invertedIndex.has(keyword)) continue
+    // 2. 搜索智能缓存库
+    const cachedResults = await this.cacheStore.search(query, options)
+    if (cachedResults.length > 0) {
+      results.cached = cachedResults
+      results.total += cachedResults.length
+      this.stats.cacheHits++
+      console.log(`💾 缓存库找到 ${cachedResults.length} 个匹配素材`)
+    }
 
-      const entries = this.invertedIndex.get(keyword)
-      for (const [materialId, score] of entries) {
-        if (category && this.materials.get(materialId)?.category !== category) {
-          continue // 分类过滤
+    return results
+  }
+
+  /**
+   * 缓存外部获取的素材
+   */
+  async cacheMaterial(material, source, options = {}) {
+    try {
+      // 第一步：去重检查
+      const deduplicationResult = await this.checkDeduplication(material, source, options)
+      if (deduplicationResult.isDuplicate) {
+        console.log(`🚫 跳过重复素材: ${material.id} (${deduplicationResult.reason})`)
+        this.stats.deduplicationStats.totalDuplicatesPrevented++
+        return false
+      }
+
+      // 第二步：评估是否值得缓存
+      const shouldCache = await this.cacheStore.shouldCache(material, source, options)
+
+      if (shouldCache) {
+        await this.cacheStore.store(material, source)
+
+        // 第三步：更新去重索引
+        await this.updateDeduplicationIndex(material, source, options)
+
+        // 更新统计
+        this.stats.cachedMaterials++
+        this.stats.cacheSize += this.cacheStore.estimateSize(material)
+
+        console.log(`💾 已缓存素材: ${material.id} (来源: ${source})`)
+        return true
+      } else {
+        console.log(`⏭️ 跳过缓存: ${material.id} (来源: ${source})`)
+        return false
+      }
+    } catch (error) {
+      console.warn('缓存素材失败:', error)
+      return false
+    }
+  }
+
+  /**
+   * 检查素材是否重复
+   */
+  async checkDeduplication(material, source, options = {}) {
+    try {
+      // 1. URL去重检查（最简单有效）
+      if (material.dataUrl || material.url) {
+        const url = material.dataUrl || material.url
+        if (this.deduplicationIndex.urls.has(url)) {
+          this.stats.deduplicationStats.urlDuplicates++
+          return { isDuplicate: true, reason: 'URL重复' }
         }
-
-        const currentScore = materialScores.get(materialId) || 0
-        materialScores.set(materialId, currentScore + score)
       }
+
+      // 2. 标题去重检查（辅助去重）
+      if (material.name || material.title) {
+        const title = material.name || material.title
+        if (this.deduplicationIndex.titles.has(title)) {
+          this.stats.deduplicationStats.titleDuplicates++
+          return { isDuplicate: true, reason: '标题重复' }
+        }
+      }
+
+      // 3. 内容哈希去重检查（可选，需要计算哈希）
+      if (options?.enableHashDeduplication && (material.dataUrl || material.url)) {
+        const hash = await this.calculateContentHash(material)
+        if (hash && this.deduplicationIndex.hashes.has(hash)) {
+          this.stats.deduplicationStats.hashDuplicates++
+          return { isDuplicate: true, reason: '内容重复' }
+        }
+      }
+
+      // 4. 检查本地缓存中是否已存在
+      const existingMaterial = await this.findExistingMaterial(material)
+      if (existingMaterial) {
+        return { isDuplicate: true, reason: '本地已存在' }
+      }
+
+      return { isDuplicate: false }
+    } catch (error) {
+      console.warn('去重检查失败:', error)
+      // 去重检查失败时，允许缓存（宁可重复也不要遗漏）
+      return { isDuplicate: false }
     }
+  }
 
-    // 转换为结果数组
-    const results = Array.from(materialScores.entries())
-      .filter(([, score]) => score >= minScore)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit)
-      .map(([id, score]) => ({
-        ...this.materials.get(id),
-        relevanceScore: score,
-        matchReason: this.getMatchReason(id, expandedKeywords)
-      }))
+  /**
+   * 更新去重索引
+   */
+  async updateDeduplicationIndex(material, source, options = {}) {
+    try {
+      // 1. 添加URL到去重索引
+      if (material.dataUrl || material.url) {
+        const url = material.dataUrl || material.url
+        this.deduplicationIndex.urls.add(url)
+      }
 
-    console.log(`📊 搜索完成，找到 ${results.length} 个匹配素材`)
+      // 2. 添加标题到去重索引
+      if (material.name || material.title) {
+        const title = material.name || material.title
+        this.deduplicationIndex.titles.add(title)
+      }
 
+      // 3. 计算并添加内容哈希（可选）
+      if (options?.enableHashDeduplication && (material.dataUrl || material.url)) {
+        const hash = await this.calculateContentHash(material)
+        if (hash) {
+          this.deduplicationIndex.hashes.add(hash)
+        }
+      }
+
+      // 4. 添加到元数据索引
+      const metadataKey = `${source}_${material.id}`
+      this.deduplicationIndex.metadata.set(metadataKey, {
+        id: material.id,
+        source,
+        timestamp: Date.now(),
+        url: material.dataUrl || material.url,
+        title: material.name || material.title
+      })
+    } catch (error) {
+      console.warn('更新去重索引失败:', error)
+    }
+  }
+
+  /**
+   * 计算内容哈希值
+   */
+  async calculateContentHash(material) {
+    try {
+      const url = material.dataUrl || material.url
+      if (!url) return null
+
+      // 对于Base64数据，直接计算
+      if (url.startsWith('data:')) {
+        const base64Data = url.split(',')[1]
+        // 简单哈希计算（生产环境中可以使用更复杂的算法）
+        let hash = 0
+        for (let i = 0; i < base64Data.length; i++) {
+          const char = base64Data.charCodeAt(i)
+          hash = (hash << 5) - hash + char
+          hash = hash & hash // 转换为32位整数
+        }
+        return Math.abs(hash).toString(36)
+      }
+
+      // 对于普通URL，可以考虑下载并计算哈希
+      // 这里暂时返回null，避免网络请求
+      return null
+    } catch (error) {
+      console.warn('计算内容哈希失败:', error)
+      return null
+    }
+  }
+
+  /**
+   * 查找已存在的素材
+   */
+  async findExistingMaterial(material) {
+    try {
+      // 检查缓存存储中是否已存在相同ID的素材
+      const existing = await this.cacheStore.findSimilar(material)
+      return existing
+    } catch (error) {
+      console.warn('查找现有素材失败:', error)
+      return null
+    }
+  }
+
+  /**
+   * 获取去重统计
+   */
+  getDeduplicationStats() {
     return {
-      materials: results,
-      totalCount: results.length,
-      expandedKeywords,
-      fromCache: false
+      ...this.stats.deduplicationStats,
+      deduplicationRate:
+        this.stats.cachedMaterials > 0
+          ? (
+              (this.stats.deduplicationStats.totalDuplicatesPrevented /
+                (this.stats.cachedMaterials +
+                  this.stats.deduplicationStats.totalDuplicatesPrevented)) *
+              100
+            ).toFixed(2)
+          : 0
     }
   }
 
   /**
-   * 获取匹配原因
+   * 清理去重索引（内存优化）
    */
-  getMatchReason(materialId, keywords) {
-    const material = this.materials.get(materialId)
-    if (!material) return '未知'
+  cleanupDeduplicationIndex() {
+    try {
+      // 定期清理旧的元数据索引
+      const now = Date.now()
+      const maxAge = 24 * 60 * 60 * 1000 // 24小时
 
-    const reasons = []
+      for (const [key, metadata] of this.deduplicationIndex.metadata) {
+        if (now - metadata.timestamp > maxAge) {
+          this.deduplicationIndex.metadata.delete(key)
+        }
+      }
 
-    keywords.forEach(keyword => {
-      if (material.name?.toLowerCase().includes(keyword)) {
-        reasons.push(`名称匹配: ${material.name}`)
-      }
-      if (material.keywords?.some(k => k.toLowerCase().includes(keyword))) {
-        reasons.push(`关键词匹配: ${keyword}`)
-      }
-      if (material.tags?.some(t => t.toLowerCase().includes(keyword))) {
-        reasons.push(`标签匹配: ${keyword}`)
-      }
-    })
-
-    return reasons.length > 0 ? reasons[0] : '扩展匹配'
+      console.log('🧹 去重索引清理完成')
+    } catch (error) {
+      console.warn('清理去重索引失败:', error)
+    }
   }
 
   /**
-   * 记录素材使用
+   * 获取素材详情
    */
-  async recordUsage(materialId) {
-    const material = this.materials.get(materialId)
-    if (!material) return
+  async getMaterial(materialId, options = {}) {
+    if (!this.isInitialized) {
+      await this.initialize()
+    }
 
-    material.usageCount++
-    material.lastUsed = Date.now()
+    // 优先从预置库获取
+    let material = await this.presetStore.get(materialId)
+    if (material) {
+      material.source = 'preset'
+      return material
+    }
 
-    await this.updateMaterial(material)
+    // 从缓存库获取
+    material = await this.cacheStore.get(materialId)
+    if (material) {
+      material.source = 'cached'
+      return material
+    }
+
+    return null
   }
 
   /**
-   * 获取热门素材
+   * 记录素材使用情况（用于智能缓存决策）
    */
-  async getPopularMaterials(limit = 10) {
-    const materials = Array.from(this.materials.values())
-      .filter(m => m.usageCount > 0)
-      .sort((a, b) => b.usageCount - a.usageCount)
-      .slice(0, limit)
-
-    return materials
-  }
-
-  /**
-   * 获取最近使用的素材
-   */
-  async getRecentMaterials(limit = 10) {
-    const materials = Array.from(this.materials.values())
-      .filter(m => m.lastUsed)
-      .sort((a, b) => b.lastUsed - a.lastUsed)
-      .slice(0, limit)
-
-    return materials
+  async recordUsage(materialId, action = 'view') {
+    await this.cacheStore.recordUsage(materialId, action)
   }
 
   /**
    * 获取统计信息
    */
   async getStatistics() {
-    const stats = {
-      totalMaterials: this.materials.size,
-      categoryBreakdown: {},
-      usageStats: {
-        totalUsage: 0,
-        mostUsed: null,
-        recentlyUsed: null
+    const deduplicationStats = this.getDeduplicationStats()
+
+    return {
+      ...this.stats,
+      cacheHitRate:
+        this.stats.totalAccess > 0
+          ? ((this.stats.cacheHits / this.stats.totalAccess) * 100).toFixed(1)
+          : 0,
+      deduplicationStats,
+      storageBreakdown: {
+        preset: await this.presetStore.getStats(),
+        cached: await this.cacheStore.getStats(),
+        runtime: await this.runtimeStore.getStats()
       },
-      searchIndex: {
-        totalTerms: this.invertedIndex.size,
-        avgTermsPerMaterial: 0
+      deduplicationIndex: {
+        urls: this.deduplicationIndex.urls.size,
+        hashes: this.deduplicationIndex.hashes.size,
+        titles: this.deduplicationIndex.titles.size,
+        metadata: this.deduplicationIndex.metadata.size
       }
     }
-
-    // 分类统计
-    for (const material of this.materials.values()) {
-      const category = material.category
-      stats.categoryBreakdown[category] = (stats.categoryBreakdown[category] || 0) + 1
-
-      stats.usageStats.totalUsage += material.usageCount || 0
-
-      if (
-        !stats.usageStats.mostUsed ||
-        material.usageCount > stats.usageStats.mostUsed.usageCount
-      ) {
-        stats.usageStats.mostUsed = material
-      }
-
-      if (
-        !stats.usageStats.recentlyUsed ||
-        (material.lastUsed &&
-          (!stats.usageStats.recentlyUsed.lastUsed ||
-            material.lastUsed > stats.usageStats.recentlyUsed.lastUsed))
-      ) {
-        stats.usageStats.recentlyUsed = material
-      }
-    }
-
-    // 搜索索引统计
-    if (this.materials.size > 0) {
-      const totalTerms = Array.from(this.materialTerms.values()).reduce(
-        (sum, terms) => sum + terms.length,
-        0
-      )
-      stats.searchIndex.avgTermsPerMaterial = totalTerms / this.materials.size
-    }
-
-    return stats
   }
 
-  // 数据库操作方法
-  async getAllMaterials() {
+  /**
+   * 清理缓存
+   */
+  async cleanupCache(options = {}) {
+    const { targetSize, force = false } = options
+
+    console.log('🧹 开始缓存清理...')
+
+    const cleanedCount = await this.cacheStore.cleanup(targetSize, force)
+
+    // 更新统计
+    await this.updateStats()
+
+    console.log(`✅ 清理完成，释放了 ${cleanedCount} 个缓存项`)
+
+    this.stats.lastCleanup = new Date().toISOString()
+    await this.saveStats()
+
+    return cleanedCount
+  }
+
+  /**
+   * 启动定期清理定时器
+   */
+  startCleanupTimer() {
+    // 每小时检查一次缓存大小
+    setInterval(
+      async () => {
+        const stats = await this.getStatistics()
+        const cacheSizeMB = stats.cacheSize / (1024 * 1024)
+
+        // 如果缓存超过80%，触发清理
+        if (cacheSizeMB > 400) {
+          // 400MB
+          console.log(`📏 缓存大小达到 ${cacheSizeMB.toFixed(1)}MB，触发自动清理`)
+          await this.cleanupCache({ targetSize: 300 * 1024 * 1024 }) // 清理到300MB
+        }
+      },
+      60 * 60 * 1000
+    ) // 1小时
+  }
+
+  /**
+   * 加载统计信息
+   */
+  async loadStats() {
+    try {
+      const statsStr = localStorage.getItem('vidslide_material_stats')
+      if (statsStr) {
+        this.stats = { ...this.stats, ...JSON.parse(statsStr) }
+      }
+    } catch (error) {
+      console.warn('加载统计信息失败:', error)
+    }
+  }
+
+  /**
+   * 保存统计信息
+   */
+  async saveStats() {
+    try {
+      localStorage.setItem('vidslide_material_stats', JSON.stringify(this.stats))
+    } catch (error) {
+      console.warn('保存统计信息失败:', error)
+    }
+  }
+
+  /**
+   * 更新统计信息
+   */
+  async updateStats() {
+    const presetStats = await this.presetStore.getStats()
+    const cacheStats = await this.cacheStore.getStats()
+
+    this.stats.presetMaterials = presetStats.count
+    this.stats.cachedMaterials = cacheStats.count
+    this.stats.cacheSize = cacheStats.size
+
+    await this.saveStats()
+  }
+
+  /**
+   * 格式化字节数
+   */
+  formatBytes(bytes) {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+}
+
+/**
+ * 本地预置素材库
+ * 存储少量高质量的预置素材，不占用太多空间
+ */
+class PresetMaterialStore {
+  constructor() {
+    this.dbName = 'VidSlidePresetMaterials'
+    this.version = 1
+    this.db = null
+  }
+
+  async initialize() {
     return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.version)
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = event => {
+        this.db = event.target.result
+        resolve()
+      }
+
+      request.onupgradeneeded = event => {
+        const db = event.target.result
+
+        // 预置素材存储
+        if (!db.objectStoreNames.contains('materials')) {
+          const store = db.createObjectStore('materials', { keyPath: 'id' })
+          store.createIndex('category', 'category', { unique: false })
+          store.createIndex('tags', 'tags', { unique: false })
+        }
+
+        // 分类索引
+        if (!db.objectStoreNames.contains('categories')) {
+          db.createObjectStore('categories', { keyPath: 'id' })
+        }
+      }
+    })
+  }
+
+  async search(query, options = {}) {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
       const transaction = this.db.transaction(['materials'], 'readonly')
       const store = transaction.objectStore('materials')
-      const request = store.getAll()
+      const results = []
 
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
-  }
+      const request = store.openCursor()
+      request.onsuccess = event => {
+        const cursor = event.target.result
+        if (cursor) {
+          const material = cursor.value
 
-  async addMaterialsBatch(materials) {
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['materials'], 'readwrite')
-      const store = transaction.objectStore('materials')
+          // 简单关键词匹配
+          if (this.matchesQuery(material, query, options)) {
+            results.push(material)
+          }
 
-      let completed = 0
-      const total = materials.length
-
-      materials.forEach(material => {
-        const request = store.add(material)
-        request.onsuccess = () => {
-          this.materials.set(material.id, material)
-          completed++
-          if (completed === total) resolve()
+          cursor.continue()
+        } else {
+          resolve(results)
         }
-        request.onerror = () => reject(request.error)
-      })
+      }
+
+      request.onerror = () => resolve([])
     })
   }
 
-  async updateMaterial(material) {
+  matchesQuery(material, query, options) {
+    const searchText = query.toLowerCase()
+
+    // 匹配标题
+    if (material.title && material.title.toLowerCase().includes(searchText)) {
+      return true
+    }
+
+    // 匹配标签
+    if (material.tags && material.tags.some(tag => tag.toLowerCase().includes(searchText))) {
+      return true
+    }
+
+    // 匹配分类
+    if (material.category && material.category.toLowerCase().includes(searchText)) {
+      return true
+    }
+
+    return false
+  }
+
+  async get(materialId) {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      const request = store.get(materialId)
+
+      request.onsuccess = () => resolve(request.result || null)
+      request.onerror = () => resolve(null)
+    })
+  }
+
+  async getStats() {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      const countRequest = store.count()
+
+      countRequest.onsuccess = () => {
+        resolve({
+          count: countRequest.result,
+          size: 0 // 预置素材大小较小，暂时不计算
+        })
+      }
+
+      countRequest.onerror = () => resolve({ count: 0, size: 0 })
+    })
+  }
+}
+
+/**
+ * 智能缓存库
+ * 实现LRU缓存策略，控制存储大小
+ */
+class SmartCacheStore {
+  constructor() {
+    this.maxCacheSize = 500 * 1024 * 1024 // 500MB
+    this.currentCacheSize = 0
+    this.dbName = 'VidSlideCachedMaterials'
+    this.version = 1
+    this.db = null
+
+    // 缓存优先级
+    this.priority = {
+      baidu: 10,
+      pexels: 8,
+      unsplash: 6,
+      pixabay: 4
+    }
+  }
+
+  async initialize() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.version)
+
+      request.onerror = () => reject(request.error)
+      request.onsuccess = event => {
+        this.db = event.target.result
+        this.loadCacheSize()
+        resolve()
+      }
+
+      request.onupgradeneeded = event => {
+        const db = event.target.result
+
+        // 缓存素材存储
+        if (!db.objectStoreNames.contains('materials')) {
+          const store = db.createObjectStore('materials', { keyPath: 'id' })
+          store.createIndex('source', 'source', { unique: false })
+          store.createIndex('lastAccess', 'lastAccess', { unique: false })
+          store.createIndex('usageCount', 'usageCount', { unique: false })
+          store.createIndex('tags', 'tags', { unique: false })
+        }
+
+        // 使用统计
+        if (!db.objectStoreNames.contains('usage')) {
+          db.createObjectStore('usage', { keyPath: 'materialId' })
+        }
+      }
+    })
+  }
+
+  async shouldCache(material, source, options = {}) {
+    if (!this.db) await this.initialize()
+
+    // 百度图片一律缓存
+    if (source === 'baidu') {
+      return true
+    }
+
+    // 检查缓存大小限制
+    const materialSize = this.estimateSize(material)
+    if (this.currentCacheSize + materialSize > this.maxCacheSize) {
+      console.log(`⏭️ 缓存已满，跳过: ${material.id} (${source})`)
+      return false
+    }
+
+    // 基于使用频率和优先级
+    const priority = this.priority[source] || 1
+    const usageCount = options.usageCount || 0
+
+    const shouldCacheResult = priority >= 4 || usageCount > 3 // 临时降低阈值用于测试
+
+    if (!shouldCacheResult) {
+      console.log(
+        `⏭️ 优先级不足，跳过: ${material.id} (${source}, 优先级: ${priority}, 使用次数: ${usageCount})`
+      )
+    }
+
+    return shouldCacheResult
+  }
+
+  async store(material, source) {
+    if (!this.db) await this.initialize()
+
+    const materialSize = this.estimateSize(material)
+
+    // 添加缓存元数据
+    const cachedMaterial = {
+      ...material,
+      source,
+      cachedAt: new Date().toISOString(),
+      lastAccess: Date.now(),
+      usageCount: 1,
+      size: materialSize
+    }
+
     return new Promise((resolve, reject) => {
       const transaction = this.db.transaction(['materials'], 'readwrite')
       const store = transaction.objectStore('materials')
-      const request = store.put(material)
+      const request = store.put(cachedMaterial)
 
-      request.onsuccess = () => resolve()
+      request.onsuccess = () => {
+        this.currentCacheSize += materialSize
+        resolve()
+      }
+
       request.onerror = () => reject(request.error)
     })
+  }
+
+  async search(query, options = {}) {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      const results = []
+
+      const request = store.openCursor()
+      request.onsuccess = event => {
+        const cursor = event.target.result
+        if (cursor) {
+          const material = cursor.value
+
+          // 关键词匹配
+          if (this.matchesQuery(material, query, options)) {
+            results.push(material)
+            // 更新访问时间
+            this.recordAccess(material.id)
+          }
+
+          cursor.continue()
+        } else {
+          resolve(results)
+        }
+      }
+
+      request.onerror = () => resolve([])
+    })
+  }
+
+  async get(materialId) {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      const request = store.get(materialId)
+
+      request.onsuccess = () => {
+        const material = request.result
+        if (material) {
+          this.recordAccess(materialId)
+        }
+        resolve(material || null)
+      }
+
+      request.onerror = () => resolve(null)
+    })
+  }
+
+  async findSimilar(material) {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      const similar = []
+
+      const request = store.openCursor()
+      request.onsuccess = event => {
+        const cursor = event.target.result
+        if (cursor) {
+          const existing = cursor.value
+
+          // 检查是否相似：相同的URL、标题或内容哈希
+          const isSimilar =
+            (material.url && existing.url === material.url) ||
+            (material.dataUrl && existing.dataUrl === material.dataUrl) ||
+            (material.title && existing.title === material.title) ||
+            (material.contentHash && existing.contentHash === material.contentHash)
+
+          if (isSimilar) {
+            similar.push(existing)
+          }
+
+          cursor.continue()
+        } else {
+          // 返回第一个找到的相似素材（如果有的话）
+          resolve(similar.length > 0 ? similar[0] : null)
+        }
+      }
+
+      request.onerror = () => resolve(null)
+    })
+  }
+
+  matchesQuery(material, query, options) {
+    const searchText = query.toLowerCase()
+
+    // 匹配标题
+    if (material.title && material.title.toLowerCase().includes(searchText)) {
+      return true
+    }
+
+    // 匹配标签
+    if (material.tags && material.tags.some(tag => tag.toLowerCase().includes(searchText))) {
+      return true
+    }
+
+    // 匹配描述
+    if (material.description && material.description.toLowerCase().includes(searchText)) {
+      return true
+    }
+
+    return false
+  }
+
+  async recordUsage(materialId, action = 'view') {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['usage'], 'readwrite')
+      const store = transaction.objectStore('usage')
+      const request = store.get(materialId)
+
+      request.onsuccess = () => {
+        const usage = request.result || {
+          materialId,
+          views: 0,
+          downloads: 0,
+          lastAccess: Date.now()
+        }
+
+        // 更新使用统计
+        usage[action + 's'] = (usage[action + 's'] || 0) + 1
+        usage.lastAccess = Date.now()
+
+        const putRequest = store.put(usage)
+        putRequest.onsuccess = () => resolve()
+        putRequest.onerror = () => resolve() // 不影响主要功能
+      }
+
+      request.onerror = () => resolve()
+    })
+  }
+
+  recordAccess(materialId) {
+    // 异步更新访问时间
+    setTimeout(async () => {
+      if (!this.db) return
+
+      try {
+        const transaction = this.db.transaction(['materials'], 'readwrite')
+        const store = transaction.objectStore('materials')
+        const request = store.get(materialId)
+
+        request.onsuccess = () => {
+          const material = request.result
+          if (material) {
+            material.lastAccess = Date.now()
+            material.usageCount = (material.usageCount || 0) + 1
+            store.put(material)
+          }
+        }
+      } catch (error) {
+        // 静默失败
+      }
+    }, 0)
+  }
+
+  async cleanup(targetSize = this.maxCacheSize * 0.7) {
+    if (!this.db) await this.initialize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readwrite')
+      const store = transaction.objectStore('materials')
+      const toDelete = []
+
+      // 获取所有缓存项，按最后访问时间排序
+      const request = store.openCursor()
+      request.onsuccess = event => {
+        const cursor = event.target.result
+        if (cursor) {
+          toDelete.push({
+            id: cursor.value.id,
+            lastAccess: cursor.value.lastAccess || 0,
+            size: cursor.value.size || 0
+          })
+          cursor.continue()
+        } else {
+          // 按访问时间排序（最少使用的在前）
+          toDelete.sort((a, b) => a.lastAccess - b.lastAccess)
+
+          // 删除项目直到达到目标大小
+          let deletedCount = 0
+          let freedSize = 0
+
+          for (const item of toDelete) {
+            if (this.currentCacheSize - freedSize <= targetSize) {
+              break
+            }
+
+            // 删除项目
+            const deleteRequest = store.delete(item.id)
+            deleteRequest.onsuccess = () => {
+              deletedCount++
+              freedSize += item.size
+              this.currentCacheSize -= item.size
+            }
+          }
+
+          console.log(`🧹 缓存清理: 删除 ${deletedCount} 项, 释放 ${this.formatBytes(freedSize)}`)
+          resolve(deletedCount)
+        }
+      }
+
+      request.onerror = () => resolve(0)
+    })
+  }
+
+  estimateSize(material) {
+    let size = 0
+
+    // 基础数据
+    size += JSON.stringify(material).length * 2
+
+    // 图片数据
+    if (material.dataUrl && material.dataUrl.startsWith('data:image/')) {
+      const base64Data = material.dataUrl.split(',')[1]
+      if (base64Data) {
+        size += (base64Data.length * 3) / 4
+      }
+    }
+
+    // 缩略图
+    if (material.thumbnailUrl && material.thumbnailUrl !== material.dataUrl) {
+      if (material.thumbnailUrl.startsWith('data:image/')) {
+        const thumbData = material.thumbnailUrl.split(',')[1]
+        if (thumbData) {
+          size += (thumbData.length * 3) / 4
+        }
+      }
+    }
+
+    return size
+  }
+
+  async loadCacheSize() {
+    if (!this.db) return
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      let totalSize = 0
+
+      const request = store.openCursor()
+      request.onsuccess = event => {
+        const cursor = event.target.result
+        if (cursor) {
+          totalSize += cursor.value.size || 0
+          cursor.continue()
+        } else {
+          this.currentCacheSize = totalSize
+          resolve()
+        }
+      }
+
+      request.onerror = () => resolve()
+    })
+  }
+
+  async getStats() {
+    if (!this.db) await this.initialize()
+
+    await this.loadCacheSize()
+
+    return new Promise(resolve => {
+      const transaction = this.db.transaction(['materials'], 'readonly')
+      const store = transaction.objectStore('materials')
+      const countRequest = store.count()
+
+      countRequest.onsuccess = () => {
+        resolve({
+          count: countRequest.result,
+          size: this.currentCacheSize
+        })
+      }
+
+      countRequest.onerror = () => resolve({ count: 0, size: 0 })
+    })
+  }
+
+  formatBytes(bytes) {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  }
+}
+
+/**
+ * 运行时临时存储
+ * 用于存储运行时的临时数据，不持久化
+ */
+class RuntimeMaterialStore {
+  constructor() {
+    this.materials = new Map()
+    this.searchIndex = new Map()
+  }
+
+  async initialize() {
+    // 运行时存储不需要特殊初始化
+    return Promise.resolve()
+  }
+
+  async store(material, ttl = 300000) {
+    // 默认5分钟TTL
+    const key = material.id
+    this.materials.set(key, {
+      data: material,
+      expires: Date.now() + ttl
+    })
+
+    // 更新搜索索引
+    this.updateSearchIndex(material)
+
+    // 自动清理过期项
+    setTimeout(() => {
+      this.materials.delete(key)
+    }, ttl)
+  }
+
+  async get(materialId) {
+    const item = this.materials.get(materialId)
+    if (item && item.expires > Date.now()) {
+      return item.data
+    } else if (item) {
+      this.materials.delete(materialId)
+    }
+    return null
+  }
+
+  async search(query, options = {}) {
+    const results = []
+    const searchText = query.toLowerCase()
+
+    for (const [key, item] of this.materials) {
+      if (item.expires <= Date.now()) {
+        this.materials.delete(key)
+        continue
+      }
+
+      const material = item.data
+      if (this.matchesQuery(material, searchText)) {
+        results.push(material)
+      }
+    }
+
+    return results
+  }
+
+  matchesQuery(material, searchText) {
+    // 检查标题、描述、标签等
+    const fields = [material.title, material.description, ...(material.tags || [])].filter(Boolean)
+
+    return fields.some(field => field.toLowerCase().includes(searchText))
+  }
+
+  updateSearchIndex(material) {
+    // 简单的倒排索引
+    const words = [
+      ...(material.title || '').split(/\s+/),
+      ...(material.description || '').split(/\s+/),
+      ...(material.tags || [])
+    ].filter(word => word.length > 1)
+
+    words.forEach(word => {
+      const key = word.toLowerCase()
+      if (!this.searchIndex.has(key)) {
+        this.searchIndex.set(key, new Set())
+      }
+      this.searchIndex.get(key).add(material.id)
+    })
+  }
+
+  async getStats() {
+    // 清理过期项
+    const now = Date.now()
+    for (const [key, item] of this.materials) {
+      if (item.expires <= now) {
+        this.materials.delete(key)
+      }
+    }
+
+    return {
+      count: this.materials.size,
+      size: 0 // 运行时数据不计算大小
+    }
   }
 }
 

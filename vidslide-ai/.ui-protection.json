@@ -1,25 +1,53 @@
 {
   "protectedFiles": [
+    "src/App.vue",
     "src/views/HomeView.vue",
     "src/views/TestWorkspace.vue",
-    "src/components/**/*.vue",
-    "src/styles/*.css"
+    "src/views/WorkspaceView.vue",
+    "src/views/WorkspaceViewSimple.vue",
+    "src/components/AssetBrowser.vue",
+    "src/components/AIContentAnalyzer.vue",
+    "src/components/ExportDialog.vue",
+    "src/components/PictureInPicture.vue",
+    "src/components/UserAdjustmentPanel.vue",
+    "src/components/AnimationSystem.vue",
+    "src/components/PerformanceMonitor.vue",
+    "src/components/DispatcherStatus.vue",
+    "src/components/WegicDesignShowcase.vue",
+    "src/components/templates/TemplateSelector.vue",
+    "src/components/templates/TitleTemplate.vue",
+    "src/components/templates/InfoCardTemplate.vue",
+    "src/components/templates/DocumentTemplate.vue",
+    "src/components/templates/KeywordTemplate.vue",
+    "src/components/templates/PipTemplate.vue",
+    "src/styles/wegic-design-system.css",
+    "src/router/index.js",
+    "src/main.js",
+    "index.html"
   ],
   "uiIntegrityChecks": {
-    "HomeView.vue": {
+    "src/App.vue": {
       "criticalElements": [
-        "hero-section",
-        "product-features",
-        "pricing-section",
-        "contact-section"
+        "router-view",
+        "<div id=\"app\">"
+      ],
+      "requiredImports": [
+        "TestWorkspace"
+      ]
+    },
+    "src/views/HomeView.vue": {
+      "criticalElements": [
+        "hero-section"
       ],
       "requiredClasses": [
         "hero-section",
-        "feature-card",
-        "pricing-card"
+        "btn-primary-large"
+      ],
+      "requiredContent": [
+        "VidSlide AI"
       ]
     },
-    "TestWorkspace.vue": {
+    "src/views/TestWorkspace.vue": {
       "criticalElements": [
         "workspace-container",
         "toolbar-left",
@@ -29,15 +57,241 @@
       "requiredClasses": [
         "tool-btn",
         "progress-bar",
-        "timeline-track"
+        "timeline-track",
+        "workspace-container"
+      ]
+    },
+    "src/views/WorkspaceView.vue": {
+      "criticalElements": [
+        "workspace"
+      ],
+      "requiredClasses": [
+        "workspace"
+      ]
+    },
+    "src/components/AssetBrowser.vue": {
+      "criticalElements": [
+        "asset-browser"
+      ],
+      "requiredClasses": [
+        "asset-browser"
+      ]
+    },
+    "src/components/AIContentAnalyzer.vue": {
+      "criticalElements": [
+        "ai-content-analyzer"
+      ],
+      "requiredClasses": [
+        "analyzer-header",
+        "analysis-controls"
+      ]
+    },
+    "src/components/KeyframeExtractor.vue": {
+      "criticalElements": [
+        "keyframe-extractor",
+        "keyframes-section"
+      ],
+      "requiredClasses": [
+        "keyframe-item",
+        "thumbnail-container",
+        "keyframe-actions"
+      ]
+    },
+    "src/components/KeywordExtractor.vue": {
+      "criticalElements": [
+        "keyword-extractor",
+        "keywords-section"
+      ],
+      "requiredClasses": [
+        "keyword-item",
+        "importance-indicator",
+        "keyword-actions"
+      ]
+    },
+    "src/components/MaterialRequirementAnalyzer.vue": {
+      "criticalElements": [
+        "material-requirement-analyzer",
+        "requirements-section"
+      ],
+      "requiredClasses": [
+        "requirement-card",
+        "requirements-overview",
+        "requirement-actions"
+      ]
+    },
+    "src/components/SmartCropTool.vue": {
+      "criticalElements": [
+        "smart-crop-tool",
+        "upload-section"
+      ],
+      "requiredClasses": [
+        "crop-canvas",
+        "crop-overlay",
+        "crop-border"
+      ]
+    },
+    "src/components/BackgroundRemover.vue": {
+      "criticalElements": [
+        "background-remover",
+        "removal-workspace"
+      ],
+      "requiredClasses": [
+        "comparison-canvas",
+        "service-status",
+        "bg-preset-btn"
+      ]
+    },
+    "src/components/ColorMatcher.vue": {
+      "criticalElements": [
+        "color-matcher",
+        "matcher-workspace"
+      ],
+      "requiredClasses": [
+        "color-swatch",
+        "palette-scheme",
+        "color-picker-overlay"
+      ]
+    },
+    "src/components/TimelineEditor.vue": {
+      "criticalElements": [
+        "timeline-editor",
+        "timeline-body"
+      ],
+      "requiredClasses": [
+        "timeline-editor",
+        "timeline-toolbar",
+        "timeline-ruler",
+        "timeline-track",
+        "time-cursor",
+        "timeline-clip"
+      ]
+    },
+    "src/components/PreviewQualityControl.vue": {
+      "criticalElements": [
+        "preview-quality-control",
+        "control-header",
+        "control-sections"
+      ],
+      "requiredClasses": [
+        "preview-quality-control",
+        "control-section",
+        "section-label",
+        "resolution-btn",
+        "preset-btn"
+      ]
+    },
+    "src/components/FaceTrackingSettings.vue": {
+      "criticalElements": [
+        "face-tracking-settings",
+        "settings-header",
+        "settings-content"
+      ],
+      "requiredClasses": [
+        "face-tracking-settings",
+        "setting-group",
+        "group-label",
+        "mode-btn",
+        "preview-canvas"
+      ]
+    },
+    "src/components/BatchProcessor.vue": {
+      "criticalElements": [
+        "batch-processor",
+        "processor-header",
+        "upload-area",
+        "settings-section"
+      ],
+      "requiredClasses": [
+        "batch-processor",
+        "upload-area",
+        "file-item",
+        "progress-bar",
+        "start-btn"
+      ]
+    },
+    "src/components/TemplateCustomEditor.vue": {
+      "criticalElements": [
+        "template-custom-editor",
+        "editor-header",
+        "editor-content",
+        "editor-sidebar",
+        "editor-canvas"
+      ],
+      "requiredClasses": [
+        "template-custom-editor",
+        "editor-content",
+        "element-item",
+        "slide-item",
+        "canvas-element",
+        "preview-content"
+      ]
+    },
+    "src/components/ExportHistoryManager.vue": {
+      "criticalElements": [
+        "export-history-manager",
+        "manager-header",
+        "manager-toolbar",
+        "history-list",
+        "pagination"
+      ],
+      "requiredClasses": [
+        "export-history-manager",
+        "history-item",
+        "item-info",
+        "item-actions",
+        "modal-overlay",
+        "pagination"
+      ]
+    },
+    "src/components/AuthorizationDialog.vue": {
+      "criticalElements": [
+        ".authorization-dialog",
+        ".auth-details",
+        ".consent-section",
+        ".dialog-actions"
+      ],
+      "requiredClasses": [
+        "authorization-dialog-overlay",
+        "authorization-dialog",
+        "auth-details",
+        "consent-checkbox"
+      ],
+      "accessibility": {
+        "ariaLabels": true,
+        "keyboardNav": true,
+        "screenReader": true,
+        "dialogRole": true
+      },
+      "responsive": true
+    },
+    "src/styles/wegic-design-system.css": {
+      "criticalRules": [
+        ".wegic-",
+        "@media",
+        "backdrop-filter"
+      ],
+      "requiredContent": [
+        "VidSlide AI",
+        "苹果设计"
+      ]
+    },
+    "index.html": {
+      "criticalElements": [
+        "<div id=\"app\">",
+        "<script"
+      ],
+      "requiredContent": [
+        "VidSlide AI",
+        "vite"
       ]
     }
   },
   "autoBackup": {
     "enabled": true,
-    "interval": "1h",
-    "retention": "7d",
-    "backupDir": ".ui-backups"
+    "interval": "30m",
+    "retention": "30d",
+    "backupDir": ".ui-backups",
+    "maxBackupsPerFile": 10
   },
   "changeDetection": {
     "enabled": true,
@@ -45,7 +299,35 @@
       "node_modules/**",
       ".git/**",
       "*.log",
-      ".DS_Store"
-    ]
+      ".DS_Store",
+      "dist/**",
+      "*.test.js",
+      "*.spec.js"
+    ],
+    "strictMode": true
+  },
+  "uiValidationRules": {
+    "vueFiles": {
+      "mustHaveTemplate": true,
+      "mustHaveScript": true,
+      "mustHaveStyle": false,
+      "forbiddenPatterns": [
+        "console.log",
+        "debugger"
+      ]
+    },
+    "cssFiles": {
+      "mustHaveValidSyntax": true,
+      "maxLineLength": 120,
+      "mustUseDesignTokens": true
+    },
+    "jsFiles": {
+      "mustHaveValidSyntax": true,
+      "mustUseImports": true,
+      "forbiddenGlobals": [
+        "var",
+        "eval"
+      ]
+    }
   }
 }

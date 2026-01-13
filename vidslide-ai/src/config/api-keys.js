@@ -57,6 +57,24 @@ export const OPENAI_CONFIG = {
   baseUrl: 'https://api.openai.com/v1'
 }
 
+// Remove.bg API配置 (专业背景移除服务)
+export const REMOVEBG_CONFIG = {
+  apiKey: process.env.REMOVEBG_API_KEY || '',
+  baseUrl: 'https://api.remove.bg/v1.0',
+  endpoints: {
+    removebg: '/removebg'
+  }
+}
+
+// Claid.ai API配置 (AI图像处理服务)
+export const CLAIDAI_CONFIG = {
+  apiKey: process.env.CLAIDAI_API_KEY || '',
+  baseUrl: 'https://api.claid.ai/v1',
+  endpoints: {
+    backgroundRemoval: '/background-removal'
+  }
+}
+
 // API配置集合
 export const API_CONFIGS = {
   baiduTranslate: BAIDU_TRANSLATE_CONFIG,
@@ -67,7 +85,9 @@ export const API_CONFIGS = {
   bingSearch: BING_SEARCH_CONFIG,
   newsapi: NEWSAPI_CONFIG,
   twitter: TWITTER_CONFIG,
-  openai: OPENAI_CONFIG
+  openai: OPENAI_CONFIG,
+  removebg: REMOVEBG_CONFIG,
+  claidai: CLAIDAI_CONFIG
 }
 
 /**
@@ -115,6 +135,10 @@ export function isAPIConfigured(apiName) {
     case 'twitter':
       return !!config.bearerToken
     case 'openai':
+      return !!config.apiKey
+    case 'removebg':
+      return !!config.apiKey
+    case 'claidai':
       return !!config.apiKey
     default:
       return false

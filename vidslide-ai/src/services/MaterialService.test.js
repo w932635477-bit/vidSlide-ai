@@ -50,7 +50,7 @@ vi.mock('./BaiduImageService.js', () => ({
 vi.mock('./IntelligentDispatcher.js', () => ({
   default: {
     initialize: vi.fn(),
-    dispatch: vi.fn((keyword) => {
+    dispatch: vi.fn(keyword => {
       if (keyword === '春节') {
         return {
           strategy: { name: 'single_platform' },
@@ -94,7 +94,8 @@ describe('MaterialService', () => {
   let service
 
   beforeEach(() => {
-    service = new MaterialService()
+    // MaterialService是单例，直接使用导入的实例
+    service = MaterialService
     vi.clearAllMocks()
   })
 
@@ -172,9 +173,7 @@ describe('MaterialService', () => {
 
     it('应该处理搜索错误', async () => {
       // Mock搜索错误
-      service.intelligentDispatcher.dispatch.mockRejectedValueOnce(
-        new Error('调度器错误')
-      )
+      service.intelligentDispatcher.dispatch.mockRejectedValueOnce(new Error('调度器错误'))
 
       const result = await service.searchMaterials('error')
 
@@ -261,9 +260,7 @@ describe('MaterialService', () => {
     })
 
     it('应该处理初始化失败', async () => {
-      service.localLibrary.initialize.mockRejectedValueOnce(
-        new Error('本地库初始化失败')
-      )
+      service.localLibrary.initialize.mockRejectedValueOnce(new Error('本地库初始化失败'))
 
       await expect(service.initialize()).rejects.toThrow('本地库初始化失败')
       expect(service.isInitialized).toBe(false)

@@ -18,7 +18,7 @@ describe('FreeAPIService', () => {
 
     // Mock localStorage
     global.localStorage = {
-      getItem: vi.fn((key) => {
+      getItem: vi.fn(key => {
         if (key === 'vidslide_freeapi_usage') {
           return JSON.stringify({
             unsplash: { calls: 10, date: new Date().toISOString().split('T')[0] },
@@ -70,21 +70,22 @@ describe('FreeAPIService', () => {
     beforeEach(() => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          results: [
-            {
-              id: 'unsplash_1',
-              urls: {
-                regular: 'https://images.unsplash.com/photo1',
-                thumb: 'https://images.unsplash.com/photo1_thumb'
-              },
-              alt_description: 'Beautiful landscape',
-              user: { name: 'John Doe' },
-              width: 1920,
-              height: 1080
-            }
-          ]
-        })
+        json: () =>
+          Promise.resolve({
+            results: [
+              {
+                id: 'unsplash_1',
+                urls: {
+                  regular: 'https://images.unsplash.com/photo1',
+                  thumb: 'https://images.unsplash.com/photo1_thumb'
+                },
+                alt_description: 'Beautiful landscape',
+                user: { name: 'John Doe' },
+                width: 1920,
+                height: 1080
+              }
+            ]
+          })
       })
     })
 
@@ -125,21 +126,22 @@ describe('FreeAPIService', () => {
     beforeEach(() => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          photos: [
-            {
-              id: 12345,
-              src: {
-                original: 'https://images.pexels.com/photo1',
-                medium: 'https://images.pexels.com/photo1_medium'
-              },
-              alt: 'Stunning mountain view',
-              photographer: 'Jane Smith',
-              width: 1920,
-              height: 1080
-            }
-          ]
-        })
+        json: () =>
+          Promise.resolve({
+            photos: [
+              {
+                id: 12345,
+                src: {
+                  original: 'https://images.pexels.com/photo1',
+                  medium: 'https://images.pexels.com/photo1_medium'
+                },
+                alt: 'Stunning mountain view',
+                photographer: 'Jane Smith',
+                width: 1920,
+                height: 1080
+              }
+            ]
+          })
       })
     })
 
@@ -171,19 +173,20 @@ describe('FreeAPIService', () => {
     beforeEach(() => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          hits: [
-            {
-              id: 98765,
-              largeImageURL: 'https://pixabay.com/photo1.jpg',
-              previewURL: 'https://pixabay.com/photo1_preview.jpg',
-              tags: 'forest trees nature',
-              user: 'PixabayUser',
-              imageWidth: 1920,
-              imageHeight: 1080
-            }
-          ]
-        })
+        json: () =>
+          Promise.resolve({
+            hits: [
+              {
+                id: 98765,
+                largeImageURL: 'https://pixabay.com/photo1.jpg',
+                previewURL: 'https://pixabay.com/photo1_preview.jpg',
+                tags: 'forest trees nature',
+                user: 'PixabayUser',
+                imageWidth: 1920,
+                imageHeight: 1080
+              }
+            ]
+          })
       })
     })
 
@@ -215,8 +218,8 @@ describe('FreeAPIService', () => {
     it('应该根据分数选择最佳平台', () => {
       // Mock不同的使用统计来测试平台选择
       service.usageStats.unsplash.calls = 50 // 高使用率
-      service.usageStats.pexels.calls = 10   // 低使用率
-      service.usageStats.pixabay.calls = 20  // 中等使用率
+      service.usageStats.pexels.calls = 10 // 低使用率
+      service.usageStats.pixabay.calls = 20 // 中等使用率
 
       // Pexels应该被优先选择（使用率最低）
       const bestPlatform = service.selectBestAPI('test query')
@@ -289,12 +292,19 @@ describe('FreeAPIService', () => {
 
   describe('错误处理和降级', () => {
     it('应该处理网络超时', async () => {
-      global.fetch.mockImplementation(() =>
-        new Promise((resolve) => setTimeout(() => resolve({
-          ok: false,
-          status: 408,
-          statusText: 'Request Timeout'
-        }), 100))
+      global.fetch.mockImplementation(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: false,
+                  status: 408,
+                  statusText: 'Request Timeout'
+                }),
+              100
+            )
+          )
       )
 
       const result = await service.searchImages('timeout', { platform: 'unsplash' })

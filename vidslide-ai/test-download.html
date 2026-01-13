@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试素材下载</title>
+</head>
+<body>
+    <h1>测试素材下载功能</h1>
+    <button onclick="testDownload()">测试下载</button>
+    <div id="output"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const output = document.getElementById('output')
+            output.innerHTML = '<p>页面加载完成，开始测试...</p>'
+
+            try {
+                // 动态导入模块
+                const { default: LocalMaterialLibrary } = await import('./src/services/LocalMaterialLibrary.js')
+                const { default: BaiduImageService } = await import('./src/services/BaiduImageService.js')
+
+                output.innerHTML += '<p>✅ 模块导入成功</p>'
+
+                window.testDownload = async function() {
+                    output.innerHTML = '<p>开始测试...</p>'
+
+                    try {
+                        // 初始化本地素材库
+                        await LocalMaterialLibrary.initialize()
+                        output.innerHTML += '<p>✅ 本地素材库初始化成功</p>'
+
+                        // 创建百度图片服务
+                        const baiduService = new BaiduImageService()
+                        output.innerHTML += '<p>✅ 百度图片服务创建成功</p>'
+
+                        // 搜索素材
+                        const results = await baiduService.searchImages('团队合作', { limit: 3 })
+                        output.innerHTML += `<p>✅ 搜索成功，找到 ${results.images ? results.images.length : 0} 张图片</p>`
+
+                        if (results.success && results.images && results.images.length > 0) {
+                            output.innerHTML += '<p>📥 开始缓存素材...</p>'
+
+                            for (const material of results.images) {
+                                try {
+                                    const cached = await LocalMaterialLibrary.cacheMaterial(material, 'baidu')
+                                    output.innerHTML += `<p>💾 缓存素材 ${material.id}: ${cached ? '成功' : '跳过'}</p>`
+                                } catch (error) {
+                                    output.innerHTML += `<p>❌ 缓存失败 ${material.id}: ${error.message}</p>`
+                                }
+                            }
+                        } else {
+                            output.innerHTML += '<p>❌ 搜索失败或无结果</p>'
+                        }
+
+                        // 显示统计
+                        const stats = LocalMaterialLibrary.getStatistics()
+                        output.innerHTML += `<p>📊 最终统计: 总素材 ${stats.totalMaterials} 个</p>`
+
+                    } catch (error) {
+                        output.innerHTML += `<p>❌ 测试失败: ${error.message}</p>`
+                        console.error(error)
+                    }
+                }
+
+                output.innerHTML += '<p>🎯 测试环境准备完成，点击按钮开始测试</p>'
+
+            } catch (error) {
+                output.innerHTML += `<p>❌ 初始化失败: ${error.message}</p>`
+                console.error(error)
+            }
+        })
+    </script>
+</body>
+</html>

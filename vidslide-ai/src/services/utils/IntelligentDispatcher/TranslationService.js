@@ -154,7 +154,10 @@ class TranslationService {
     const salt = Date.now().toString()
     const sign = this.generateSign(this.appId, text, salt, this.secretKey)
 
-    const url = `https://fanyi-api.baidu.com/api/trans/vip/translate?q=${encodeURIComponent(text)}&from=zh&to=en&appid=${this.appId}&salt=${salt}&sign=${sign}`
+    // 在开发环境下使用代理路径，生产环境使用直接路径
+    const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    const baseUrl = isDev ? '/api/translate' : 'https://fanyi-api.baidu.com'
+    const url = `${baseUrl}/api/trans/vip/translate?q=${encodeURIComponent(text)}&from=zh&to=en&appid=${this.appId}&salt=${salt}&sign=${sign}`
 
     try {
       const response = await fetch(url, {

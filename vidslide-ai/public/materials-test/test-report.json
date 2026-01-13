@@ -1,0 +1,17 @@
+{
+  "totalAttempted": 8,
+  "totalDownloaded": 8,
+  "bySource": {
+    "unsplash": 4,
+    "pexels": 4
+  },
+  "errors": [],
+  "testTime": "2026-01-11T04:50:17.221Z",
+  "keywords": [
+    "computer",
+    "business",
+    "education",
+    "technology"
+  ],
+  "outputDir": "/Users/weilei/VidSlide AI/vidslide-ai/public/materials-test"
+}

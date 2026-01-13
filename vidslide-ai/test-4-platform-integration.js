@@ -41,10 +41,10 @@ const testCases = [
 
 async function testSinglePlatform(platform, query, limit = 2) {
   const endpoints = {
-    '百度图片': '/proxy-test-baidu-image',
-    'Unsplash': '/proxy-test-unsplash',
-    'Pexels': '/proxy-test-pexels',
-    'Pixabay': '/proxy-test-pixabay'
+    百度图片: '/proxy-test-baidu-image',
+    Unsplash: '/proxy-test-unsplash',
+    Pexels: '/proxy-test-pexels',
+    Pixabay: '/proxy-test-pixabay'
   }
 
   const endpoint = endpoints[platform]
@@ -63,7 +63,6 @@ async function testSinglePlatform(platform, query, limit = 2) {
 
     const result = await response.json()
     return result
-
   } catch (error) {
     return { success: false, error: error.message }
   }
@@ -110,7 +109,9 @@ async function runIntegrationTest() {
     const result = await testSinglePlatform(testPlatform, testCase.query, 2)
 
     if (result.success) {
-      console.log(`   ✅ 调度成功: ${testPlatform} 返回 ${result.total || (result.images ? result.images.length : 0)} 个结果`)
+      console.log(
+        `   ✅ 调度成功: ${testPlatform} 返回 ${result.total || (result.images ? result.images.length : 0)} 个结果`
+      )
       if (result.note) {
         console.log(`   📋 备注: ${result.note}`)
       }
@@ -154,11 +155,11 @@ async function runIntegrationTest() {
     console.log(`   📈 成功率: ${successRate.toFixed(1)}% (${successCount}/${perfTest.runs})`)
 
     if (successRate === 100 && avgTime < 2000) {
-      console.log(`   ✅ 性能优秀`)
+      console.log('   ✅ 性能优秀')
     } else if (successRate >= 80) {
-      console.log(`   ⚠️  性能一般`)
+      console.log('   ⚠️  性能一般')
     } else {
-      console.log(`   ❌ 性能需要优化`)
+      console.log('   ❌ 性能需要优化')
     }
 
     console.log('')

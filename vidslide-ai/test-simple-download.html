@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单下载测试</title>
+</head>
+<body>
+    <h1>简单下载测试</h1>
+    <button onclick="testImport()">测试导入</button>
+    <button onclick="testDownload()">测试下载</button>
+    <div id="log"></div>
+
+    <script type="module">
+        let downloader = null;
+
+        window.testImport = async function() {
+            try {
+                log('正在导入模块...');
+                const module = await import('./scripts/quick-material-downloader.js');
+                downloader = module.default;
+                log('✅ 模块导入成功');
+                log('downloader对象类型:', typeof downloader);
+                log('downloader对象:', downloader ? '存在' : '不存在');
+                if (downloader && typeof downloader.initialize === 'function') {
+                    log('✅ downloader.initialize 方法存在');
+                } else {
+                    log('❌ downloader.initialize 方法不存在');
+                }
+            } catch (error) {
+                log('❌ 导入失败:', error.message);
+                log('错误详情:', error.stack);
+                console.error('Import error:', error);
+            }
+        };
+
+        window.testDownload = async function() {
+            if (!downloader) {
+                log('请先测试导入');
+                return;
+            }
+
+            try {
+                log('正在初始化...');
+                const success = await downloader.initialize();
+                if (success) {
+                    log('✅ 初始化成功，开始下载...');
+                    // 只下载一个关键词作为测试
+                    await downloader.downloadKeywordMaterials('business meeting');
+                    log('✅ 测试下载完成');
+                } else {
+                    log('❌ 初始化失败');
+                }
+            } catch (error) {
+                log('❌ 下载失败:', error.message);
+            }
+        };
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+
+        // 自动测试导入
+        window.addEventListener('load', () => {
+            log('页面加载完成');
+        });
+    </script>
+</body>
+</html>
