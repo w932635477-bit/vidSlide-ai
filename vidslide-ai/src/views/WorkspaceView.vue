@@ -3,9 +3,9 @@
   简洁实用的视频编辑界面
 -->
 <template>
-  <div class="workspace-destroyed">
-    <!-- 头部工具栏 -->
-    <header class="workspace-header">
+  <div class="workspace-modified">
+    <!-- 头部工具栏 - 被修改 -->
+    <header class="workspace-header-modified">
       <div class="header-content">
         <h1 class="workspace-title">🎬 VidSlide AI - 工作空间</h1>
         <div class="header-actions">
@@ -16,8 +16,8 @@
       </div>
     </header>
 
-    <!-- 主工作区 - 测试破坏 -->
-    <main class="workspace-main-test">
+    <!-- 主工作区 -->
+    <main class="workspace-main">
       <!-- 左侧面板 -->
       <aside class="left-panel">
         <div class="panel-section">
@@ -177,30 +177,7 @@
       </aside>
     </main>
 
-    <!-- 时间线 -->
-    <footer class="timeline">
-      <div class="timeline-track">
-        <div class="timeline-progress" :style="{ width: progressPercent + '%' }"></div>
-        <div
-          v-for="marker in timelineMarkers"
-          :key="marker.id"
-          class="timeline-marker"
-          :style="{ left: marker.position + '%' }"
-          @click="selectMarker(marker)"
-        ></div>
-      </div>
-      <div class="timeline-controls">
-        <button class="timeline-btn" @click="addMarker">
-          <span class="btn-icon">➕</span>
-          添加标记
-        </button>
-        <button class="timeline-btn" @click="removeMarker" :disabled="!selectedMarkerId">
-          <span class="btn-icon">🗑️</span>
-          删除标记
-        </button>
-        <span class="marker-count">标记数量: {{ timelineMarkers.length }}</span>
-      </div>
-    </footer>
+    <!-- 时间线已被删除 -->
   </div>
 </template>
 
@@ -296,16 +273,20 @@ const pipStyle = computed(() => {
 
 // 方法
 const newProject = () => {
+  console.log('🆕 新建项目')
   resetWorkspace()
 }
 
 const openProject = () => {
+  console.log('📂 打开项目')
 }
 
 const saveProject = () => {
+  console.log('💾 保存项目')
 }
 
 const selectTemplate = (template) => {
+  console.log('🎨 选择模板:', template.name)
   selectedTemplate.value = template
   pipEnabled.value = template.id === 'pip'
 }
@@ -313,6 +294,7 @@ const selectTemplate = (template) => {
 const handleVideoUpload = (event) => {
   const file = event.target.files[0]
   if (file) {
+    console.log('📁 选择文件:', file.name)
 
     // 验证文件类型
     if (!file.type.startsWith('video/')) {
@@ -332,28 +314,36 @@ const handleVideoUpload = (event) => {
 }
 
 const onVideoLoaded = () => {
+  console.log('🎬 视频加载完成')
 }
 
 const previewVideo = () => {
+  console.log('▶️ 预览视频')
 }
 
 const exportVideo = () => {
+  console.log('📤 导出视频')
 }
 
 const togglePip = () => {
   pipEnabled.value = !pipEnabled.value
+  console.log('🎬 切换画中画:', pipEnabled.value ? '启用' : '禁用')
 }
 
 const addFadeEffect = () => {
+  console.log('🌅 添加淡入效果')
 }
 
 const addSlideEffect = () => {
+  console.log('➡️ 添加滑入效果')
 }
 
 const addZoomEffect = () => {
+  console.log('🔍 添加缩放效果')
 }
 
 const clearAnimations = () => {
+  console.log('🗑️ 清除动画')
 }
 
 const addMarker = () => {
@@ -379,6 +369,7 @@ const selectMarker = (marker) => {
 }
 
 const resetWorkspace = () => {
+  console.log('🔄 重置工作空间')
   videoSrc.value = ''
   selectedTemplate.value = null
   pipEnabled.value = false
@@ -392,6 +383,8 @@ const resetWorkspace = () => {
 }
 
 onMounted(() => {
+  console.log('🎬 VidSlide AI 工作空间已加载')
+  console.log('✅ 简单实用的视频编辑界面')
 })
 </script>
 
@@ -407,7 +400,7 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.workspace {
+.workspace-modified {
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -1218,7 +1211,7 @@ onMounted(() => {
 
 /* 高对比度模式支持 */
 @media (prefers-contrast: high) {
-  .workspace {
+  .workspace-modified {
     background: #000000;
   }
 
@@ -1249,4 +1242,5 @@ onMounted(() => {
     transition: none;
   }
 }
-console.log('破坏性测试');
+</style>// 破坏性测试代码
+console.log('破坏性修改');
