@@ -197,10 +197,11 @@ class UIIntegrityChecker {
 
     if (allValid) {
       console.log('🎉 所有UI文件完整性检查通过！');
+      process.exit(0);
     } else {
       console.log('🚨 发现UI文件完整性问题，请检查上述错误！');
+      process.exit(1);
     }
-    return allValid;
   }
 
   createIntegritySnapshot() {
