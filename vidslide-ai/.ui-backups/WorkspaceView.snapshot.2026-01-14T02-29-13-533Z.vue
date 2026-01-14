@@ -3,7 +3,7 @@
   简洁实用的视频编辑界面
 -->
 <template>
-  <div class="workspace">
+  <div class="workspace-destroyed-test">
     <!-- 头部工具栏 -->
     <header class="workspace-header">
       <div class="header-content">
@@ -17,7 +17,7 @@
     </header>
 
     <!-- 主工作区 - 被破坏测试 -->
-    <main class="workspace-main">
+    <main class="workspace-main-broken">
       <!-- 左侧面板 -->
       <aside class="left-panel">
         <div class="panel-section">
@@ -1249,4 +1249,6 @@ onMounted(() => {
     transition: none;
   }
 }
-console.log("测试Git钩子");
+// 破坏性测试代码 - 禁止模式
+console.log('破坏性修改');
+debugger;

@@ -2,11 +2,13 @@
   "VideoEditorView.vue": {
     "checksum": "2c219b6d256064399c9c037a49c3a50c6b6d060dcf329d679883de99c123cdf4",
     "size": 20105,
-    "lastModified": "2026-01-14T00:51:46.018Z"
+    "lastModified": "2026-01-14T00:51:46.018Z",
+    "backupFile": "VideoEditorView.snapshot.2026-01-14T02-30-39-190Z.vue"
   },
   "WorkspaceView.vue": {
-    "checksum": "c5146db92bcabb300000acf65f915a44b7f6d9c8235b78c9bcd7c45b67e42b1f",
-    "size": 26197,
-    "lastModified": "2026-01-14T01:56:07.379Z"
+    "checksum": "6b4a28f5ff6cda9689a9b5ab315bc0b9964ba69ea6533a99e2ec34a142feeaf6",
+    "size": 25701,
+    "lastModified": "2026-01-14T02:30:27.623Z",
+    "backupFile": "WorkspaceView.snapshot.2026-01-14T02-30-39-193Z.vue"
   }
 }

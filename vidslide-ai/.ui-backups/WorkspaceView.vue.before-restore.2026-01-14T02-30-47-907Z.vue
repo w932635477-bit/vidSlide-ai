@@ -1249,4 +1249,5 @@ onMounted(() => {
     transition: none;
   }
 }
-console.log("测试Git钩子");
+console.log("破坏测试"); debugger;
+<script>alert("破坏性代码");</script>

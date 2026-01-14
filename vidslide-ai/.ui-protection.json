@@ -70,17 +70,27 @@
         ".timeline-btn"
       ],
       "requiredContent": [
-        "workspace-main",
-        "workspace-header",
-        "left-panel",
-        "main-editor",
-        "right-panel",
-        "timeline"
+        "<div class=\"workspace\">",
+        "<header class=\"workspace-header\">",
+        "<main class=\"workspace-main\">",
+        "<aside class=\"left-panel\">",
+        "<section class=\"main-editor\">",
+        "<aside class=\"right-panel\">",
+        "<footer class=\"timeline\">"
       ],
       "forbiddenPatterns": [
         "console.log",
-        "debugger"
-      ]
+        "debugger",
+        "workspace-modified",
+        "workspace-destroyed",
+        "-modified",
+        "-destroyed"
+      ],
+      "mustHaveStructure": {
+        "template": true,
+        "script": true,
+        "style": true
+      }
     }
   },
   "autoBackup": {

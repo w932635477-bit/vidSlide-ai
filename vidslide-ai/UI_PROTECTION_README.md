@@ -140,6 +140,15 @@ node scripts/ui-integrity-check.js --verbose
 cp .ui-backups/WorkspaceView.vue.latest src/views/WorkspaceView.vue
 ```
 
+### 紧急恢复
+```bash
+# 自动紧急恢复（推荐）
+npm run ui-emergency-restore
+
+# 或者手动从备份恢复
+cp .ui-backups/WorkspaceView.vue.latest src/views/WorkspaceView.vue
+```
+
 ### Git提交被阻止
 ```bash
 # 强制提交（仅在确认安全时使用）

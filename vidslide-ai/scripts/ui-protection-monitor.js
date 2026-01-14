@@ -21,9 +21,11 @@ class UIProtectionMonitor {
     ];
 
     this.backupDir = '.ui-backups';
-    this.checkInterval = 10000; // 10秒检查一次
+    this.checkInterval = 5000; // 5秒检查一次（更频繁）
     this.lastModified = new Map();
     this.monitoring = false;
+    this.alertOnModification = true; // 检测到修改时发出警报
+    this.autoRecover = false; // 自动恢复（默认关闭，需要手动确认）
   }
 
   /**

@@ -1249,4 +1249,3 @@ onMounted(() => {
     transition: none;
   }
 }
-console.log("测试Git钩子");

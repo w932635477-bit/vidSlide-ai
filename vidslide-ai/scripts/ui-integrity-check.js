@@ -57,6 +57,32 @@ class UIIntegrityChecker {
         }
       }
 
+      // 检查禁止模式
+      if (config.forbiddenPatterns) {
+        for (const pattern of config.forbiddenPatterns) {
+          if (content.includes(pattern)) {
+            console.error(`🚨 发现禁止模式: ${pattern} in ${fileName}`);
+            isValid = false;
+          }
+        }
+      }
+
+      // 检查必需结构
+      if (config.mustHaveStructure) {
+        if (config.mustHaveStructure.template && !content.includes('<template>')) {
+          console.error(`🚨 Vue文件缺少template结构: ${fileName}`);
+          isValid = false;
+        }
+        if (config.mustHaveStructure.script && !content.includes('<script')) {
+          console.error(`🚨 Vue文件缺少script结构: ${fileName}`);
+          isValid = false;
+        }
+        if (config.mustHaveStructure.style && !content.includes('<style')) {
+          console.error(`🚨 Vue文件缺少style结构: ${fileName}`);
+          isValid = false;
+        }
+      }
+
       // 检查必需内容
       if (config.requiredContent) {
         for (const contentStr of config.requiredContent) {
@@ -207,22 +233,38 @@ class UIIntegrityChecker {
   createIntegritySnapshot() {
     const snapshot = {};
     const checks = this.config.uiIntegrityChecks;
+    const backupDir = path.join(this.projectRoot, '.ui-backups');
+
+    // 确保备份目录存在
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+    }
 
     for (const [fileName, config] of Object.entries(checks)) {
       const fullPath = path.join(this.projectRoot, 'src/views', fileName);
       if (fs.existsSync(fullPath)) {
         const content = fs.readFileSync(fullPath, 'utf8');
+
+        // 创建实际的文件备份
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupFileName = `${fileName.replace('.vue', '')}.snapshot.${timestamp}.vue`;
+        const backupPath = path.join(backupDir, backupFileName);
+        fs.copyFileSync(fullPath, backupPath);
+
         snapshot[fileName] = {
           checksum: crypto.createHash('sha256').update(content).digest('hex'),
           size: content.length,
-          lastModified: fs.statSync(fullPath).mtime.toISOString()
+          lastModified: fs.statSync(fullPath).mtime.toISOString(),
+          backupFile: backupFileName
         };
+
+        console.log(`💾 已备份: ${fileName} -> ${backupFileName}`);
       }
     }
 
     const snapshotPath = path.join(this.projectRoot, '.ui-snapshot.json');
     fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
-    console.log('📸 已创建UI完整性快照');
+    console.log('📸 已创建UI完整性快照和备份文件');
   }
 }
 

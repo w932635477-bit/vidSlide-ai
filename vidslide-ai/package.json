@@ -26,6 +26,7 @@
     "ui-integrity-snapshot": "node scripts/ui-integrity-check.js snapshot",
     "ui-protection-monitor": "node scripts/ui-protection-monitor.js",
     "ui-protection-status": "node scripts/ui-protection-status.js",
+    "ui-emergency-restore": "node scripts/ui-emergency-restore.js",
     "ui-lock": "node scripts/ui-file-locker.js lock",
     "ui-unlock": "node scripts/ui-file-locker.js unlock",
     "ui-lock-status": "node scripts/ui-file-locker.js status",
