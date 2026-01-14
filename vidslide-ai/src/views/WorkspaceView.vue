@@ -1,6 +1,6 @@
 <!--
   VidSlide AI - 工作空间
-  简洁实用的视频编辑界面 - 保护测试
+  简洁实用的视频编辑界面
 -->
 <template>
   <div class="workspace">
@@ -16,8 +16,8 @@
       </div>
     </header>
 
-    <!-- 主工作区 -->
-    <main class="workspace-main">
+    <!-- 主工作区 - 测试破坏 -->
+    <main class="workspace-main-test">
       <!-- 左侧面板 -->
       <aside class="left-panel">
         <div class="panel-section">

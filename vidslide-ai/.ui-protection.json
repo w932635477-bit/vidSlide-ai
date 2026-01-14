@@ -68,6 +68,18 @@
         ".timeline-progress",
         ".timeline-controls",
         ".timeline-btn"
+      ],
+      "requiredContent": [
+        "<main class=\"workspace-main\">",
+        "<header class=\"workspace-header\">",
+        "<aside class=\"left-panel\">",
+        "<section class=\"main-editor\">",
+        "<aside class=\"right-panel\">",
+        "<footer class=\"timeline\">"
+      ],
+      "forbiddenPatterns": [
+        "console.log",
+        "debugger"
       ]
     }
   },
