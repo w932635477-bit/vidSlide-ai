@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; media-src 'self' blob:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.unsplash.com https://api.pexels.com https://pixabay.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://fonts.googleapis.com; connect-src 'self' https://api.unsplash.com https://api.pexels.com https://pixabay.com;">
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -446,11 +446,6 @@
         z-index: 1000;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-DL9pPH4N.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vue-vendor-o20mJRcd.js">
-    <link rel="modulepreload" crossorigin href="/assets/utils-vendor-2_cXfsPf.js">
-    <link rel="modulepreload" crossorigin href="/assets/ui-vendor-CnTpKv_u.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-B0J-ByyS.css">
   </head>
   <body>
     <div id="app">
@@ -513,5 +508,14 @@
         alert('基础JavaScript工作正常！');
       };
     </script>
+    <script type="module">
+      console.log('🚀 ES模块开始执行');
+      // 简单的ES模块测试
+      window.testModule = function() {
+        console.log('✅ ES模块函数调用成功');
+        alert('ES模块工作正常！');
+      };
+    </script>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>

@@ -21,12 +21,12 @@ const router = createRouter({
     {
       path: '/editor',
       name: 'editor',
-      component: () => import('../views/WorkspaceView.vue') // 重定向到统一的工作页面
+      component: () => import('../views/VideoEditorView.vue')
     },
     {
       path: '/workspace',
       name: 'workspace',
-      component: () => import('../views/TestWorkspace.vue')
+      component: () => import('../views/WorkspaceView.vue')
     },
     {
       path: '/help',

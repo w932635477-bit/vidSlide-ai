@@ -1,12 +1,12 @@
 {
-  "HomeView.vue": {
-    "checksum": "b5d1ca638e2e624b4a0a3abde8d0ee0b200b5538b13b5d9455a26856a242372c",
-    "size": 25432,
-    "lastModified": "2026-01-12T10:02:12.212Z"
+  "VideoEditorView.vue": {
+    "checksum": "2c219b6d256064399c9c037a49c3a50c6b6d060dcf329d679883de99c123cdf4",
+    "size": 20105,
+    "lastModified": "2026-01-14T00:51:46.018Z"
   },
-  "TestWorkspace.vue": {
-    "checksum": "d73e4bac411e738faa4240f57c544f108f93db9e2e09c1023bc19c2147c6cb31",
-    "size": 32825,
-    "lastModified": "2026-01-12T09:43:43.485Z"
+  "WorkspaceView.vue": {
+    "checksum": "c5146db92bcabb300000acf65f915a44b7f6d9c8235b78c9bcd7c45b67e42b1f",
+    "size": 26197,
+    "lastModified": "2026-01-14T01:56:07.379Z"
   }
 }

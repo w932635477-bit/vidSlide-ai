@@ -3,6 +3,7 @@
 
 <!-- PipTemplate 组件模板 -->
 <template>
+  <div role="region" :aria-label="templateDescription">
   <div class="pip-template" :style="{ width: slideWidth + 'px', height: slideHeight + 'px' }">
     <!-- 主内容区域 (右侧大图) -->
     <div class="main-content" :style="mainContentStyle">
@@ -40,6 +41,7 @@
     <div class="template-decoration">
       <div class="decoration-line" :style="decorationStyle"></div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -92,6 +94,11 @@ export default {
       type: String,
       default: 'medium', // small, medium, large
       validator: value => ['small', 'medium', 'large'].includes(value)
+    },
+    // 无障碍访问描述
+    templateDescription: {
+      type: String,
+      default: '画中画模板 - 视频与PPT内容并排显示'
     }
   },
   computed: {

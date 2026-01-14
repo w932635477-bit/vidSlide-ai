@@ -1,17 +1,19 @@
-/** * App.vue * VidSlide AI - 紧急补齐阶段 *
-实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统 */
-
 <template>
   <div id="app">
     <router-view />
   </div>
 </template>
 
-<script setup>
-import TestWorkspace from './views/TestWorkspace.vue'
+<script>
+/**
+ * App.vue
+ * VidSlide AI - 紧急补齐阶段
+ * 实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统
+ */
 
-// 全局状态
-// const isDark = ref(false) // 暂时不需要暗色模式
+export default {
+  name: 'App'
+}
 </script>
 
 <style>

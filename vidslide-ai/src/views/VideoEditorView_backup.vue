@@ -196,6 +196,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
+// 导入核心服务
+import TemplateRenderer from '../utils/TemplateRenderer.js'
+import MaterialService from '../services/MaterialService.js'
+import BackgroundRemovalService from '../services/BackgroundRemovalService.js'
+// import AIService from '../services/AIService.js' // TODO: 需要创建AIService
+// import AnimationSystem from '../utils/AnimationSystem.js' // TODO: 需要创建AnimationSystem
+
 // 响应式状态
 const activePanelTab = ref('template')
 const selectedTemplateId = ref('pip')
@@ -256,6 +263,13 @@ const currentProgress = ref(30)
 // 计算属性
 const progressPercent = computed(() => currentProgress.value)
 
+// 核心服务实例
+const templateRenderer = ref(null)
+const materialService = ref(null)
+const backgroundRemovalService = ref(null)
+// const aiService = ref(null) // TODO: 需要创建AIService
+// const animationSystem = ref(null) // TODO: 需要创建AnimationSystem
+
 // 方法 - 工具栏操作
 const newProject = () => {
   console.log('🆕 新建项目')
@@ -312,8 +326,12 @@ const selectTemplateById = (templateId) => {
 const renderTemplate = (template) => {
   console.log('🎨 渲染模板:', template.name)
   try {
-    // 这里应该调用实际的模板渲染服务
-    console.log('✅ 模板渲染完成 (占位符)')
+    if (templateRenderer.value) {
+      templateRenderer.value.renderTemplate(template)
+      console.log('✅ 模板渲染完成')
+    } else {
+      console.warn('⚠️ TemplateRenderer 服务未初始化')
+    }
   } catch (error) {
     console.error('❌ 模板渲染失败:', error)
   }
@@ -419,8 +437,13 @@ const handleFileSelect = (event) => {
 const processVideoFile = (file) => {
   console.log('🎬 处理视频文件:', file.name)
   try {
-    // 这里应该调用背景移除服务处理视频
-    console.log('✅ 视频处理完成 (占位符)')
+    if (backgroundRemovalService.value) {
+      // 调用背景移除服务处理视频
+      backgroundRemovalService.value.processVideo(file)
+      console.log('✅ 视频处理完成')
+    } else {
+      console.warn('⚠️ BackgroundRemovalService 服务未初始化')
+    }
   } catch (error) {
     console.error('❌ 视频处理失败:', error)
   }
@@ -447,16 +470,33 @@ onMounted(() => {
   console.log('✅ 基于苹果风格设计的三栏布局')
   console.log('✅ 工具栏 + 主编辑区 + 属性面板 + 时间线')
 
-  // 加载初始模板
-  loadInitialTemplate()
+  // 初始化核心服务
+  console.log('🔧 初始化核心服务...')
+
+  try {
+    // 初始化核心服务实例
+    templateRenderer.value = new TemplateRenderer()
+    materialService.value = new MaterialService()
+    backgroundRemovalService.value = new BackgroundRemovalService()
+    // aiService.value = new AIService() // TODO: 需要创建AIService
+    // animationSystem.value = new AnimationSystem() // TODO: 需要创建AnimationSystem
+
+    console.log('✅ 核心服务初始化完成')
+
+    // 加载初始模板
+    loadInitialTemplate()
+
+  } catch (error) {
+    console.error('❌ 核心服务初始化失败:', error)
+  }
 })
 
 // 加载初始模板
 const loadInitialTemplate = () => {
   try {
     const initialTemplate = templates.value.find(t => t.id === selectedTemplateId.value)
-    if (initialTemplate) {
-      renderTemplate(initialTemplate)
+    if (initialTemplate && templateRenderer.value) {
+      templateRenderer.value.renderTemplate(initialTemplate)
       console.log('✅ 初始模板加载完成')
     }
   } catch (error) {
@@ -485,7 +525,7 @@ body {
   overflow: hidden;
 }
 
-/* 标题栏 */
+/* 顶部标题栏 */
 .title-bar {
   height: 40px;
   background: #2A2A2A;
@@ -493,7 +533,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 20px;
-  -webkit-app-region: drag; /* 使整个标题栏可拖动 */
+  -webkit-app-region: drag;
 }
 
 .title-bar h1 {
@@ -505,8 +545,8 @@ body {
 /* 主工作区 - 三栏布局 */
 .workspace {
   display: grid;
-  grid-template-columns: 64px 1fr 320px; /* 左侧工具栏，主编辑区，右侧属性面板 */
-  height: calc(100vh - 40px); /* 减去标题栏高度 */
+  grid-template-columns: 64px 1fr 320px;
+  height: calc(100vh - 40px);
 }
 
 /* 左侧工具栏 */
@@ -630,13 +670,13 @@ body {
   transition: all 0.2s ease;
 }
 
-.panel-tab:hover {
-  color: #FFFFFF;
-}
-
 .panel-tab.active {
   background: #007AFF;
   color: #FFFFFF;
+}
+
+.panel-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .panel-content {
@@ -647,72 +687,66 @@ body {
 
 .property-group {
   margin-bottom: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
-  border-radius: 8px;
 }
 
 .property-group h3 {
   font-size: 14px;
+  font-weight: 600;
   color: #FFFFFF;
   margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 8px;
 }
 
 /* 模板选择器 */
 .template-selector {
   display: grid;
-  grid-template-columns: 1fr; /* 单列布局 */
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
 
 .template-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #404040;
   border-radius: 8px;
-  padding: 12px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-align: left;
+  border: 2px solid transparent;
 }
 
 .template-card:hover {
-  background: rgba(0, 122, 255, 0.2);
+  background: #505050;
   border-color: #007AFF;
 }
 
 .template-card.selected {
-  background: #007AFF;
   border-color: #007AFF;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  background: rgba(0, 122, 255, 0.1);
 }
 
 .template-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: #FFFFFF;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .template-desc {
-  font-size: 11px;
+  font-size: 14px;
   color: #CCCCCC;
 }
 
 /* 样式控制 */
 .style-controls,
-.animation-controls,
-.ai-assistant {
+.animation-controls {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .control-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .control-item label {
@@ -720,61 +754,44 @@ body {
   color: #CCCCCC;
 }
 
-.control-item input[type="range"],
-.control-item select {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  padding: 6px 8px;
+.control-item select,
+.control-item input {
+  padding: 8px 12px;
+  background: #404040;
+  border: 1px solid #606060;
+  border-radius: 6px;
   color: #FFFFFF;
-  font-size: 12px;
-  -webkit-appearance: none; /* 移除默认样式 */
-  appearance: none;
+  font-size: 14px;
 }
 
-.control-item input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #007AFF;
-  cursor: pointer;
-  border: 2px solid #FFFFFF;
-  margin-top: -6px; /* 居中滑块 */
-}
-
-.control-item input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #007AFF;
-  cursor: pointer;
-  border: 2px solid #FFFFFF;
-}
-
-.control-item select option {
-  background: #2A2A2A;
-  color: #FFFFFF;
+.control-item select:focus,
+.control-item input:focus {
+  outline: none;
+  border-color: #007AFF;
 }
 
 .control-btn {
-  padding: 8px 12px;
-  background: rgba(0, 122, 255, 0.6);
+  padding: 10px 16px;
+  background: #007AFF;
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .control-btn:hover {
-  background: #007AFF;
+  background: #0056CC;
 }
 
 /* AI助手 */
+.ai-assistant {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .ai-suggestions {
   display: flex;
   flex-direction: column;
@@ -782,15 +799,14 @@ body {
 }
 
 .suggestion-item {
-  background: rgba(52, 199, 89, 0.1);
-  border: 1px solid rgba(52, 199, 89, 0.3);
-  border-radius: 6px;
-  padding: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  color: #34C759;
+  padding: 12px;
+  background: #404040;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #FFFFFF;
 }
 
 .suggestion-icon {
@@ -799,43 +815,41 @@ body {
 
 /* 时间线 */
 .timeline {
-  height: 120px;
   background: #2A2A2A;
   border-top: 1px solid #404040;
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding: 0 20px;
+  gap: 20px;
+  height: 120px;
 }
 
 .timeline-track {
-  width: 100%;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  flex: 1;
+  height: 40px;
+  background: #404040;
+  border-radius: 4px;
   position: relative;
-  margin-bottom: 12px;
   cursor: pointer;
 }
 
 .timeline-progress {
   height: 100%;
   background: #007AFF;
-  border-radius: 10px;
-  width: 0%;
-  transition: width 0.1s linear;
+  border-radius: 4px;
+  transition: width 0.2s ease;
 }
 
 .timeline-marker {
   position: absolute;
-  top: -5px;
-  width: 4px;
-  height: 30px;
-  background: #FF3B30;
+  top: -6px;
+  width: 12px;
+  height: 52px;
+  background: #FF6B35;
   border-radius: 2px;
   cursor: pointer;
-  border: 1px solid #FFFFFF;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  border: 2px solid #FFFFFF;
 }
 
 .timeline-controls {
@@ -852,85 +866,61 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
+  transition: all 0.2s ease;
 }
 
 .timeline-btn:hover {
   background: #0056CC;
 }
 
-.timeline-controls span {
-  font-size: 12px;
-  color: #CCCCCC;
+.timeline-btn:disabled {
+  background: #404040;
+  cursor: not-allowed;
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .workspace {
-    grid-template-columns: 64px 1fr; /* 隐藏右侧面板 */
+    grid-template-columns: 64px 1fr 280px;
   }
 
   .properties-panel {
-    display: none; /* 默认隐藏 */
-  }
-
-  .main-canvas {
-    grid-column: 2 / 3;
+    width: 280px;
   }
 }
 
 @media (max-width: 768px) {
   .workspace {
-    grid-template-columns: 1fr; /* 单列布局 */
-    grid-template-rows: auto 1fr auto; /* 工具栏、主编辑区、时间线 */
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
   }
 
   .toolbar {
     flex-direction: row;
-    flex-wrap: wrap;
     height: auto;
-    border-right: none;
-    border-bottom: 1px solid #404040;
     padding: 10px;
-    justify-content: center;
+    overflow-x: auto;
   }
 
   .tool-group {
     flex-direction: row;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .tool-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
   }
 
   .main-canvas {
-    grid-row: 2 / 3;
+    grid-row: 2;
+  }
+
+  .properties-panel {
+    height: 300px;
+    grid-row: 3;
   }
 
   .timeline {
-    grid-row: 3 / 4;
-    padding: 10px;
-    height: 100px;
-  }
-
-  .timeline-track {
-    height: 15px;
-  }
-
-  .timeline-marker {
-    height: 25px;
-    top: -5px;
-  }
-
-  .timeline-controls {
-    justify-content: center;
+    height: 80px;
   }
 
   .title-bar {
-    padding: 0 10px;
+    padding: 0 15px;
   }
 
   .title-bar h1 {
@@ -938,3 +928,185 @@ body {
   }
 }
 </style>
+    <section
+v-if="!videoSrc" class="upload-section"
+role="region" aria-labelledby="upload-heading"
+>
+      <div class="upload-container">
+        <h3 id="upload-heading">📤 上传视频</h3>
+        <p>选择您要转换为PPT的视频文件</p>
+        <label
+for="video-file-input" class="sr-only"
+>选择视频文件</label>
+        <input
+          id="video-file-input"
+          type="file"
+          accept="video/*"
+          class="file-input"
+          aria-describedby="upload-description"
+          @change="handleFileSelect"
+        />
+        <div
+id="upload-description" class="sr-only"
+>
+          支持MP4、AVI、MOV等常见视频格式，文件大小不超过500MB
+        </div>
+      </div>
+    </section>
+
+    <!-- 视频编辑区域 -->
+    <main
+v-else class="editor-section"
+role="main" aria-labelledby="editor-heading"
+>
+      <div class="editor-layout">
+        <!-- 左侧工具栏 -->
+        <aside
+class="left-panel" role="complementary"
+aria-label="编辑工具面板"
+>
+          <section
+class="panel-section" role="region"
+aria-labelledby="template-section-heading"
+>
+            <h4 id="template-section-heading">🎨 模板选择</h4>
+            <TemplateSelector @template-selected="handleTemplateSelected" />
+          </section>
+
+          <section
+class="panel-section" role="region"
+aria-labelledby="adjustment-section-heading"
+>
+            <h4 id="adjustment-section-heading">⚙️ 参数调整</h4>
+            <UserAdjustmentPanel
+              v-if="selectedTemplate"
+              :template="selectedTemplate"
+              :aria-label="`调整 ${selectedTemplate?.name || '选中模板'} 的参数`"
+              @adjustment-changed="handleAdjustmentChanged"
+            />
+          </section>
+        </aside>
+
+        <!-- 主编辑区 -->
+        <section
+class="main-editor" role="region"
+aria-labelledby="editor-heading"
+>
+          <h2
+id="editor-heading" class="sr-only">视频编辑主区域</h2>
+
+          <div class="canvas-container">
+            <canvas
+              ref="canvasRef"
+              :width="canvasWidth"
+              :height="canvasHeight"
+              class="editor-canvas"
+              role="img"
+              :aria-label="`视频编辑画布，尺寸 ${canvasWidth}x${canvasHeight}`"
+              tabindex="0"
+              @keydown="handleCanvasKeydown"
+            />
+
+            <!-- 画中画控制 -->
+            <div
+v-if="pipEnabled" class="pip-controls"
+role="region" aria-label="画中画效果控制"
+>
+              <PictureInPicture
+                :video-element="videoElement"
+                :pip-element="pipElement"
+                :enabled="pipEnabled"
+                :position="pipPosition"
+                :size="pipSize"
+                :style="pipStyle"
+              />
+            </div>
+          </div>
+
+          <!-- 动画控制 -->
+          <section
+class="animation-controls" role="region"
+aria-labelledby="animation-heading"
+>
+            <h3
+id="animation-heading" class="sr-only">动画效果控制</h3>
+            <AnimationSystem
+              :video-element="videoElement"
+              :text-elements="textElements"
+              aria-label="视频动画效果控制系统"
+              @animation-start="handleAnimationStart"
+              @animation-end="handleAnimationEnd"
+            />
+          </section>
+        </section>
+      </div>
+
+      <!-- 右侧素材面板 -->
+      <aside
+class="right-panel" role="complementary"
+aria-label="素材和监控面板"
+>
+        <!-- 暂时注释掉AssetBrowser以避免初始化错误 -->
+        <!-- <section
+class="panel-section" role="region"
+aria-labelledby="asset-section-heading"
+>
+          <h4 id="asset-section-heading">🖼️ 素材浏览器</h4>
+          <AssetBrowser
+            aria-label="素材资源浏览器和选择器"
+            @asset-selected="handleAssetSelected"
+            @asset-previewed="handleAssetPreviewed"
+          />
+        </section> -->
+
+        <section
+class="panel-section" role="region"
+aria-labelledby="monitor-section-heading"
+>
+          <h4 id="monitor-section-heading">📊 性能监控</h4>
+          <PerformanceMonitor
+            :auto-start="true"
+            :update-interval="2000"
+            aria-label="系统性能实时监控面板"
+            @performance-alert="handlePerformanceAlert"
+            @metrics-updated="handleMetricsUpdated"
+          />
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <!-- 底部控制栏 -->
+  <footer
+class="bottom-toolbar" role="toolbar"
+aria-label="编辑器操作控制栏"
+>
+    <button
+      class="export-btn"
+      aria-label="导出演示结果"
+      :aria-describedby="exportStatus ? 'export-status' : undefined"
+      @click="openExportDialog"
+    >
+      导出
+    </button>
+    <div
+v-if="exportStatus" id="export-status"
+class="sr-only" aria-live="polite"
+>
+      {{ exportStatus }}
+    </div>
+    <button
+class="preview-btn" @click="previewPPT">预览</button>
+    <button
+class="reset-btn" @click="resetAll">重置</button>
+  </footer>
+
+  <!-- 导出对话框 -->
+  <ExportDialog
+    :visible="showExportDialog"
+    :canvas="canvasRef"
+    :slides="exportSlides"
+    @close="closeExportDialog"
+    @export-complete="handleExportComplete"
+  />
+</template>

@@ -195,6 +195,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import TemplateSelector from '../components/templates/TemplateSelector.vue'
+import UserAdjustmentPanel from '../components/UserAdjustmentPanel.vue'
+import PictureInPicture from '../components/PictureInPicture.vue'
+import AnimationSystem from '../components/AnimationSystem.vue'
+import AssetBrowser from '../components/AssetBrowser.vue'
+import PerformanceMonitor from '../components/PerformanceMonitor.vue'
+import ExportDialog from '../components/ExportDialog.vue'
 
 // 响应式状态
 const activePanelTab = ref('template')
@@ -256,10 +263,15 @@ const currentProgress = ref(30)
 // 计算属性
 const progressPercent = computed(() => currentProgress.value)
 
+// 核心服务实例
+const templateRenderer = ref(null)
+const materialService = ref(null)
+const backgroundRemovalService = ref(null)
+const aiService = ref(null)
+
 // 方法 - 工具栏操作
 const newProject = () => {
   console.log('🆕 新建项目')
-  // 实现新建项目逻辑
   resetWorkspace()
 }
 
@@ -275,7 +287,6 @@ const saveProject = () => {
 
 const uploadVideo = () => {
   console.log('🎥 上传视频')
-  // 实现视频上传逻辑
   triggerFileInput()
 }
 
@@ -311,11 +322,9 @@ const selectTemplateById = (templateId) => {
 
 const renderTemplate = (template) => {
   console.log('🎨 渲染模板:', template.name)
-  try {
-    // 这里应该调用实际的模板渲染服务
-    console.log('✅ 模板渲染完成 (占位符)')
-  } catch (error) {
-    console.error('❌ 模板渲染失败:', error)
+  // 这里应该调用 TemplateRenderer 服务
+  if (templateRenderer.value) {
+    templateRenderer.value.renderTemplate(template)
   }
 }
 
@@ -356,22 +365,18 @@ const optimize = () => {
 // 动画方法
 const addFadeAnimation = () => {
   console.log('🎬 添加淡入动画')
-  console.log('✅ 淡入动画添加完成 (占位符)')
 }
 
 const addSlideAnimation = () => {
   console.log('🎬 添加滑入动画')
-  console.log('✅ 滑入动画添加完成 (占位符)')
 }
 
 const addZoomAnimation = () => {
   console.log('🎬 添加缩放动画')
-  console.log('✅ 缩放动画添加完成 (占位符)')
 }
 
 const clearAnimations = () => {
   console.log('🎬 清除所有动画')
-  console.log('✅ 所有动画已清除 (占位符)')
 }
 
 // 时间线方法
@@ -418,11 +423,9 @@ const handleFileSelect = (event) => {
 
 const processVideoFile = (file) => {
   console.log('🎬 处理视频文件:', file.name)
-  try {
-    // 这里应该调用背景移除服务处理视频
-    console.log('✅ 视频处理完成 (占位符)')
-  } catch (error) {
-    console.error('❌ 视频处理失败:', error)
+  // 这里应该调用 BackgroundRemovalService 或其他相关服务
+  if (backgroundRemovalService.value) {
+    backgroundRemovalService.value.processVideo(file)
   }
 }
 
@@ -447,22 +450,16 @@ onMounted(() => {
   console.log('✅ 基于苹果风格设计的三栏布局')
   console.log('✅ 工具栏 + 主编辑区 + 属性面板 + 时间线')
 
-  // 加载初始模板
-  loadInitialTemplate()
-})
+  // 初始化核心服务
+  console.log('🔧 初始化核心服务...')
+  // 这里需要实际导入和初始化服务
+  // templateRenderer.value = new TemplateRenderer()
+  // materialService.value = new MaterialService()
+  // backgroundRemovalService.value = new BackgroundRemovalService()
+  // aiService.value = new AIService()
 
-// 加载初始模板
-const loadInitialTemplate = () => {
-  try {
-    const initialTemplate = templates.value.find(t => t.id === selectedTemplateId.value)
-    if (initialTemplate) {
-      renderTemplate(initialTemplate)
-      console.log('✅ 初始模板加载完成')
-    }
-  } catch (error) {
-    console.error('❌ 初始模板加载失败:', error)
-  }
-}
+  console.log('✅ 核心服务初始化完成')
+})
 </script>
 
 <style scoped>
@@ -485,7 +482,7 @@ body {
   overflow: hidden;
 }
 
-/* 标题栏 */
+/* 顶部标题栏 */
 .title-bar {
   height: 40px;
   background: #2A2A2A;
@@ -493,7 +490,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 20px;
-  -webkit-app-region: drag; /* 使整个标题栏可拖动 */
+  -webkit-app-region: drag;
 }
 
 .title-bar h1 {
@@ -505,8 +502,8 @@ body {
 /* 主工作区 - 三栏布局 */
 .workspace {
   display: grid;
-  grid-template-columns: 64px 1fr 320px; /* 左侧工具栏，主编辑区，右侧属性面板 */
-  height: calc(100vh - 40px); /* 减去标题栏高度 */
+  grid-template-columns: 64px 1fr 320px;
+  height: calc(100vh - 40px);
 }
 
 /* 左侧工具栏 */
@@ -630,13 +627,13 @@ body {
   transition: all 0.2s ease;
 }
 
-.panel-tab:hover {
-  color: #FFFFFF;
-}
-
 .panel-tab.active {
   background: #007AFF;
   color: #FFFFFF;
+}
+
+.panel-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .panel-content {
@@ -647,72 +644,66 @@ body {
 
 .property-group {
   margin-bottom: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
-  border-radius: 8px;
 }
 
 .property-group h3 {
   font-size: 14px;
+  font-weight: 600;
   color: #FFFFFF;
   margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 8px;
 }
 
 /* 模板选择器 */
 .template-selector {
   display: grid;
-  grid-template-columns: 1fr; /* 单列布局 */
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
 
 .template-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #404040;
   border-radius: 8px;
-  padding: 12px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  text-align: left;
+  border: 2px solid transparent;
 }
 
 .template-card:hover {
-  background: rgba(0, 122, 255, 0.2);
+  background: #505050;
   border-color: #007AFF;
 }
 
 .template-card.selected {
-  background: #007AFF;
   border-color: #007AFF;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+  background: rgba(0, 122, 255, 0.1);
 }
 
 .template-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: #FFFFFF;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .template-desc {
-  font-size: 11px;
+  font-size: 14px;
   color: #CCCCCC;
 }
 
 /* 样式控制 */
 .style-controls,
-.animation-controls,
-.ai-assistant {
+.animation-controls {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .control-item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .control-item label {
@@ -720,61 +711,44 @@ body {
   color: #CCCCCC;
 }
 
-.control-item input[type="range"],
-.control-item select {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  padding: 6px 8px;
+.control-item select,
+.control-item input {
+  padding: 8px 12px;
+  background: #404040;
+  border: 1px solid #606060;
+  border-radius: 6px;
   color: #FFFFFF;
-  font-size: 12px;
-  -webkit-appearance: none; /* 移除默认样式 */
-  appearance: none;
+  font-size: 14px;
 }
 
-.control-item input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #007AFF;
-  cursor: pointer;
-  border: 2px solid #FFFFFF;
-  margin-top: -6px; /* 居中滑块 */
-}
-
-.control-item input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #007AFF;
-  cursor: pointer;
-  border: 2px solid #FFFFFF;
-}
-
-.control-item select option {
-  background: #2A2A2A;
-  color: #FFFFFF;
+.control-item select:focus,
+.control-item input:focus {
+  outline: none;
+  border-color: #007AFF;
 }
 
 .control-btn {
-  padding: 8px 12px;
-  background: rgba(0, 122, 255, 0.6);
+  padding: 10px 16px;
+  background: #007AFF;
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .control-btn:hover {
-  background: #007AFF;
+  background: #0056CC;
 }
 
 /* AI助手 */
+.ai-assistant {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .ai-suggestions {
   display: flex;
   flex-direction: column;
@@ -782,15 +756,14 @@ body {
 }
 
 .suggestion-item {
-  background: rgba(52, 199, 89, 0.1);
-  border: 1px solid rgba(52, 199, 89, 0.3);
-  border-radius: 6px;
-  padding: 10px;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  color: #34C759;
+  padding: 12px;
+  background: #404040;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #FFFFFF;
 }
 
 .suggestion-icon {
@@ -799,43 +772,41 @@ body {
 
 /* 时间线 */
 .timeline {
-  height: 120px;
   background: #2A2A2A;
   border-top: 1px solid #404040;
+  grid-column: 1 / -1;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding: 0 20px;
+  gap: 20px;
+  height: 120px;
 }
 
 .timeline-track {
-  width: 100%;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  flex: 1;
+  height: 40px;
+  background: #404040;
+  border-radius: 4px;
   position: relative;
-  margin-bottom: 12px;
   cursor: pointer;
 }
 
 .timeline-progress {
   height: 100%;
   background: #007AFF;
-  border-radius: 10px;
-  width: 0%;
-  transition: width 0.1s linear;
+  border-radius: 4px;
+  transition: width 0.2s ease;
 }
 
 .timeline-marker {
   position: absolute;
-  top: -5px;
-  width: 4px;
-  height: 30px;
-  background: #FF3B30;
+  top: -6px;
+  width: 12px;
+  height: 52px;
+  background: #FF6B35;
   border-radius: 2px;
   cursor: pointer;
-  border: 1px solid #FFFFFF;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  border: 2px solid #FFFFFF;
 }
 
 .timeline-controls {
@@ -852,85 +823,61 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
+  transition: all 0.2s ease;
 }
 
 .timeline-btn:hover {
   background: #0056CC;
 }
 
-.timeline-controls span {
-  font-size: 12px;
-  color: #CCCCCC;
+.timeline-btn:disabled {
+  background: #404040;
+  cursor: not-allowed;
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .workspace {
-    grid-template-columns: 64px 1fr; /* 隐藏右侧面板 */
+    grid-template-columns: 64px 1fr 280px;
   }
 
   .properties-panel {
-    display: none; /* 默认隐藏 */
-  }
-
-  .main-canvas {
-    grid-column: 2 / 3;
+    width: 280px;
   }
 }
 
 @media (max-width: 768px) {
   .workspace {
-    grid-template-columns: 1fr; /* 单列布局 */
-    grid-template-rows: auto 1fr auto; /* 工具栏、主编辑区、时间线 */
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
   }
 
   .toolbar {
     flex-direction: row;
-    flex-wrap: wrap;
     height: auto;
-    border-right: none;
-    border-bottom: 1px solid #404040;
     padding: 10px;
-    justify-content: center;
+    overflow-x: auto;
   }
 
   .tool-group {
     flex-direction: row;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .tool-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
   }
 
   .main-canvas {
-    grid-row: 2 / 3;
+    grid-row: 2;
+  }
+
+  .properties-panel {
+    height: 300px;
+    grid-row: 3;
   }
 
   .timeline {
-    grid-row: 3 / 4;
-    padding: 10px;
-    height: 100px;
-  }
-
-  .timeline-track {
-    height: 15px;
-  }
-
-  .timeline-marker {
-    height: 25px;
-    top: -5px;
-  }
-
-  .timeline-controls {
-    justify-content: center;
+    height: 80px;
   }
 
   .title-bar {
-    padding: 0 10px;
+    padding: 0 15px;
   }
 
   .title-bar h1 {

@@ -107,7 +107,12 @@ export class TemplateEngineFactory {
   }
 }
 
-// 默认导出
+// 默认导出 - 动态导入所有组件
+const TemplateRenderer = (await import('./TemplateRenderer.js')).default
+const TemplateParser = (await import('./TemplateParser.js')).default
+const VisualEffects = (await import('./VisualEffects.js')).default
+const ConstraintSystem = (await import('./ConstraintSystem.js')).default
+
 export default {
   TemplateRenderer,
   TemplateParser,

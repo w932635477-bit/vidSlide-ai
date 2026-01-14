@@ -248,11 +248,19 @@ class FaceTrackingValidator {
         return
       }
 
+      // 默认跳过OpenCV加载以避免WebAssembly冲突
+      console.log('⚠️ OpenCV.js已跳过加载（避免WebAssembly冲突）')
+      resolve()
+      return
+
+      // 如果需要测试OpenCV，取消上面的注释
+      /*
       const script = document.createElement('script')
       script.src = 'https://docs.opencv.org/4.8.0/opencv.js'
       script.onload = resolve
       script.onerror = reject
       document.head.appendChild(script)
+      */
     })
   }
 

@@ -182,8 +182,9 @@ class UIIntegrityChecker {
     for (const [fileName, config] of Object.entries(checks)) {
       console.log(`📄 检查文件: ${fileName}`);
 
-      // fileName已经是完整路径
-      const isValid = this.checkFileIntegrity(fileName, config);
+      // 检查src/views目录下的文件
+      const filePath = path.join('src', 'views', fileName);
+      const isValid = this.checkFileIntegrity(filePath, config);
 
       if (isValid) {
         console.log(`✅ ${fileName} 完整性正常`);

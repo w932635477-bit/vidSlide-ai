@@ -3,6 +3,7 @@
 
 <!-- InfoCardTemplate 组件模板 -->
 <template>
+  <div role="region" :aria-label="templateDescription">
   <div class="info-card-template" :style="{ width: slideWidth + 'px', height: slideHeight + 'px' }">
     <!-- 背景装饰 -->
     <div class="background-decoration">
@@ -47,6 +48,7 @@
     <div v-if="showSource" class="data-source">
       <span>数据来源: {{ dataSource || 'VidSlide AI 分析' }}</span>
     </div>
+  </div>
   </div>
 </template>
 
@@ -128,6 +130,11 @@ export default {
     dataSource: {
       type: String,
       default: ''
+    },
+    // 无障碍访问描述
+    templateDescription: {
+      type: String,
+      default: '信息卡片模板 - 数据可视化展示'
     }
   },
   computed: {
