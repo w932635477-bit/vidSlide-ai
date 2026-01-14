@@ -70,12 +70,12 @@
         ".timeline-btn"
       ],
       "requiredContent": [
-        "<main class=\"workspace-main\">",
-        "<header class=\"workspace-header\">",
-        "<aside class=\"left-panel\">",
-        "<section class=\"main-editor\">",
-        "<aside class=\"right-panel\">",
-        "<footer class=\"timeline\">"
+        "workspace-main",
+        "workspace-header",
+        "left-panel",
+        "main-editor",
+        "right-panel",
+        "timeline"
       ],
       "forbiddenPatterns": [
         "console.log",

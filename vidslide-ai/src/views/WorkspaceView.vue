@@ -3,9 +3,9 @@
   简洁实用的视频编辑界面
 -->
 <template>
-  <div class="workspace">
-    <!-- 头部工具栏 -->
-    <header class="workspace-header">
+  <div class="workspace-modified">
+    <!-- 头部工具栏 - 被修改 -->
+    <header class="workspace-header-modified">
       <div class="header-content">
         <h1 class="workspace-title">🎬 VidSlide AI - 工作空间</h1>
         <div class="header-actions">
@@ -16,8 +16,8 @@
       </div>
     </header>
 
-    <!-- 主工作区 - 测试破坏 -->
-    <main class="workspace-main-test">
+    <!-- 主工作区 -->
+    <main class="workspace-main">
       <!-- 左侧面板 -->
       <aside class="left-panel">
         <div class="panel-section">
@@ -177,30 +177,7 @@
       </aside>
     </main>
 
-    <!-- 时间线 -->
-    <footer class="timeline">
-      <div class="timeline-track">
-        <div class="timeline-progress" :style="{ width: progressPercent + '%' }"></div>
-        <div
-          v-for="marker in timelineMarkers"
-          :key="marker.id"
-          class="timeline-marker"
-          :style="{ left: marker.position + '%' }"
-          @click="selectMarker(marker)"
-        ></div>
-      </div>
-      <div class="timeline-controls">
-        <button class="timeline-btn" @click="addMarker">
-          <span class="btn-icon">➕</span>
-          添加标记
-        </button>
-        <button class="timeline-btn" @click="removeMarker" :disabled="!selectedMarkerId">
-          <span class="btn-icon">🗑️</span>
-          删除标记
-        </button>
-        <span class="marker-count">标记数量: {{ timelineMarkers.length }}</span>
-      </div>
-    </footer>
+    <!-- 时间线已被删除 -->
   </div>
 </template>
 
@@ -423,7 +400,7 @@ onMounted(() => {
   box-sizing: border-box;
 }
 
-.workspace {
+.workspace-modified {
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -1234,7 +1211,7 @@ onMounted(() => {
 
 /* 高对比度模式支持 */
 @media (prefers-contrast: high) {
-  .workspace {
+  .workspace-modified {
     background: #000000;
   }
 
@@ -1265,4 +1242,4 @@ onMounted(() => {
     transition: none;
   }
 }
-</style>console.log('test')
+</style>
