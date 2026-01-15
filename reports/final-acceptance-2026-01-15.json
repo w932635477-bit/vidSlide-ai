@@ -1,0 +1,108 @@
+{
+  "scenarios": [
+    {
+      "name": "新用户首次访问",
+      "status": "fail",
+      "details": {
+        "message": "首页缺少关键元素",
+        "details": "检查结果: {\"title\":true,\"hero\":false,\"cta\":false,\"langSwitch\":false}"
+      },
+      "timestamp": "2026-01-15T03:56:55.404Z"
+    },
+    {
+      "name": "工作页面导航",
+      "status": "fail",
+      "details": {
+        "message": "工作页面缺少关键功能区域",
+        "details": "检查结果: {\"header\":false,\"upload\":false,\"timeline\":false,\"export\":false,\"panels\":false}"
+      },
+      "timestamp": "2026-01-15T03:56:55.407Z"
+    },
+    {
+      "name": "多语言切换",
+      "status": "warning",
+      "details": {
+        "message": "多语言支持基础完整 (检测到2个语言包)",
+        "details": "翻译文件存在，可能存在部分翻译键缺失，但不影响核心功能"
+      },
+      "timestamp": "2026-01-15T03:56:55.408Z"
+    },
+    {
+      "name": "视频上传流程",
+      "status": "pass",
+      "details": {
+        "message": "视频上传功能完整 (100%实现率)",
+        "details": "包含拖拽上传、文件验证、进度显示、用户反馈等核心功能"
+      },
+      "timestamp": "2026-01-15T03:56:55.408Z"
+    },
+    {
+      "name": "时间轴交互",
+      "status": "warning",
+      "details": {
+        "message": "时间轴功能需要完善 (67%实现率)",
+        "details": "缺少部分功能: progress, accessibility"
+      },
+      "timestamp": "2026-01-15T03:56:55.408Z"
+    },
+    {
+      "name": "导出功能",
+      "status": "warning",
+      "details": {
+        "message": "导出功能需要完善 (86%实现率)",
+        "details": "缺少部分功能: validation"
+      },
+      "timestamp": "2026-01-15T03:56:55.409Z"
+    },
+    {
+      "name": "错误处理体验",
+      "status": "pass",
+      "details": {
+        "message": "错误处理机制完善 (100%实现率)",
+        "details": "包含全局捕获、错误分类、用户界面、恢复机制等"
+      },
+      "timestamp": "2026-01-15T03:56:55.409Z"
+    },
+    {
+      "name": "性能表现",
+      "status": "pass",
+      "details": {
+        "message": "组件性能优秀 (平均21.1KB，最大34.8KB)",
+        "details": "所有组件大小合理，无明显性能瓶颈"
+      },
+      "timestamp": "2026-01-15T03:56:55.409Z"
+    },
+    {
+      "name": "用户体验评估",
+      "status": "pass",
+      "details": {
+        "message": "用户体验卓越 (100.0分)",
+        "details": "设计一致性100.0分，代码质量100.0分"
+      },
+      "timestamp": "2026-01-15T03:56:55.409Z"
+    }
+  ],
+  "performance": {
+    "componentSizes": {
+      "VideoUploader.vue": 13.3,
+      "Timeline.vue": 21,
+      "ProgressIndicator.vue": 16.7,
+      "ExportHandler.vue": 20,
+      "ErrorHandler.vue": 20.6,
+      "WorkspaceView.vue": 34.8
+    },
+    "avgSize": 21.066666666666666,
+    "maxSize": 34.8,
+    "assessment": "excellent"
+  },
+  "userExperience": {
+    "designScore": 100,
+    "qualityScore": 100,
+    "overallScore": 100,
+    "assessment": "excellent"
+  },
+  "overall": {
+    "status": "rejected",
+    "message": "项目验收未通过，需要修复关键问题"
+  }
+}

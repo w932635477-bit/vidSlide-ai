@@ -1,0 +1,189 @@
+{
+  "passed": 24,
+  "failed": 2,
+  "warnings": 0,
+  "tests": [
+    {
+      "name": "组件文件存在: VideoUploader.vue",
+      "status": "pass",
+      "message": "13.3KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.554Z"
+    },
+    {
+      "name": "组件文件存在: TemplateSelector.vue",
+      "status": "pass",
+      "message": "11.1KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: PictureInPicture.vue",
+      "status": "pass",
+      "message": "23.2KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: Timeline.vue",
+      "status": "pass",
+      "message": "21.0KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: UserAdjustmentPanel.vue",
+      "status": "pass",
+      "message": "30.1KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: ProgressIndicator.vue",
+      "status": "pass",
+      "message": "16.7KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: ExportHandler.vue",
+      "status": "pass",
+      "message": "20.0KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: ErrorHandler.vue",
+      "status": "pass",
+      "message": "20.6KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件文件存在: WorkspaceView.vue",
+      "status": "pass",
+      "message": "35.0KB",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件结构: VideoUploader.vue",
+      "status": "pass",
+      "message": "结构完整",
+      "details": "Template: ✅, Script: ✅, Name: ✅",
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件结构: Timeline.vue",
+      "status": "pass",
+      "message": "结构完整",
+      "details": "Template: ✅, Script: ✅, Name: ✅",
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件结构: ProgressIndicator.vue",
+      "status": "pass",
+      "message": "结构完整",
+      "details": "Template: ✅, Script: ✅, Name: ✅",
+      "timestamp": "2026-01-15T03:35:29.555Z"
+    },
+    {
+      "name": "组件结构: ExportHandler.vue",
+      "status": "pass",
+      "message": "结构完整",
+      "details": "Template: ✅, Script: ✅, Name: ✅",
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "组件结构: ErrorHandler.vue",
+      "status": "pass",
+      "message": "结构完整",
+      "details": "Template: ✅, Script: ✅, Name: ✅",
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "组件结构: WorkspaceView.vue",
+      "status": "pass",
+      "message": "结构完整",
+      "details": "Template: ✅, Script: ✅, Name: ✅",
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "多语言支持",
+      "status": "pass",
+      "message": "支持 5 种语言",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "翻译键完整性",
+      "status": "fail",
+      "message": "缺少 3 个翻译键",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "组件导入",
+      "status": "pass",
+      "message": "所有必需组件都已导入",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "组件注册",
+      "status": "fail",
+      "message": "缺少 4 个组件注册",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "响应式数据",
+      "status": "pass",
+      "message": "所有必需数据都已定义",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "事件处理",
+      "status": "pass",
+      "message": "包含事件处理逻辑",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "样式完整性: VideoUploader.vue",
+      "status": "pass",
+      "message": "样式完整",
+      "details": "响应式: ✅, 弹性布局: ✅",
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "样式完整性: Timeline.vue",
+      "status": "pass",
+      "message": "样式完整",
+      "details": "响应式: ✅, 弹性布局: ✅",
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "样式完整性: WorkspaceView.vue",
+      "status": "pass",
+      "message": "样式完整",
+      "details": "响应式: ✅, 弹性布局: ✅",
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "路由配置",
+      "status": "pass",
+      "message": "工作页面路由已配置",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.556Z"
+    },
+    {
+      "name": "错误处理",
+      "status": "pass",
+      "message": "错误处理功能完整",
+      "details": null,
+      "timestamp": "2026-01-15T03:35:29.557Z"
+    }
+  ]
+}

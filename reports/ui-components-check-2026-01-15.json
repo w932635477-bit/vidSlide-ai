@@ -1,0 +1,363 @@
+{
+  "summary": {
+    "total": 9,
+    "existing": 9,
+    "missing": 0,
+    "valid": 1,
+    "invalid": 8
+  },
+  "components": {
+    "VideoUploader.vue": {
+      "type": "核心组件",
+      "priority": "P0",
+      "description": "视频上传组件",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/VideoUploader.vue",
+        "size": 13597,
+        "lastModified": "2026-01-15T03:24:04.376Z",
+        "sizeKB": "13.3"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": false,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 663,
+          "hasComments": true
+        },
+        "score": 7,
+        "maxScore": 9,
+        "quality": 0.7777777777777778,
+        "recommendations": [
+          "添加组件name属性"
+        ]
+      }
+    },
+    "TemplateSelector.vue": {
+      "type": "核心组件",
+      "priority": "P0",
+      "description": "模板选择组件",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/TemplateSelector.vue",
+        "size": 11347,
+        "lastModified": "2026-01-13T05:20:59.412Z",
+        "sizeKB": "11.1"
+      },
+      "quality": {
+        "valid": true,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": true,
+          "hasProps": true,
+          "hasEmits": false,
+          "hasExport": true,
+          "linesCount": 520,
+          "hasComments": false
+        },
+        "score": 7,
+        "maxScore": 9,
+        "quality": 0.7777777777777778,
+        "recommendations": [
+          "添加必要的注释"
+        ]
+      }
+    },
+    "PictureInPicture.vue": {
+      "type": "核心组件",
+      "priority": "P0",
+      "description": "画中画组件",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/PictureInPicture.vue",
+        "size": 23711,
+        "lastModified": "2026-01-15T03:24:04.376Z",
+        "sizeKB": "23.2"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": true,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 1084,
+          "hasComments": true
+        },
+        "score": 8,
+        "maxScore": 9,
+        "quality": 0.8888888888888888,
+        "recommendations": []
+      }
+    },
+    "Timeline.vue": {
+      "type": "核心组件",
+      "priority": "P0",
+      "description": "时间轴组件",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/Timeline.vue",
+        "size": 21497,
+        "lastModified": "2026-01-15T03:24:04.376Z",
+        "sizeKB": "21.0"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": false,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 962,
+          "hasComments": true
+        },
+        "score": 7,
+        "maxScore": 9,
+        "quality": 0.7777777777777778,
+        "recommendations": [
+          "添加组件name属性"
+        ]
+      }
+    },
+    "UserAdjustmentPanel.vue": {
+      "type": "核心组件",
+      "priority": "P0",
+      "description": "用户调整面板",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/UserAdjustmentPanel.vue",
+        "size": 30793,
+        "lastModified": "2026-01-15T03:24:04.377Z",
+        "sizeKB": "30.1"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": true,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 1308,
+          "hasComments": true
+        },
+        "score": 8,
+        "maxScore": 9,
+        "quality": 0.8888888888888888,
+        "recommendations": []
+      }
+    },
+    "ProgressIndicator.vue": {
+      "type": "辅助组件",
+      "priority": "P1",
+      "description": "进度指示器",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/ProgressIndicator.vue",
+        "size": 17104,
+        "lastModified": "2026-01-15T03:24:04.381Z",
+        "sizeKB": "16.7"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": false,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 793,
+          "hasComments": true
+        },
+        "score": 7,
+        "maxScore": 9,
+        "quality": 0.7777777777777778,
+        "recommendations": [
+          "添加组件name属性"
+        ]
+      }
+    },
+    "ExportHandler.vue": {
+      "type": "辅助组件",
+      "priority": "P1",
+      "description": "导出处理器",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/ExportHandler.vue",
+        "size": 20438,
+        "lastModified": "2026-01-15T03:26:01.457Z",
+        "sizeKB": "20.0"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": true,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 907,
+          "hasComments": true
+        },
+        "score": 8,
+        "maxScore": 9,
+        "quality": 0.8888888888888888,
+        "recommendations": []
+      }
+    },
+    "ErrorHandler.vue": {
+      "type": "辅助组件",
+      "priority": "P1",
+      "description": "错误处理器",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "/Users/weilei/VidSlide AI/vidslide-ai/src/components/ErrorHandler.vue",
+        "size": 21096,
+        "lastModified": "2026-01-15T03:26:40.596Z",
+        "sizeKB": "20.6"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": false,
+          "hasProps": true,
+          "hasEmits": true,
+          "hasExport": false,
+          "linesCount": 977,
+          "hasComments": true
+        },
+        "score": 7,
+        "maxScore": 9,
+        "quality": 0.7777777777777778,
+        "recommendations": [
+          "添加组件name属性"
+        ]
+      }
+    },
+    "WorkspaceView.vue": {
+      "type": "视图组件",
+      "priority": "P0",
+      "description": "工作页面主视图",
+      "path": "vidslide-ai/src/views/WorkspaceView.vue",
+      "required": true,
+      "existence": {
+        "exists": true,
+        "path": "vidslide-ai/src/views/WorkspaceView.vue",
+        "size": 35021,
+        "lastModified": "2026-01-15T01:13:25.908Z",
+        "sizeKB": "34.2"
+      },
+      "quality": {
+        "valid": false,
+        "checks": {
+          "hasTemplate": true,
+          "hasScript": true,
+          "hasStyle": true,
+          "hasName": true,
+          "hasProps": false,
+          "hasEmits": false,
+          "hasExport": false,
+          "linesCount": 1506,
+          "hasComments": true
+        },
+        "score": 6,
+        "maxScore": 9,
+        "quality": 0.6666666666666666,
+        "recommendations": [
+          "考虑使用Composition API"
+        ]
+      }
+    }
+  },
+  "issues": [
+    {
+      "type": "invalid_component",
+      "component": "VideoUploader.vue",
+      "priority": "P0",
+      "recommendations": [
+        "添加组件name属性"
+      ]
+    },
+    {
+      "type": "invalid_component",
+      "component": "PictureInPicture.vue",
+      "priority": "P0",
+      "recommendations": []
+    },
+    {
+      "type": "invalid_component",
+      "component": "Timeline.vue",
+      "priority": "P0",
+      "recommendations": [
+        "添加组件name属性"
+      ]
+    },
+    {
+      "type": "invalid_component",
+      "component": "UserAdjustmentPanel.vue",
+      "priority": "P0",
+      "recommendations": []
+    },
+    {
+      "type": "invalid_component",
+      "component": "ProgressIndicator.vue",
+      "priority": "P1",
+      "recommendations": [
+        "添加组件name属性"
+      ]
+    },
+    {
+      "type": "invalid_component",
+      "component": "ExportHandler.vue",
+      "priority": "P1",
+      "recommendations": []
+    },
+    {
+      "type": "invalid_component",
+      "component": "ErrorHandler.vue",
+      "priority": "P1",
+      "recommendations": [
+        "添加组件name属性"
+      ]
+    },
+    {
+      "type": "invalid_component",
+      "component": "WorkspaceView.vue",
+      "priority": "P0",
+      "recommendations": [
+        "考虑使用Composition API"
+      ]
+    }
+  ]
+}

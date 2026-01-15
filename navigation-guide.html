@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VidSlide AI 导航指南</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            min-height: 100vh;
+        }
+        .nav-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .nav-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .nav-header h1 {
+            color: #007aff;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .nav-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .page-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .page-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #007aff;
+        }
+        .page-card.recommended {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #f8f9fa 100%);
+        }
+        .page-card.recommended:hover {
+            border-color: #28a745;
+        }
+        .page-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        .page-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .page-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .page-features {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .page-features h4 {
+            margin-bottom: 10px;
+            color: #007aff;
+            font-size: 1em;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 5px 0;
+            color: #555;
+            font-size: 0.9em;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .nav-btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .nav-btn:hover {
+            background: #0056cc;
+        }
+        .nav-btn.secondary {
+            background: #6c757d;
+        }
+        .nav-btn.secondary:hover {
+            background: #545b62;
+        }
+        .nav-btn.success {
+            background: #28a745;
+        }
+        .nav-btn.success:hover {
+            background: #218838;
+        }
+        .status-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .status-info h3 {
+            margin-top: 0;
+            color: #007aff;
+        }
+        .server-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online {
+            background: #28a745;
+        }
+        .status-offline {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <div class="nav-header">
+            <h1>🎯 VidSlide AI 导航指南</h1>
+            <p>请选择您要访问的页面来体验不同的功能</p>
+        </div>
+
+        <div class="page-grid">
+            <!-- 主页 -->
+            <div class="page-card" onclick="navigateTo('/')">
+                <div class="page-icon">🏠</div>
+                <div class="page-title">VidSlide AI 主页</div>
+                <div class="page-description">
+                    产品介绍、功能展示和用户引导的入口页面
+                </div>
+                <div class="page-features">
+                    <h4>主要功能：</h4>
+                    <ul class="feature-list">
+                        <li>产品特点展示</li>
+                        <li>用户注册登录</li>
+                        <li>多语言支持</li>
+                        <li>响应式设计</li>
+                    </ul>
+                </div>
+                <button class="nav-btn" onclick="navigateTo('/')">访问主页</button>
+            </div>
+
+            <!-- 编辑器页面 -->
+            <div class="page-card recommended" onclick="navigateTo('/editor')">
+                <div class="page-icon">🎬</div>
+                <div class="page-title">视频编辑器 ⭐</div>
+                <div class="page-description">
+                    核心功能页面：视频上传、模板选择、参数调整
+                </div>
+                <div class="page-features">
+                    <h4>核心功能：</h4>
+                    <ul class="feature-list">
+                        <li>视频文件上传</li>
+                        <li>智能模板选择</li>
+                        <li>参数实时调整</li>
+                        <li>画中画效果</li>
+                        <li>导出多种格式</li>
+                    </ul>
+                </div>
+                <button class="nav-btn success" onclick="navigateTo('/editor')">进入编辑器</button>
+            </div>
+
+            <!-- 工作空间 -->
+            <div class="page-card" onclick="navigateTo('/workspace')">
+                <div class="page-icon">🛠️</div>
+                <div class="page-title">工作空间</div>
+                <div class="page-description">
+                    高级工作区，支持复杂的编辑操作
+                </div>
+                <div class="page-features">
+                    <h4>高级功能：</h4>
+                    <ul class="feature-list">
+                        <li>批量处理</li>
+                        <li>高级设置</li>
+                        <li>性能监控</li>
+                        <li>历史记录</li>
+                    </ul>
+                </div>
+                <button class="nav-btn" onclick="navigateTo('/workspace')">进入工作空间</button>
+            </div>
+
+            <!-- 调试工具 -->
+            <div class="page-card" onclick="openDebugTools()">
+                <div class="page-icon">🔧</div>
+                <div class="page-title">调试工具</div>
+                <div class="page-description">
+                    UI状态检查和功能测试工具
+                </div>
+                <div class="page-features">
+                    <h4>调试功能：</h4>
+                    <ul class="feature-list">
+                        <li>组件状态检查</li>
+                        <li>事件绑定测试</li>
+                        <li>控制台错误捕获</li>
+                        <li>功能完整性验证</li>
+                    </ul>
+                </div>
+                <button class="nav-btn secondary" onclick="openDebugTools()">打开调试工具</button>
+            </div>
+        </div>
+
+        <!-- 服务器状态 -->
+        <div class="status-info">
+            <h3>🖥️ 服务器状态</h3>
+            <div class="server-status">
+                <span><span class="status-indicator status-online"></span>Vite开发服务器 (5173)</span>
+                <span>运行中 ✅</span>
+            </div>
+            <div class="server-status">
+                <span><span class="status-indicator status-online"></span>HTTP静态服务器 (8080)</span>
+                <span>运行中 ✅</span>
+            </div>
+            <div class="server-status">
+                <span><span class="status-indicator status-offline"></span>科学上网代理 (1080)</span>
+                <span>未运行 ⚠️</span>
+            </div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="status-info">
+            <h3>📋 使用说明</h3>
+            <p><strong>如果视频上传或左侧导航栏不工作：</strong></p>
+            <ol style="color: #555; line-height: 1.6;">
+                <li>确保您访问的是<strong>编辑器页面 (/editor)</strong>，而不是主页</li>
+                <li>点击上方的"进入编辑器"按钮跳转到正确的页面</li>
+                <li>如果仍有问题，请使用"调试工具"检查UI状态</li>
+                <li>检查浏览器控制台是否有JavaScript错误</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        async function checkServerStatus(port) {
+            try {
+                const response = await fetch(`http://localhost:${port}/`, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function navigateTo(path) {
+            window.location.href = `http://localhost:5173${path}`;
+        }
+
+        function openDebugTools() {
+            window.open('http://localhost:8080/ui-status-check.html', '_blank');
+        }
+
+        // 页面加载时检查服务器状态
+        window.addEventListener('load', async function() {
+            const viteStatus = await checkServerStatus(5173);
+            const httpStatus = await checkServerStatus(8080);
+
+            // 更新状态指示器
+            const viteIndicator = document.querySelector('.server-status:nth-child(1) .status-indicator');
+            const httpIndicator = document.querySelector('.server-status:nth-child(2) .status-indicator');
+
+            if (viteStatus) {
+                viteIndicator.className = 'status-indicator status-online';
+                document.querySelector('.server-status:nth-child(1)').innerHTML =
+                    '<span><span class="status-indicator status-online"></span>Vite开发服务器 (5173)</span><span>运行中 ✅</span>';
+            } else {
+                viteIndicator.className = 'status-indicator status-offline';
+                document.querySelector('.server-status:nth-child(1)').innerHTML =
+                    '<span><span class="status-indicator status-offline"></span>Vite开发服务器 (5173)</span><span>未运行 ❌</span>';
+            }
+
+            if (httpStatus) {
+                httpIndicator.className = 'status-indicator status-online';
+                document.querySelector('.server-status:nth-child(2)').innerHTML =
+                    '<span><span class="status-indicator status-online"></span>HTTP静态服务器 (8080)</span><span>运行中 ✅</span>';
+            } else {
+                httpIndicator.className = 'status-indicator status-offline';
+                document.querySelector('.server-status:nth-child(2)').innerHTML =
+                    '<span><span class="status-indicator status-offline"></span>HTTP静态服务器 (8080)</span><span>未运行 ❌</span>';
+            }
+        });
+
+        // 添加键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + 1: 主页
+            if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+                e.preventDefault();
+                navigateTo('/');
+            }
+            // Ctrl/Cmd + 2: 编辑器
+            if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+                e.preventDefault();
+                navigateTo('/editor');
+            }
+            // Ctrl/Cmd + 3: 调试工具
+            if ((e.ctrlKey || e.metaKey) && e.key === '3') {
+                e.preventDefault();
+                openDebugTools();
+            }
+        });
+    </script>
+</body>
+</html>

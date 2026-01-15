@@ -1,0 +1,178 @@
+{
+  "timestamp": "2026-01-15T03:26:45.826Z",
+  "template": {
+    "status": "partial",
+    "template": "\n  <div class=\"workspace\">\n    <!-- 头部工具栏 -->\n    <header class=\"workspace-header\">\n      <div class=\"header-content\">\n        <h1 class=\"workspace-title\">{{ t('workspace.title') }}</h1>\n        <div class=\"header-actions\">\n          <button class=\"header-btn\" @click=\"newProject\">{{ t('workspace.header.newProject') }}</button>\n          <button class=\"header-btn\" @click=\"openProject\">{{ t('workspace.header.openProject') }}</button>\n          <button class=\"header-btn primary\" @click=\"saveProject\">{{ t('workspace.header.save') }}</button>\n        </div>\n      </div>\n    </header>\n\n    <!-- 主工作区 - 被破坏测试 -->\n    <main class=\"workspace-main\">\n      <!-- 左侧面板 -->\n      <aside class=\"left-panel\">\n        <div class=\"panel-section\">\n          <h3 class=\"panel-title\">{{ t('workspace.templates.title') }}</h3>\n          <div class=\"template-list\">\n            <button\n              v-for=\"template in templates\"\n              :key=\"template.id\"\n              class=\"template-btn\"\n              :class=\"{ active: selectedTemplate?.id === template.id }\"\n              @click=\"selectTemplate(template)\"\n            >\n              <span class=\"template-icon\">{{ template.icon }}</span>\n              <div class=\"template-info\">\n                <div class=\"template-name\">{{ template.name }}</div>\n                <div class=\"template-desc\">{{ template.description }}</div>\n              </div>\n            </button>\n          </div>\n        </div>\n\n        <div class=\"panel-section\">\n          <h3 class=\"panel-title\">{{ t('workspace.pip.title') }}</h3>\n          <div class=\"control-group\">\n            <label class=\"control-label\">{{ t('workspace.pip.position') }}</label>\n            <select v-model=\"pipSettings.position\" class=\"control-select\">\n              <option value=\"top-left\">{{ t('workspace.pip.positions.topLeft') }}</option>\n              <option value=\"top-right\">{{ t('workspace.pip.positions.topRight') }}</option>\n              <option value=\"bottom-left\">{{ t('workspace.pip.positions.bottomLeft') }}</option>\n              <option value=\"bottom-right\">{{ t('workspace.pip.positions.bottomRight') }}</option>\n            </select>\n          </div>\n\n          <div class=\"control-group\">\n            <label class=\"control-label\">{{ t('workspace.pip.size') }}: {{ pipSettings.size }}%</label>\n            <input type=\"range\" min=\"10\" max=\"50\" v-model=\"pipSettings.size\" class=\"control-range\">\n          </div>\n\n          <div class=\"control-group\">\n            <label class=\"control-label\">{{ t('workspace.pip.style') }}</label>\n            <select v-model=\"pipSettings.style\" class=\"control-select\">\n              <option value=\"simple\">{{ t('workspace.pip.styles.simple') }}</option>\n              <option value=\"professional\">{{ t('workspace.pip.styles.professional') }}</option>\n              <option value=\"dynamic\">{{ t('workspace.pip.styles.dynamic') }}</option>\n            </select>\n          </div>\n        </div>\n      </aside>\n\n      <!-- 主编辑区 -->\n      <section class=\"main-editor\">\n        <!-- 上传区域 -->\n        <div v-if=\"!videoSrc\" class=\"upload-area\">\n          <div class=\"upload-content\">\n            <div class=\"upload-icon\">🎥</div>\n            <h2 class=\"upload-title\">{{ t('workspace.upload.title') }}</h2>\n            <p class=\"upload-desc\">{{ t('workspace.upload.desc') }}</p>\n            <label for=\"video-upload\" class=\"upload-btn\">\n              {{ t('workspace.upload.button') }}\n            </label>\n            <input\n              id=\"video-upload\"\n              type=\"file\"\n              accept=\"video/*\"\n              @change=\"handleVideoUpload\"\n              style=\"display: none;\"\n            >\n          </div>\n        </div>\n\n        <!-- 编辑区域 -->\n        <div v-else class=\"editor-area\">\n          <div class=\"editor-header\">\n            <h3 class=\"editor-title\">{{ selectedTemplate?.name || t('workspace.editor.selectTemplate') }}</h3>\n            <div class=\"editor-actions\">\n              <button class=\"action-btn\" @click=\"previewVideo\">{{ t('workspace.editor.preview') }}</button>\n              <button class=\"action-btn primary\" @click=\"exportVideo\">{{ t('workspace.editor.export') }}</button>\n            </div>\n          </div>\n\n          <div class=\"editor-canvas\">\n            <video\n              v-if=\"videoSrc\"\n              ref=\"videoElement\"\n              :src=\"videoSrc\"\n              class=\"preview-video\"\n              controls\n              @loadedmetadata=\"onVideoLoaded\"\n            ></video>\n\n            <!-- 画中画预览 -->\n            <div v-if=\"pipEnabled && videoSrc\" class=\"pip-overlay\">\n              <div class=\"pip-window\" :style=\"pipStyle\">\n                <video\n                  :src=\"videoSrc\"\n                  muted\n                  autoplay\n                  loop\n                  class=\"pip-video\"\n                ></video>\n              </div>\n            </div>\n          </div>\n        </div>\n      </section>\n\n      <!-- 右侧面板 -->\n      <aside class=\"right-panel\">\n        <div class=\"panel-section\">\n          <h3 class=\"panel-title\">{{ t('workspace.status.title') }}</h3>\n          <div class=\"status-list\">\n            <div class=\"status-item\">\n              <span class=\"status-label\">{{ t('workspace.status.video') }}:</span>\n              <span class=\"status-value\" :class=\"{ ready: videoSrc, empty: !videoSrc }\">\n                {{ videoSrc ? t('workspace.status.loaded') : t('workspace.status.notLoaded') }}\n              </span>\n            </div>\n            <div class=\"status-item\">\n              <span class=\"status-label\">{{ t('workspace.status.template') }}:</span>\n              <span class=\"status-value\" :class=\"{ ready: selectedTemplate, empty: !selectedTemplate }\">\n                {{ selectedTemplate ? selectedTemplate.name : t('workspace.status.notSelected') }}\n              </span>\n            </div>\n            <div class=\"status-item\">\n              <span class=\"status-label\">{{ t('workspace.status.pip') }}:</span>\n              <span class=\"status-value\" :class=\"{ enabled: pipEnabled }\">\n                {{ pipEnabled ? t('workspace.status.enabled') : t('workspace.status.disabled') }}\n              </span>\n            </div>\n          </div>\n        </div>\n\n        <div class=\"panel-section\">\n          <h3 class=\"panel-title\">{{ t('workspace.animations.title') }}</h3>\n          <div class=\"animation-list\">\n            <button class=\"animation-btn\" @click=\"addFadeEffect\">{{ t('workspace.animations.fade') }}</button>\n            <button class=\"animation-btn\" @click=\"addSlideEffect\">{{ t('workspace.animations.slide') }}</button>\n            <button class=\"animation-btn\" @click=\"addZoomEffect\">{{ t('workspace.animations.zoom') }}</button>\n            <button class=\"animation-btn\" @click=\"clearAnimations\">{{ t('workspace.animations.clear') }}</button>\n          </div>\n        </div>\n\n        <div class=\"panel-section\">\n          <h3 class=\"panel-title\">{{ t('workspace.ai.title') }}</h3>\n          <div class=\"ai-list\">\n            <div class=\"ai-item\">\n              {{ t('workspace.ai.suggestions.pip') }}\n            </div>\n            <div class=\"ai-item\">\n              {{ t('workspace.ai.suggestions.chart') }}\n            </div>\n            <div class=\"ai-item\">\n              {{ t('workspace.ai.suggestions.color') }}\n            </div>\n          </div>\n        </div>\n      </aside>\n    </main>\n\n    <!-- 时间线 -->\n    <footer class=\"timeline\">\n      <div class=\"timeline-track\">\n        <div class=\"timeline-progress\" :style=\"{ width: progressPercent + '%' }\"></div>\n        <div\n          v-for=\"marker in timelineMarkers\"\n          :key=\"marker.id\"\n          class=\"timeline-marker\"\n          :style=\"{ left: marker.position + '%' }\"\n          @click=\"selectMarker(marker)\"\n        ></div>\n      </div>\n      <div class=\"timeline-controls\">\n        <button class=\"timeline-btn\" @click=\"addMarker\">\n          <span class=\"btn-icon\">➕</span>\n          {{ t('workspace.timeline.addMarker') }}\n        </button>\n        <button class=\"timeline-btn\" @click=\"removeMarker\" :disabled=\"!selectedMarkerId\">\n          <span class=\"btn-icon\">🗑️</span>\n          {{ t('workspace.timeline.removeMarker') }}\n        </button>\n        <span class=\"marker-count\">{{ t('workspace.timeline.markerCount') }}: {{ timelineMarkers.length }}</span>\n      </div>\n    </footer>\n  </div>\n",
+    "checks": {
+      "hasWorkspaceClass": true,
+      "hasHeader": true,
+      "hasMain": true,
+      "hasAside": true,
+      "hasUploadArea": true,
+      "hasEditorArea": true,
+      "hasTemplateList": true,
+      "hasTimeline": true,
+      "hasPipControls": false,
+      "hasAdjustmentPanel": false,
+      "hasVideoElement": true,
+      "hasButtons": true,
+      "hasInputs": true,
+      "hasSelects": true
+    },
+    "score": 12,
+    "maxScore": 14,
+    "completeness": 85.71428571428571
+  },
+  "dependencies": {
+    "dependencies": {
+      "vue": true,
+      "vueRouter": false,
+      "elementPlus": true,
+      "VideoUploader": false,
+      "TemplateSelector": false,
+      "PictureInPicture": false,
+      "Timeline": false,
+      "UserAdjustmentPanel": false,
+      "translation": true,
+      "utils": false
+    },
+    "issues": [
+      "缺少必需依赖: VideoUploader",
+      "缺少必需依赖: TemplateSelector",
+      "缺少必需依赖: Timeline"
+    ]
+  },
+  "dataBinding": {
+    "dataBindings": {
+      "videoSrc": true,
+      "selectedTemplate": true,
+      "pipEnabled": true,
+      "timelineMarkers": true,
+      "hasComputed": true,
+      "hasProgress": true,
+      "hasMethods": false,
+      "hasEventHandlers": true
+    },
+    "issues": [
+      "缺少数据绑定: hasMethods"
+    ]
+  },
+  "styling": {
+    "status": "good",
+    "styles": "\n/* ===========================================\n   VidSlide AI - 工作空间\n   苹果设计风格优化版本\n   =========================================== */\n\n* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\n.workspace {\n  height: 100vh;\n  display: flex;\n  flex-direction: column;\n  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;\n  background: #FAFAFA;\n  color: #1C1C1E;\n}\n\n/* 头部工具栏 */\n.workspace-header {\n  height: 52px;\n  background: rgba(255, 255, 255, 0.8);\n  backdrop-filter: blur(20px);\n  -webkit-backdrop-filter: blur(20px);\n  border-bottom: 1px solid #E5E5EA;\n  display: flex;\n  align-items: center;\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n\n.header-content {\n  max-width: 1400px;\n  margin: 0 auto;\n  width: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 0 24px;\n}\n\n.workspace-title {\n  font-size: 17px;\n  font-weight: 600;\n  color: #1C1C1E;\n  letter-spacing: -0.022em;\n}\n\n.header-actions {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.header-btn {\n  padding: 8px 16px;\n  border: none;\n  border-radius: 8px;\n  background: #F2F2F7;\n  color: #636366;\n  font-size: 14px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.header-btn:hover {\n  background: #E5E5EA;\n  transform: translateY(-0.5px);\n  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n}\n\n.header-btn:active {\n  transform: translateY(0);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.header-btn.primary {\n  background: #007AFF;\n  color: white;\n  box-shadow: 0 2px 0 rgba(0, 122, 255, 0.3);\n}\n\n.header-btn.primary:hover {\n  background: #0056CC;\n  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);\n}\n\n.header-btn.primary:active {\n  box-shadow: 0 1px 0 rgba(0, 122, 255, 0.2);\n}\n\n/* 主工作区 - 三栏布局 */\n.workspace-main {\n  flex: 1;\n  display: grid;\n  grid-template-columns: 320px 1fr 300px;\n  gap: 24px;\n  padding: 24px;\n}\n\n/* 左侧面板和右侧面板 */\n.left-panel,\n.right-panel {\n  background: rgba(255, 255, 255, 0.8);\n  backdrop-filter: blur(20px);\n  -webkit-backdrop-filter: blur(20px);\n  border: 1px solid #E5E5EA;\n  border-radius: 12px;\n  display: flex;\n  flex-direction: column;\n  overflow-y: auto;\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n\n.panel-section {\n  padding: 20px;\n  border-bottom: 1px solid #F2F2F7;\n}\n\n.panel-section:last-child {\n  border-bottom: none;\n}\n\n.panel-title {\n  font-size: 15px;\n  font-weight: 600;\n  color: #1C1C1E;\n  margin-bottom: 16px;\n  letter-spacing: -0.016em;\n}\n\n/* 模板列表 */\n.template-list {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.template-btn {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 12px;\n  border: 1px solid transparent;\n  border-radius: 8px;\n  background: #FAFAFA;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.template-btn:hover {\n  background: #F2F2F7;\n  border-color: #007AFF;\n  transform: translateY(-0.5px);\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.1);\n}\n\n.template-btn:active {\n  transform: translateY(0);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.template-btn.active {\n  background: #007AFF;\n  color: white;\n  border-color: #007AFF;\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);\n}\n\n.template-icon {\n  font-size: 18px;\n  width: 28px;\n  text-align: center;\n  flex-shrink: 0;\n}\n\n.template-info {\n  flex: 1;\n  min-width: 0;\n}\n\n.template-name {\n  font-size: 14px;\n  font-weight: 500;\n  margin-bottom: 4px;\n  line-height: 1.3;\n}\n\n.template-desc {\n  font-size: 12px;\n  color: #8E8E93;\n  line-height: 1.4;\n}\n\n/* 控制组件 */\n.control-group {\n  margin-bottom: 16px;\n}\n\n.control-group:last-child {\n  margin-bottom: 0;\n}\n\n.control-label {\n  display: block;\n  font-size: 13px;\n  font-weight: 500;\n  color: #636366;\n  margin-bottom: 8px;\n  letter-spacing: -0.006em;\n}\n\n.control-select {\n  width: 100%;\n  padding: 8px 12px;\n  border: 1px solid #D1D1D6;\n  border-radius: 8px;\n  background: white;\n  color: #1C1C1E;\n  font-size: 14px;\n  font-weight: 400;\n  cursor: pointer;\n  appearance: none;\n  background-image: url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e\");\n  background-position: right 8px center;\n  background-repeat: no-repeat;\n  background-size: 16px 16px;\n  padding-right: 32px;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.control-select:focus {\n  outline: none;\n  border-color: #007AFF;\n  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);\n}\n\n.control-select:hover {\n  border-color: #C7C7CC;\n}\n\n.control-range {\n  width: 100%;\n  height: 6px;\n  border-radius: 3px;\n  background: #E5E5EA;\n  outline: none;\n  -webkit-appearance: none;\n  appearance: none;\n  cursor: pointer;\n}\n\n.control-range::-webkit-slider-thumb {\n  -webkit-appearance: none;\n  appearance: none;\n  width: 20px;\n  height: 20px;\n  border-radius: 50%;\n  background: #007AFF;\n  cursor: pointer;\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n.control-range::-webkit-slider-thumb:hover {\n  transform: scale(1.1);\n  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);\n}\n\n.control-range::-moz-range-thumb {\n  width: 20px;\n  height: 20px;\n  border-radius: 50%;\n  background: #007AFF;\n  cursor: pointer;\n  border: none;\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);\n}\n\n/* 主编辑区 */\n.main-editor {\n  background: rgba(255, 255, 255, 0.8);\n  backdrop-filter: blur(20px);\n  -webkit-backdrop-filter: blur(20px);\n  border: 1px solid #E5E5EA;\n  border-radius: 12px;\n  display: flex;\n  flex-direction: column;\n  overflow: hidden;\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n\n/* 上传区域 */\n.upload-area {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 40px;\n}\n\n.upload-content {\n  text-align: center;\n  max-width: 400px;\n}\n\n.upload-icon {\n  font-size: 48px;\n  margin-bottom: 24px;\n  opacity: 0.6;\n}\n\n.upload-title {\n  font-size: 22px;\n  font-weight: 600;\n  color: #1C1C1E;\n  margin-bottom: 12px;\n  letter-spacing: -0.022em;\n}\n\n.upload-desc {\n  font-size: 15px;\n  color: #8E8E93;\n  margin-bottom: 32px;\n  line-height: 1.5;\n}\n\n.upload-btn {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  padding: 12px 24px;\n  border: none;\n  border-radius: 8px;\n  background: #007AFF;\n  color: white;\n  font-size: 15px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  box-shadow: 0 2px 0 rgba(0, 122, 255, 0.3);\n  min-height: 44px;\n}\n\n.upload-btn:hover {\n  background: #0056CC;\n  transform: translateY(-1px);\n  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);\n}\n\n.upload-btn:active {\n  transform: translateY(0);\n  box-shadow: 0 1px 0 rgba(0, 122, 255, 0.2);\n}\n\n/* 编辑区域 */\n.editor-area {\n  flex: 1;\n  display: flex;\n  flex-direction: column;\n}\n\n.editor-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 16px 20px;\n  background: #FAFAFA;\n  border-bottom: 1px solid #E5E5EA;\n}\n\n.editor-title {\n  font-size: 17px;\n  font-weight: 600;\n  color: #1C1C1E;\n  letter-spacing: -0.022em;\n}\n\n.editor-actions {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.action-btn {\n  padding: 8px 16px;\n  border: none;\n  border-radius: 8px;\n  background: #AEAEB2;\n  color: white;\n  font-size: 14px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);\n  min-height: 32px;\n}\n\n.action-btn:hover {\n  background: #8E8E93;\n  transform: translateY(-0.5px);\n  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);\n}\n\n.action-btn:active {\n  transform: translateY(0);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);\n}\n\n.action-btn.primary {\n  background: #007AFF;\n  box-shadow: 0 2px 0 rgba(0, 122, 255, 0.3);\n}\n\n.action-btn.primary:hover {\n  background: #0056CC;\n  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);\n}\n\n.editor-canvas {\n  flex: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: #F2F2F7;\n  position: relative;\n}\n\n.preview-video {\n  max-width: 90%;\n  max-height: 90%;\n  border-radius: 12px;\n  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);\n  border: 1px solid #E5E5EA;\n}\n\n/* 画中画预览 */\n.pip-overlay {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  pointer-events: none;\n}\n\n.pip-window {\n  position: absolute;\n  background: rgba(255, 255, 255, 0.95);\n  backdrop-filter: blur(20px);\n  -webkit-backdrop-filter: blur(20px);\n  border: 2px solid #007AFF;\n  border-radius: 12px;\n  overflow: hidden;\n  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);\n  pointer-events: auto;\n}\n\n.pip-video {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  border-radius: 10px;\n}\n\n/* 右侧面板 */\n.status-list {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.status-item {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 8px 12px;\n  background: #FAFAFA;\n  border-radius: 8px;\n  border: 1px solid #E5E5EA;\n}\n\n.status-label {\n  font-size: 14px;\n  font-weight: 500;\n  color: #636366;\n}\n\n.status-value {\n  font-size: 14px;\n  font-weight: 500;\n}\n\n.status-value.ready {\n  color: #34C759;\n}\n\n.status-value.empty {\n  color: #AEAEB2;\n}\n\n.status-value.enabled {\n  color: #007AFF;\n}\n\n.animation-list {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.animation-btn {\n  padding: 8px 12px;\n  border: 1px solid transparent;\n  border-radius: 8px;\n  background: #FAFAFA;\n  color: #1C1C1E;\n  font-size: 14px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  text-align: left;\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.animation-btn:hover {\n  background: #F2F2F7;\n  border-color: #007AFF;\n  transform: translateY(-0.5px);\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.1);\n}\n\n.animation-btn:active {\n  transform: translateY(0);\n  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);\n}\n\n.ai-list {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.ai-item {\n  padding: 12px;\n  background: rgba(0, 122, 255, 0.05);\n  border-left: 3px solid #007AFF;\n  border-radius: 8px;\n  font-size: 14px;\n  color: #1C1C1E;\n  line-height: 1.4;\n}\n\n/* 时间线 */\n.timeline {\n  height: 88px;\n  background: rgba(255, 255, 255, 0.8);\n  backdrop-filter: blur(20px);\n  -webkit-backdrop-filter: blur(20px);\n  border-top: 1px solid #E5E5EA;\n  display: flex;\n  align-items: center;\n  padding: 0 24px;\n  gap: 20px;\n  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);\n}\n\n.timeline-track {\n  flex: 1;\n  height: 6px;\n  background: #E5E5EA;\n  border-radius: 3px;\n  position: relative;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n.timeline-track:hover {\n  background: #D1D1D6;\n}\n\n.timeline-progress {\n  height: 100%;\n  background: linear-gradient(135deg, #007AFF, #0056CC);\n  border-radius: 3px;\n  width: 30%;\n  transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);\n  position: relative;\n}\n\n.timeline-progress::after {\n  content: '';\n  position: absolute;\n  right: -3px;\n  top: 50%;\n  transform: translateY(-50%);\n  width: 12px;\n  height: 12px;\n  background: #007AFF;\n  border: 2px solid white;\n  border-radius: 50%;\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.2);\n}\n\n.timeline-marker {\n  position: absolute;\n  top: 50%;\n  transform: translate(-50%, -50%);\n  width: 10px;\n  height: 10px;\n  background: #FF3B30;\n  border-radius: 50%;\n  border: 2px solid white;\n  cursor: pointer;\n  box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3);\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n.timeline-marker:hover {\n  transform: translate(-50%, -50%) scale(1.2);\n  box-shadow: 0 4px 8px rgba(255, 59, 48, 0.4);\n}\n\n.timeline-controls {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.timeline-btn {\n  padding: 8px 12px;\n  border: none;\n  border-radius: 8px;\n  background: #007AFF;\n  color: white;\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);\n  box-shadow: 0 1px 0 rgba(0, 122, 255, 0.3);\n  min-height: 32px;\n}\n\n.timeline-btn:hover {\n  background: #0056CC;\n  transform: translateY(-0.5px);\n  box-shadow: 0 2px 4px rgba(0, 122, 255, 0.3);\n}\n\n.timeline-btn:active {\n  transform: translateY(0);\n  box-shadow: 0 1px 0 rgba(0, 122, 255, 0.2);\n}\n\n.timeline-btn:disabled {\n  background: #C7C7CC;\n  cursor: not-allowed;\n  transform: none;\n  box-shadow: none;\n}\n\n.marker-count {\n  font-size: 13px;\n  font-weight: 500;\n  color: #8E8E93;\n  min-width: 60px;\n  text-align: center;\n}\n\n/* 响应式设计 */\n@media (max-width: 1200px) {\n  .workspace-main {\n    grid-template-columns: 300px 1fr 280px;\n    padding: 20px;\n  }\n}\n\n@media (max-width: 1024px) {\n  .workspace-main {\n    grid-template-columns: 1fr;\n    grid-template-rows: 1fr auto;\n    padding: 16px;\n  }\n\n  .left-panel,\n  .right-panel {\n    display: none;\n  }\n\n  .timeline {\n    grid-column: 1 / -1;\n  }\n\n  .upload-area {\n    padding: 32px;\n  }\n}\n\n@media (max-width: 768px) {\n  .workspace-header {\n    height: 48px;\n  }\n\n  .header-content {\n    padding: 0 16px;\n  }\n\n  .workspace-title {\n    font-size: 16px;\n  }\n\n  .header-actions {\n    gap: 8px;\n  }\n\n  .header-btn {\n    padding: 4px 12px;\n    font-size: 13px;\n    min-height: 36px;\n  }\n\n  .upload-content {\n    padding: 16px;\n  }\n\n  .upload-title {\n    font-size: 20px;\n  }\n\n  .upload-icon {\n    font-size: 40px;\n    margin-bottom: 20px;\n  }\n\n  .upload-btn {\n    padding: 8px 20px;\n    font-size: 14px;\n    min-height: 40px;\n  }\n\n  .timeline {\n    height: 72px;\n    padding: 0 16px;\n    gap: 16px;\n  }\n\n  .timeline-btn {\n    padding: 4px 12px;\n    font-size: 12px;\n    min-height: 28px;\n  }\n\n  .marker-count {\n    font-size: 12px;\n    min-width: 50px;\n  }\n}\n\n@media (max-width: 480px) {\n  .workspace-header {\n    height: 44px;\n  }\n\n  .header-content {\n    padding: 0 12px;\n  }\n\n  .workspace-title {\n    font-size: 15px;\n  }\n\n  .header-actions {\n    gap: 4px;\n  }\n\n  .header-btn {\n    padding: 4px 8px;\n    font-size: 12px;\n    min-height: 32px;\n  }\n\n  .upload-area {\n    padding: 24px;\n  }\n\n  .upload-content {\n    max-width: 300px;\n  }\n\n  .upload-title {\n    font-size: 18px;\n  }\n\n  .upload-desc {\n    font-size: 14px;\n  }\n\n  .upload-btn {\n    padding: 8px 16px;\n    font-size: 13px;\n    min-height: 36px;\n  }\n\n  .timeline {\n    height: 64px;\n    padding: 0 12px;\n    gap: 12px;\n  }\n\n  .timeline-btn {\n    padding: 4px 8px;\n    font-size: 11px;\n  }\n}\n\n/* 高对比度模式支持 */\n@media (prefers-contrast: high) {\n  .workspace {\n    background: #000000;\n  }\n\n  .workspace-header {\n    background: rgba(0, 0, 0, 0.9);\n    border-bottom-color: rgba(255, 255, 255, 0.3);\n  }\n\n  .left-panel,\n  .right-panel {\n    background: rgba(0, 0, 0, 0.8);\n    border-color: rgba(255, 255, 255, 0.2);\n  }\n\n  .header-btn {\n    border: 1px solid rgba(255, 255, 255, 0.3);\n  }\n}\n\n/* 减少动画偏好 */\n@media (prefers-reduced-motion: reduce) {\n  * {\n    animation: none !important;\n    transition: none !important;\n  }\n\n  .timeline-progress {\n    transition: none;\n  }\n}\n",
+    "checks": {
+      "hasWorkspaceStyles": true,
+      "hasHeaderStyles": true,
+      "hasMainStyles": true,
+      "hasResponsive": true,
+      "hasAnimations": true,
+      "hasFlexbox": true,
+      "hasGrid": true
+    },
+    "score": 7,
+    "maxScore": 7,
+    "coverage": 100
+  },
+  "summary": {
+    "overallScore": 83.92857142857143,
+    "scores": {
+      "template": 85.71428571428571,
+      "dependencies": 70,
+      "dataBinding": 80,
+      "styling": 100
+    },
+    "issues": [
+      {
+        "0": "缺",
+        "1": "少",
+        "2": "必",
+        "3": "需",
+        "4": "依",
+        "5": "赖",
+        "6": ":",
+        "7": " ",
+        "8": "V",
+        "9": "i",
+        "10": "d",
+        "11": "e",
+        "12": "o",
+        "13": "U",
+        "14": "p",
+        "15": "l",
+        "16": "o",
+        "17": "a",
+        "18": "d",
+        "19": "e",
+        "20": "r",
+        "type": "dependency"
+      },
+      {
+        "0": "缺",
+        "1": "少",
+        "2": "必",
+        "3": "需",
+        "4": "依",
+        "5": "赖",
+        "6": ":",
+        "7": " ",
+        "8": "T",
+        "9": "e",
+        "10": "m",
+        "11": "p",
+        "12": "l",
+        "13": "a",
+        "14": "t",
+        "15": "e",
+        "16": "S",
+        "17": "e",
+        "18": "l",
+        "19": "e",
+        "20": "c",
+        "21": "t",
+        "22": "o",
+        "23": "r",
+        "type": "dependency"
+      },
+      {
+        "0": "缺",
+        "1": "少",
+        "2": "必",
+        "3": "需",
+        "4": "依",
+        "5": "赖",
+        "6": ":",
+        "7": " ",
+        "8": "T",
+        "9": "i",
+        "10": "m",
+        "11": "e",
+        "12": "l",
+        "13": "i",
+        "14": "n",
+        "15": "e",
+        "type": "dependency"
+      },
+      {
+        "0": "缺",
+        "1": "少",
+        "2": "数",
+        "3": "据",
+        "4": "绑",
+        "5": "定",
+        "6": ":",
+        "7": " ",
+        "8": "h",
+        "9": "a",
+        "10": "s",
+        "11": "M",
+        "12": "e",
+        "13": "t",
+        "14": "h",
+        "15": "o",
+        "16": "d",
+        "17": "s",
+        "type": "data_binding"
+      }
+    ]
+  }
+}

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VidSlide AI - 素材需求分析测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .test-section h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .test-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .test-card h3 {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 12px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status.success {
+      background: rgba(52, 199, 89, 0.2);
+      color: #34c759;
+    }
+
+    .status.error {
+      background: rgba(255, 59, 48, 0.2);
+      color: #ff3b30;
+    }
+
+    .status.pending {
+      background: rgba(255, 149, 0, 0.2);
+      color: #ff9500;
+    }
+
+    .status.info {
+      background: rgba(0, 122, 255, 0.2);
+      color: #007aff;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin: 4px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .log-area {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .log-entry.success { color: #34c759; }
+    .log-entry.error { color: #ff3b30; }
+    .log-entry.info { color: #007aff; }
+    .log-entry.warn { color: #ff9500; }
+
+    .result-display {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .instructions {
+      background: rgba(0, 122, 255, 0.1);
+      border: 1px solid rgba(0, 122, 255, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .instructions h3 {
+      color: #007aff;
+      margin-bottom: 8px;
+    }
+
+    .instructions ol {
+      padding-left: 20px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .instructions li {
+      margin-bottom: 6px;
+    }
+
+    a {
+      color: #007aff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📦 素材需求分析功能测试</h1>
+
+    <div class="instructions">
+      <h3>测试说明</h3>
+      <ol>
+        <li>打开 <a href="http://localhost:5174/" target="_blank">http://localhost:5174/</a> 进入工作区</li>
+        <li>上传一个视频文件</li>
+        <li>点击"智能分析"按钮进行AI分析</li>
+        <li>分析完成后，点击底部面板的"素材需求"标签页</li>
+        <li>点击"重新分析"按钮生成素材需求</li>
+        <li>测试搜索、添加到画布等功能</li>
+      </ol>
+    </div>
+
+    <div class="test-section">
+      <h2>1. 组件集成验证</h2>
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>MaterialRequirementAnalyzer 组件</h3>
+          <div id="component-status" class="status pending">⏳ 待验证</div>
+          <button class="btn btn-primary" onclick="checkComponentIntegration()">验证集成</button>
+        </div>
+
+        <div class="test-card">
+          <h3>MaterialService 服务</h3>
+          <div id="service-status" class="status pending">⏳ 待验证</div>
+          <button class="btn btn-primary" onclick="checkMaterialService()">验证服务</button>
+        </div>
+
+        <div class="test-card">
+          <h3>IntelligentDispatcher 调度器</h3>
+          <div id="dispatcher-status" class="status pending">⏳ 待验证</div>
+          <button class="btn btn-primary" onclick="checkDispatcher()">验证调度器</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>2. 素材搜索测试</h2>
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>中文关键词搜索</h3>
+          <button class="btn btn-secondary" onclick="testSearch('人工智能')">搜索"人工智能"</button>
+          <button class="btn btn-secondary" onclick="testSearch('科技创新')">搜索"科技创新"</button>
+          <div id="chinese-search-result" class="result-display" style="display:none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>英文关键词搜索</h3>
+          <button class="btn btn-secondary" onclick="testSearch('technology')">搜索"technology"</button>
+          <button class="btn btn-secondary" onclick="testSearch('business')">搜索"business"</button>
+          <div id="english-search-result" class="result-display" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>3. 测试日志</h2>
+      <div class="log-area" id="log-area">
+        <div class="log-entry info">📋 测试页面已加载，等待测试...</div>
+      </div>
+      <button class="btn btn-secondary" onclick="clearLogs()">清空日志</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // 日志函数
+    window.log = function(message, type = 'info') {
+      const logArea = document.getElementById('log-area');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
+      logArea.appendChild(entry);
+      logArea.scrollTop = logArea.scrollHeight;
+    };
+
+    window.clearLogs = function() {
+      document.getElementById('log-area').innerHTML = '<div class="log-entry info">📋 日志已清空</div>';
+    };
+
+    // 检查组件集成
+    window.checkComponentIntegration = async function() {
+      const statusEl = document.getElementById('component-status');
+      log('检查 MaterialRequirementAnalyzer 组件集成...', 'info');
+
+      try {
+        // 动态导入组件
+        const module = await import('/src/components/MaterialRequirementAnalyzer.vue');
+        if (module.default) {
+          statusEl.className = 'status success';
+          statusEl.textContent = '✅ 组件已正确导入';
+          log('MaterialRequirementAnalyzer 组件导入成功', 'success');
+        }
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 导入失败';
+        log(`组件导入失败: ${error.message}`, 'error');
+      }
+    };
+
+    // 检查素材服务
+    window.checkMaterialService = async function() {
+      const statusEl = document.getElementById('service-status');
+      log('检查 MaterialService 服务...', 'info');
+
+      try {
+        const module = await import('/src/services/MaterialService.js');
+        const MaterialService = module.default;
+
+        if (MaterialService) {
+          log('MaterialService 模块已加载', 'success');
+
+          // 尝试初始化
+          await MaterialService.initialize();
+          log('MaterialService 初始化成功', 'success');
+
+          statusEl.className = 'status success';
+          statusEl.textContent = '✅ 服务正常';
+        }
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 服务异常';
+        log(`MaterialService 错误: ${error.message}`, 'error');
+      }
+    };
+
+    // 检查调度器
+    window.checkDispatcher = async function() {
+      const statusEl = document.getElementById('dispatcher-status');
+      log('检查 IntelligentDispatcher 调度器...', 'info');
+
+      try {
+        const module = await import('/src/services/IntelligentDispatcher.js');
+        const dispatcher = module.default;
+
+        if (dispatcher) {
+          log('IntelligentDispatcher 模块已加载', 'success');
+
+          // 尝试初始化
+          await dispatcher.initialize();
+          log('IntelligentDispatcher 初始化成功', 'success');
+
+          // 测试调度
+          const result = await dispatcher.dispatch('测试关键词');
+          log(`调度测试结果: 策略=${result.strategy?.name}, 置信度=${(result.confidence * 100).toFixed(1)}%`, 'success');
+
+          statusEl.className = 'status success';
+          statusEl.textContent = '✅ 调度器正常';
+        }
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 调度器异常';
+        log(`IntelligentDispatcher 错误: ${error.message}`, 'error');
+      }
+    };
+
+    // 测试搜索
+    window.testSearch = async function(keyword) {
+      log(`开始搜索: "${keyword}"`, 'info');
+
+      try {
+        const module = await import('/src/services/MaterialService.js');
+        const MaterialService = module.default;
+
+        await MaterialService.initialize();
+
+        const startTime = performance.now();
+        const results = await MaterialService.searchMaterials(keyword, {
+          limit: 10,
+          context: { type: 'image' }
+        });
+        const duration = (performance.now() - startTime).toFixed(0);
+
+        if (results.success) {
+          log(`搜索成功: 找到 ${results.materials.length} 个素材 (耗时 ${duration}ms)`, 'success');
+          log(`搜索统计: 本地=${results.searchStats?.localHits || 0}, 外部=${results.searchStats?.externalHits || 0}`, 'info');
+
+          // 显示部分结果
+          if (results.materials.length > 0) {
+            const sample = results.materials.slice(0, 3);
+            sample.forEach((m, i) => {
+              log(`  ${i + 1}. ${m.name || m.title || '未命名'} (${m.source || 'local'})`, 'info');
+            });
+          }
+        } else {
+          log(`搜索失败: ${results.error || '未知错误'}`, 'error');
+        }
+      } catch (error) {
+        log(`搜索异常: ${error.message}`, 'error');
+      }
+    };
+
+    // 页面加载完成
+    log('测试页面初始化完成', 'success');
+    log('请点击上方按钮开始测试各项功能', 'info');
+  </script>
+</body>
+</html>

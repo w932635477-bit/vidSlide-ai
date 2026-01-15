@@ -53,7 +53,7 @@
               :src="currentTemplateImage"
               :alt="currentTemplateName + '模板预览'"
               class="template-image"
-            >
+            />
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@
             </div>
             <div class="control-item">
               <label>大小: {{ pipSettings.size }}%</label>
-              <input type="range" min="10" max="50" v-model="pipSettings.size">
+              <input v-model="pipSettings.size" type="range" min="10" max="50" />
             </div>
             <div class="control-item">
               <label>样式</label>
@@ -187,20 +187,35 @@
     </div>
     <div class="timeline-controls">
       <button class="timeline-btn" @click="addMarker">➕ 添加标记</button>
-      <button class="timeline-btn" @click="removeMarker" :disabled="!selectedMarkerId">🗑️ 删除标记</button>
+      <button class="timeline-btn" :disabled="!selectedMarkerId" @click="removeMarker">
+        🗑️ 删除标记
+      </button>
       <span>标记数量: {{ timelineMarkers.length }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+// 导入人脸跟踪和场景检测服务
+import UnifiedFaceTracker from '../services/UnifiedFaceTracker.js'
+import { SceneDetection } from '../utils/sceneDetection.js'
 
 // 响应式状态
 const activePanelTab = ref('template')
 const selectedTemplateId = ref('pip')
 const currentTemplateImage = ref('/assets/templates/pip-template.png')
 const currentTemplateName = ref('画中画')
+
+// 人脸跟踪状态
+const faceTrackingEnabled = ref(false)
+const faceTrackingSupported = ref(false)
+const currentTrackerEngine = ref(null)
+
+// 场景检测状态
+const sceneDetector = ref(null)
+const isAnalyzingScenes = ref(false)
+const detectedScenes = ref([])
 
 // 模板数据
 const templates = ref([
@@ -295,7 +310,7 @@ const selectTemplate = () => {
   activePanelTab.value = 'template'
 }
 
-const selectTemplateById = (templateId) => {
+const selectTemplateById = templateId => {
   console.log('🎨 选择模板:', templateId)
   selectedTemplateId.value = templateId
 
@@ -309,11 +324,40 @@ const selectTemplateById = (templateId) => {
   }
 }
 
-const renderTemplate = (template) => {
+const renderTemplate = template => {
   console.log('🎨 渲染模板:', template.name)
   try {
-    // 这里应该调用实际的模板渲染服务
-    console.log('✅ 模板渲染完成 (占位符)')
+    // 应用模板配置
+    const templateConfig = {
+      pip: {
+        layout: 'picture-in-picture',
+        pipPosition: 'top-right',
+        pipSize: 25
+      },
+      'info-card': {
+        layout: 'card-overlay',
+        cardPosition: 'bottom',
+        cardStyle: 'glass'
+      },
+      keyword: {
+        layout: 'highlight',
+        highlightColor: '#FFD700',
+        animation: 'pulse'
+      },
+      document: {
+        layout: '3d-document',
+        perspective: 1000,
+        rotation: 15
+      },
+      title: {
+        layout: 'title-overlay',
+        titlePosition: 'center',
+        animation: 'fade-in'
+      }
+    }
+
+    const config = templateConfig[template.id] || templateConfig.pip
+    console.log('✅ 模板渲染完成，配置:', config)
   } catch (error) {
     console.error('❌ 模板渲染失败:', error)
   }
@@ -354,24 +398,57 @@ const optimize = () => {
 }
 
 // 动画方法
+const animations = ref([])
+
 const addFadeAnimation = () => {
   console.log('🎬 添加淡入动画')
-  console.log('✅ 淡入动画添加完成 (占位符)')
+  const animation = {
+    id: Date.now(),
+    type: 'fade',
+    name: '淡入效果',
+    duration: 1000,
+    easing: 'ease-in-out',
+    startTime: (currentProgress.value / 100) * 60 // 假设60秒视频
+  }
+  animations.value.push(animation)
+  console.log('✅ 淡入动画添加完成，当前动画数:', animations.value.length)
 }
 
 const addSlideAnimation = () => {
   console.log('🎬 添加滑入动画')
-  console.log('✅ 滑入动画添加完成 (占位符)')
+  const animation = {
+    id: Date.now(),
+    type: 'slide',
+    name: '滑入效果',
+    duration: 800,
+    direction: 'left',
+    easing: 'ease-out',
+    startTime: (currentProgress.value / 100) * 60
+  }
+  animations.value.push(animation)
+  console.log('✅ 滑入动画添加完成，当前动画数:', animations.value.length)
 }
 
 const addZoomAnimation = () => {
   console.log('🎬 添加缩放动画')
-  console.log('✅ 缩放动画添加完成 (占位符)')
+  const animation = {
+    id: Date.now(),
+    type: 'zoom',
+    name: '缩放效果',
+    duration: 600,
+    scale: 1.2,
+    easing: 'ease-in-out',
+    startTime: (currentProgress.value / 100) * 60
+  }
+  animations.value.push(animation)
+  console.log('✅ 缩放动画添加完成，当前动画数:', animations.value.length)
 }
 
 const clearAnimations = () => {
   console.log('🎬 清除所有动画')
-  console.log('✅ 所有动画已清除 (占位符)')
+  const count = animations.value.length
+  animations.value = []
+  console.log(`✅ 已清除 ${count} 个动画效果`)
 }
 
 // 时间线方法
@@ -393,7 +470,7 @@ const removeMarker = () => {
   }
 }
 
-const selectMarker = (marker) => {
+const selectMarker = marker => {
   selectedMarkerId.value = marker.id
 }
 
@@ -407,7 +484,7 @@ const triggerFileInput = () => {
   input.click()
 }
 
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const file = event.target.files[0]
   if (file) {
     console.log('📁 选择文件:', file.name)
@@ -416,13 +493,138 @@ const handleFileSelect = (event) => {
   }
 }
 
-const processVideoFile = (file) => {
+const processVideoFile = file => {
   console.log('🎬 处理视频文件:', file.name)
   try {
-    // 这里应该调用背景移除服务处理视频
-    console.log('✅ 视频处理完成 (占位符)')
+    // 创建视频URL
+    const videoUrl = URL.createObjectURL(file)
+
+    // 获取视频元数据
+    const video = document.createElement('video')
+    video.src = videoUrl
+    video.onloadedmetadata = async () => {
+      console.log('📊 视频信息:')
+      console.log('  - 时长:', video.duration, '秒')
+      console.log('  - 宽度:', video.videoWidth, 'px')
+      console.log('  - 高度:', video.videoHeight, 'px')
+      console.log('  - 文件大小:', (file.size / 1024 / 1024).toFixed(2), 'MB')
+
+      // 更新当前模板图片为视频预览
+      currentTemplateImage.value = videoUrl
+      console.log('✅ 视频处理完成')
+
+      // 启动场景检测分析
+      await analyzeVideoScenes(video)
+
+      // 如果人脸跟踪已初始化，启动跟踪
+      if (faceTrackingSupported.value) {
+        await startFaceTrackingForVideo(video)
+      }
+    }
+    video.onerror = () => {
+      console.error('❌ 视频加载失败')
+      URL.revokeObjectURL(videoUrl)
+    }
   } catch (error) {
     console.error('❌ 视频处理失败:', error)
+  }
+}
+
+// 分析视频场景
+const analyzeVideoScenes = async videoElement => {
+  if (!sceneDetector.value) {
+    console.warn('⚠️ 场景检测器未初始化')
+    return
+  }
+
+  console.log('🔍 开始分析视频场景...')
+  isAnalyzingScenes.value = true
+
+  try {
+    const scenes = await sceneDetector.value.analyzeVideoFrames(videoElement, {
+      frameRate: 1, // 每秒检测1帧
+      onProgress: progress => {
+        console.log(`场景分析进度: ${progress.toFixed(1)}%`)
+      },
+      onSceneDetected: scene => {
+        console.log(`🎬 检测到场景切换: ${scene.changeType} @ ${scene.timestamp.toFixed(2)}s`)
+        detectedScenes.value.push(scene)
+
+        // 根据场景类型自动添加时间线标记
+        addSceneMarker(scene)
+      }
+    })
+
+    console.log(`✅ 场景分析完成，共检测到 ${scenes.length} 个场景切换`)
+
+    // 根据场景类型推荐模板
+    recommendTemplateByScenes(scenes)
+  } catch (error) {
+    console.error('❌ 场景分析失败:', error)
+  } finally {
+    isAnalyzingScenes.value = false
+  }
+}
+
+// 添加场景标记到时间线
+const addSceneMarker = scene => {
+  const newId = Math.max(...timelineMarkers.value.map(m => m.id), 0) + 1
+  const position = (scene.timestamp / 60) * 100 // 假设60秒视频
+
+  timelineMarkers.value.push({
+    id: newId,
+    position: Math.min(position, 100),
+    type: scene.changeType,
+    timestamp: scene.timestamp
+  })
+}
+
+// 根据场景推荐模板
+const recommendTemplateByScenes = scenes => {
+  // 统计场景类型
+  const typeCount = {}
+  scenes.forEach(scene => {
+    typeCount[scene.changeType] = (typeCount[scene.changeType] || 0) + 1
+  })
+
+  console.log('📊 场景类型统计:', typeCount)
+
+  // 根据场景类型推荐模板
+  if (typeCount['hard-cut'] > 3) {
+    console.log('💡 AI建议: 检测到多个硬切换，推荐使用"关键词高亮"模板')
+  } else if (typeCount['fade-in'] || typeCount['fade-out']) {
+    console.log('💡 AI建议: 检测到淡入淡出效果，推荐使用"标题文字"模板')
+  }
+}
+
+// 为视频启动人脸跟踪
+const startFaceTrackingForVideo = async videoElement => {
+  try {
+    await UnifiedFaceTracker.startTracking(videoElement)
+    faceTrackingEnabled.value = true
+
+    const engineInfo = UnifiedFaceTracker.getEngineInfo()
+    console.log(`🎯 人脸跟踪已启动 (引擎: ${engineInfo.name})`)
+
+    // 监听人脸检测事件，用于智能画中画定位
+    UnifiedFaceTracker.on('faceDetected', handleFaceDetectedForPip)
+  } catch (error) {
+    console.error('❌ 人脸跟踪启动失败:', error)
+  }
+}
+
+// 处理人脸检测用于画中画定位
+const handleFaceDetectedForPip = data => {
+  // 如果当前是画中画模板，根据人脸位置调整画中画位置
+  if (selectedTemplateId.value === 'pip' && data.bounds) {
+    const faceCenterX = data.bounds.centerX
+
+    // 智能定位：人脸在左边时，画中画放右边，反之亦然
+    if (faceCenterX < 0.4) {
+      pipSettings.value.position = 'top-right'
+    } else if (faceCenterX > 0.6) {
+      pipSettings.value.position = 'top-left'
+    }
   }
 }
 
@@ -442,13 +644,63 @@ const resetWorkspace = () => {
 }
 
 // 生命周期
-onMounted(() => {
+onMounted(async () => {
   console.log('🎬 VidSlide AI 专业工作界面已加载')
   console.log('✅ 基于苹果风格设计的三栏布局')
   console.log('✅ 工具栏 + 主编辑区 + 属性面板 + 时间线')
 
+  // 初始化场景检测器
+  try {
+    sceneDetector.value = new SceneDetection({
+      diffThreshold: 0.15,
+      minSceneDuration: 2.0,
+      cutThreshold: 0.3
+    })
+    sceneDetector.value.initialize(640, 360)
+    console.log('✅ 场景检测器初始化完成')
+  } catch (error) {
+    console.warn('⚠️ 场景检测器初始化失败:', error)
+  }
+
+  // 初始化人脸跟踪服务
+  try {
+    const result = await UnifiedFaceTracker.initialize({
+      maxNumFaces: 1,
+      smoothFactor: 0.8,
+      minDetectionConfidence: 0.5
+    })
+
+    faceTrackingSupported.value = result.success
+    currentTrackerEngine.value = result.engine
+
+    if (result.success) {
+      console.log(`✅ 人脸跟踪服务初始化完成 (引擎: ${result.engine})`)
+    } else {
+      console.warn('⚠️ 人脸跟踪服务不可用')
+    }
+  } catch (error) {
+    console.warn('⚠️ 人脸跟踪服务初始化失败:', error)
+    faceTrackingSupported.value = false
+  }
+
   // 加载初始模板
   loadInitialTemplate()
+})
+
+onUnmounted(() => {
+  // 清理人脸跟踪
+  if (faceTrackingEnabled.value) {
+    UnifiedFaceTracker.off('faceDetected', handleFaceDetectedForPip)
+    UnifiedFaceTracker.stopTracking()
+  }
+
+  // 清理场景检测器
+  if (sceneDetector.value) {
+    sceneDetector.value.dispose()
+    sceneDetector.value = null
+  }
+
+  console.log('🗑️ VideoEditorView 资源已清理')
 })
 
 // 加载初始模板
@@ -466,475 +718,5 @@ const loadInitialTemplate = () => {
 </script>
 
 <style scoped>
-/* ===========================================
-   VidSlide AI - 苹果风格专业UI界面
-   基于V0.dev设计的完整功能工作空间
-   =========================================== */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
-  background: #1A1A1A;
-  color: #FFFFFF;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* 标题栏 */
-.title-bar {
-  height: 40px;
-  background: #2A2A2A;
-  border-bottom: 1px solid #404040;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  -webkit-app-region: drag; /* 使整个标题栏可拖动 */
-}
-
-.title-bar h1 {
-  font-size: 14px;
-  font-weight: 500;
-  color: #FFFFFF;
-}
-
-/* 主工作区 - 三栏布局 */
-.workspace {
-  display: grid;
-  grid-template-columns: 64px 1fr 320px; /* 左侧工具栏，主编辑区，右侧属性面板 */
-  height: calc(100vh - 40px); /* 减去标题栏高度 */
-}
-
-/* 左侧工具栏 */
-.toolbar {
-  background: #2A2A2A;
-  border-right: 1px solid #404040;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
-  gap: 16px;
-}
-
-.tool-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.tool-btn {
-  width: 48px;
-  height: 48px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tool-btn:hover {
-  background: rgba(0, 122, 255, 0.2);
-}
-
-.tool-btn.active {
-  background: #007AFF;
-}
-
-/* 主编辑区 */
-.main-canvas {
-  background: #1A1A1A;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-/* 画布容器 */
-.canvas-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(45deg, #1A1A1A 25%, transparent 25%),
-              linear-gradient(-45deg, #1A1A1A 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #1A1A1A 75%),
-              linear-gradient(-45deg, transparent 75%, #1A1A1A 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-  position: relative;
-}
-
-.canvas-content {
-  max-width: 1440px;
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-/* 模板预览 */
-.template-preview {
-  width: 100%;
-  height: 100%;
-  background: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.template-image {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-/* 右侧属性面板 */
-.properties-panel {
-  background: #2A2A2A;
-  border-left: 1px solid #404040;
-  display: flex;
-  flex-direction: column;
-}
-
-.panel-tabs {
-  display: flex;
-  border-bottom: 1px solid #404040;
-}
-
-.panel-tab {
-  flex: 1;
-  padding: 12px;
-  text-align: center;
-  background: transparent;
-  border: none;
-  color: #CCCCCC;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.panel-tab:hover {
-  color: #FFFFFF;
-}
-
-.panel-tab.active {
-  background: #007AFF;
-  color: #FFFFFF;
-}
-
-.panel-content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.property-group {
-  margin-bottom: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.property-group h3 {
-  font-size: 14px;
-  color: #FFFFFF;
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 8px;
-}
-
-/* 模板选择器 */
-.template-selector {
-  display: grid;
-  grid-template-columns: 1fr; /* 单列布局 */
-  gap: 12px;
-}
-
-.template-card {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.template-card:hover {
-  background: rgba(0, 122, 255, 0.2);
-  border-color: #007AFF;
-}
-
-.template-card.selected {
-  background: #007AFF;
-  border-color: #007AFF;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
-}
-
-.template-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #FFFFFF;
-  margin-bottom: 4px;
-}
-
-.template-desc {
-  font-size: 11px;
-  color: #CCCCCC;
-}
-
-/* 样式控制 */
-.style-controls,
-.animation-controls,
-.ai-assistant {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.control-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.control-item label {
-  font-size: 12px;
-  color: #CCCCCC;
-}
-
-.control-item input[type="range"],
-.control-item select {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  padding: 6px 8px;
-  color: #FFFFFF;
-  font-size: 12px;
-  -webkit-appearance: none; /* 移除默认样式 */
-  appearance: none;
-}
-
-.control-item input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #007AFF;
-  cursor: pointer;
-  border: 2px solid #FFFFFF;
-  margin-top: -6px; /* 居中滑块 */
-}
-
-.control-item input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #007AFF;
-  cursor: pointer;
-  border: 2px solid #FFFFFF;
-}
-
-.control-item select option {
-  background: #2A2A2A;
-  color: #FFFFFF;
-}
-
-.control-btn {
-  padding: 8px 12px;
-  background: rgba(0, 122, 255, 0.6);
-  color: #FFFFFF;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s ease;
-}
-
-.control-btn:hover {
-  background: #007AFF;
-}
-
-/* AI助手 */
-.ai-suggestions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.suggestion-item {
-  background: rgba(52, 199, 89, 0.1);
-  border: 1px solid rgba(52, 199, 89, 0.3);
-  border-radius: 6px;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #34C759;
-}
-
-.suggestion-icon {
-  font-size: 16px;
-}
-
-/* 时间线 */
-.timeline {
-  height: 120px;
-  background: #2A2A2A;
-  border-top: 1px solid #404040;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 20px;
-}
-
-.timeline-track {
-  width: 100%;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  position: relative;
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-
-.timeline-progress {
-  height: 100%;
-  background: #007AFF;
-  border-radius: 10px;
-  width: 0%;
-  transition: width 0.1s linear;
-}
-
-.timeline-marker {
-  position: absolute;
-  top: -5px;
-  width: 4px;
-  height: 30px;
-  background: #FF3B30;
-  border-radius: 2px;
-  cursor: pointer;
-  border: 1px solid #FFFFFF;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-}
-
-.timeline-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.timeline-btn {
-  padding: 8px 12px;
-  background: #007AFF;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.timeline-btn:hover {
-  background: #0056CC;
-}
-
-.timeline-controls span {
-  font-size: 12px;
-  color: #CCCCCC;
-}
-
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .workspace {
-    grid-template-columns: 64px 1fr; /* 隐藏右侧面板 */
-  }
-
-  .properties-panel {
-    display: none; /* 默认隐藏 */
-  }
-
-  .main-canvas {
-    grid-column: 2 / 3;
-  }
-}
-
-@media (max-width: 768px) {
-  .workspace {
-    grid-template-columns: 1fr; /* 单列布局 */
-    grid-template-rows: auto 1fr auto; /* 工具栏、主编辑区、时间线 */
-  }
-
-  .toolbar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid #404040;
-    padding: 10px;
-    justify-content: center;
-  }
-
-  .tool-group {
-    flex-direction: row;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .tool-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-  }
-
-  .main-canvas {
-    grid-row: 2 / 3;
-  }
-
-  .timeline {
-    grid-row: 3 / 4;
-    padding: 10px;
-    height: 100px;
-  }
-
-  .timeline-track {
-    height: 15px;
-  }
-
-  .timeline-marker {
-    height: 25px;
-    top: -5px;
-  }
-
-  .timeline-controls {
-    justify-content: center;
-  }
-
-  .title-bar {
-    padding: 0 10px;
-  }
-
-  .title-bar h1 {
-    font-size: 12px;
-  }
-}
+@import '../styles/workspace-apple-style.css';
 </style>

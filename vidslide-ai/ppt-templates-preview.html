@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT风格模板预览 - VidSlide AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+      padding: 40px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .template-card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+
+    .template-header {
+      padding: 20px;
+      border-bottom: 1px solid #333;
+    }
+
+    .template-header h2 {
+      font-size: 20px;
+      color: #FFD700;
+      margin-bottom: 8px;
+    }
+
+    .template-header p {
+      font-size: 14px;
+      color: #888;
+    }
+
+    .template-preview {
+      aspect-ratio: 9/16;
+      max-height: 500px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .template-tags {
+      padding: 16px 20px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      border-top: 1px solid #333;
+    }
+
+    .tag {
+      padding: 4px 12px;
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: #FFD700;
+    }
+
+    /* ========== 模板1: PPT标题幻灯片 ========== */
+    .ppt-title-slide {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px;
+    }
+
+    .ppt-title-slide .accent-bar {
+      width: 120px;
+      height: 6px;
+      background: #FFD700;
+      border-radius: 3px;
+      margin-bottom: 30px;
+    }
+
+    .ppt-title-slide .main-title {
+      font-size: 36px;
+      font-weight: bold;
+      color: #FFFFFF;
+      text-align: center;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .ppt-title-slide .subtitle {
+      font-size: 18px;
+      color: #AAAAAA;
+      text-align: center;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .ppt-title-slide .branding {
+      position: absolute;
+      bottom: 40px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* ========== 模板2: PPT要点列表 ========== */
+    .ppt-bullet-points {
+      background: #0D1117;
+      height: 100%;
+      padding: 40px;
+      position: relative;
+    }
+
+    .ppt-bullet-points .left-accent {
+      position: absolute;
+      left: 30px;
+      top: 80px;
+      width: 4px;
+      height: 300px;
+      background: #4ECDC4;
+      border-radius: 2px;
+    }
+
+    .ppt-bullet-points .section-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFFFFF;
+      margin-left: 30px;
+      margin-bottom: 30px;
+    }
+
+    .ppt-bullet-points .bullet-list {
+      margin-left: 50px;
+    }
+
+    .ppt-bullet-points .bullet-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      opacity: 0;
+      animation: fadeInLeft 0.5s ease-out forwards;
+    }
+
+    .ppt-bullet-points .bullet-item:nth-child(1) { animation-delay: 0.1s; }
+    .ppt-bullet-points .bullet-item:nth-child(2) { animation-delay: 0.3s; }
+    .ppt-bullet-points .bullet-item:nth-child(3) { animation-delay: 0.5s; }
+    .ppt-bullet-points .bullet-item:nth-child(4) { animation-delay: 0.7s; }
+    .ppt-bullet-points .bullet-item:nth-child(5) { animation-delay: 0.9s; }
+
+    .ppt-bullet-points .bullet-dot {
+      width: 10px;
+      height: 10px;
+      background: #4ECDC4;
+      border-radius: 50%;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+
+    .ppt-bullet-points .bullet-text {
+      font-size: 16px;
+      color: #E0E0E0;
+    }
+
+    .ppt-bullet-points .page-number {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* ========== 模板3: PPT大数字展示 ========== */
+    .ppt-big-number {
+      background: #0f0c29;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .ppt-big-number .glow-circle {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 215, 0, 0.1);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .ppt-big-number .trend-indicator {
+      font-size: 20px;
+      color: #34C759;
+      margin-bottom: 10px;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    .ppt-big-number .hero-number {
+      font-size: 72px;
+      font-weight: bold;
+      color: #FFD700;
+      font-family: 'DIN Alternate', 'Helvetica Neue', sans-serif;
+      animation: scaleIn 0.8s ease-out;
+      z-index: 1;
+    }
+
+    .ppt-big-number .number-label {
+      font-size: 20px;
+      color: #AAAAAA;
+      margin-top: 15px;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+
+    .ppt-big-number .context-text {
+      position: absolute;
+      bottom: 50px;
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      padding: 0 30px;
+    }
+
+    /* ========== 模板4: PPT左右对比 ========== */
+    .ppt-comparison {
+      background: #1a1a1a;
+      height: 100%;
+      padding: 30px 20px;
+      position: relative;
+    }
+
+    .ppt-comparison .comparison-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #FFFFFF;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .ppt-comparison .panels {
+      display: flex;
+      gap: 15px;
+      height: calc(100% - 120px);
+    }
+
+    .ppt-comparison .panel {
+      flex: 1;
+      border-radius: 12px;
+      padding: 20px 15px;
+      position: relative;
+    }
+
+    .ppt-comparison .panel-left {
+      background: rgba(52, 199, 89, 0.1);
+      border: 2px solid rgba(52, 199, 89, 0.3);
+    }
+
+    .ppt-comparison .panel-right {
+      background: rgba(255, 59, 48, 0.1);
+      border: 2px solid rgba(255, 59, 48, 0.3);
+    }
+
+    .ppt-comparison .panel-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .ppt-comparison .panel-left .panel-title {
+      color: #34C759;
+    }
+
+    .ppt-comparison .panel-right .panel-title {
+      color: #FF3B30;
+    }
+
+    .ppt-comparison .panel-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      font-size: 13px;
+      color: #E0E0E0;
+    }
+
+    .ppt-comparison .panel-item .icon {
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    .ppt-comparison .panel-left .icon {
+      color: #34C759;
+    }
+
+    .ppt-comparison .panel-right .icon {
+      color: #FF3B30;
+    }
+
+    .ppt-comparison .vs-badge {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      background: #FFD700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      z-index: 10;
+      animation: bounce 1s ease-in-out infinite;
+    }
+
+    .ppt-comparison .conclusion {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 14px;
+      color: #FFD700;
+    }
+
+    /* ========== 模板5: PPT金句引用 ========== */
+    .ppt-quote {
+      background: #16213e;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+    }
+
+    .ppt-quote .quote-mark-left {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      font-size: 120px;
+      color: rgba(255, 215, 0, 0.2);
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .ppt-quote .quote-mark-right {
+      position: absolute;
+      bottom: 120px;
+      right: 30px;
+      font-size: 120px;
+      color: rgba(255, 215, 0, 0.2);
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .ppt-quote .quote-text {
+      font-size: 22px;
+      font-style: italic;
+      color: #FFFFFF;
+      text-align: center;
+      line-height: 1.8;
+      max-width: 90%;
+      z-index: 1;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .ppt-quote .bottom-line {
+      width: 150px;
+      height: 3px;
+      background: #FFD700;
+      border-radius: 1.5px;
+      margin-top: 30px;
+    }
+
+    .ppt-quote .quote-author {
+      font-size: 16px;
+      color: #888;
+      margin-top: 20px;
+    }
+
+    /* ========== 动画 ========== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+      }
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+    }
+
+    /* 重播按钮 */
+    .replay-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      z-index: 100;
+      transition: background 0.3s;
+    }
+
+    .replay-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>PPT风格模板预览</h1>
+
+  <div class="templates-grid">
+    <!-- 模板1: PPT标题幻灯片 -->
+    <div class="template-card">
+      <div class="template-header">
+        <h2>ppt-title-slide</h2>
+        <p>大标题+副标题的经典PPT开场风格</p>
+      </div>
+      <div class="template-preview">
+        <button class="replay-btn" onclick="replayAnimation(this)">重播动画</button>
+        <div class="ppt-title-slide">
+          <div class="accent-bar"></div>
+          <div class="main-title">短视频流量获客秘籍</div>
+          <div class="subtitle">3个核心策略助你快速起号</div>
+          <div class="branding">VidSlide AI</div>
+        </div>
+      </div>
+      <div class="template-tags">
+        <span class="tag">PPT</span>
+        <span class="tag">标题</span>
+        <span class="tag">开场</span>
+        <span class="tag">演示</span>
+      </div>
+    </div>
+
+    <!-- 模板2: PPT要点列表 -->
+    <div class="template-card">
+      <div class="template-header">
+        <h2>ppt-bullet-points</h2>
+        <p>清晰的要点列表展示，适合干货内容</p>
+      </div>
+      <div class="template-preview">
+        <button class="replay-btn" onclick="replayAnimation(this)">重播动画</button>
+        <div class="ppt-bullet-points">
+          <div class="left-accent"></div>
+          <div class="section-title">核心要点</div>
+          <div class="bullet-list">
+            <div class="bullet-item">
+              <div class="bullet-dot"></div>
+              <div class="bullet-text">精准定位目标用户群体</div>
+            </div>
+            <div class="bullet-item">
+              <div class="bullet-dot"></div>
+              <div class="bullet-text">打造差异化内容IP</div>
+            </div>
+            <div class="bullet-item">
+              <div class="bullet-dot"></div>
+              <div class="bullet-text">优化发布时间和频率</div>
+            </div>
+            <div class="bullet-item">
+              <div class="bullet-dot"></div>
+              <div class="bullet-text">建立私域流量池</div>
+            </div>
+            <div class="bullet-item">
+              <div class="bullet-dot"></div>
+              <div class="bullet-text">数据驱动持续迭代</div>
+            </div>
+          </div>
+          <div class="page-number">01 / 05</div>
+        </div>
+      </div>
+      <div class="template-tags">
+        <span class="tag">PPT</span>
+        <span class="tag">要点</span>
+        <span class="tag">列表</span>
+        <span class="tag">干货</span>
+      </div>
+    </div>
+
+    <!-- 模板3: PPT大数字展示 -->
+    <div class="template-card">
+      <div class="template-header">
+        <h2>ppt-big-number</h2>
+        <p>突出展示核心数据和统计数字</p>
+      </div>
+      <div class="template-preview">
+        <button class="replay-btn" onclick="replayAnimation(this)">重播动画</button>
+        <div class="ppt-big-number">
+          <div class="glow-circle"></div>
+          <div class="trend-indicator">↑ 同比增长</div>
+          <div class="hero-number">327%</div>
+          <div class="number-label">用户转化率提升</div>
+          <div class="context-text">通过优化投放策略，Q4季度实现突破性增长</div>
+        </div>
+      </div>
+      <div class="template-tags">
+        <span class="tag">PPT</span>
+        <span class="tag">数据</span>
+        <span class="tag">数字</span>
+        <span class="tag">统计</span>
+      </div>
+    </div>
+
+    <!-- 模板4: PPT左右对比 -->
+    <div class="template-card">
+      <div class="template-header">
+        <h2>ppt-comparison</h2>
+        <p>清晰的左右对比布局，适合优缺点分析</p>
+      </div>
+      <div class="template-preview">
+        <button class="replay-btn" onclick="replayAnimation(this)">重播动画</button>
+        <div class="ppt-comparison">
+          <div class="comparison-title">短视频 vs 图文内容</div>
+          <div class="panels">
+            <div class="panel panel-left">
+              <div class="panel-title">短视频优势</div>
+              <div class="panel-item">
+                <span class="icon">✓</span>
+                <span>更高的用户停留时长</span>
+              </div>
+              <div class="panel-item">
+                <span class="icon">✓</span>
+                <span>更强的情感传递能力</span>
+              </div>
+              <div class="panel-item">
+                <span class="icon">✓</span>
+                <span>算法推荐流量更大</span>
+              </div>
+              <div class="panel-item">
+                <span class="icon">✓</span>
+                <span>转化路径更短</span>
+              </div>
+            </div>
+            <div class="panel panel-right">
+              <div class="panel-title">图文劣势</div>
+              <div class="panel-item">
+                <span class="icon">✗</span>
+                <span>用户注意力分散</span>
+              </div>
+              <div class="panel-item">
+                <span class="icon">✗</span>
+                <span>信息传递效率低</span>
+              </div>
+              <div class="panel-item">
+                <span class="icon">✗</span>
+                <span>平台流量倾斜少</span>
+              </div>
+              <div class="panel-item">
+                <span class="icon">✗</span>
+                <span>互动率相对较低</span>
+              </div>
+            </div>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="conclusion">结论：短视频是当前最高效的获客方式</div>
+        </div>
+      </div>
+      <div class="template-tags">
+        <span class="tag">PPT</span>
+        <span class="tag">对比</span>
+        <span class="tag">分析</span>
+        <span class="tag">优缺点</span>
+      </div>
+    </div>
+
+    <!-- 模板5: PPT金句引用 -->
+    <div class="template-card">
+      <div class="template-header">
+        <h2>ppt-quote</h2>
+        <p>突出展示金句、名言或核心观点</p>
+      </div>
+      <div class="template-preview">
+        <button class="replay-btn" onclick="replayAnimation(this)">重播动画</button>
+        <div class="ppt-quote">
+          <div class="quote-mark-left">"</div>
+          <div class="quote-mark-right">"</div>
+          <div class="quote-text">
+            内容为王的时代，<br>
+            真正稀缺的不是流量，<br>
+            而是能打动人心的故事。
+          </div>
+          <div class="bottom-line"></div>
+          <div class="quote-author">— 短视频运营心得</div>
+        </div>
+      </div>
+      <div class="template-tags">
+        <span class="tag">PPT</span>
+        <span class="tag">金句</span>
+        <span class="tag">引用</span>
+        <span class="tag">名言</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 重播动画
+    function replayAnimation(btn) {
+      const preview = btn.parentElement;
+      const content = preview.querySelector('div:not(.replay-btn)');
+
+      // 克隆并替换以重置动画
+      const clone = content.cloneNode(true);
+      content.parentNode.replaceChild(clone, content);
+    }
+
+    // 页面加载时自动播放动画
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('PPT模板预览已加载');
+    });
+  </script>
+</body>
+</html>

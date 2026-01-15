@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-01-15T02:41:14.967Z",
+  "summary": {
+    "P0": {
+      "count": 0,
+      "description": "阻塞性问题，必须立即解决"
+    },
+    "P1": {
+      "count": 0,
+      "description": "功能性问题，影响用户体验"
+    },
+    "P2": {
+      "count": 0,
+      "description": "优化性问题，可逐步改进"
+    }
+  },
+  "issues": [],
+  "fixPlan": {
+    "immediate": [],
+    "thisWeek": [],
+    "thisMonth": [],
+    "optimization": []
+  }
+}

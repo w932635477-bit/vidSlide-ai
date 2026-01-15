@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模板预览 - VidSlide AI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      padding: 20px;
+    }
+    h1 { text-align: center; color: #FFD700; margin-bottom: 30px; }
+    h2 { color: #007AFF; margin: 30px 0 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+    }
+    
+    .template-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    
+    .template-preview {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .template-info {
+      padding: 16px;
+    }
+    
+    .template-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    
+    .template-id {
+      font-size: 12px;
+      color: #666;
+      font-family: monospace;
+      margin-bottom: 8px;
+    }
+    
+    .template-desc {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+    
+    .template-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    
+    .tag {
+      background: #333;
+      color: #ccc;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+    
+    /* 模板预览样式 */
+    .preview-pip {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    }
+    .preview-pip::before {
+      content: '';
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+    .preview-pip::after {
+      content: '画中画';
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .preview-info-card {
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-info-card::before {
+      content: '';
+      width: 80%;
+      height: 60%;
+      background: #1a1a1a;
+      border: 2px solid #FFD700;
+      border-radius: 8px;
+    }
+    
+    .preview-keyword {
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-keyword::before {
+      content: '关键词';
+      padding: 12px 30px;
+      background: #1a1a1a;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    
+    .preview-timeline {
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+    }
+    .preview-timeline::before {
+      content: '';
+      width: 100%;
+      height: 3px;
+      background: #FFD700;
+    }
+    .preview-timeline::after {
+      content: '2020 → 2021 → 2022 → 2023';
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #FFD700;
+      font-weight: bold;
+    }
+    
+    .preview-split {
+      background: #1a1a1a;
+      display: flex;
+    }
+    .preview-split::before {
+      content: 'A';
+      width: 50%;
+      height: 100%;
+      background: rgba(255,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #FF6B6B;
+    }
+    .preview-split::after {
+      content: 'B';
+      width: 50%;
+      height: 100%;
+      background: rgba(0,255,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #4ECDC4;
+      border-left: 2px solid #fff;
+    }
+    
+    .preview-dialog {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    }
+    .preview-dialog::before {
+      content: '💡 重要提示';
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid #FFD700;
+      border-radius: 8px;
+      padding: 12px 20px;
+      color: #fff;
+      font-size: 14px;
+    }
+    
+    .preview-chart {
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-chart::before {
+      content: '';
+      width: 70%;
+      height: 60%;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .preview-chart::after {
+      content: '📊';
+      position: absolute;
+      font-size: 48px;
+    }
+    
+    .preview-document {
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+    .preview-document::before {
+      content: '📄';
+      font-size: 64px;
+      transform: rotateY(10deg) rotateX(5deg);
+    }
+    
+    .preview-minimalist {
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-minimalist::before {
+      content: '简洁';
+      color: #1D1D1F;
+      font-size: 32px;
+      font-weight: 300;
+      letter-spacing: 8px;
+    }
+    
+    .preview-speaker {
+      background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 100%);
+    }
+    .preview-speaker::before {
+      content: '👤';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+    }
+    
+    .preview-educational {
+      background: #F8F9FA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-educational::before {
+      content: '';
+      width: 80%;
+      height: 70%;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .preview-educational::after {
+      content: '📚 学习要点';
+      position: absolute;
+      color: #1D1D1F;
+      font-weight: bold;
+    }
+    
+    .preview-product {
+      background: #000;
+    }
+    .preview-product::before {
+      content: '';
+      position: absolute;
+      left: 30%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 100px;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.1) 0%, transparent 70%);
+    }
+    .preview-product::after {
+      content: '🎁 产品';
+      position: absolute;
+      left: 30%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 24px;
+    }
+    
+    /* 短视频模板 */
+    .preview-douyin {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .preview-douyin::before {
+      content: '🔥 抖音爆款秘籍';
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .preview-douyin::after {
+      content: '点击了解更多';
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #FF2D55;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+    }
+    
+    .preview-traffic {
+      background: #0D1117;
+      display: flex;
+      align-items: center;
+    }
+    .preview-traffic::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      width: 40%;
+      height: 80%;
+      background: linear-gradient(180deg, 
+        #FF6B6B 0%, #FF6B6B 20%,
+        #FFE66D 20%, #FFE66D 40%,
+        #4ECDC4 40%, #4ECDC4 60%,
+        #45B7D1 60%, #45B7D1 80%,
+        #96CEB4 80%, #96CEB4 100%
+      );
+      clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+    }
+    .preview-traffic::after {
+      content: '流量漏斗';
+      position: absolute;
+      right: 30px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .preview-ad {
+      background: #1A1A2E;
+    }
+    .preview-ad::before {
+      content: 'ROI 320%';
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      color: #4ECDC4;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .preview-ad::after {
+      content: 'CPM CPC CTR CVR';
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #FFE66D;
+      font-size: 12px;
+      letter-spacing: 4px;
+    }
+    
+    .preview-ip {
+      background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 30px;
+    }
+    .preview-ip::before {
+      content: '';
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid #FFD700;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    }
+    .preview-ip::after {
+      content: '个人IP';
+      margin-top: 15px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    
+    .preview-fan {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-fan::before {
+      content: '❤️ 💬 🔄 ⭐';
+      font-size: 32px;
+      letter-spacing: 16px;
+    }
+    .preview-fan::after {
+      content: '双击点赞！';
+      position: absolute;
+      bottom: 20px;
+      color: #fff;
+      font-weight: bold;
+    }
+    
+    .preview-knowledge {
+      background: #FAFAFA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-knowledge::before {
+      content: '';
+      width: 85%;
+      height: 75%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .preview-knowledge::after {
+      content: '💡 干货分享';
+      position: absolute;
+      color: #1D1D1F;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    
+    .preview-review {
+      background: #F5F5F7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-review::before {
+      content: 'VS';
+      color: #FF2D55;
+      font-size: 48px;
+      font-weight: bold;
+    }
+    .preview-review::after {
+      content: '⭐⭐⭐⭐⭐';
+      position: absolute;
+      bottom: 20px;
+      font-size: 20px;
+    }
+    
+    .preview-data {
+      background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-data::before {
+      content: '+128%';
+      color: #FFD700;
+      font-size: 48px;
+      font-weight: bold;
+    }
+    .preview-data::after {
+      content: '📈';
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 32px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 VidSlide AI 模板预览</h1>
+  
+  <h2>基础模板 (12个)</h2>
+  <div class="templates-grid">
+    <div class="template-card">
+      <div class="template-preview preview-pip"></div>
+      <div class="template-info">
+        <div class="template-name">画中画模板</div>
+        <div class="template-id">picture-in-picture</div>
+        <div class="template-desc">视频画面中叠加小窗口显示演讲者</div>
+        <div class="template-tags">
+          <span class="tag">视频</span>
+          <span class="tag">演讲</span>
+          <span class="tag">演示</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-info-card"></div>
+      <div class="template-info">
+        <div class="template-name">信息卡片模板</div>
+        <div class="template-id">info-card</div>
+        <div class="template-desc">突出显示重要信息和关键词</div>
+        <div class="template-tags">
+          <span class="tag">信息</span>
+          <span class="tag">卡片</span>
+          <span class="tag">展示</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-keyword"></div>
+      <div class="template-info">
+        <div class="template-name">关键词高亮模板</div>
+        <div class="template-id">keyword-highlight</div>
+        <div class="template-desc">突出显示重要的关键词汇</div>
+        <div class="template-tags">
+          <span class="tag">关键词</span>
+          <span class="tag">高亮</span>
+          <span class="tag">强调</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-timeline"></div>
+      <div class="template-info">
+        <div class="template-name">时间线展示模板</div>
+        <div class="template-id">timeline</div>
+        <div class="template-desc">展示时间发展的内容和历程</div>
+        <div class="template-tags">
+          <span class="tag">时间线</span>
+          <span class="tag">历程</span>
+          <span class="tag">发展</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-split"></div>
+      <div class="template-info">
+        <div class="template-name">分屏对比模板</div>
+        <div class="template-id">split-screen</div>
+        <div class="template-desc">左右分屏展示对比内容</div>
+        <div class="template-tags">
+          <span class="tag">对比</span>
+          <span class="tag">分屏</span>
+          <span class="tag">分析</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-dialog"></div>
+      <div class="template-info">
+        <div class="template-name">对话弹窗模板</div>
+        <div class="template-id">dialog-popup</div>
+        <div class="template-desc">右下角弹出显示关键词和重要信息</div>
+        <div class="template-tags">
+          <span class="tag">弹窗</span>
+          <span class="tag">关键词</span>
+          <span class="tag">强调</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-chart"></div>
+      <div class="template-info">
+        <div class="template-name">图表分析模板</div>
+        <div class="template-id">chart-analysis</div>
+        <div class="template-desc">智能匹配和展示数据图表</div>
+        <div class="template-tags">
+          <span class="tag">图表</span>
+          <span class="tag">数据</span>
+          <span class="tag">分析</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-document"></div>
+      <div class="template-info">
+        <div class="template-name">文件展示模板</div>
+        <div class="template-id">document-display</div>
+        <div class="template-desc">3D效果展示文档和文件内容</div>
+        <div class="template-tags">
+          <span class="tag">文档</span>
+          <span class="tag">文件</span>
+          <span class="tag">展示</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-minimalist"></div>
+      <div class="template-info">
+        <div class="template-name">简洁模板</div>
+        <div class="template-id">minimalist</div>
+        <div class="template-desc">极简设计，突出核心内容</div>
+        <div class="template-tags">
+          <span class="tag">简洁</span>
+          <span class="tag">极简</span>
+          <span class="tag">清晰</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-speaker"></div>
+      <div class="template-info">
+        <div class="template-name">演讲者聚焦模板</div>
+        <div class="template-id">speaker-focus</div>
+        <div class="template-desc">突出演讲者，弱化背景内容</div>
+        <div class="template-tags">
+          <span class="tag">演讲</span>
+          <span class="tag">聚焦</span>
+          <span class="tag">人像</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-educational"></div>
+      <div class="template-info">
+        <div class="template-name">教育模板</div>
+        <div class="template-id">educational</div>
+        <div class="template-desc">适合教学内容的结构化展示</div>
+        <div class="template-tags">
+          <span class="tag">教育</span>
+          <span class="tag">教学</span>
+          <span class="tag">学习</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-product"></div>
+      <div class="template-info">
+        <div class="template-name">产品展示模板</div>
+        <div class="template-id">product-showcase</div>
+        <div class="template-desc">突出产品特点和优势</div>
+        <div class="template-tags">
+          <span class="tag">产品</span>
+          <span class="tag">展示</span>
+          <span class="tag">营销</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <h2>短视频/自媒体专用模板 (8个)</h2>
+  <div class="templates-grid">
+    <div class="template-card">
+      <div class="template-preview preview-douyin"></div>
+      <div class="template-info">
+        <div class="template-name">抖音营销模板</div>
+        <div class="template-id">douyin-marketing</div>
+        <div class="template-desc">适合抖音、快手等短视频平台的营销内容展示</div>
+        <div class="template-tags">
+          <span class="tag">抖音</span>
+          <span class="tag">短视频</span>
+          <span class="tag">营销</span>
+          <span class="tag">获客</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-traffic"></div>
+      <div class="template-info">
+        <div class="template-name">流量获客模板</div>
+        <div class="template-id">traffic-acquisition</div>
+        <div class="template-desc">展示流量转化和获客策略的专业模板</div>
+        <div class="template-tags">
+          <span class="tag">流量</span>
+          <span class="tag">获客</span>
+          <span class="tag">转化</span>
+          <span class="tag">漏斗</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-ad"></div>
+      <div class="template-info">
+        <div class="template-name">投放效果模板</div>
+        <div class="template-id">ad-performance</div>
+        <div class="template-desc">展示广告投放效果和ROI数据</div>
+        <div class="template-tags">
+          <span class="tag">投放</span>
+          <span class="tag">广告</span>
+          <span class="tag">ROI</span>
+          <span class="tag">数据</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-ip"></div>
+      <div class="template-info">
+        <div class="template-name">IP打造模板</div>
+        <div class="template-id">personal-ip</div>
+        <div class="template-desc">展示个人IP和品牌形象</div>
+        <div class="template-tags">
+          <span class="tag">IP</span>
+          <span class="tag">个人品牌</span>
+          <span class="tag">KOL</span>
+          <span class="tag">自媒体</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-fan"></div>
+      <div class="template-info">
+        <div class="template-name">粉丝互动模板</div>
+        <div class="template-id">fan-engagement</div>
+        <div class="template-desc">展示粉丝互动和社区运营效果</div>
+        <div class="template-tags">
+          <span class="tag">粉丝</span>
+          <span class="tag">互动</span>
+          <span class="tag">社区</span>
+          <span class="tag">运营</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-knowledge"></div>
+      <div class="template-info">
+        <div class="template-name">干货分享模板</div>
+        <div class="template-id">knowledge-sharing</div>
+        <div class="template-desc">适合知识分享和干货内容展示</div>
+        <div class="template-tags">
+          <span class="tag">干货</span>
+          <span class="tag">知识</span>
+          <span class="tag">分享</span>
+          <span class="tag">教程</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-review"></div>
+      <div class="template-info">
+        <div class="template-name">对比种草模板</div>
+        <div class="template-id">comparison-review</div>
+        <div class="template-desc">产品对比和种草推荐展示</div>
+        <div class="template-tags">
+          <span class="tag">对比</span>
+          <span class="tag">种草</span>
+          <span class="tag">评测</span>
+          <span class="tag">推荐</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="template-card">
+      <div class="template-preview preview-data"></div>
+      <div class="template-info">
+        <div class="template-name">数据故事模板</div>
+        <div class="template-id">data-storytelling</div>
+        <div class="template-desc">用数据讲故事，适合展示增长、趋势等</div>
+        <div class="template-tags">
+          <span class="tag">数据</span>
+          <span class="tag">增长</span>
+          <span class="tag">趋势</span>
+          <span class="tag">可视化</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <p style="text-align: center; margin-top: 40px; color: #666;">
+    共 20 个模板 | VidSlide AI 模板库
+  </p>
+</body>
+</html>

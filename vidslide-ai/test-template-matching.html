@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模板匹配测试 - VidSlide AI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    h1 { color: #FFD700; text-align: center; }
+    h2 { color: #007AFF; border-bottom: 1px solid #333; padding-bottom: 10px; }
+    .card {
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #333;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 8px;
+      color: #fff;
+      padding: 12px;
+      font-size: 14px;
+      resize: vertical;
+    }
+    button {
+      background: #007AFF;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+    button:hover { background: #0056CC; }
+    button.secondary { background: #34C759; }
+    button.secondary:hover { background: #2DA44E; }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .keyword-tag {
+      background: #FFD700;
+      color: #000;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .keyword-tag.low { background: #666; color: #fff; }
+    .keyword-tag.medium { background: #FF9500; color: #fff; }
+    .keyword-tag.high { background: #34C759; color: #fff; }
+
+    .template-card {
+      background: #333;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid #007AFF;
+    }
+    .template-card.rank-1 { border-left-color: #FFD700; }
+    .template-card.rank-2 { border-left-color: #C0C0C0; }
+    .template-card.rank-3 { border-left-color: #CD7F32; }
+
+    .template-name { font-size: 18px; font-weight: 600; color: #fff; }
+    .template-score {
+      display: inline-block;
+      background: #007AFF;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .template-reason { color: #999; font-size: 13px; margin-top: 8px; }
+    .template-sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .source-tag {
+      background: #444;
+      color: #ccc;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .log {
+      background: #111;
+      color: #0f0;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .stat-item {
+      background: #333;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-value { font-size: 28px; font-weight: bold; color: #FFD700; }
+    .stat-label { font-size: 12px; color: #999; margin-top: 4px; }
+
+    .warning { background: #FF3B30; color: #fff; padding: 12px; border-radius: 8px; margin: 10px 0; }
+    .success { background: #34C759; color: #fff; padding: 12px; border-radius: 8px; margin: 10px 0; }
+    .info { background: #007AFF; color: #fff; padding: 12px; border-radius: 8px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>🎯 模板匹配测试工具</h1>
+
+  <div class="card">
+    <h2>📝 步骤1: 输入测试文本</h2>
+    <p>输入视频转录文本或直接使用预设的测试文本：</p>
+    <textarea id="inputText" placeholder="在此输入文本内容..."></textarea>
+    <div>
+      <button onclick="usePresetText('douyin')">使用抖音营销文本</button>
+      <button onclick="usePresetText('education')">使用教育内容文本</button>
+      <button onclick="usePresetText('product')">使用产品介绍文本</button>
+      <button onclick="usePresetText('timeline')">使用时间线文本</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🔑 步骤2: 关键词提取</h2>
+      <button onclick="extractKeywords()">提取关键词</button>
+      <button onclick="clearKeywords()" class="secondary">清空</button>
+      <div id="keywordsResult"></div>
+    </div>
+
+    <div class="card">
+      <h2>🎨 步骤3: 模板推荐</h2>
+      <button onclick="recommendTemplates()">获取推荐</button>
+      <div id="templatesResult"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 模板库统计</h2>
+    <div id="templateStats"></div>
+  </div>
+
+  <div class="card">
+    <h2>📋 调试日志</h2>
+    <button onclick="clearLog()">清空日志</button>
+    <div id="log" class="log"></div>
+  </div>
+
+  <script type="module">
+    // 导入模块
+    import TemplateArchitecture from './src/utils/TemplateArchitecture.js';
+    import TemplateRecommender from './src/services/TemplateRecommender.js';
+
+    // 全局变量
+    let extractedKeywords = [];
+
+    // 日志函数
+    function log(msg) {
+      const logEl = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(msg);
+    }
+
+    window.clearLog = function() {
+      document.getElementById('log').textContent = '';
+    };
+
+    // 预设文本
+    const presetTexts = {
+      douyin: `心思做拍摄，做剪辑，做出来的短视频，发到抖音，反而流量越来越少，你可能反复在思考到底是哪里出现了问题啊？不要再思考哪里出现问题了？是因为抖音的玩法早就已经变天了，以前可能我们费心思量去拍摄，去做剪辑，然后发上去那辆好到起飞，但是现在这种方式已经完全行不通了，抖音目前已经是没有增量的用户，所以我们想要做ip想要做获客的，一定是要投放质量ad的抖音现在的流量推送机制是她第一波流量先推送给你的粉丝，然后通过你粉丝反馈的数据再推送给陌生的流量，而土而我们头发巨量ad的话，他可以在你没有粉丝的基础上，这些宽选中你想要的那个人群，然后他会帮你找。好精准的陌生流量，从而起到一个原生互动的目的，原生互动越多的我们几号就越快，获客，也就是会越来越多，从而达到一个良性的循环，所以我们想要做获客的老板，一定是要投放质量ad的，我这边总结出来一套高效的质量，ad，投放方方式，如果有感兴趣的老板可以后台私信我交流交流，分享领域。`,
+
+      education: `今天我们来学习人工智能的发展历程。人工智能的概念最早在1956年的达特茅斯会议上被提出。从那时起，AI经历了几个重要的发展阶段。第一阶段是符号主义时期，主要研究专家系统。第二阶段是连接主义时期，神经网络开始兴起。第三阶段是深度学习时期，从2012年开始，深度学习取得了突破性进展。现在我们正处于大模型时代，GPT、Claude等大语言模型正在改变世界。学习要点：1. 理解AI的基本概念 2. 掌握发展历程 3. 了解未来趋势。`,
+
+      product: `这款产品是我们最新推出的智能手表，它有以下几个核心优势：第一，续航能力强，一次充电可以使用7天。第二，健康监测功能全面，支持心率、血氧、睡眠监测。第三，防水等级达到IP68，游泳时也可以佩戴。与竞品相比，我们的价格更优惠，功能更丰富。现在购买还有限时优惠，原价999元，现在只要699元。数据显示，用户满意度达到98%，复购率超过60%。`,
+
+      timeline: `让我们回顾一下公司的发展历程。2018年，公司成立，只有3个人的小团队。2019年，获得天使轮融资500万。2020年，用户突破10万，团队扩展到20人。2021年，完成A轮融资2000万，用户达到100万。2022年，推出2.0版本，用户突破500万。2023年，完成B轮融资1亿，成为行业独角兽。2024年，计划上市，目标用户1000万。这就是我们从0到1的创业故事。`
+    };
+
+    window.usePresetText = function(type) {
+      document.getElementById('inputText').value = presetTexts[type];
+      log(`已加载预设文本: ${type}`);
+    };
+
+    // 本地关键词提取算法（与BaiduNLPService一致）
+    function localExtractKeywords(text, num = 15) {
+      // 领域词典 - 短视频/自媒体/营销相关
+      const domainDictionary = new Set([
+        // 平台相关
+        '抖音', '快手', '小红书', '视频号', 'B站', '微博', '知乎',
+        // 营销相关
+        '获客', '转化', '变现', '引流', '私域', '公域', '投放', '推广',
+        '巨量AD', '巨量ad', '质量AD', '质量ad', '投放巨量', '头发巨量',
+        '做IP', '做ip', 'IP', 'KOL', 'KOC', 'MCN',
+        // 内容相关
+        '短视频', '直播', '带货', '种草', '拔草', '爆款', '热门',
+        '拍摄', '剪辑', '运营', '账号', '粉丝', '流量', '播放量',
+        '原生互动', '良性循环', '增量用户', '目标人群', '陌生流量', '流量推送', '推送机制',
+        // 商业相关
+        '老板', '创业', '副业', '赚钱', '收入', '利润', '成本',
+        // 教育相关
+        '人工智能', '机器学习', '深度学习', '神经网络', '大模型', 'AI', 'GPT',
+        '学习', '教学', '课程', '培训', '知识', '技能',
+        // 产品相关
+        '产品', '功能', '优势', '特点', '价格', '优惠', '性价比',
+        // 数据相关
+        '数据', '统计', '增长', '下降', '趋势', '分析', '报告',
+        // 时间相关
+        '发展', '历程', '阶段', '历史', '未来', '计划', '目标'
+      ]);
+
+      // 停用字符
+      const stopChars = new Set([
+        '的', '了', '是', '在', '我', '有', '和', '就', '不', '人', '都', '一', '个',
+        '上', '也', '很', '到', '说', '要', '去', '你', '会', '着', '没', '看', '好',
+        '自', '这', '那', '她', '他', '它', '们', '么', '什', '吗', '呢', '吧', '啊',
+        '哦', '嗯', '呀', '哈', '哪', '谁', '怎', '为', '被', '把', '让', '给', '从',
+        '向', '对', '与', '及', '或', '但', '而', '如', '若', '虽', '因', '所', '以',
+        '能', '可', '想', '做', '来', '去', '过', '出', '起', '下', '里', '外', '前',
+        '后', '中', '内', '间', '时', '年', '月', '日', '号', '点', '分', '秒'
+      ]);
+
+      // 停用词组
+      const stopPhrases = new Set([
+        '可能', '然后', '这个', '那个', '什么', '怎么', '为什么', '因为', '所以',
+        '但是', '而且', '或者', '如果', '虽然', '虽然', '不过', '其实', '当然',
+        '已经', '正在', '一直', '一定', '一些', '一样', '一起', '一下', '一点',
+        '现在', '以前', '以后', '之前', '之后', '这样', '那样', '这里', '那里',
+        '越来越', '反复', '到底', '完全', '非常', '特别', '真的', '确实'
+      ]);
+
+      // 第一步：从文本中提取所有领域词典中的词
+      const sortedDomainWords = [...domainDictionary].sort((a, b) => b.length - a.length);
+      const foundDomainWords = {};
+
+      for (const word of sortedDomainWords) {
+        const regex = new RegExp(word, 'gi');
+        const matches = text.match(regex);
+        if (matches && matches.length > 0) {
+          const normalizedWord = word.toUpperCase().includes('AD') || word.toUpperCase().includes('IP')
+            ? word.replace(/ad$/i, 'AD').replace(/ip$/i, 'IP').replace(/^做ip$/i, '做IP')
+            : word;
+          foundDomainWords[normalizedWord] = (foundDomainWords[normalizedWord] || 0) + matches.length;
+        }
+      }
+
+      // 第二步：使用N-gram方法提取高频词组
+      const ngramCounts = {};
+      const cleanText = text.replace(/[，。！？、；：""''（）【】《》\s\n\r\t]+/g, ' ');
+      const segments = cleanText.split(' ').filter(s => s.length > 0);
+
+      for (const segment of segments) {
+        for (let n = 2; n <= 4; n++) {
+          for (let i = 0; i <= segment.length - n; i++) {
+            const ngram = segment.substring(i, i + n);
+            if (stopChars.has(ngram[0]) || stopChars.has(ngram[ngram.length - 1])) continue;
+            if (stopPhrases.has(ngram)) continue;
+            let allStop = true;
+            for (const char of ngram) {
+              if (!stopChars.has(char)) { allStop = false; break; }
+            }
+            if (allStop) continue;
+            if (domainDictionary.has(ngram)) continue;
+            ngramCounts[ngram] = (ngramCounts[ngram] || 0) + 1;
+          }
+        }
+      }
+
+      // 第三步：合并领域词和高频n-gram
+      const wordScores = [];
+
+      for (const [word, count] of Object.entries(foundDomainWords)) {
+        let score = count * 5;
+        if (word.length >= 4) score *= 1.5;
+        wordScores.push({ text: word, score, count, source: 'domain' });
+      }
+
+      for (const [word, count] of Object.entries(ngramCounts)) {
+        if (count >= 2) {
+          let score = count * 1.5;
+          if (word.length >= 3) score *= 1.2;
+          wordScores.push({ text: word, score, count, source: 'ngram' });
+        }
+      }
+
+      // 排序并返回
+      wordScores.sort((a, b) => b.score - a.score);
+      return wordScores.slice(0, num).map((item, index) => ({
+        ...item,
+        importance: 1 - (index / num) * 0.5
+      }));
+    }
+
+    // 提取关键词
+    window.extractKeywords = function() {
+      const text = document.getElementById('inputText').value.trim();
+      if (!text) {
+        alert('请先输入文本内容');
+        return;
+      }
+
+      log('开始提取关键词...');
+      extractedKeywords = localExtractKeywords(text, 15);
+
+      const resultEl = document.getElementById('keywordsResult');
+      if (extractedKeywords.length === 0) {
+        resultEl.innerHTML = '<div class="warning">未能提取到关键词</div>';
+        return;
+      }
+
+      let html = `<div class="success">成功提取 ${extractedKeywords.length} 个关键词</div>`;
+      html += '<div class="keywords-list">';
+
+      extractedKeywords.forEach((kw, index) => {
+        let levelClass = 'low';
+        if (kw.importance > 0.7) levelClass = 'high';
+        else if (kw.importance > 0.4) levelClass = 'medium';
+
+        html += `<span class="keyword-tag ${levelClass}" title="分数:${kw.score.toFixed(1)} 来源:${kw.source}">${kw.text}</span>`;
+      });
+
+      html += '</div>';
+      resultEl.innerHTML = html;
+
+      log(`关键词提取完成: ${extractedKeywords.map(k => k.text).join(', ')}`);
+    };
+
+    window.clearKeywords = function() {
+      extractedKeywords = [];
+      document.getElementById('keywordsResult').innerHTML = '';
+      document.getElementById('templatesResult').innerHTML = '';
+      log('已清空关键词');
+    };
+
+    // 推荐模板
+    window.recommendTemplates = async function() {
+      if (extractedKeywords.length === 0) {
+        alert('请先提取关键词');
+        return;
+      }
+
+      log('开始推荐模板...');
+
+      try {
+        // 初始化推荐服务
+        await TemplateRecommender.initialize();
+
+        // 构建内容分析对象
+        const contentAnalysis = {
+          keywords: extractedKeywords,
+          contentType: detectContentType(extractedKeywords),
+          textDensity: 0.5,
+          dataMentions: detectDataMentions(document.getElementById('inputText').value),
+          sentiment: 'neutral',
+          confidence: 0.8
+        };
+
+        log(`内容分析: 类型=${contentAnalysis.contentType}, 数据提及=${contentAnalysis.dataMentions.toFixed(2)}`);
+
+        // 获取推荐
+        const recommendations = await TemplateRecommender.generateRecommendations(contentAnalysis, {
+          maxRecommendations: 5
+        });
+
+        const resultEl = document.getElementById('templatesResult');
+
+        if (recommendations.length === 0) {
+          resultEl.innerHTML = '<div class="warning">未找到匹配的模板</div>';
+          log('未找到匹配的模板');
+          return;
+        }
+
+        let html = `<div class="info">找到 ${recommendations.length} 个推荐模板</div>`;
+
+        recommendations.forEach((rec, index) => {
+          const rankClass = index < 3 ? `rank-${index + 1}` : '';
+          html += `
+            <div class="template-card ${rankClass}">
+              <div>
+                <span class="template-name">${rec.template?.name || '未知模板'}</span>
+                <span class="template-score">${rec.confidence}% 匹配</span>
+              </div>
+              <div class="template-reason">${rec.reasons?.join(' | ') || '无'}</div>
+              <div class="template-sources">
+                ${(rec.sources || []).map(s => `<span class="source-tag">${s}</span>`).join('')}
+              </div>
+            </div>
+          `;
+
+          log(`推荐 #${index + 1}: ${rec.template?.name} (${rec.confidence}%)`);
+        });
+
+        resultEl.innerHTML = html;
+
+      } catch (error) {
+        log(`错误: ${error.message}`);
+        document.getElementById('templatesResult').innerHTML = `<div class="warning">推荐失败: ${error.message}</div>`;
+      }
+    };
+
+    // 检测内容类型
+    function detectContentType(keywords) {
+      const keywordTexts = keywords.map(k => k.text.toLowerCase());
+
+      // 短视频/营销类
+      const marketingKeywords = ['抖音', '快手', '获客', '投放', '流量', '粉丝', '变现', '带货'];
+      if (marketingKeywords.some(k => keywordTexts.some(kt => kt.includes(k)))) {
+        return 'promotional';
+      }
+
+      // 教育类
+      const eduKeywords = ['学习', '教学', '课程', '知识', '人工智能', '发展历程'];
+      if (eduKeywords.some(k => keywordTexts.some(kt => kt.includes(k)))) {
+        return 'educational';
+      }
+
+      // 产品类
+      const productKeywords = ['产品', '功能', '优势', '价格', '优惠'];
+      if (productKeywords.some(k => keywordTexts.some(kt => kt.includes(k)))) {
+        return 'promotional';
+      }
+
+      return 'presentation';
+    }
+
+    // 检测数据提及
+    function detectDataMentions(text) {
+      const dataPatterns = [
+        /\d+%/g,           // 百分比
+        /\d+万/g,          // 万
+        /\d+亿/g,          // 亿
+        /\d+元/g,          // 金额
+        /\d+年/g,          // 年份
+        /\d+个?月/g,       // 月份
+        /\d+倍/g,          // 倍数
+        /\d+次/g           // 次数
+      ];
+
+      let totalMatches = 0;
+      dataPatterns.forEach(pattern => {
+        const matches = text.match(pattern);
+        if (matches) totalMatches += matches.length;
+      });
+
+      return Math.min(totalMatches / 20, 1);
+    }
+
+    // 显示模板统计
+    async function showTemplateStats() {
+      try {
+        await TemplateArchitecture.initialize();
+        const stats = TemplateArchitecture.getStatistics();
+        const templates = TemplateArchitecture.getAllTemplates();
+
+        let html = `
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">${stats.totalTemplates}</div>
+              <div class="stat-label">模板总数</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${Object.keys(stats.templatesByCategory).length}</div>
+              <div class="stat-label">分类数量</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${stats.layersByType.fixed}</div>
+              <div class="stat-label">固定层</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${stats.layersByType.adjustable}</div>
+              <div class="stat-label">可调整层</div>
+            </div>
+          </div>
+          <h3 style="margin-top:20px;">模板列表</h3>
+          <div class="keywords-list">
+        `;
+
+        templates.forEach(t => {
+          html += `<span class="keyword-tag" title="${t.description}">${t.name}</span>`;
+        });
+
+        html += '</div>';
+
+        // 分类统计
+        html += '<h3 style="margin-top:20px;">分类统计</h3><div class="keywords-list">';
+        for (const [cat, count] of Object.entries(stats.templatesByCategory)) {
+          html += `<span class="keyword-tag low">${cat}: ${count}</span>`;
+        }
+        html += '</div>';
+
+        document.getElementById('templateStats').innerHTML = html;
+        log(`模板库加载完成: ${stats.totalTemplates} 个模板`);
+
+      } catch (error) {
+        document.getElementById('templateStats').innerHTML = `<div class="warning">加载失败: ${error.message}</div>`;
+        log(`模板库加载失败: ${error.message}`);
+      }
+    }
+
+    // 初始化
+    window.addEventListener('load', () => {
+      log('测试工具已加载');
+      showTemplateStats();
+    });
+  </script>
+</body>
+</html>

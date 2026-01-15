@@ -1,0 +1,188 @@
+{
+  "passed": 23,
+  "failed": 1,
+  "tests": [
+    {
+      "name": "开发服务器连接",
+      "status": "pass",
+      "message": "服务器正常运行在 http://localhost:5173",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.307Z"
+    },
+    {
+      "name": "应用内容加载",
+      "status": "pass",
+      "message": "Vue应用正常加载",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "组件文件: VideoUploader.vue",
+      "status": "pass",
+      "message": "文件存在",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "组件文件: Timeline.vue",
+      "status": "pass",
+      "message": "文件存在",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "组件文件: ProgressIndicator.vue",
+      "status": "pass",
+      "message": "文件存在",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "组件文件: ExportHandler.vue",
+      "status": "pass",
+      "message": "文件存在",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "组件文件: ErrorHandler.vue",
+      "status": "pass",
+      "message": "文件存在",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "组件文件: WorkspaceView.vue",
+      "status": "pass",
+      "message": "文件存在",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "工作页面路由",
+      "status": "pass",
+      "message": "已配置工作页面路由",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "首页路由",
+      "status": "pass",
+      "message": "已配置首页路由",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "语言支持",
+      "status": "pass",
+      "message": "支持 5 种语言",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "翻译键完整性",
+      "status": "fail",
+      "message": "缺少 3 个翻译键",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "样式系统: VideoUploader.vue",
+      "status": "pass",
+      "message": "包含现代CSS特性",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "样式系统: Timeline.vue",
+      "status": "pass",
+      "message": "包含现代CSS特性",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.309Z"
+    },
+    {
+      "name": "样式系统: WorkspaceView.vue",
+      "status": "pass",
+      "message": "包含现代CSS特性",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.310Z"
+    },
+    {
+      "name": "错误处理功能",
+      "status": "pass",
+      "message": "错误处理系统完整",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.310Z"
+    },
+    {
+      "name": "错误类型覆盖",
+      "status": "pass",
+      "message": "定义了 5/5 种错误类型",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.310Z"
+    },
+    {
+      "name": "响应式数据定义",
+      "status": "pass",
+      "message": "所有必需数据都已定义",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "事件处理机制",
+      "status": "pass",
+      "message": "包含事件处理逻辑",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "组件间通信",
+      "status": "pass",
+      "message": "包含组件通信机制",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "组件大小: VideoUploader.vue",
+      "status": "pass",
+      "message": "13.3KB，体积合理",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "性能基础: VideoUploader.vue",
+      "status": "pass",
+      "message": "无明显性能风险",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "组件大小: Timeline.vue",
+      "status": "pass",
+      "message": "21.0KB，体积合理",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "性能基础: Timeline.vue",
+      "status": "warning",
+      "message": "可能存在性能风险",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "组件大小: ProgressIndicator.vue",
+      "status": "pass",
+      "message": "16.7KB，体积合理",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    },
+    {
+      "name": "性能基础: ProgressIndicator.vue",
+      "status": "warning",
+      "message": "可能存在性能风险",
+      "details": null,
+      "timestamp": "2026-01-15T03:36:10.311Z"
+    }
+  ]
+}
