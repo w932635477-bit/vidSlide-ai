@@ -33,12 +33,27 @@ const REQUIRED_MODULES = {
     {
       path: 'src/services/MaterialService.js',
       description: '素材服务',
-      interfaces: ['searchMaterials', 'downloadMaterial']
+      interfaces: ['searchMaterials', 'downloadMaterial', 'initialize']
+    },
+    {
+      path: 'src/services/IntelligentDispatcher.js',
+      description: '智能素材调度器',
+      interfaces: [
+        'async initialize(',
+        'async dispatch(',
+        'selectStrategy(',
+        'selectPlatforms('
+      ]
     },
     {
       path: 'src/services/TemplateRecommender.js',
       description: '模板推荐服务',
       interfaces: ['recommend', 'analyzeContent']
+    },
+    {
+      path: 'src/services/SpeechRecognitionService.js',
+      description: '语音识别服务',
+      interfaces: ['start', 'stop', 'extractKeywords']
     }
   ],
   utils: [
@@ -52,6 +67,26 @@ const REQUIRED_MODULES = {
         'detectImageDifference(',
         'dispose('
       ]
+    },
+    {
+      path: 'src/services/utils/IntelligentDispatcher/KeywordAnalyzer.js',
+      description: '关键词分析器',
+      interfaces: [
+        'analyze(',
+        'countChineseChars(',
+        'countEnglishChars(',
+        'matchPatterns('
+      ]
+    },
+    {
+      path: 'src/services/utils/IntelligentDispatcher/PlatformEvaluator.js',
+      description: '平台评估器',
+      interfaces: ['calculateScores']
+    },
+    {
+      path: 'src/services/utils/IntelligentDispatcher/TranslationService.js',
+      description: '翻译服务',
+      interfaces: ['translate', 'initialize']
     }
   ],
   components: [
@@ -71,6 +106,22 @@ const REQUIRED_MODULES = {
       path: 'src/components/Timeline.vue',
       description: '时间线组件',
       mustHave: ['markers', 'addMarker']
+    },
+    {
+      path: 'src/components/MaterialRequirementAnalyzer.vue',
+      description: '素材需求分析组件',
+      mustImport: ['MaterialService', 'IntelligentDispatcher'],
+      mustHave: [
+        'analyzeRequirements',
+        'searchMaterial',
+        'materialRequirements',
+        'handleSearch'
+      ]
+    },
+    {
+      path: 'src/components/DispatcherStatus.vue',
+      description: '调度器状态组件',
+      mustHave: ['dispatcherStats', 'platformUsage']
     }
   ],
   views: [
@@ -89,7 +140,15 @@ const REQUIRED_MODULES = {
     {
       path: 'src/views/WorkspaceView.vue',
       description: '工作区视图',
-      mustHave: ['projects', 'createProject']
+      mustImport: ['MaterialRequirementAnalyzer', 'MaterialService'],
+      mustHave: [
+        'materialAnalyzerKeywords',
+        'materialAnalyzerKeyframes',
+        'handleMaterialSearchRequested',
+        'extractedKeywords',
+        'extractedKeyframes',
+        'panelTabs'
+      ]
     }
   ]
 }
@@ -126,6 +185,28 @@ const WORKFLOWS = {
       { id: 'analyze', description: '帧分析', handler: 'analyzeVideoFrames' },
       { id: 'detect', description: '场景检测', handler: 'detectSceneChange' },
       { id: 'marker', description: '标记生成', handler: 'addSceneMarker' }
+    ]
+  },
+  materialRequirementAnalysis: {
+    name: '素材需求分析工作流',
+    steps: [
+      { id: 'speechRecognition', description: '语音识别', handler: 'extractKeywords' },
+      { id: 'keywordAnalysis', description: '关键词分析', handler: 'KeywordAnalyzer.analyze' },
+      { id: 'dispatch', description: '智能调度', handler: 'IntelligentDispatcher.dispatch' },
+      { id: 'platformSelect', description: '平台选择', handler: 'selectPlatforms' },
+      { id: 'translate', description: '翻译处理', handler: 'TranslationService.translate' },
+      { id: 'search', description: '素材搜索', handler: 'MaterialService.searchMaterials' },
+      { id: 'display', description: '结果展示', handler: 'materialRequirements' }
+    ]
+  },
+  intelligentDispatch: {
+    name: '智能调度工作流',
+    steps: [
+      { id: 'init', description: '初始化调度器', handler: 'IntelligentDispatcher.initialize' },
+      { id: 'analyze', description: '关键词分析', handler: 'keywordAnalyzer.analyze' },
+      { id: 'evaluate', description: '平台评估', handler: 'platformEvaluator.calculateScores' },
+      { id: 'strategy', description: '策略选择', handler: 'selectStrategy' },
+      { id: 'dispatch', description: '执行调度', handler: 'dispatch' }
     ]
   }
 }
@@ -455,6 +536,44 @@ class WorkflowGuide {
           '[ ] 人脸在右侧时画中画在左侧',
           '[ ] 位置切换平滑',
           '[ ] 无人脸时使用默认位置'
+        ]
+      },
+      materialRequirementAnalysis: {
+        name: '素材需求分析功能',
+        steps: [
+          '1. 确保 MaterialRequirementAnalyzer.vue 已集成到 WorkspaceView',
+          '2. 确保 IntelligentDispatcher.js 和 MaterialService.js 已正确实现',
+          '3. 视频分析完成后，提取关键词 (extractKeywords)',
+          '4. 将关键词传递给 MaterialRequirementAnalyzer 组件',
+          '5. 组件调用 IntelligentDispatcher.dispatch() 进行智能调度',
+          '6. 根据关键词语言自动选择平台 (中文→百度, 英文→Unsplash)',
+          '7. 调用 MaterialService.searchMaterials() 搜索素材',
+          '8. 展示搜索结果，支持添加到画布'
+        ],
+        checklist: [
+          '[ ] 中文关键词正确路由到百度平台',
+          '[ ] 英文关键词正确路由到 Unsplash/Pexels',
+          '[ ] 翻译服务正常工作',
+          '[ ] 搜索结果正确展示',
+          '[ ] 添加到画布功能正常',
+          '[ ] extractKeywords 异步调用正确处理'
+        ]
+      },
+      intelligentDispatch: {
+        name: '智能调度功能',
+        steps: [
+          '1. 确保 KeywordAnalyzer.js 正确分析关键词语言',
+          '2. 确保 PlatformEvaluator.js 正确评估平台分数',
+          '3. 确保 TranslationService.js 正确翻译中文关键词',
+          '4. IntelligentDispatcher 根据分析结果选择最优策略',
+          '5. 支持单平台精确模式、多平台并行模式、渐进式扩展'
+        ],
+        checklist: [
+          '[ ] 关键词语言检测准确',
+          '[ ] 平台评分合理',
+          '[ ] 翻译服务响应正常',
+          '[ ] 策略选择正确',
+          '[ ] 缓存机制有效'
         ]
       }
     }

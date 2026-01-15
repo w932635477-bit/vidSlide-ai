@@ -129,6 +129,70 @@
         └───────────────┘
 ```
 
+### 4. 素材需求分析工作流
+
+```
+AI分析完成 (语音识别 + 关键帧提取)
+     │
+     ▼
+┌─────────────────────────────────────────┐
+│ SpeechRecognitionService.extractKeywords│
+│ (异步方法，返回关键词数组)               │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│ MaterialRequirementAnalyzer.vue         │
+│ (接收 keywords 和 keyframes props)      │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│ IntelligentDispatcher.dispatch(keyword) │
+│                                         │
+│  1. KeywordAnalyzer.analyze()           │
+│     - 检测语言 (中文/英文/混合)          │
+│     - 计算置信度                         │
+│     - 匹配模式特征                       │
+│                                         │
+│  2. selectStrategy()                    │
+│     - single_platform (速度优先)         │
+│     - parallel_platforms (质量优先)      │
+│     - progressive_expansion (平衡)       │
+│                                         │
+│  3. PlatformEvaluator.calculateScores() │
+│     - 百度 (中文优先)                    │
+│     - Unsplash (英文优先)                │
+│     - Pexels (备选)                      │
+│                                         │
+│  4. TranslationService.translate()      │
+│     (中文关键词翻译为英文)               │
+└─────────────────┬───────────────────────┘
+                  │
+     ┌────────────┼────────────┐
+     ▼            ▼            ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│ 百度    │ │Unsplash │ │ Pexels  │
+│(中文)   │ │(英文)   │ │(备选)   │
+└────┬────┘ └────┬────┘ └────┬────┘
+     │           │           │
+     └───────────┼───────────┘
+                 ▼
+        ┌───────────────┐
+        │ 素材搜索结果   │
+        │ → 展示列表     │
+        │ → 添加到画布   │
+        └───────────────┘
+```
+
+### 5. 智能调度策略
+
+| 策略 | 触发条件 | 平台数量 | 翻译 | 适用场景 |
+|------|----------|----------|------|----------|
+| single_platform | 置信度 > 0.8 或 speedPriority | 1 | 中文时翻译 | 快速搜索 |
+| parallel_platforms | 置信度 < 0.6 或 qualityPriority | 2 | 始终翻译 | 高质量搜索 |
+| progressive_expansion | 默认 | 1+备选 | 中文/混合时翻译 | 平衡模式 |
+
 ## 模块依赖关系
 
 ### 核心服务模块
@@ -138,7 +202,11 @@
 | UnifiedFaceTracker | services/UnifiedFaceTracker.js | face-api.js, @mediapipe/face_mesh | PictureInPicture, FaceTrackingSettings, VideoEditorView |
 | SceneDetection | utils/sceneDetection.js | - | VideoEditorView |
 | TemplateEngine | core/template-engine/ | - | VideoEditorView, WorkspaceView |
-| MaterialService | services/MaterialService.js | API services | VideoEditorView |
+| MaterialService | services/MaterialService.js | IntelligentDispatcher, API services | WorkspaceView, MaterialRequirementAnalyzer |
+| IntelligentDispatcher | services/IntelligentDispatcher.js | KeywordAnalyzer, PlatformEvaluator, TranslationService | MaterialService, MaterialRequirementAnalyzer |
+| KeywordAnalyzer | services/utils/IntelligentDispatcher/KeywordAnalyzer.js | - | IntelligentDispatcher |
+| PlatformEvaluator | services/utils/IntelligentDispatcher/PlatformEvaluator.js | - | IntelligentDispatcher |
+| TranslationService | services/utils/IntelligentDispatcher/TranslationService.js | Baidu Translate API | IntelligentDispatcher |
 
 ### UI 组件模块
 
@@ -148,6 +216,9 @@
 | PictureInPicture | components/PictureInPicture.vue | UnifiedFaceTracker |
 | FaceTrackingSettings | components/FaceTrackingSettings.vue | UnifiedFaceTracker |
 | Timeline | components/Timeline.vue | SceneDetection |
+| WorkspaceView | views/WorkspaceView.vue | MaterialRequirementAnalyzer, MaterialService, SpeechRecognitionService |
+| MaterialRequirementAnalyzer | components/MaterialRequirementAnalyzer.vue | MaterialService, IntelligentDispatcher |
+| DispatcherStatus | components/DispatcherStatus.vue | IntelligentDispatcher |
 
 ## 接口契约定义
 
