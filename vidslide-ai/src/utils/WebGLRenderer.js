@@ -32,8 +32,9 @@ class WebGLRenderer {
 
     try {
       // 获取WebGL上下文
-      this.gl = this.canvas.getContext('webgl', this.config) ||
-                this.canvas.getContext('experimental-webgl', this.config)
+      this.gl =
+        this.canvas.getContext('webgl', this.config) ||
+        this.canvas.getContext('experimental-webgl', this.config)
 
       if (!this.gl) {
         throw new Error('WebGL not supported')
@@ -53,7 +54,6 @@ class WebGLRenderer {
 
       this.isInitialized = true
       console.log('WebGL渲染引擎初始化完成')
-
     } catch (error) {
       console.error('WebGL初始化失败:', error)
       throw new Error(`WebGL渲染引擎初始化失败: ${error.message}`)
@@ -208,9 +208,7 @@ class WebGLRenderer {
     // 索引缓冲区（用于矩形渲染）
     this.buffers.indexBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.indexBuffer)
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([
-      0, 1, 2, 0, 2, 3
-    ]), gl.STATIC_DRAW)
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW)
   }
 
   /**
@@ -307,10 +305,14 @@ class WebGLRenderer {
 
     // 设置顶点数据（全屏矩形）
     const vertices = new Float32Array([
-      -1.0, -1.0,  // 左下
-       1.0, -1.0,  // 右下
-       1.0,  1.0,  // 右上
-      -1.0,  1.0   // 左上
+      -1.0,
+      -1.0, // 左下
+      1.0,
+      -1.0, // 右下
+      1.0,
+      1.0, // 右上
+      -1.0,
+      1.0 // 左上
     ])
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.vertexBuffer)
@@ -322,11 +324,7 @@ class WebGLRenderer {
 
     // 设置统一的背景颜色
     const matrixLocation = gl.getUniformLocation(this.program, 'u_matrix')
-    const matrix = new Float32Array([
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1
-    ])
+    const matrix = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1])
     gl.uniformMatrix3fv(matrixLocation, false, matrix)
 
     const timeLocation = gl.getUniformLocation(this.program, 'u_time')
@@ -368,7 +366,6 @@ class WebGLRenderer {
         fps: () => this.fps,
         stop: () => this.stopRenderLoop()
       }
-
     } catch (error) {
       console.error('WebGL模板渲染失败:', error)
       throw new Error(`WebGL渲染失败: ${error.message}`)
@@ -424,7 +421,10 @@ class WebGLRenderer {
    */
   generateVertices(layer) {
     const props = layer.properties
-    let x = 0, y = 0, width = 100, height = 100
+    let x = 0,
+      y = 0,
+      width = 100,
+      height = 100
 
     // 根据位置和大小计算顶点
     if (props.position) {
@@ -448,10 +448,14 @@ class WebGLRenderer {
     const glHeight = (height / this.canvas.height) * 2
 
     return new Float32Array([
-      glX, glY,                    // 左下
-      glX + glWidth, glY,          // 右下
-      glX + glWidth, glY + glHeight, // 右上
-      glX, glY + glHeight          // 左上
+      glX,
+      glY, // 左下
+      glX + glWidth,
+      glY, // 右下
+      glX + glWidth,
+      glY + glHeight, // 右上
+      glX,
+      glY + glHeight // 左上
     ])
   }
 
@@ -463,10 +467,14 @@ class WebGLRenderer {
   generateTexCoords(layer) {
     // 标准矩形纹理坐标
     return new Float32Array([
-      0.0, 1.0,  // 左下
-      1.0, 1.0,  // 右下
-      1.0, 0.0,  // 右上
-      0.0, 0.0   // 左上
+      0.0,
+      1.0, // 左下
+      1.0,
+      1.0, // 右下
+      1.0,
+      0.0, // 右上
+      0.0,
+      0.0 // 左上
     ])
   }
 
@@ -481,10 +489,22 @@ class WebGLRenderer {
 
     // 为四个顶点重复颜色
     return new Float32Array([
-      rgba.r, rgba.g, rgba.b, rgba.a,
-      rgba.r, rgba.g, rgba.b, rgba.a,
-      rgba.r, rgba.g, rgba.b, rgba.a,
-      rgba.r, rgba.g, rgba.b, rgba.a
+      rgba.r,
+      rgba.g,
+      rgba.b,
+      rgba.a,
+      rgba.r,
+      rgba.g,
+      rgba.b,
+      rgba.a,
+      rgba.r,
+      rgba.g,
+      rgba.b,
+      rgba.a,
+      rgba.r,
+      rgba.g,
+      rgba.b,
+      rgba.a
     ])
   }
 
@@ -495,11 +515,7 @@ class WebGLRenderer {
    */
   generateTransform(properties) {
     // 简化的3x3变换矩阵
-    const matrix = new Float32Array([
-      1, 0, 0,
-      0, 1, 0,
-      0, 0, 1
-    ])
+    const matrix = new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1])
 
     // 应用旋转
     if (properties.rotation) {
@@ -612,7 +628,7 @@ class WebGLRenderer {
     this.animations.set(id, {
       ...animation,
       startTime: performance.now(),
-      update: (deltaTime) => {
+      update: deltaTime => {
         // 动画更新逻辑
       },
       isComplete: () => {
@@ -637,12 +653,14 @@ class WebGLRenderer {
    */
   hexToRGBA(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex)
-    return result ? {
-      r: parseInt(result[1], 16) / 255,
-      g: parseInt(result[2], 16) / 255,
-      b: parseInt(result[3], 16) / 255,
-      a: result[4] ? parseInt(result[4], 16) / 255 : 1
-    } : { r: 1, g: 1, b: 1, a: 1 }
+    return result
+      ? {
+          r: parseInt(result[1], 16) / 255,
+          g: parseInt(result[2], 16) / 255,
+          b: parseInt(result[3], 16) / 255,
+          a: result[4] ? parseInt(result[4], 16) / 255 : 1
+        }
+      : { r: 1, g: 1, b: 1, a: 1 }
   }
 
   /**
@@ -668,11 +686,15 @@ class WebGLRenderer {
     const { format = 'png', quality = 0.9 } = options
 
     return new Promise(resolve => {
-      this.canvas.toBlob(blob => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result)
-        reader.readAsDataURL(blob)
-      }, `image/${format}`, quality)
+      this.canvas.toBlob(
+        blob => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result)
+          reader.readAsDataURL(blob)
+        },
+        `image/${format}`,
+        quality
+      )
     })
   }
 

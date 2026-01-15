@@ -13,7 +13,7 @@ import KeywordExtractor from './KeywordExtractor.vue'
 global.IntersectionObserver = vi.fn(() => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
-  unobserve: vi.fn(),
+  unobserve: vi.fn()
 }))
 
 describe('KeywordExtractor.vue', () => {
@@ -316,7 +316,9 @@ describe('KeywordExtractor.vue', () => {
     it('应该处理提取过程中的错误', async () => {
       // Mock一个会失败的提取过程
       const originalTimeout = global.setTimeout
-      global.setTimeout = vi.fn(() => { throw new Error('Test error') })
+      global.setTimeout = vi.fn(() => {
+        throw new Error('Test error')
+      })
 
       await wrapper.vm.startKeywordExtraction()
 

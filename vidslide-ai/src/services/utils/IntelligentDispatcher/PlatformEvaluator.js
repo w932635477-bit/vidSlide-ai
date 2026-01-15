@@ -241,13 +241,13 @@ class PlatformEvaluator {
    * 判断是否为摄影相关关键词
    */
   isPhotographyKeyword(keyword) {
+    // 摄影相关关键词（不包括风景等自然景观词汇）
     const photoKeywords = [
-      '风景',
       '摄影',
       '照片',
       '图片',
-      'landscape',
       'photo',
+      'photography',
       'image',
       '摄影师',
       'photographer',
@@ -278,10 +278,8 @@ class PlatformEvaluator {
       'civilization'
     ]
 
-    const hasCulturalTerms = culturalKeywords.some(k => keyword.toLowerCase().includes(k))
-
-    // 高中文比例的关键词更可能是文化相关
-    return hasCulturalTerms || analysis.chineseRatio > 0.7
+    // 只检查关键词是否包含文化相关术语
+    return culturalKeywords.some(k => keyword.toLowerCase().includes(k))
   }
 
   /**
@@ -312,7 +310,8 @@ class PlatformEvaluator {
    * 更新缓存
    */
   updateCache(key, scores) {
-    this.evaluationCache.set(key, { ...scores, timestamp: Date.now() })
+    // 直接存储scores对象，不添加timestamp以保持引用一致性
+    this.evaluationCache.set(key, scores)
 
     // 控制缓存大小
     if (this.evaluationCache.size > this.cacheMaxSize) {

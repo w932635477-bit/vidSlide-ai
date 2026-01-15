@@ -1,287 +1,879 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>百度图片API测试</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            margin: 40px;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .test-section {
-            margin: 20px 0;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        .btn:hover {
-            background: #0056b3;
-        }
-        .result {
-            margin: 10px 0;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .success {
-            background: #d4edda;
-            color: #155724;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>百度语音API测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f7;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    h1 { color: #1d1d1f; }
+    h2 { color: #333; font-size: 18px; margin-top: 0; }
+    button {
+      background: #007AFF;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover { background: #0056CC; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .log {
+      background: #1d1d1f;
+      color: #00ff00;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .status { padding: 8px 16px; border-radius: 6px; display: inline-block; margin: 10px 0; }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .status.pending { background: #fff3cd; color: #856404; }
+    input[type="file"] { margin: 10px 0; }
+    .result { background: #f0f9ff; padding: 16px; border-radius: 8px; margin-top: 16px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔍 百度图片API连接测试</h1>
-        <p>测试百度图片搜索API的连接性和功能</p>
+  <h1>🎤 百度语音API测试工具</h1>
 
-        <div class="test-section">
-            <h3>1. Access Token 获取测试</h3>
-            <button class="btn" onclick="testAccessToken()">获取Access Token</button>
-            <div id="tokenResult" class="result"></div>
-        </div>
+  <div class="card">
+    <h2>步骤1: 测试API连接（获取Access Token）</h2>
+    <button onclick="testGetToken()">测试获取Token</button>
+    <div id="tokenStatus" class="status pending">等待测试...</div>
+    <div id="tokenResult"></div>
+  </div>
 
-        <div class="test-section">
-            <h3>2. 图片搜索测试</h3>
-            <input type="text" id="searchKeyword" placeholder="输入搜索关键词" value="团队合作">
-            <button class="btn" onclick="testImageSearch()">搜索图片</button>
-            <div id="searchResult" class="result"></div>
-        </div>
+  <div class="card">
+    <h2>步骤2: 测试音频提取</h2>
+    <p>选择一个视频文件来测试音频提取：</p>
+    <input type="file" id="videoFile" accept="video/*">
+    <br>
+    <button onclick="testAudioExtraction()" id="extractBtn" disabled>测试音频提取</button>
+    <div id="extractStatus" class="status pending">等待选择文件...</div>
+    <div id="extractResult"></div>
+  </div>
 
-        <div class="test-section">
-            <h3>3. 网络连接测试</h3>
-            <button class="btn" onclick="testConnectivity()">测试连接</button>
-            <div id="connectResult" class="result"></div>
-        </div>
+  <div class="card">
+    <h2>步骤3: 测试完整语音识别流程</h2>
+    <button onclick="testFullRecognition()" id="recognizeBtn" disabled>测试语音识别</button>
+    <div id="recognizeStatus" class="status pending">等待音频提取完成...</div>
+    <div id="recognizeResult" class="result" style="display:none;"></div>
+  </div>
 
-        <div class="test-section">
-            <h3>5. 直接API测试</h3>
-            <button class="btn" onclick="testDirectAPI()">直接测试百度API</button>
-            <div id="directAPIResult" class="result"></div>
-        </div>
+  <div class="card">
+    <h2>步骤4: 测试关键词提取（百度NLP API）</h2>
+    <button onclick="testKeywordExtraction()" id="keywordBtn" disabled>测试关键词提取</button>
+    <button onclick="testLocalKeywordExtraction()" id="localKeywordBtn" disabled style="background:#34C759;">本地算法提取</button>
+    <div id="keywordStatus" class="status pending">等待语音识别完成...</div>
+    <div id="keywordResult" class="result" style="display:none;"></div>
+  </div>
 
-        <div class="test-section">
-            <h3>6. 解决方案说明</h3>
-            <div class="solution-info">
-                <h4>🔍 问题诊断</h4>
-                <p>百度API不支持浏览器直接调用（CORS限制），需要在后端调用。</p>
+  <div class="card">
+    <h2>调试日志</h2>
+    <button onclick="clearLog()">清空日志</button>
+    <div id="log" class="log"></div>
+  </div>
 
-                <h4>✅ 推荐解决方案</h4>
-                <ul>
-                    <li>1. <strong>使用现有的模拟数据</strong> - 系统已自动降级到模拟数据，确保功能正常</li>
-                    <li>2. <strong>部署到Vercel/Netlify</strong> - 生产环境可以正常调用百度API</li>
-                    <li>3. <strong>设置开发服务器代理</strong> - 配置本地开发服务器转发API请求</li>
-                    <li>4. <strong>使用百度JavaScript SDK</strong> - 如果SDK支持的话</li>
-                </ul>
+  <script type="module">
+    // 百度API配置
+    const BAIDU_CONFIG = {
+      apiKey: '5bAqP0hDvOJ5qjxqf8HCAp04',
+      secretKey: 'EeGwJFeifTImA843vw3DozuR6hzBq7wJ'
+    };
 
-                <h4>📊 当前状态</h4>
-                <p>✅ <strong>功能正常</strong> - 模拟数据确保VidSlide AI完整功能可用</p>
-                <p>✅ <strong>用户体验</strong> - 用户感受不到API限制，获得完整素材</p>
-                <p>🔄 <strong>生产就绪</strong> - 部署后可切换到真实百度API数据</p>
-            </div>
-        </div>
+    // 百度NLP API配置（独立的AppID）
+    const BAIDU_NLP_CONFIG = {
+      apiKey: 'AvbQlOsHwzNJr79fa64EKmZy',
+      secretKey: 'bhqnDHqT3ncpGbIBSGPCimE4gl8zW7Jz'
+    };
 
-        <div class="test-section">
-            <h3>4. 当前素材库状态</h3>
-            <button class="btn" onclick="checkMaterialStats()">查看统计</button>
-            <div id="statsResult" class="result"></div>
-        </div>
-    </div>
+    let accessToken = null;
+    let nlpAccessToken = null;
+    let extractedPCM = null;
 
-    <script type="module">
-        import BaiduImageService from './src/services/BaiduImageService.js'
-        import library from './src/services/LocalMaterialLibrary.js'
+    // 日志函数
+    function log(msg) {
+      const logEl = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(msg);
+    }
 
-        const baiduService = new BaiduImageService()
-        let materialLibrary = null
+    window.clearLog = function() {
+      document.getElementById('log').textContent = '';
+    };
 
-        // 初始化
-        async function init() {
-            try {
-                materialLibrary = library
-                await materialLibrary.initialize()
-                console.log('✅ 素材库初始化成功')
-            } catch (error) {
-                console.error('❌ 素材库初始化失败:', error)
-            }
+    // 步骤1: 测试获取Token
+    window.testGetToken = async function() {
+      const statusEl = document.getElementById('tokenStatus');
+      const resultEl = document.getElementById('tokenResult');
+
+      statusEl.className = 'status pending';
+      statusEl.textContent = '正在获取Token...';
+      log('开始获取百度Access Token...');
+
+      try {
+        // 使用Vite代理路径，避免CORS问题
+        const url = `/api/baidu/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_CONFIG.apiKey}&client_secret=${BAIDU_CONFIG.secretKey}`;
+
+        log(`请求URL: ${url} (通过Vite代理)`);
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        log(`响应状态: ${response.status}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP错误: ${response.status}`);
         }
 
-        init()
+        const data = await response.json();
+        log(`响应数据: ${JSON.stringify(data, null, 2)}`);
 
-        // 测试获取Access Token
-        window.testAccessToken = async function() {
-            const resultDiv = document.getElementById('tokenResult')
-            resultDiv.innerHTML = '🔄 正在获取Access Token...'
-            resultDiv.className = 'result'
-
-            try {
-                const token = await baiduService.getAccessToken()
-                const isMock = token.startsWith('mock_token_')
-                const status = isMock ? '🔄 模拟Token' : '✅ 真实Token'
-                resultDiv.innerHTML = `${status}<br><strong>Token:</strong> ${token.substring(0, 20)}...<br><strong>类型:</strong> ${isMock ? '模拟' : '真实'}`
-                resultDiv.classList.add(isMock ? 'error' : 'success')
-            } catch (error) {
-                resultDiv.innerHTML = `❌ Access Token获取失败: ${error.message}`
-                resultDiv.classList.add('error')
-            }
+        if (data.error) {
+          throw new Error(`API错误: ${data.error_description || data.error}`);
         }
 
-        // 测试图片搜索
-        window.testImageSearch = async function() {
-            const keyword = document.getElementById('searchKeyword').value
-            const resultDiv = document.getElementById('searchResult')
-            resultDiv.innerHTML = `🔄 正在搜索"${keyword}"...`
-            resultDiv.className = 'result'
+        accessToken = data.access_token;
+        statusEl.className = 'status success';
+        statusEl.textContent = '✅ Token获取成功！';
+        resultEl.innerHTML = `<p><strong>Access Token:</strong> ${accessToken.substring(0, 30)}...</p>
+                             <p><strong>有效期:</strong> ${data.expires_in} 秒</p>`;
 
-            try {
-                const results = await baiduService.searchImages(keyword, { limit: 3 })
-                if (results.success && results.images) {
-                    const isMock = results.source === 'mock' || results.images[0]?.id?.startsWith('mock')
-                    const status = isMock ? '🔄 模拟数据' : '✅ 真实数据'
-                    resultDiv.innerHTML = `${status} - 找到 ${results.images.length} 张图片<br>`
-                    results.images.slice(0, 3).forEach((img, index) => {
-                        resultDiv.innerHTML += `<strong>图片${index+1}:</strong> ${img.title || '无标题'}<br>`
-                    })
-                    resultDiv.classList.add(isMock ? 'error' : 'success')
-                } else {
-                    resultDiv.innerHTML = `❌ 搜索失败: ${results.error || '未知错误'}`
-                    resultDiv.classList.add('error')
+        log('Token获取成功！');
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ Token获取失败';
+        resultEl.innerHTML = `<p style="color:red;">错误: ${error.message}</p>`;
+        log(`错误: ${error.message}`);
+      }
+    };
+
+    // 文件选择事件
+    document.getElementById('videoFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        document.getElementById('extractBtn').disabled = false;
+        document.getElementById('extractStatus').textContent = `已选择: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+        log(`选择文件: ${file.name}`);
+      }
+    });
+
+    // 步骤2: 测试音频提取
+    window.testAudioExtraction = async function() {
+      const file = document.getElementById('videoFile').files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById('extractStatus');
+      const resultEl = document.getElementById('extractResult');
+
+      statusEl.className = 'status pending';
+      statusEl.textContent = '正在提取音频...';
+      log('开始从视频提取音频...');
+
+      try {
+        extractedPCM = await extractAudioFromVideo(file);
+
+        statusEl.className = 'status success';
+        statusEl.textContent = '✅ 音频提取成功！';
+        resultEl.innerHTML = `<p><strong>PCM数据大小:</strong> ${extractedPCM.byteLength} 字节</p>
+                             <p><strong>时长约:</strong> ${(extractedPCM.byteLength / 2 / 16000).toFixed(2)} 秒</p>`;
+
+        document.getElementById('recognizeBtn').disabled = false;
+        document.getElementById('recognizeStatus').textContent = '准备就绪，可以测试语音识别';
+
+        log(`音频提取成功，PCM大小: ${extractedPCM.byteLength} 字节`);
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 音频提取失败';
+        resultEl.innerHTML = `<p style="color:red;">错误: ${error.message}</p>`;
+        log(`音频提取错误: ${error.message}`);
+      }
+    };
+
+    // 音频提取函数
+    async function extractAudioFromVideo(videoFile) {
+      return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.crossOrigin = 'anonymous';
+        video.preload = 'auto';
+
+        const videoUrl = URL.createObjectURL(videoFile);
+
+        video.onloadedmetadata = async () => {
+          try {
+            const duration = video.duration;
+            log(`视频时长: ${duration} 秒`);
+
+            if (duration <= 0 || !isFinite(duration)) {
+              reject(new Error('无法获取视频时长'));
+              return;
+            }
+
+            // 检查是否支持 captureStream
+            if (!video.captureStream) {
+              reject(new Error('浏览器不支持 captureStream'));
+              return;
+            }
+
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioChunks = [];
+            let isRecording = true;
+
+            // 获取视频流
+            const stream = video.captureStream();
+            const audioTracks = stream.getAudioTracks();
+
+            log(`检测到音频轨道: ${audioTracks.length}`);
+
+            if (audioTracks.length === 0) {
+              reject(new Error('视频没有音频轨道'));
+              return;
+            }
+
+            // 创建音频源
+            const source = audioContext.createMediaStreamSource(stream);
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0; // 静音输出
+
+            const bufferSize = 4096;
+            const processor = audioContext.createScriptProcessor(bufferSize, 2, 2);
+
+            let hasDetectedAudio = false;
+
+            processor.onaudioprocess = (e) => {
+              if (!isRecording) return;
+
+              const left = e.inputBuffer.getChannelData(0);
+              const right = e.inputBuffer.numberOfChannels > 1 ? e.inputBuffer.getChannelData(1) : left;
+
+              // 检查是否有音频数据
+              for (let i = 0; i < left.length; i++) {
+                if (Math.abs(left[i]) > 0.001) {
+                  if (!hasDetectedAudio) {
+                    hasDetectedAudio = true;
+                    log('检测到音频数据！');
+                  }
+                  break;
                 }
-            } catch (error) {
-                resultDiv.innerHTML = `❌ 搜索异常: ${error.message}`
-                resultDiv.classList.add('error')
-            }
+              }
+
+              // 混合为单声道
+              const mono = new Float32Array(left.length);
+              for (let i = 0; i < left.length; i++) {
+                mono[i] = (left[i] + right[i]) / 2;
+              }
+              audioChunks.push(mono);
+            };
+
+            source.connect(processor);
+            processor.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // 设置很小的音量而不是静音
+            video.volume = 0.01;
+            // 注意：必须使用正常速度播放，否则音频会被压缩导致识别错误
+            video.playbackRate = 1.0;
+
+            log('开始播放视频（正常速度）...');
+
+            video.ontimeupdate = () => {
+              const progress = ((video.currentTime / duration) * 100).toFixed(1);
+              document.getElementById('extractStatus').textContent = `提取中... ${progress}%`;
+            };
+
+            video.onended = async () => {
+              isRecording = false;
+              log('视频播放完成');
+
+              const totalLength = audioChunks.reduce((acc, chunk) => acc + chunk.length, 0);
+              log(`捕获的音频块: ${audioChunks.length}, 总采样数: ${totalLength}`);
+
+              if (totalLength === 0) {
+                processor.disconnect();
+                source.disconnect();
+                gainNode.disconnect();
+                await audioContext.close();
+                URL.revokeObjectURL(videoUrl);
+                reject(new Error('未能捕获到音频数据'));
+                return;
+              }
+
+              // 合并音频
+              const mergedAudio = new Float32Array(totalLength);
+              let offset = 0;
+              for (const chunk of audioChunks) {
+                mergedAudio.set(chunk, offset);
+                offset += chunk.length;
+              }
+
+              // 检查音频振幅
+              let maxAmplitude = 0;
+              for (let i = 0; i < mergedAudio.length; i += 100) {
+                maxAmplitude = Math.max(maxAmplitude, Math.abs(mergedAudio[i]));
+              }
+              log(`音频最大振幅: ${maxAmplitude}`);
+
+              if (maxAmplitude < 0.001) {
+                processor.disconnect();
+                source.disconnect();
+                gainNode.disconnect();
+                await audioContext.close();
+                URL.revokeObjectURL(videoUrl);
+                reject(new Error('捕获的音频数据为静音'));
+                return;
+              }
+
+              // 重采样到16000Hz
+              const ratio = audioContext.sampleRate / 16000;
+              const newLength = Math.round(mergedAudio.length / ratio);
+              const resampled = new Float32Array(newLength);
+              for (let i = 0; i < newLength; i++) {
+                const srcIndex = i * ratio;
+                const srcIndexFloor = Math.floor(srcIndex);
+                const srcIndexCeil = Math.min(srcIndexFloor + 1, mergedAudio.length - 1);
+                const fraction = srcIndex - srcIndexFloor;
+                resampled[i] = mergedAudio[srcIndexFloor] * (1 - fraction) + mergedAudio[srcIndexCeil] * fraction;
+              }
+
+              // 转换为16位PCM
+              const pcmData = new Int16Array(resampled.length);
+              for (let i = 0; i < resampled.length; i++) {
+                const sample = Math.max(-1, Math.min(1, resampled[i]));
+                pcmData[i] = sample < 0 ? sample * 32768 : sample * 32767;
+              }
+
+              processor.disconnect();
+              source.disconnect();
+              gainNode.disconnect();
+              await audioContext.close();
+              URL.revokeObjectURL(videoUrl);
+
+              log(`PCM数据生成完成: ${pcmData.buffer.byteLength} 字节`);
+              resolve(pcmData.buffer);
+            };
+
+            video.onerror = (e) => {
+              log(`视频播放错误: ${e}`);
+              reject(new Error('视频播放出错'));
+            };
+
+            // 开始播放
+            video.play().catch(err => {
+              log(`播放失败: ${err.message}`);
+              reject(new Error('无法播放视频: ' + err.message));
+            });
+
+          } catch (error) {
+            URL.revokeObjectURL(videoUrl);
+            reject(error);
+          }
+        };
+
+        video.onerror = () => {
+          URL.revokeObjectURL(videoUrl);
+          reject(new Error('无法加载视频文件'));
+        };
+
+        video.src = videoUrl;
+        video.load();
+      });
+    }
+
+    // 步骤3: 测试语音识别（支持分段识别长音频）
+    window.testFullRecognition = async function() {
+      if (!accessToken) {
+        alert('请先获取Token');
+        return;
+      }
+      if (!extractedPCM) {
+        alert('请先提取音频');
+        return;
+      }
+
+      const statusEl = document.getElementById('recognizeStatus');
+      const resultEl = document.getElementById('recognizeResult');
+
+      statusEl.className = 'status pending';
+      statusEl.textContent = '正在识别语音...';
+      resultEl.style.display = 'none';
+
+      log('开始调用百度语音识别API...');
+
+      try {
+        const sampleRate = 16000;
+        const bytesPerSample = 2;
+        const maxDuration = 55; // 每段最大55秒
+        const maxBytes = maxDuration * sampleRate * bytesPerSample;
+
+        const totalBytes = extractedPCM.byteLength;
+        const totalDuration = totalBytes / (sampleRate * bytesPerSample);
+        const segments = Math.ceil(totalBytes / maxBytes);
+
+        log(`音频总时长: ${totalDuration.toFixed(1)}秒，将分${segments}段识别`);
+
+        const results = [];
+
+        for (let i = 0; i < segments; i++) {
+          const start = i * maxBytes;
+          const end = Math.min(start + maxBytes, totalBytes);
+          const segment = extractedPCM.slice(start, end);
+          const segmentDuration = (end - start) / (sampleRate * bytesPerSample);
+
+          statusEl.textContent = `正在识别第${i + 1}/${segments}段 (${segmentDuration.toFixed(1)}秒)...`;
+          log(`识别第${i + 1}段: ${start}-${end} 字节 (${segmentDuration.toFixed(1)}秒)`);
+
+          // 转换为Base64
+          const bytes = new Uint8Array(segment);
+          let binary = '';
+          for (let j = 0; j < bytes.byteLength; j++) {
+            binary += String.fromCharCode(bytes[j]);
+          }
+          const base64Audio = btoa(binary);
+
+          const requestBody = {
+            format: 'pcm',
+            rate: 16000,
+            channel: 1,
+            cuid: 'vidslide_ai_test',
+            token: accessToken,
+            dev_pid: 1537,
+            speech: base64Audio,
+            len: segment.byteLength
+          };
+
+          const response = await fetch('/api/speech/server_api', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          });
+
+          const result = await response.json();
+
+          if (result.err_no === 0 && result.result) {
+            const text = result.result.join('');
+            results.push(text);
+            log(`第${i + 1}段识别成功: ${text.substring(0, 50)}...`);
+          } else {
+            log(`第${i + 1}段识别失败: ${result.err_msg || '未知错误'}`);
+          }
+
+          // 避免请求过快
+          if (i < segments - 1) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
         }
 
-        // 测试网络连接
-        window.testConnectivity = async function() {
-            const resultDiv = document.getElementById('connectResult')
-            resultDiv.innerHTML = '🔄 正在测试网络连接...'
-            resultDiv.className = 'result'
+        const fullText = results.join('');
 
-            const tests = [
-                { name: '百度Token API', url: 'https://aip.baidubce.com/oauth/2.0/token' },
-                { name: '百度图片API', url: 'https://aip.baidubce.com/rest/2.0/image-classify/v1/realtime_search/simnet' }
-            ]
+        statusEl.className = 'status success';
+        statusEl.textContent = `✅ 语音识别成功！共${segments}段`;
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<h3>识别结果 (${fullText.length}字):</h3><p>${fullText || '(无识别内容)'}</p>`;
 
-            let results = []
+        log(`识别完成，总文本长度: ${fullText.length}字`);
+        log(`完整结果: ${fullText}`);
 
-            for (const test of tests) {
-                try {
-                    const response = await fetch(test.url, {
-                        method: 'HEAD',
-                        mode: 'no-cors'
-                    })
-                    results.push(`✅ ${test.name}: 连接正常`)
-                } catch (error) {
-                    results.push(`❌ ${test.name}: 连接失败 - ${error.message}`)
-                }
+        // 启用关键词提取按钮
+        document.getElementById('keywordBtn').disabled = false;
+        document.getElementById('localKeywordBtn').disabled = false;
+        document.getElementById('keywordStatus').textContent = '准备就绪，可以测试关键词提取';
+        // 保存识别结果供关键词提取使用
+        window.recognizedText = fullText;
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 语音识别失败';
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<p style="color:red;">错误: ${error.message}</p>`;
+        log(`识别错误: ${error.message}`);
+      }
+    };
+
+    // 页面加载完成
+    log('测试工具已加载，请按步骤进行测试');
+
+    // 步骤4: 测试关键词提取
+    window.testKeywordExtraction = async function() {
+      if (!window.recognizedText) {
+        alert('请先完成语音识别');
+        return;
+      }
+
+      const statusEl = document.getElementById('keywordStatus');
+      const resultEl = document.getElementById('keywordResult');
+
+      statusEl.className = 'status pending';
+      statusEl.textContent = '正在获取NLP Token...';
+      resultEl.style.display = 'none';
+
+      log('开始调用百度NLP关键词提取API...');
+
+      try {
+        // 先获取NLP专用的Token
+        if (!nlpAccessToken) {
+          log('获取NLP API Token...');
+          const tokenUrl = `/api/baidu/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_NLP_CONFIG.apiKey}&client_secret=${BAIDU_NLP_CONFIG.secretKey}`;
+          const tokenResponse = await fetch(tokenUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const tokenData = await tokenResponse.json();
+          if (tokenData.error) {
+            throw new Error(`Token错误: ${tokenData.error_description || tokenData.error}`);
+          }
+          nlpAccessToken = tokenData.access_token;
+          log(`NLP Token获取成功: ${nlpAccessToken.substring(0, 30)}...`);
+        }
+
+        statusEl.textContent = '正在提取关键词...';
+        log(`输入文本: ${window.recognizedText.substring(0, 100)}...`);
+
+        // 调用百度NLP关键词提取API
+        const url = `/api/baidu/rpc/2.0/nlp/v1/keyword?access_token=${nlpAccessToken}`;
+
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: '视频内容',
+            content: window.recognizedText
+          })
+        });
+
+        const result = await response.json();
+        log(`API响应: ${JSON.stringify(result, null, 2)}`);
+
+        if (result.error_code) {
+          throw new Error(`API错误 ${result.error_code}: ${result.error_msg}`);
+        }
+
+        const keywords = result.items || [];
+
+        statusEl.className = 'status success';
+        statusEl.textContent = `✅ 关键词提取成功！共${keywords.length}个关键词`;
+        resultEl.style.display = 'block';
+
+        // 格式化显示关键词
+        const keywordHtml = keywords.map((item, index) =>
+          `<span style="display:inline-block; background:#e3f2fd; padding:4px 12px; margin:4px; border-radius:16px; font-size:14px;">
+            ${item.tag} <small style="color:#666;">(${(item.score * 100).toFixed(1)}%)</small>
+          </span>`
+        ).join('');
+
+        resultEl.innerHTML = `
+          <h3>提取的关键词 (${keywords.length}个):</h3>
+          <div style="margin-top:12px;">${keywordHtml || '(无关键词)'}</div>
+          <h4 style="margin-top:16px;">原始数据:</h4>
+          <pre style="background:#f5f5f5; padding:12px; border-radius:8px; font-size:12px; overflow-x:auto;">${JSON.stringify(keywords, null, 2)}</pre>
+        `;
+
+        log(`关键词提取完成: ${keywords.map(k => k.tag).join(', ')}`);
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 关键词提取失败';
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<p style="color:red;">错误: ${error.message}</p>`;
+        log(`关键词提取错误: ${error.message}`);
+      }
+    };
+
+    // 本地关键词提取算法测试
+    window.testLocalKeywordExtraction = function() {
+      if (!window.recognizedText) {
+        alert('请先完成语音识别');
+        return;
+      }
+
+      const statusEl = document.getElementById('keywordStatus');
+      const resultEl = document.getElementById('keywordResult');
+
+      statusEl.className = 'status pending';
+      statusEl.textContent = '正在使用本地算法提取关键词...';
+      resultEl.style.display = 'none';
+
+      log('开始使用本地算法提取关键词...');
+
+      try {
+        const keywords = localExtractKeywords(window.recognizedText, 15);
+
+        statusEl.className = 'status success';
+        statusEl.textContent = `✅ 本地算法提取成功！共${keywords.length}个关键词`;
+        resultEl.style.display = 'block';
+
+        // 格式化显示关键词
+        const keywordHtml = keywords.map((item, index) =>
+          `<span style="display:inline-block; background:#d4edda; padding:4px 12px; margin:4px; border-radius:16px; font-size:14px;">
+            ${item.text} <small style="color:#666;">(${item.count}次)</small>
+          </span>`
+        ).join('');
+
+        resultEl.innerHTML = `
+          <h3>提取的关键词 (${keywords.length}个) - 本地算法:</h3>
+          <div style="margin-top:12px;">${keywordHtml || '(无关键词)'}</div>
+          <h4 style="margin-top:16px;">原始数据:</h4>
+          <pre style="background:#f5f5f5; padding:12px; border-radius:8px; font-size:12px; overflow-x:auto;">${JSON.stringify(keywords, null, 2)}</pre>
+        `;
+
+        log(`本地算法提取完成: ${keywords.map(k => k.text).join(', ')}`);
+
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ 本地算法提取失败';
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = `<p style="color:red;">错误: ${error.message}</p>`;
+        log(`本地算法错误: ${error.message}`);
+      }
+    };
+
+    // 本地关键词提取算法（改进版 - 基于领域词典 + N-gram）
+    function localExtractKeywords(text, num = 15) {
+      if (!text || text.length < 5) return [];
+
+      console.log('[本地算法] 开始提取关键词...');
+
+      // 大型领域词典（短视频/营销/电商领域）
+      // 注意：长词放前面，短词放后面，优先匹配长词
+      const domainDictionary = new Set([
+        // 平台
+        '抖音', '快手', '视频号', '小红书', 'B站', '微博', '微信', '淘宝', '京东', '拼多多',
+        '天猫', '闲鱼', '得物', '知乎', '豆瓣', '头条', '西瓜视频', '火山', '皮皮虾',
+        // 内容形式
+        '短视频', '直播', '带货', '种草', '测评', '开箱', '教程', '攻略', '干货', '分享',
+        '视频', '图文', '笔记', '帖子', '动态', '故事', '合集', '专栏',
+        // 营销术语 - 投放相关（重要！）
+        '巨量AD', '巨量ad', '质量AD', '质量ad', '投放巨量', '头发巨量',  // 语音识别常见错误
+        '巨量引擎', '巨量千川', '磁力金牛', '腾讯广告', '信息流广告',
+        '巨量', '千川', '信息流', 'DOU+', 'AD', 'ROI', 'GMV', 'UV', 'PV', 'CTR', 'CVR',
+        // 营销术语 - 流量相关
+        '流量', '粉丝', '用户', '客户', '获客', '转化', '变现', '引流', '涨粉', '掉粉',
+        '投放', '广告', '推广', '营销', '运营', '增长', '裂变', '私域', '公域',
+        // 内容创作
+        '拍摄', '剪辑', '文案', '脚本', '素材', '封面', '标题', '配音', '字幕', '特效',
+        '滤镜', '转场', 'BGM', '音乐', '贴纸', '模板', '剪映', 'PR', 'AE',
+        // 账号运营
+        '做IP', '做ip', 'IP', '人设', '账号', '矩阵', '爆款', '热门', '上热门', '推荐', '首页',
+        '垂直', '领域', '赛道', '定位', '标签', '话题', '挑战', '活动',
+        // 数据指标
+        '播放量', '点赞', '评论', '转发', '收藏', '关注', '完播率', '互动率', '转化率',
+        '曝光', '展现', '点击', '浏览', '停留', '跳出', '留存', '复购',
+        // 商业变现
+        '变现', '盈利', '收益', '订单', '成交', '客单价', '利润', '佣金', '分成',
+        '橱窗', '小店', '商品', '链接', '挂车', '购物车', '团购', '优惠券',
+        // 用户相关
+        '粉丝', '铁粉', '路人', '黑粉', '水军', '僵尸粉', '真粉', '活粉',
+        '目标用户', '精准用户', '潜在客户', '意向客户', '成交客户', '目标人群',
+        // 流量相关（重要！）
+        '自然流量', '付费流量', '精准流量', '陌生流量', '泛流量', '私域流量', '公域流量',
+        '流量池', '流量推送', '推送机制', '算法', '推荐算法',
+        '原生互动', '良性循环', '增量用户',  // 新增
+        // 策略方法
+        '玩法', '打法', '套路', '技巧', '方法', '策略', '模式', '体系', '闭环',
+        '起号', '养号', '破播', '破千', '破万', '爆单', '爆款', '对标',
+        // 行业术语
+        '电商', '直播电商', '内容电商', '兴趣电商', '社交电商', '跨境电商',
+        '达人', '博主', '网红', 'KOL', 'KOC', 'MCN', '主播', '带货主播',
+        // 其他常用
+        '老板', '商家', '品牌', '产品', '服务', '项目', '案例', '效果', '结果',
+        '数据', '分析', '复盘', '优化', '测试', '迭代', '升级'
+      ]);
+
+      // 停用词（单字）
+      const stopChars = new Set([
+        '的', '地', '得', '了', '着', '过', '吗', '呢', '吧', '啊', '呀', '哦', '嗯',
+        '是', '有', '在', '和', '与', '或', '但', '而', '就', '才', '只', '都', '也',
+        '很', '太', '真', '挺', '更', '最', '比', '被', '把', '让', '给', '从', '向',
+        '我', '你', '他', '她', '它', '这', '那', '哪', '谁', '什', '么', '怎',
+        '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '百', '千', '万',
+        '个', '只', '条', '件', '种', '些', '点', '下', '次', '遍', '会', '能', '要',
+        '不', '没', '无', '非', '别', '去', '来', '到', '说', '看', '想', '做', '用'
+      ]);
+
+      // 停用词组
+      const stopPhrases = new Set([
+        '可以', '需要', '知道', '觉得', '认为', '希望', '喜欢', '应该', '必须', '可能',
+        '已经', '正在', '将要', '一定', '肯定', '因为', '所以', '如果', '虽然', '但是',
+        '而且', '或者', '还是', '不过', '然后', '接着', '于是', '那么', '这样', '那样',
+        '这里', '那里', '现在', '以前', '以后', '时候', '地方', '东西', '事情', '问题',
+        '越来越', '出现', '完全', '目前', '通过', '达到', '起到', '进行', '开始', '结束',
+        '一个', '一些', '一点', '一下', '一样', '一起', '没有', '不是', '不要', '不能',
+        '什么', '怎么', '为什么', '怎样', '如何', '多少', '哪里', '哪个', '哪些'
+      ]);
+
+      // 第一步：从文本中提取所有领域词典中的词
+      // 优先匹配长词（按词长排序）
+      const sortedDomainWords = [...domainDictionary].sort((a, b) => b.length - a.length);
+      const foundDomainWords = {};
+
+      for (const word of sortedDomainWords) {
+        const regex = new RegExp(word, 'gi');  // 忽略大小写
+        const matches = text.match(regex);
+        if (matches && matches.length > 0) {
+          // 使用标准化的词（优先使用大写版本）
+          const normalizedWord = word.toUpperCase().includes('AD') || word.toUpperCase().includes('IP')
+            ? word.replace(/ad$/i, 'AD').replace(/ip$/i, 'IP').replace(/^做ip$/i, '做IP')
+            : word;
+          foundDomainWords[normalizedWord] = (foundDomainWords[normalizedWord] || 0) + matches.length;
+        }
+      }
+
+      // 第二步：使用N-gram方法提取高频词组（2-4字）
+      const ngramCounts = {};
+      const cleanText = text.replace(/[，。！？、；：""''（）【】《》\s\n\r\t]+/g, ' ');
+      const segments = cleanText.split(' ').filter(s => s.length > 0);
+
+      for (const segment of segments) {
+        // 提取2-4字的n-gram
+        for (let n = 2; n <= 4; n++) {
+          for (let i = 0; i <= segment.length - n; i++) {
+            const ngram = segment.substring(i, i + n);
+
+            // 跳过包含停用字符开头或结尾的词
+            if (stopChars.has(ngram[0]) || stopChars.has(ngram[ngram.length - 1])) {
+              continue;
             }
 
-            resultDiv.innerHTML = results.join('<br>')
-            if (results.some(r => r.includes('❌'))) {
-                resultDiv.classList.add('error')
+            // 跳过停用词组
+            if (stopPhrases.has(ngram)) {
+              continue;
+            }
+
+            // 跳过全是停用字符的词
+            let allStop = true;
+            for (const char of ngram) {
+              if (!stopChars.has(char)) {
+                allStop = false;
+                break;
+              }
+            }
+            if (allStop) continue;
+
+            // 跳过已经在领域词典中的词（避免重复计数）
+            if (domainDictionary.has(ngram)) continue;
+
+            ngramCounts[ngram] = (ngramCounts[ngram] || 0) + 1;
+          }
+        }
+      }
+
+      // 第三步：合并领域词和高频n-gram，计算分数
+      const wordScores = [];
+
+      // 添加领域词（高权重）
+      for (const [word, count] of Object.entries(foundDomainWords)) {
+        let score = count * 5;  // 领域词基础权重5倍
+
+        // 词长加权
+        if (word.length >= 4) score *= 1.5;
+        else if (word.length === 3) score *= 1.3;
+
+        // 位置加权
+        const firstPos = text.indexOf(word);
+        if (firstPos < text.length * 0.2) score *= 1.3;
+        else if (firstPos < text.length * 0.4) score *= 1.1;
+
+        // 英文词加权
+        if (/[A-Za-z]/.test(word)) score *= 1.5;
+
+        wordScores.push({ text: word, count, score, isDomain: true });
+      }
+
+      // 添加高频n-gram（只添加出现2次以上的）
+      for (const [word, count] of Object.entries(ngramCounts)) {
+        if (count < 2) continue;  // 只保留出现2次以上的词
+
+        let score = count;
+
+        // 词长加权
+        if (word.length >= 4) score *= 1.5;
+        else if (word.length === 3) score *= 1.2;
+
+        // 位置加权
+        const firstPos = text.indexOf(word);
+        if (firstPos !== -1) {
+          if (firstPos < text.length * 0.2) score *= 1.2;
+          else if (firstPos < text.length * 0.4) score *= 1.1;
+        }
+
+        wordScores.push({ text: word, count, score, isDomain: false });
+      }
+
+      // 按分数排序
+      wordScores.sort((a, b) => b.score - a.score);
+
+      // 去重：去除被其他词包含的词
+      const filteredKeywords = [];
+      const usedWords = new Set();
+
+      for (const item of wordScores) {
+        let shouldAdd = true;
+
+        // 检查是否与已选词有包含关系
+        for (const used of usedWords) {
+          // 如果当前词被已选词包含，跳过
+          if (used.includes(item.text)) {
+            shouldAdd = false;
+            break;
+          }
+          // 如果当前词包含已选词，且当前词是领域词或分数更高，替换
+          if (item.text.includes(used)) {
+            if (item.isDomain || item.score > filteredKeywords.find(k => k.text === used)?.score * 1.5) {
+              usedWords.delete(used);
+              const idx = filteredKeywords.findIndex(k => k.text === used);
+              if (idx !== -1) filteredKeywords.splice(idx, 1);
             } else {
-                resultDiv.classList.add('success')
+              shouldAdd = false;
             }
+            break;
+          }
         }
 
-        // 检查素材库统计
-        window.checkMaterialStats = async function() {
-            const resultDiv = document.getElementById('statsResult')
-            resultDiv.innerHTML = '🔄 正在获取统计信息...'
-            resultDiv.className = 'result'
-
-            try {
-                const stats = await materialLibrary.getStatistics()
-                resultDiv.innerHTML = `
-                    <strong>📊 素材库统计:</strong><br>
-                    预置素材: ${stats.presetMaterials} 个<br>
-                    缓存素材: ${stats.cachedMaterials} 个<br>
-                    缓存大小: ${materialLibrary.formatBytes(stats.cacheSize)}<br>
-                    缓存命中率: ${stats.cacheHitRate}
-                `
-                resultDiv.classList.add('success')
-            } catch (error) {
-                resultDiv.innerHTML = `❌ 获取统计失败: ${error.message}`
-                resultDiv.classList.add('error')
-            }
+        if (shouldAdd && filteredKeywords.length < num) {
+          filteredKeywords.push(item);
+          usedWords.add(item.text);
         }
+      }
 
-        // 直接测试百度API
-        window.testDirectAPI = async function() {
-            const resultDiv = document.getElementById('directAPIResult')
-            resultDiv.innerHTML = '🔄 正在测试百度API连接...'
-            resultDiv.className = 'result'
+      // 计算重要性分数
+      const maxScore = filteredKeywords[0]?.score || 1;
+      const keywords = filteredKeywords.map((item, index) => ({
+        text: item.text,
+        count: item.count,
+        score: item.score / maxScore,
+        importance: Math.max(0.5, 1 - index * 0.03)
+      }));
 
-            try {
-                // 检查是否使用代理
-                const isDev = window.location.hostname === 'localhost'
-                const baseUrl = isDev ? '/api/baidu' : 'https://aip.baidubce.com'
-                const tokenUrl = `${baseUrl}/oauth/2.0/token?grant_type=client_credentials&client_id=LRmz9hG2wXyjHSiI9xJBUGEH&client_secret=MWS1oFHwjRMPALu83ZggXROg6fmkodUP`
-
-                resultDiv.innerHTML += `<br>🌐 环境: ${isDev ? '开发环境(使用代理)' : '生产环境(直接调用)'}`
-                resultDiv.innerHTML += `<br>🔗 请求URL: ${baseUrl}/oauth/2.0/token`
-
-                const response = await fetch(tokenUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                })
-
-                resultDiv.innerHTML += `<br>📡 响应状态: ${response.status} ${response.statusText}`
-
-                if (response.ok) {
-                    const data = await response.json()
-                    if (data.access_token) {
-                        resultDiv.innerHTML += '<br>✅ API密钥有效，成功获取token'
-                        resultDiv.innerHTML += `<br>🔑 Token: ${data.access_token.substring(0, 20)}...`
-                        resultDiv.innerHTML += `<br>⏰ 有效期: ${Math.round(data.expires_in / 3600)}小时`
-                        resultDiv.classList.add('success')
-                    } else if (data.error) {
-                        resultDiv.innerHTML += '<br>❌ 百度API错误'
-                        resultDiv.innerHTML += `<br>📋 错误: ${data.error_description || data.error}`
-                        resultDiv.classList.add('error')
-                    } else {
-                        resultDiv.innerHTML += '<br>❌ API响应格式错误'
-                        resultDiv.innerHTML += `<br>📋 响应: ${JSON.stringify(data)}`
-                        resultDiv.classList.add('error')
-                    }
-                } else {
-                    const errorText = await response.text().catch(() => '无法读取错误信息')
-                    resultDiv.innerHTML += '<br>❌ API请求失败'
-                    resultDiv.innerHTML += `<br>📋 错误信息: ${errorText}`
-                    resultDiv.classList.add('error')
-                }
-            } catch (error) {
-                resultDiv.innerHTML += `<br>❌ 网络错误: ${error.message}`
-                resultDiv.classList.add('error')
-            }
-        }
-    </script>
+      console.log('[本地算法] 提取关键词:', keywords.map(k => k.text).join(', '));
+      return keywords;
+    }
+  </script>
 </body>
 </html>

@@ -26,7 +26,10 @@ class TemplateRenderer {
     // 检查WebGL支持
     const webglSupported = this.checkWebGLSupport()
 
-    if (webglSupported && (this.preferredRenderer === 'auto' || this.preferredRenderer === 'webgl')) {
+    if (
+      webglSupported &&
+      (this.preferredRenderer === 'auto' || this.preferredRenderer === 'webgl')
+    ) {
       try {
         this.webglRenderer = new WebGLRenderer(this.canvas)
         await this.webglRenderer.initialize()
@@ -93,7 +96,6 @@ class TemplateRenderer {
       result.rendererInfo = this.getRendererInfo()
 
       return result
-
     } catch (error) {
       console.error('模板渲染失败:', error)
 

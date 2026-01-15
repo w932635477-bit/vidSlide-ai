@@ -13,7 +13,7 @@ import MaterialRequirementAnalyzer from './MaterialRequirementAnalyzer.vue'
 global.IntersectionObserver = vi.fn(() => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
-  unobserve: vi.fn(),
+  unobserve: vi.fn()
 }))
 
 describe('MaterialRequirementAnalyzer.vue', () => {
@@ -337,9 +337,7 @@ describe('MaterialRequirementAnalyzer.vue', () => {
       expect(wrapper.vm.materialRequirements.length).toBeGreaterThan(0)
 
       // 检查是否包含基于关键词生成的需求
-      const keywordBasedReq = wrapper.vm.materialRequirements.find(r =>
-        r.id.startsWith('keyword-')
-      )
+      const keywordBasedReq = wrapper.vm.materialRequirements.find(r => r.id.startsWith('keyword-'))
       expect(keywordBasedReq).toBeDefined()
     })
 
@@ -487,7 +485,9 @@ describe('MaterialRequirementAnalyzer.vue', () => {
 
       // Mock一个会失败的分析过程
       const originalAnalyzeKeywords = wrapper.vm.analyzeKeywords
-      wrapper.vm.analyzeKeywords = vi.fn(() => { throw new Error('Test error') })
+      wrapper.vm.analyzeKeywords = vi.fn(() => {
+        throw new Error('Test error')
+      })
 
       await wrapper.vm.startAnalysis()
 

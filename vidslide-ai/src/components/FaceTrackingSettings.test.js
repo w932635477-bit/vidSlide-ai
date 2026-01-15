@@ -63,9 +63,9 @@ describe('FaceTrackingSettings.vue', () => {
     })
 
     it('应该能够切换跟踪模式', async () => {
-      const multiModeBtn = wrapper.findAll('.mode-btn').find(btn =>
-        btn.find('.mode-name').text() === '多人跟踪'
-      )
+      const multiModeBtn = wrapper
+        .findAll('.mode-btn')
+        .find(btn => btn.find('.mode-name').text() === '多人跟踪')
       await multiModeBtn.trigger('click')
 
       expect(wrapper.vm.currentMode).toBe('multi')
@@ -383,9 +383,12 @@ describe('FaceTrackingSettings.vue', () => {
       const renderCount = { value: 0 }
 
       // 监听组件更新
-      wrapper.vm.$watch(() => wrapper.vm.currentSensitivity, () => {
-        renderCount.value++
-      })
+      wrapper.vm.$watch(
+        () => wrapper.vm.currentSensitivity,
+        () => {
+          renderCount.value++
+        }
+      )
 
       // 快速更新
       for (let i = 0; i < 5; i++) {

@@ -1032,6 +1032,1591 @@ class TemplateArchitecture {
       }
     })
 
+    // ========== 短视频/自媒体场景专用模板 ==========
+
+    // 抖音营销模板 - 2025 Brat风格配色
+    this.templates.set('douyin-marketing', {
+      id: 'douyin-marketing',
+      name: '抖音营销模板',
+      category: 'short-video',
+      description: '适合抖音、快手等短视频平台的营销内容展示',
+
+      layers: {
+        fixed: [
+          {
+            id: 'gradient-background',
+            type: 'fixed',
+            name: '渐变背景层',
+            zIndex: 1,
+            properties: {
+              // 2025 TikTok风格：深色底+霓虹渐变
+              background: 'linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'neon-glow',
+            type: 'fixed',
+            name: '霓虹光效层',
+            zIndex: 1.5,
+            properties: {
+              // TikTok标志性青粉渐变光效
+              background: 'radial-gradient(ellipse at 30% 20%, rgba(0,217,255,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(255,0,110,0.15) 0%, transparent 50%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'brand-watermark',
+            type: 'fixed',
+            name: '品牌水印',
+            zIndex: 2,
+            properties: {
+              position: { x: 'right', y: 'top', offsetX: -20, offsetY: 20 },
+              opacity: 0.8,
+              size: { width: 80, height: 30 }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'hook-text',
+            type: 'dynamic',
+            name: '钩子文案层',
+            zIndex: 3,
+            source: 'keyword-analysis',
+            properties: {
+              position: 'top-center',
+              fontSize: 32,
+              fontWeight: 'bold',
+              color: '#FFFFFF',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+              animation: {
+                type: 'bounce-in',
+                duration: 0.5
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'keyword-bullets',
+            type: 'dynamic',
+            name: '关键词要点',
+            zIndex: 4,
+            source: 'keyword-extraction',
+            properties: {
+              layout: 'vertical-list',
+              maxItems: 5,
+              bulletStyle: 'emoji',
+              animation: {
+                type: 'stagger-fade',
+                stagger: 200
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'cta-button',
+            type: 'adjustable',
+            name: 'CTA按钮层',
+            zIndex: 5,
+            properties: {
+              text: '点击了解更多',
+              position: 'bottom-center',
+              backgroundColor: '#FF2D55',
+              borderRadius: 25,
+              animation: { type: 'pulse', duration: 1.5 }
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { text: 10 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['抖音', '短视频', '营销', '获客'],
+        compatibility: ['short-video', 'marketing', 'social-media']
+      }
+    })
+
+    // 流量获客模板 - 2025专业商务蓝绿渐变
+    this.templates.set('traffic-acquisition', {
+      id: 'traffic-acquisition',
+      name: '流量获客模板',
+      category: 'marketing',
+      description: '展示流量转化和获客策略的专业模板',
+
+      layers: {
+        fixed: [
+          {
+            id: 'dark-background',
+            type: 'fixed',
+            name: '深色背景',
+            zIndex: 1,
+            properties: {
+              // 2025专业深蓝渐变 - 商务科技感
+              background: 'linear-gradient(135deg, #0D1117 0%, #161B22 50%, #21262D 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'grid-overlay',
+            type: 'fixed',
+            name: '网格叠加层',
+            zIndex: 1.5,
+            properties: {
+              // 科技感网格背景
+              background: 'linear-gradient(rgba(45,212,191,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(45,212,191,0.03) 1px, transparent 1px)',
+              backgroundSize: '50px 50px',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'funnel-container',
+            type: 'fixed',
+            name: '漏斗容器',
+            zIndex: 2,
+            properties: {
+              position: 'center-left',
+              size: { width: '45%', height: '70%' },
+              background: 'transparent'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'traffic-funnel',
+            type: 'dynamic',
+            name: '流量漏斗',
+            zIndex: 3,
+            source: 'data-analysis',
+            properties: {
+              funnelStages: ['曝光', '点击', '互动', '转化', '成交'],
+              colors: ['#FF6B6B', '#FFE66D', '#4ECDC4', '#45B7D1', '#96CEB4'],
+              animation: {
+                type: 'funnel-fill',
+                duration: 2000
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'conversion-stats',
+            type: 'dynamic',
+            name: '转化数据',
+            zIndex: 4,
+            source: 'data-extraction',
+            properties: {
+              position: 'center-right',
+              layout: 'stats-cards',
+              animation: {
+                type: 'count-up',
+                duration: 1500
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'strategy-tips',
+            type: 'adjustable',
+            name: '策略提示',
+            zIndex: 5,
+            properties: {
+              tips: [],
+              showIcons: true,
+              theme: 'dark'
+            },
+            constraints: {
+              modifiable: true,
+              maxItems: 4
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['流量', '获客', '转化', '漏斗'],
+        compatibility: ['marketing', 'analytics', 'business']
+      }
+    })
+
+    // 投放效果模板
+    this.templates.set('ad-performance', {
+      id: 'ad-performance',
+      name: '投放效果模板',
+      category: 'advertising',
+      description: '展示广告投放效果和ROI数据',
+
+      layers: {
+        fixed: [
+          {
+            id: 'dashboard-background',
+            type: 'fixed',
+            name: '仪表盘背景',
+            zIndex: 1,
+            properties: {
+              // 2025专业数据仪表盘风格 - 深蓝紫渐变
+              background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'data-grid-overlay',
+            type: 'fixed',
+            name: '数据网格层',
+            zIndex: 1.5,
+            properties: {
+              // 数据可视化网格背景
+              background: 'linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'header-bar',
+            type: 'fixed',
+            name: '顶部标题栏',
+            zIndex: 2,
+            properties: {
+              position: 'top',
+              height: 60,
+              // 玻璃态顶栏
+              background: 'linear-gradient(90deg, rgba(99,102,241,0.1) 0%, rgba(168,85,247,0.1) 100%)',
+              backdropFilter: 'blur(10px)',
+              borderBottom: '1px solid rgba(168,85,247,0.2)'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'roi-display',
+            type: 'dynamic',
+            name: 'ROI展示',
+            zIndex: 3,
+            source: 'data-analysis',
+            properties: {
+              position: 'top-left',
+              size: { width: '30%', height: '40%' },
+              chartType: 'gauge',
+              colors: ['#FF6B6B', '#FFE66D', '#4ECDC4'],
+              animation: {
+                type: 'gauge-fill',
+                duration: 1500
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'cost-breakdown',
+            type: 'dynamic',
+            name: '成本分解',
+            zIndex: 4,
+            source: 'data-extraction',
+            properties: {
+              position: 'top-right',
+              chartType: 'pie',
+              showLegend: true
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'trend-chart',
+            type: 'dynamic',
+            name: '趋势图表',
+            zIndex: 5,
+            source: 'time-series',
+            properties: {
+              position: 'bottom',
+              chartType: 'line',
+              showGrid: true,
+              animation: {
+                type: 'draw-line',
+                duration: 2000
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'metric-labels',
+            type: 'adjustable',
+            name: '指标标签',
+            zIndex: 6,
+            properties: {
+              metrics: ['CPM', 'CPC', 'CTR', 'CVR'],
+              showValues: true,
+              theme: 'neon'
+            },
+            constraints: {
+              modifiable: true
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['投放', '广告', 'ROI', '数据'],
+        compatibility: ['advertising', 'analytics', 'performance']
+      }
+    })
+
+    // IP打造模板
+    this.templates.set('personal-ip', {
+      id: 'personal-ip',
+      name: 'IP打造模板',
+      category: 'personal-brand',
+      description: '展示个人IP和品牌形象',
+
+      layers: {
+        fixed: [
+          {
+            id: 'brand-background',
+            type: 'fixed',
+            name: '品牌背景',
+            zIndex: 1,
+            properties: {
+              // 2025 IP打造风格 - 神秘黑紫渐变
+              background: 'linear-gradient(135deg, #0D0D0D 0%, #3B0A45 40%, #6A2C91 70%, #B84E8C 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'spotlight-glow',
+            type: 'fixed',
+            name: '聚光灯效果',
+            zIndex: 1.5,
+            properties: {
+              // 中心聚光效果
+              background: 'radial-gradient(ellipse at 50% 30%, rgba(184,78,140,0.25) 0%, transparent 60%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'avatar-frame',
+            type: 'fixed',
+            name: '头像框架',
+            zIndex: 2,
+            properties: {
+              position: { x: 'center', y: 'top', offsetY: 80 },
+              size: { width: 150, height: 150 },
+              borderRadius: '50%',
+              // 渐变边框效果
+              border: '4px solid transparent',
+              background: 'linear-gradient(135deg, #B84E8C, #6A2C91, #FFD700)',
+              shadow: '0 0 40px rgba(184,78,140,0.5), 0 0 80px rgba(106,44,145,0.3)'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'ip-name',
+            type: 'dynamic',
+            name: 'IP名称',
+            zIndex: 3,
+            source: 'content-analysis',
+            properties: {
+              position: 'center',
+              fontSize: 36,
+              fontWeight: 'bold',
+              color: '#FFFFFF',
+              animation: {
+                type: 'fade-in-up',
+                duration: 0.5
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'ip-tags',
+            type: 'dynamic',
+            name: 'IP标签',
+            zIndex: 4,
+            source: 'keyword-extraction',
+            properties: {
+              layout: 'horizontal-tags',
+              maxTags: 4,
+              tagStyle: 'pill',
+              colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#96CEB4']
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'bio-section',
+            type: 'adjustable',
+            name: '简介区域',
+            zIndex: 5,
+            properties: {
+              bio: '',
+              socialLinks: [],
+              showFollowers: true
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { bio: 100 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['IP', '个人品牌', 'KOL', '自媒体'],
+        compatibility: ['personal-brand', 'influencer', 'social-media']
+      }
+    })
+
+    // 粉丝互动模板
+    this.templates.set('fan-engagement', {
+      id: 'fan-engagement',
+      name: '粉丝互动模板',
+      category: 'engagement',
+      description: '展示粉丝互动和社区运营效果',
+
+      layers: {
+        fixed: [
+          {
+            id: 'community-background',
+            type: 'fixed',
+            name: '社区背景',
+            zIndex: 1,
+            properties: {
+              // 2025 粉丝互动风格 - 温暖粉红渐变
+              background: 'linear-gradient(135deg, #ff8177 0%, #ff867a 21%, #ff8c7f 52%, #f99185 78%, #cf556c 90%, #b12a5b 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'heart-particles',
+            type: 'fixed',
+            name: '爱心粒子层',
+            zIndex: 1.5,
+            properties: {
+              // 爱心光效装饰
+              background: 'radial-gradient(ellipse at 20% 80%, rgba(255,255,255,0.15) 0%, transparent 40%), radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'engagement-metrics',
+            type: 'dynamic',
+            name: '互动指标',
+            zIndex: 2,
+            source: 'data-analysis',
+            properties: {
+              metrics: ['点赞', '评论', '分享', '收藏'],
+              layout: 'icon-grid',
+              animation: {
+                type: 'pop-in',
+                stagger: 150
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'comment-showcase',
+            type: 'dynamic',
+            name: '评论展示',
+            zIndex: 3,
+            source: 'content-extraction',
+            properties: {
+              position: 'center',
+              maxComments: 3,
+              style: 'bubble',
+              animation: {
+                type: 'slide-in',
+                direction: 'left'
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'cta-engagement',
+            type: 'adjustable',
+            name: '互动引导',
+            zIndex: 4,
+            properties: {
+              text: '双击点赞，评论区见！',
+              position: 'bottom',
+              style: 'animated-text'
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { text: 20 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['粉丝', '互动', '社区', '运营'],
+        compatibility: ['engagement', 'community', 'social-media']
+      }
+    })
+
+    // 干货分享模板
+    this.templates.set('knowledge-sharing', {
+      id: 'knowledge-sharing',
+      name: '干货分享模板',
+      category: 'content',
+      description: '适合知识分享和干货内容展示',
+
+      layers: {
+        fixed: [
+          {
+            id: 'clean-background',
+            type: 'fixed',
+            name: '简洁背景',
+            zIndex: 1,
+            properties: {
+              // 2025 干货分享风格 - 清新蓝绿渐变
+              background: 'linear-gradient(135deg, #1fa2ff 0%, #12d8fa 50%, #a6ffcb 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'content-card',
+            type: 'fixed',
+            name: '内容卡片',
+            zIndex: 2,
+            properties: {
+              position: 'center',
+              size: { width: '85%', height: '75%' },
+              // 玻璃态卡片效果
+              background: 'rgba(255,255,255,0.95)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: 24,
+              border: '1px solid rgba(255,255,255,0.5)',
+              shadow: '0 20px 60px rgba(31,162,255,0.2), 0 10px 30px rgba(0,0,0,0.1)'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'title-section',
+            type: 'dynamic',
+            name: '标题区域',
+            zIndex: 3,
+            source: 'content-analysis',
+            properties: {
+              position: 'top',
+              fontSize: 28,
+              fontWeight: 'bold',
+              color: '#1D1D1F',
+              icon: '💡'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'key-points',
+            type: 'dynamic',
+            name: '要点列表',
+            zIndex: 4,
+            source: 'keyword-extraction',
+            properties: {
+              layout: 'numbered-list',
+              maxPoints: 5,
+              bulletStyle: 'number-circle',
+              animation: {
+                type: 'reveal',
+                stagger: 300
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'summary-footer',
+            type: 'adjustable',
+            name: '总结区域',
+            zIndex: 5,
+            properties: {
+              summary: '',
+              showSavePrompt: true,
+              theme: 'light'
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { summary: 50 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['干货', '知识', '分享', '教程'],
+        compatibility: ['education', 'tutorial', 'knowledge']
+      }
+    })
+
+    // 对比种草模板
+    this.templates.set('comparison-review', {
+      id: 'comparison-review',
+      name: '对比种草模板',
+      category: 'review',
+      description: '产品对比和种草推荐展示',
+
+      layers: {
+        fixed: [
+          {
+            id: 'review-background',
+            type: 'fixed',
+            name: '评测背景',
+            zIndex: 1,
+            properties: {
+              // 2025 对比种草风格 - 珊瑚色到青色渐变
+              background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E72 25%, #FFC3A0 50%, #A8E6CF 75%, #4ECDC4 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'glass-overlay',
+            type: 'fixed',
+            name: '玻璃遮罩层',
+            zIndex: 1.5,
+            properties: {
+              // 轻微磨砂效果增加层次感
+              background: 'rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(2px)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'vs-divider',
+            type: 'fixed',
+            name: 'VS分隔线',
+            zIndex: 2,
+            properties: {
+              position: 'center',
+              content: 'VS',
+              fontSize: 48,
+              fontWeight: 'bold',
+              // 渐变文字效果
+              background: 'linear-gradient(135deg, #FF6B6B, #4ECDC4)',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+              textShadow: '0 4px 20px rgba(255,107,107,0.4)',
+              animation: {
+                type: 'scale-bounce',
+                duration: 0.5
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'product-left',
+            type: 'dynamic',
+            name: '左侧产品',
+            zIndex: 3,
+            source: 'comparison-analysis',
+            properties: {
+              position: 'left',
+              showImage: true,
+              showSpecs: true,
+              showPrice: true
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'product-right',
+            type: 'dynamic',
+            name: '右侧产品',
+            zIndex: 4,
+            source: 'comparison-analysis',
+            properties: {
+              position: 'right',
+              showImage: true,
+              showSpecs: true,
+              showPrice: true
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'winner-badge',
+            type: 'dynamic',
+            name: '推荐标识',
+            zIndex: 5,
+            source: 'recommendation',
+            properties: {
+              text: '推荐',
+              style: 'badge',
+              color: '#34C759'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'verdict-section',
+            type: 'adjustable',
+            name: '结论区域',
+            zIndex: 6,
+            properties: {
+              verdict: '',
+              showRating: true,
+              ratingStyle: 'stars'
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { verdict: 80 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['对比', '种草', '评测', '推荐'],
+        compatibility: ['review', 'comparison', 'recommendation']
+      }
+    })
+
+    // 数据可视化模板（增强版）
+    this.templates.set('data-storytelling', {
+      id: 'data-storytelling',
+      name: '数据故事模板',
+      category: 'data',
+      description: '用数据讲故事，适合展示增长、趋势等',
+
+      layers: {
+        fixed: [
+          {
+            id: 'data-background',
+            type: 'fixed',
+            name: '数据背景',
+            zIndex: 1,
+            properties: {
+              // 2025 数据故事风格 - 深邃紫蓝渐变
+              background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #24243e 70%, #1a1a2e 100%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'data-grid-pattern',
+            type: 'fixed',
+            name: '数据网格',
+            zIndex: 1.3,
+            properties: {
+              // 数据可视化网格背景
+              background: 'linear-gradient(rgba(78,205,196,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(78,205,196,0.03) 1px, transparent 1px)',
+              backgroundSize: '60px 60px',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'glow-accent',
+            type: 'fixed',
+            name: '光效装饰',
+            zIndex: 1.5,
+            properties: {
+              // 数据高亮光效
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(255,215,0,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(78,205,196,0.1) 0%, transparent 40%)',
+              position: 'fullscreen'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'hero-number',
+            type: 'dynamic',
+            name: '核心数字',
+            zIndex: 2,
+            source: 'data-extraction',
+            properties: {
+              position: 'center',
+              fontSize: 72,
+              fontWeight: 'bold',
+              color: '#FFD700',
+              animation: {
+                type: 'count-up',
+                duration: 2000,
+                easing: 'ease-out'
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'trend-indicator',
+            type: 'dynamic',
+            name: '趋势指示',
+            zIndex: 3,
+            source: 'trend-analysis',
+            properties: {
+              showArrow: true,
+              showPercentage: true,
+              positiveColor: '#34C759',
+              negativeColor: '#FF3B30'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'context-chart',
+            type: 'dynamic',
+            name: '背景图表',
+            zIndex: 4,
+            source: 'time-series',
+            properties: {
+              chartType: 'area',
+              opacity: 0.3,
+              color: '#4ECDC4',
+              animation: {
+                type: 'draw-area',
+                duration: 1500
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'data-context',
+            type: 'adjustable',
+            name: '数据说明',
+            zIndex: 5,
+            properties: {
+              label: '',
+              subtitle: '',
+              showComparison: true
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { label: 20, subtitle: 40 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['数据', '增长', '趋势', '可视化'],
+        compatibility: ['data', 'analytics', 'storytelling']
+      }
+    })
+
+    // ========== PPT风格模板 - 可直接Canvas渲染 ==========
+
+    // PPT标题幻灯片模板
+    this.templates.set('ppt-title-slide', {
+      id: 'ppt-title-slide',
+      name: 'PPT标题幻灯片',
+      category: 'ppt-style',
+      description: '大标题+副标题的经典PPT开场风格',
+
+      layers: {
+        fixed: [
+          {
+            id: 'gradient-bg',
+            type: 'fixed',
+            name: '渐变背景',
+            zIndex: 1,
+            properties: {
+              position: 'fullscreen',
+              backgroundColor: '#1a1a2e',
+              // Canvas2D可渲染的纯色背景
+              opacity: 1.0
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'accent-bar',
+            type: 'fixed',
+            name: '装饰条',
+            zIndex: 2,
+            properties: {
+              position: { x: 0, y: 'center', offsetY: -50 },
+              size: { width: 120, height: 6 },
+              backgroundColor: '#FFD700',
+              borderRadius: 3
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'main-title',
+            type: 'dynamic',
+            name: '主标题',
+            zIndex: 3,
+            source: 'keyword-analysis',
+            properties: {
+              position: 'center',
+              fontSize: 64,
+              fontWeight: 'bold',
+              color: '#FFFFFF',
+              textAlign: 'center',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+              animation: {
+                type: 'fade-in',
+                duration: 500
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'subtitle',
+            type: 'dynamic',
+            name: '副标题',
+            zIndex: 4,
+            source: 'content-analysis',
+            properties: {
+              position: { x: 'center', y: 'center', offsetY: 80 },
+              fontSize: 28,
+              fontWeight: 'normal',
+              color: '#AAAAAA',
+              textAlign: 'center',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+              animation: {
+                type: 'fade-in',
+                duration: 500
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'branding',
+            type: 'adjustable',
+            name: '品牌区域',
+            zIndex: 5,
+            properties: {
+              position: { x: 'center', y: 'bottom', offsetY: -60 },
+              fontSize: 16,
+              color: '#666666'
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { text: 30 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['PPT', '标题', '开场', '演示'],
+        compatibility: ['presentation', 'speech', 'introduction'],
+        renderEngine: 'canvas2d'
+      }
+    })
+
+    // PPT要点列表模板
+    this.templates.set('ppt-bullet-points', {
+      id: 'ppt-bullet-points',
+      name: 'PPT要点列表',
+      category: 'ppt-style',
+      description: '清晰的要点列表展示，适合干货内容',
+
+      layers: {
+        fixed: [
+          {
+            id: 'clean-bg',
+            type: 'fixed',
+            name: '简洁背景',
+            zIndex: 1,
+            properties: {
+              position: 'fullscreen',
+              backgroundColor: '#0D1117',
+              opacity: 1.0
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'left-accent',
+            type: 'fixed',
+            name: '左侧装饰线',
+            zIndex: 2,
+            properties: {
+              position: { x: 60, y: 100 },
+              size: { width: 4, height: 400 },
+              backgroundColor: '#4ECDC4',
+              borderRadius: 2
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'header-area',
+            type: 'fixed',
+            name: '标题区域',
+            zIndex: 2,
+            properties: {
+              position: { x: 80, y: 80 },
+              size: { width: 600, height: 60 },
+              backgroundColor: 'transparent'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'section-title',
+            type: 'dynamic',
+            name: '章节标题',
+            zIndex: 3,
+            source: 'keyword-analysis',
+            properties: {
+              position: { x: 80, y: 100 },
+              fontSize: 36,
+              fontWeight: 'bold',
+              color: '#FFFFFF',
+              textAlign: 'left',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'bullet-list',
+            type: 'dynamic',
+            name: '要点列表',
+            zIndex: 4,
+            source: 'keyword-extraction',
+            properties: {
+              position: { x: 100, y: 200 },
+              layout: 'vertical-list',
+              maxItems: 5,
+              itemSpacing: 60,
+              bulletStyle: 'circle',
+              bulletColor: '#4ECDC4',
+              fontSize: 24,
+              color: '#E0E0E0',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+              animation: {
+                type: 'fade-in',
+                duration: 300,
+                stagger: 200
+              }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'page-number',
+            type: 'adjustable',
+            name: '页码',
+            zIndex: 5,
+            properties: {
+              position: { x: 'right', y: 'bottom', offsetX: -40, offsetY: -40 },
+              fontSize: 14,
+              color: '#666666'
+            },
+            constraints: { modifiable: true }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['PPT', '要点', '列表', '干货'],
+        compatibility: ['education', 'tutorial', 'knowledge'],
+        renderEngine: 'canvas2d'
+      }
+    })
+
+    // PPT大数字展示模板
+    this.templates.set('ppt-big-number', {
+      id: 'ppt-big-number',
+      name: 'PPT大数字展示',
+      category: 'ppt-style',
+      description: '突出展示核心数据和统计数字',
+
+      layers: {
+        fixed: [
+          {
+            id: 'dark-bg',
+            type: 'fixed',
+            name: '深色背景',
+            zIndex: 1,
+            properties: {
+              position: 'fullscreen',
+              backgroundColor: '#0f0c29',
+              opacity: 1.0
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'glow-circle',
+            type: 'fixed',
+            name: '光晕圆圈',
+            zIndex: 2,
+            properties: {
+              position: 'center',
+              size: { width: 300, height: 300 },
+              backgroundColor: 'rgba(255, 215, 0, 0.1)',
+              borderRadius: 150,
+              border: { width: 2, color: 'rgba(255, 215, 0, 0.3)' }
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'hero-number',
+            type: 'dynamic',
+            name: '核心数字',
+            zIndex: 3,
+            source: 'data-extraction',
+            properties: {
+              position: 'center',
+              fontSize: 120,
+              fontWeight: 'bold',
+              color: '#FFD700',
+              textAlign: 'center',
+              fontFamily: 'DIN Alternate, Helvetica Neue, sans-serif',
+              animation: {
+                type: 'scale-in',
+                duration: 600,
+                from: { scale: 0.5 },
+                to: { scale: 1.0 }
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'number-label',
+            type: 'dynamic',
+            name: '数字标签',
+            zIndex: 4,
+            source: 'content-analysis',
+            properties: {
+              position: { x: 'center', y: 'center', offsetY: 100 },
+              fontSize: 28,
+              fontWeight: 'normal',
+              color: '#AAAAAA',
+              textAlign: 'center',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'trend-indicator',
+            type: 'dynamic',
+            name: '趋势指示',
+            zIndex: 5,
+            source: 'trend-analysis',
+            properties: {
+              position: { x: 'center', y: 'center', offsetY: -80 },
+              fontSize: 24,
+              color: '#34C759',
+              showArrow: true
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'context-text',
+            type: 'adjustable',
+            name: '上下文说明',
+            zIndex: 6,
+            properties: {
+              position: { x: 'center', y: 'bottom', offsetY: -80 },
+              fontSize: 18,
+              color: '#888888',
+              textAlign: 'center'
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { text: 50 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['PPT', '数据', '数字', '统计'],
+        compatibility: ['data', 'analytics', 'statistics'],
+        renderEngine: 'canvas2d'
+      }
+    })
+
+    // PPT左右对比模板
+    this.templates.set('ppt-comparison', {
+      id: 'ppt-comparison',
+      name: 'PPT左右对比',
+      category: 'ppt-style',
+      description: '清晰的左右对比布局，适合优缺点分析',
+
+      layers: {
+        fixed: [
+          {
+            id: 'split-bg',
+            type: 'fixed',
+            name: '分割背景',
+            zIndex: 1,
+            properties: {
+              position: 'fullscreen',
+              backgroundColor: '#1a1a1a',
+              opacity: 1.0
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'left-panel-bg',
+            type: 'fixed',
+            name: '左侧面板背景',
+            zIndex: 2,
+            properties: {
+              position: { x: 40, y: 120 },
+              size: { width: 440, height: 400 },
+              backgroundColor: 'rgba(52, 199, 89, 0.1)',
+              borderRadius: 16,
+              border: { width: 2, color: 'rgba(52, 199, 89, 0.3)' }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'right-panel-bg',
+            type: 'fixed',
+            name: '右侧面板背景',
+            zIndex: 2,
+            properties: {
+              position: { x: 520, y: 120 },
+              size: { width: 440, height: 400 },
+              backgroundColor: 'rgba(255, 59, 48, 0.1)',
+              borderRadius: 16,
+              border: { width: 2, color: 'rgba(255, 59, 48, 0.3)' }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'vs-badge',
+            type: 'fixed',
+            name: 'VS标识',
+            zIndex: 3,
+            properties: {
+              position: { x: 460, y: 280 },
+              size: { width: 80, height: 80 },
+              backgroundColor: '#FFD700',
+              borderRadius: 40,
+              text: 'VS',
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: '#000000',
+              textAlign: 'center'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'comparison-title',
+            type: 'dynamic',
+            name: '对比标题',
+            zIndex: 4,
+            source: 'keyword-analysis',
+            properties: {
+              position: { x: 'center', y: 60 },
+              fontSize: 32,
+              fontWeight: 'bold',
+              color: '#FFFFFF',
+              textAlign: 'center',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'left-title',
+            type: 'dynamic',
+            name: '左侧标题',
+            zIndex: 5,
+            source: 'comparison-analysis',
+            properties: {
+              position: { x: 60, y: 140 },
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: '#34C759',
+              textAlign: 'left'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'left-points',
+            type: 'dynamic',
+            name: '左侧要点',
+            zIndex: 6,
+            source: 'comparison-analysis',
+            properties: {
+              position: { x: 60, y: 200 },
+              layout: 'vertical-list',
+              maxItems: 4,
+              itemSpacing: 50,
+              bulletStyle: 'checkmark',
+              bulletColor: '#34C759',
+              fontSize: 18,
+              color: '#E0E0E0'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'right-title',
+            type: 'dynamic',
+            name: '右侧标题',
+            zIndex: 5,
+            source: 'comparison-analysis',
+            properties: {
+              position: { x: 540, y: 140 },
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: '#FF3B30',
+              textAlign: 'left'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'right-points',
+            type: 'dynamic',
+            name: '右侧要点',
+            zIndex: 6,
+            source: 'comparison-analysis',
+            properties: {
+              position: { x: 540, y: 200 },
+              layout: 'vertical-list',
+              maxItems: 4,
+              itemSpacing: 50,
+              bulletStyle: 'cross',
+              bulletColor: '#FF3B30',
+              fontSize: 18,
+              color: '#E0E0E0'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'conclusion',
+            type: 'adjustable',
+            name: '结论区域',
+            zIndex: 7,
+            properties: {
+              position: { x: 'center', y: 'bottom', offsetY: -40 },
+              fontSize: 20,
+              color: '#FFD700',
+              textAlign: 'center'
+            },
+            constraints: {
+              modifiable: true,
+              maxLength: { text: 60 }
+            }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['PPT', '对比', '分析', '优缺点'],
+        compatibility: ['comparison', 'analysis', 'review'],
+        renderEngine: 'canvas2d'
+      }
+    })
+
+    // PPT金句/引用模板
+    this.templates.set('ppt-quote', {
+      id: 'ppt-quote',
+      name: 'PPT金句引用',
+      category: 'ppt-style',
+      description: '突出展示金句、名言或核心观点',
+
+      layers: {
+        fixed: [
+          {
+            id: 'elegant-bg',
+            type: 'fixed',
+            name: '优雅背景',
+            zIndex: 1,
+            properties: {
+              position: 'fullscreen',
+              backgroundColor: '#16213e',
+              opacity: 1.0
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'quote-mark-left',
+            type: 'fixed',
+            name: '左引号',
+            zIndex: 2,
+            properties: {
+              position: { x: 60, y: 150 },
+              text: '"',
+              fontSize: 200,
+              color: 'rgba(255, 215, 0, 0.2)',
+              fontFamily: 'Georgia, serif'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'quote-mark-right',
+            type: 'fixed',
+            name: '右引号',
+            zIndex: 2,
+            properties: {
+              position: { x: 'right', y: 'bottom', offsetX: -100, offsetY: -150 },
+              text: '"',
+              fontSize: 200,
+              color: 'rgba(255, 215, 0, 0.2)',
+              fontFamily: 'Georgia, serif'
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'bottom-line',
+            type: 'fixed',
+            name: '底部装饰线',
+            zIndex: 2,
+            properties: {
+              position: { x: 'center', y: 'bottom', offsetY: -100 },
+              size: { width: 200, height: 3 },
+              backgroundColor: '#FFD700',
+              borderRadius: 1.5
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        dynamic: [
+          {
+            id: 'quote-text',
+            type: 'dynamic',
+            name: '金句内容',
+            zIndex: 3,
+            source: 'keyword-analysis',
+            properties: {
+              position: 'center',
+              fontSize: 36,
+              fontWeight: 'normal',
+              fontStyle: 'italic',
+              color: '#FFFFFF',
+              textAlign: 'center',
+              fontFamily: 'PingFang SC, Microsoft YaHei, serif',
+              lineHeight: 1.6,
+              maxWidth: 800,
+              animation: {
+                type: 'fade-in',
+                duration: 800
+              }
+            },
+            constraints: { modifiable: false }
+          },
+          {
+            id: 'quote-author',
+            type: 'dynamic',
+            name: '来源/作者',
+            zIndex: 4,
+            source: 'content-analysis',
+            properties: {
+              position: { x: 'center', y: 'bottom', offsetY: -60 },
+              fontSize: 20,
+              fontWeight: 'normal',
+              color: '#888888',
+              textAlign: 'center',
+              fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif'
+            },
+            constraints: { modifiable: false }
+          }
+        ],
+
+        adjustable: [
+          {
+            id: 'highlight-word',
+            type: 'adjustable',
+            name: '高亮词',
+            zIndex: 5,
+            properties: {
+              highlightColor: '#FFD700',
+              highlightStyle: 'underline'
+            },
+            constraints: { modifiable: true }
+          }
+        ]
+      },
+
+      metadata: {
+        version: '1.0',
+        author: 'VidSlide AI',
+        tags: ['PPT', '金句', '引用', '名言'],
+        compatibility: ['quote', 'highlight', 'emphasis'],
+        renderEngine: 'canvas2d'
+      }
+    })
+
     console.log(`已注册 ${this.templates.size} 个预定义模板`)
   }
 
@@ -1138,9 +2723,7 @@ class TemplateArchitecture {
     }
 
     // 按评分排序
-    return recommendations
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3) // 返回前3个推荐
+    return recommendations.sort((a, b) => b.score - a.score).slice(0, 3) // 返回前3个推荐
   }
 
   /**

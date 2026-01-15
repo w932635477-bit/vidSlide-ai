@@ -117,10 +117,10 @@ class SmartCropService {
    */
   async detectAndCrop(src, options = {}) {
     const {
-      subjectType = 'auto',  // auto, face, object, text
-      padding = 20,           // 裁剪边距
-      minSubjectSize = 0.1,   // 最小主体占比
-      maxSubjectSize = 0.9    // 最大主体占比
+      subjectType = 'auto', // auto, face, object, text
+      padding = 20, // 裁剪边距
+      minSubjectSize = 0.1, // 最小主体占比
+      maxSubjectSize = 0.9 // 最大主体占比
     } = options
 
     let subjectRect = null
@@ -155,7 +155,7 @@ class SmartCropService {
 
     if (subjectRatio < minSubjectSize) {
       console.warn(`检测到的主体过小 (${(subjectRatio * 100).toFixed(1)}%)，使用备用方案`)
-      subjectRect = await this.detectSaliency(src) || subjectRect
+      subjectRect = (await this.detectSaliency(src)) || subjectRect
     }
 
     // 计算最终裁剪区域
@@ -248,7 +248,13 @@ class SmartCropService {
       // 寻找轮廓
       const contours = new this.opencv.MatVector()
       const hierarchy = new this.opencv.Mat()
-      this.opencv.findContours(edges, contours, hierarchy, this.opencv.RETR_EXTERNAL, this.opencv.CHAIN_APPROX_SIMPLE)
+      this.opencv.findContours(
+        edges,
+        contours,
+        hierarchy,
+        this.opencv.RETR_EXTERNAL,
+        this.opencv.CHAIN_APPROX_SIMPLE
+      )
 
       // 找到最大的轮廓（可能是文本区域）
       let maxArea = 0
@@ -414,7 +420,7 @@ class SmartCropService {
    * @returns {Promise<Blob>} 图片Blob
    */
   async matToBlob(mat) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const canvas = document.createElement('canvas')
       this.opencv.imshow(canvas, mat)
       canvas.toBlob(resolve, 'image/png')

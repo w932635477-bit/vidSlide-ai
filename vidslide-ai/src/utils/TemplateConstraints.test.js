@@ -85,11 +85,7 @@ describe('TemplateConstraints', () => {
     })
 
     it('应该修复无效的位置', () => {
-      const fixedValue = constraints.applyAutoFix(
-        { type: 'fixed' },
-        'position',
-        'invalid-position'
-      )
+      const fixedValue = constraints.applyAutoFix({ type: 'fixed' }, 'position', 'invalid-position')
 
       expect(['top-left', 'top-right', 'bottom-left', 'bottom-right']).toContain(fixedValue)
     })
@@ -135,7 +131,11 @@ describe('TemplateConstraints', () => {
     })
 
     it('应该撤销修改', () => {
-      constraints.recordModification('test-template', { property: 'test', oldValue: 1, newValue: 2 })
+      constraints.recordModification('test-template', {
+        property: 'test',
+        oldValue: 1,
+        newValue: 2
+      })
 
       const undoResult = constraints.undoModification('test-template')
       expect(undoResult).toHaveProperty('property', 'test')

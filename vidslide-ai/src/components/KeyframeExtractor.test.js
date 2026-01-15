@@ -13,7 +13,7 @@ import KeyframeExtractor from './KeyframeExtractor.vue'
 global.IntersectionObserver = vi.fn(() => ({
   observe: vi.fn(),
   disconnect: vi.fn(),
-  unobserve: vi.fn(),
+  unobserve: vi.fn()
 }))
 
 describe('KeyframeExtractor.vue', () => {

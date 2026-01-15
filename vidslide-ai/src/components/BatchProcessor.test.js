@@ -329,9 +329,7 @@ describe('BatchProcessor.vue', () => {
 
   describe('错误处理', () => {
     it('应该显示错误列表', async () => {
-      wrapper.vm.errors = [
-        { fileName: 'error.mp4', message: '处理失败' }
-      ]
+      wrapper.vm.errors = [{ fileName: 'error.mp4', message: '处理失败' }]
       await wrapper.vm.$nextTick()
 
       expect(wrapper.find('.errors-section').exists()).toBe(true)
@@ -339,9 +337,7 @@ describe('BatchProcessor.vue', () => {
     })
 
     it('应该能够清空错误', async () => {
-      wrapper.vm.errors = [
-        { fileName: 'error.mp4', message: '处理失败' }
-      ]
+      wrapper.vm.errors = [{ fileName: 'error.mp4', message: '处理失败' }]
       await wrapper.vm.$nextTick()
 
       const clearBtn = wrapper.find('.clear-errors-btn')

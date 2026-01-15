@@ -85,7 +85,7 @@ describe('SmartCropService', () => {
       }))
 
       // Mock canvas
-      global.document.createElement = vi.fn().mockImplementation((tag) => {
+      global.document.createElement = vi.fn().mockImplementation(tag => {
         if (tag === 'canvas') {
           return {
             getContext: vi.fn().mockReturnValue({
@@ -96,7 +96,7 @@ describe('SmartCropService', () => {
                 height: 100
               })
             }),
-            toBlob: vi.fn().mockImplementation((callback) => {
+            toBlob: vi.fn().mockImplementation(callback => {
               callback(new Blob(['cropped'], { type: 'image/png' }))
             })
           }
@@ -181,7 +181,7 @@ describe('SmartCropService', () => {
         cols: 100
       }
 
-      global.document.createElement = vi.fn().mockImplementation((tag) => {
+      global.document.createElement = vi.fn().mockImplementation(tag => {
         if (tag === 'canvas') {
           return {
             getContext: vi.fn().mockReturnValue({
@@ -192,7 +192,7 @@ describe('SmartCropService', () => {
                 height: 100
               })
             }),
-            toBlob: vi.fn().mockImplementation((callback) => {
+            toBlob: vi.fn().mockImplementation(callback => {
               callback(new Blob(['mat'], { type: 'image/png' }))
             })
           }
@@ -211,8 +211,7 @@ describe('SmartCropService', () => {
 
       const mockFile = new File(['test'], 'test.png', { type: 'image/png' })
 
-      await expect(service.smartCrop(mockFile))
-        .rejects.toThrow('智能裁剪服务初始化失败')
+      await expect(service.smartCrop(mockFile)).rejects.toThrow('智能裁剪服务初始化失败')
     })
 
     it('应该处理图像加载失败', async () => {
@@ -234,8 +233,7 @@ describe('SmartCropService', () => {
         return img
       })
 
-      await expect(service.smartCrop(mockFile))
-        .rejects.toThrow('智能裁剪处理失败')
+      await expect(service.smartCrop(mockFile)).rejects.toThrow('智能裁剪处理失败')
     })
   })
 

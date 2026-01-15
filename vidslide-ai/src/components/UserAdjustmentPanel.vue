@@ -446,10 +446,23 @@ v-if="isPreviewLoading" class="preview-loading"
 
   <!-- 约束验证区域 -->
   <div class="validation-section">
-    <!-- ConstraintValidator 已移至备份目录 -->
-    :validation-result="validationResult" :adjustments="adjustments"
-    :template-type="currentTemplate?.name" :show-history="false" @quick-fix-applied="handleQuickFix"
-    @validation-requested="requestValidation" />
+    <!-- 约束验证结果显示 -->
+    <div v-if="validationResult" class="validation-result">
+      <el-tag :type="validationResult.isValid ? 'success' : 'danger'" size="small">
+        {{ validationResult.isValid ? '验证通过' : '存在问题' }}
+      </el-tag>
+      <div v-if="validationResult.violations && validationResult.violations.length > 0" class="violations-list">
+        <el-alert
+          v-for="(violation, index) in validationResult.violations"
+          :key="index"
+          type="error"
+          :closable="false"
+          show-icon
+        >
+          {{ violation.message }}
+        </el-alert>
+      </div>
+    </div>
   </div>
 
   <!-- 智能提示区域 -->
@@ -475,7 +488,7 @@ v-if="smartSuggestions.length > 0" class="suggestions-section"
   </div>
 </template>
 
-<script setup>
+<script setup name="UserAdjustmentPanel">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {

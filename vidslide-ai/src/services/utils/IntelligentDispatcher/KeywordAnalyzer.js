@@ -54,7 +54,7 @@ class KeywordAnalyzer {
 
     const result = {
       original: keyword,
-      normalized: keyword.trim(),
+      normalized: keyword, // 保留原始内容，不trim
       length: keyword.length,
       chineseChars: this.countChineseChars(keyword),
       englishChars: this.countEnglishChars(keyword),
@@ -72,13 +72,20 @@ class KeywordAnalyzer {
     result.englishRatio = result.englishChars / result.length
 
     // 确定主要语言
-    if (result.chineseRatio > 0.3) {
+    if (result.chineseChars > 0 && result.englishChars > 0) {
+      // 同时包含中英文字符
+      result.language = 'mixed'
+      result.confidence = Math.min((result.chineseRatio + result.englishRatio) * 0.8, 1)
+    } else if (result.chineseChars > 0) {
+      // 只有中文字符
       result.language = 'chinese'
       result.confidence = Math.min(result.chineseRatio * 1.2, 1)
-    } else if (result.englishRatio > 0.3) {
+    } else if (result.englishChars > 0) {
+      // 只有英文字符（可能包含数字和符号）
       result.language = 'english'
       result.confidence = Math.min(result.englishRatio * 1.2, 1)
     } else {
+      // 没有中英文字符（纯数字或符号）
       result.language = 'mixed'
       result.confidence = 0.5
     }
@@ -181,11 +188,20 @@ class KeywordAnalyzer {
     const chineseMatches = patterns.filter(p => p.type === 'chinese')
     const englishMatches = patterns.filter(p => p.type === 'english')
 
+    // 检查是否同时包含中英文字符
+    const hasChinese = this.countChineseChars(keyword) > 0
+    const hasEnglish = this.countEnglishChars(keyword) > 0
+
+    // 如果同时包含中英文字符，优先返回mixed
+    if (hasChinese && hasEnglish) {
+      return 'mixed'
+    }
+
     if (chineseMatches.length > englishMatches.length) {
       return 'chinese_dominant'
     } else if (englishMatches.length > chineseMatches.length) {
       return 'english_dominant'
-    } else if (chineseMatches.length > 0) {
+    } else if (chineseMatches.length > 0 || englishMatches.length > 0) {
       return 'mixed_with_patterns'
     } else {
       return 'neutral'
@@ -234,11 +250,16 @@ class KeywordAnalyzer {
       '发展',
       '系统',
       '平台',
+      '人工智能',
+      '大数据',
+      '新能源',
       'technology',
       'research',
       'development',
       'system',
-      'platform'
+      'platform',
+      'ai',
+      'artificial intelligence'
     ]
 
     const hasProfessionalTerms = professionalTerms.some(term =>
@@ -246,7 +267,11 @@ class KeywordAnalyzer {
     )
 
     if (hasProfessionalTerms) return 'high'
-    if (analysis.patterns.length > 0) return 'medium'
+    // 只有匹配到专业相关的模式才返回medium，排除通用的中文字符模式
+    const professionalPatterns = analysis.patterns.filter(p =>
+      p.pattern !== '[\\u4e00-\\u9fff]' && p.pattern !== '^[a-zA-Z\\s\\-.&()]+$'
+    )
+    if (professionalPatterns.length > 0) return 'medium'
     return 'low'
   }
 
@@ -279,7 +304,7 @@ class KeywordAnalyzer {
       keyword.toLowerCase().includes(term.toLowerCase())
     )
 
-    return hasTimelyTerms ? 'high' : 'normal'
+    return hasTimelyTerms ? 'high' : 'low'
   }
 
   /**

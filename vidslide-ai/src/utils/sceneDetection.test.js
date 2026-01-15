@@ -51,10 +51,22 @@ describe('SceneDetection', () => {
         width: 2,
         height: 2,
         data: new Uint8ClampedArray([
-          255, 0, 0, 255,   // 红色像素
-          0, 255, 0, 255,   // 绿色像素
-          0, 0, 255, 255,   // 蓝色像素
-          255, 255, 255, 255 // 白色像素
+          255,
+          0,
+          0,
+          255, // 红色像素
+          0,
+          255,
+          0,
+          255, // 绿色像素
+          0,
+          0,
+          255,
+          255, // 蓝色像素
+          255,
+          255,
+          255,
+          255 // 白色像素
         ])
       }
 
@@ -62,10 +74,22 @@ describe('SceneDetection', () => {
         width: 2,
         height: 2,
         data: new Uint8ClampedArray([
-          0, 255, 255, 255,  // 青色像素
-          255, 0, 255, 255,  // 品红像素
-          255, 255, 0, 255,  // 黄色像素
-          0, 0, 0, 255       // 黑色像素
+          0,
+          255,
+          255,
+          255, // 青色像素
+          255,
+          0,
+          255,
+          255, // 品红像素
+          255,
+          255,
+          0,
+          255, // 黄色像素
+          0,
+          0,
+          0,
+          255 // 黑色像素
         ])
       }
 
@@ -81,7 +105,9 @@ describe('SceneDetection', () => {
       const frame = {
         width: 2,
         height: 2,
-        data: new Uint8ClampedArray([255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255])
+        data: new Uint8ClampedArray([
+          255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255
+        ])
       }
 
       const diff = sceneDetector.detectImageDifference(frame, null)
@@ -127,13 +153,17 @@ describe('SceneDetection', () => {
       const frame1 = {
         width: 2,
         height: 2,
-        data: new Uint8ClampedArray([255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255])
+        data: new Uint8ClampedArray([
+          255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255
+        ])
       }
 
       const frame2 = {
         width: 2,
         height: 2,
-        data: new Uint8ClampedArray([0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255])
+        data: new Uint8ClampedArray([
+          0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255
+        ])
       }
 
       const cutResult = sceneDetector.detectCut(frame2, frame1)
@@ -145,13 +175,17 @@ describe('SceneDetection', () => {
       const frame1 = {
         width: 2,
         height: 2,
-        data: new Uint8ClampedArray([128, 128, 128, 255, 128, 128, 128, 255, 128, 128, 128, 255, 128, 128, 128, 255])
+        data: new Uint8ClampedArray([
+          128, 128, 128, 255, 128, 128, 128, 255, 128, 128, 128, 255, 128, 128, 128, 255
+        ])
       }
 
       const frame2 = {
         width: 2,
         height: 2,
-        data: new Uint8ClampedArray([130, 130, 130, 255, 130, 130, 130, 255, 130, 130, 130, 255, 130, 130, 130, 255])
+        data: new Uint8ClampedArray([
+          130, 130, 130, 255, 130, 130, 130, 255, 130, 130, 130, 255, 130, 130, 130, 255
+        ])
       }
 
       const cutResult = sceneDetector.detectCut(frame2, frame1)
@@ -206,7 +240,8 @@ describe('FaceRecognitionValidator', () => {
 
     // Mock navigator APIs
     Object.defineProperty(navigator, 'userAgent', {
-      value: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      value:
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
       configurable: true
     })
   })

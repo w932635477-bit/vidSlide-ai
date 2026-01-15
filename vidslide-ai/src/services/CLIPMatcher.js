@@ -35,7 +35,6 @@ class CLIPMatcher {
 
       this.isInitialized = true
       console.log('CLIP模型加载完成')
-
     } catch (error) {
       console.error('CLIP模型初始化失败:', error)
       throw new Error(`CLIP模型初始化失败: ${error.message}`)
@@ -71,12 +70,12 @@ class CLIPMatcher {
 
     // 模拟模型加载过程
     this.model = {
-      encodeText: async (texts) => {
+      encodeText: async texts => {
         // 模拟文本编码
         return tf.randomNormal([texts.length, 512])
       },
 
-      encodeImage: async (images) => {
+      encodeImage: async images => {
         // 模拟图像编码
         return tf.randomNormal([images.length, 512])
       }
@@ -84,12 +83,12 @@ class CLIPMatcher {
 
     // 简化的tokenizer
     this.tokenizer = {
-      encode: (text) => {
+      encode: text => {
         // 简化的文本编码
         return text.split('').map(char => char.charCodeAt(0) % 1000)
       },
 
-      decode: (tokens) => {
+      decode: tokens => {
         // 简化的文本解码
         return tokens.map(token => String.fromCharCode(token % 256)).join('')
       }
@@ -124,7 +123,6 @@ class CLIPMatcher {
       console.log('相似度计算完成')
 
       return similarities
-
     } catch (error) {
       console.error('CLIP匹配失败:', error)
       // 返回随机相似度作为降级方案
@@ -176,7 +174,6 @@ class CLIPMatcher {
       this.setCache(cacheKey, embedding)
 
       return embedding
-
     } catch (error) {
       console.warn('文本编码失败:', error)
       // 返回随机向量作为降级方案
@@ -191,15 +188,12 @@ class CLIPMatcher {
    */
   async encodeImages(images) {
     try {
-      const processedImages = await Promise.all(
-        images.map(img => this.preprocessImage(img))
-      )
+      const processedImages = await Promise.all(images.map(img => this.preprocessImage(img)))
 
       // 使用CLIP模型编码
       const embeddings = await this.model.encodeImage(processedImages)
 
       return embeddings
-
     } catch (error) {
       console.warn('图像编码失败:', error)
       // 返回随机向量作为降级方案
@@ -234,11 +228,14 @@ class CLIPMatcher {
       normalizedSimilarities.dispose()
 
       return Array.from(result)
-
     } catch (error) {
       console.warn('相似度计算失败:', error)
       // 返回随机相似度
-      return imageEmbeddings.shape[0] ? Array(imageEmbeddings.shape[0]).fill(0).map(() => Math.random()) : []
+      return imageEmbeddings.shape[0]
+        ? Array(imageEmbeddings.shape[0])
+            .fill(0)
+            .map(() => Math.random())
+        : []
     }
   }
 
@@ -303,7 +300,6 @@ class CLIPMatcher {
       standardized.dispose()
 
       return chw
-
     } catch (error) {
       console.warn('图像预处理失败:', error)
       // 返回随机张量作为降级方案
@@ -319,7 +315,10 @@ class CLIPMatcher {
    * @returns {Promise<Array>} 排序后的匹配结果
    */
   async findBestMatches(text, images, topK = 5) {
-    const similarities = await this.matchTextToImages(text, images.map(img => img.image))
+    const similarities = await this.matchTextToImages(
+      text,
+      images.map(img => img.image)
+    )
 
     // 组合相似度和元数据
     const results = images.map((img, index) => ({
@@ -356,7 +355,8 @@ class CLIPMatcher {
     const recommendations = []
 
     // 为每个关键词找到最佳匹配
-    for (const keyword of keywords.slice(0, 3)) { // 限制前3个关键词
+    for (const keyword of keywords.slice(0, 3)) {
+      // 限制前3个关键词
       const keywordText = typeof keyword === 'string' ? keyword : keyword.text
       const matches = await this.findBestMatches(keywordText, availableMaterials, 3)
 
@@ -411,32 +411,34 @@ class CLIPMatcher {
    * @returns {Array} 加权后的素材
    */
   applyWeights(materials, category, sentiment) {
-    return materials.map(material => {
-      let weight = material.similarity
+    return materials
+      .map(material => {
+        let weight = material.similarity
 
-      // 类别权重
-      if (category === 'educational' && material.tags?.includes('education')) {
-        weight *= 1.2
-      }
+        // 类别权重
+        if (category === 'educational' && material.tags?.includes('education')) {
+          weight *= 1.2
+        }
 
-      if (category === 'promotional' && material.tags?.includes('marketing')) {
-        weight *= 1.3
-      }
+        if (category === 'promotional' && material.tags?.includes('marketing')) {
+          weight *= 1.3
+        }
 
-      // 情感权重
-      if (sentiment === 'positive' && material.mood === 'bright') {
-        weight *= 1.1
-      }
+        // 情感权重
+        if (sentiment === 'positive' && material.mood === 'bright') {
+          weight *= 1.1
+        }
 
-      if (sentiment === 'serious' && material.mood === 'professional') {
-        weight *= 1.2
-      }
+        if (sentiment === 'serious' && material.mood === 'professional') {
+          weight *= 1.2
+        }
 
-      return {
-        ...material,
-        weightedSimilarity: weight
-      }
-    }).sort((a, b) => b.weightedSimilarity - a.weightedSimilarity)
+        return {
+          ...material,
+          weightedSimilarity: weight
+        }
+      })
+      .sort((a, b) => b.weightedSimilarity - a.weightedSimilarity)
   }
 
   /**

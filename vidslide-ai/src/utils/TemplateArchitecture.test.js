@@ -109,7 +109,12 @@ describe('TemplateArchitecture', () => {
     })
 
     it('应该验证修改权限', () => {
-      const result = architecture.validateModification('picture-in-picture', 'background-overlay', 'opacity', 0.5)
+      const result = architecture.validateModification(
+        'picture-in-picture',
+        'background-overlay',
+        'opacity',
+        0.5
+      )
 
       // 固定层应该不允许修改
       expect(result.valid).toBe(false)
@@ -117,20 +122,35 @@ describe('TemplateArchitecture', () => {
     })
 
     it('应该允许调整层修改', () => {
-      const result = architecture.validateModification('picture-in-picture', 'user-overlay', 'content', 'new content')
+      const result = architecture.validateModification(
+        'picture-in-picture',
+        'user-overlay',
+        'content',
+        'new content'
+      )
 
       expect(result.valid).toBe(true)
     })
 
     it('应该验证尺寸约束', () => {
-      const result = architecture.validateModification('picture-in-picture', 'pip-container', 'size', 600)
+      const result = architecture.validateModification(
+        'picture-in-picture',
+        'pip-container',
+        'size',
+        600
+      )
 
       expect(result.valid).toBe(false)
       expect(result.reason).toContain('尺寸不能大于')
     })
 
     it('应该验证位置约束', () => {
-      const result = architecture.validateModification('picture-in-picture', 'pip-container', 'position', 'invalid-position')
+      const result = architecture.validateModification(
+        'picture-in-picture',
+        'pip-container',
+        'position',
+        'invalid-position'
+      )
 
       expect(result.valid).toBe(false)
       expect(result.reason).toContain('位置必须是')

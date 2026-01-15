@@ -84,7 +84,7 @@ describe('ImageQualityOptimizer', () => {
 
       // 检查像素值是否改变
       expect(imageData.data[0]).not.toBe(128) // R channel changed
-      expect(imageData.data[4]).not.toBe(64)  // R channel changed
+      expect(imageData.data[4]).not.toBe(64) // R channel changed
     })
 
     it('应该应用饱和度调整', () => {
@@ -97,7 +97,9 @@ describe('ImageQualityOptimizer', () => {
       optimizer.adjustSaturation(imageData, 50)
 
       // 检查像素值是否改变
-      expect(imageData.data).not.toEqual(new Uint8ClampedArray([255, 128, 128, 255, 128, 255, 128, 255]))
+      expect(imageData.data).not.toEqual(
+        new Uint8ClampedArray([255, 128, 128, 255, 128, 255, 128, 255])
+      )
     })
 
     it('应该应用锐度增强', () => {
@@ -210,7 +212,7 @@ describe('ImageQualityOptimizer', () => {
 
       // 初始化为中等灰度
       for (let i = 0; i < imageData.data.length; i += 4) {
-        imageData.data[i] = 128     // R
+        imageData.data[i] = 128 // R
         imageData.data[i + 1] = 128 // G
         imageData.data[i + 2] = 128 // B
         imageData.data[i + 3] = 255 // A
@@ -287,7 +289,7 @@ describe('ImageQualityOptimizer', () => {
       optimizer.canvas.width = 5
       optimizer.canvas.height = 5
       optimizer.ctx.putImageData = vi.fn()
-      optimizer.canvas.toBlob = vi.fn().mockImplementation((callback) => {
+      optimizer.canvas.toBlob = vi.fn().mockImplementation(callback => {
         callback(new Blob(['converted'], { type: 'image/png' }))
       })
 
@@ -311,10 +313,10 @@ describe('ImageQualityOptimizer', () => {
 
       // 创建有噪声的图像
       for (let i = 0; i < imageData.data.length; i += 4) {
-        imageData.data[i] = Math.random() * 255     // R
+        imageData.data[i] = Math.random() * 255 // R
         imageData.data[i + 1] = Math.random() * 255 // G
         imageData.data[i + 2] = Math.random() * 255 // B
-        imageData.data[i + 3] = 255                 // A
+        imageData.data[i + 3] = 255 // A
       }
 
       const originalData = new Uint8ClampedArray(imageData.data)

@@ -138,7 +138,9 @@ describe('PreviewQualityControl.vue', () => {
       // 等待性能监控更新
       await new Promise(resolve => setTimeout(resolve, 1100))
 
-      const fpsValue = wrapper.find('.metric-value.metric-good, .metric-value.metric-warning, .metric-value.metric-error')
+      const fpsValue = wrapper.find(
+        '.metric-value.metric-good, .metric-value.metric-warning, .metric-value.metric-error'
+      )
       expect(fpsValue.exists()).toBe(true)
     })
   })
@@ -161,9 +163,11 @@ describe('PreviewQualityControl.vue', () => {
       await firstCheckbox.setValue(false)
 
       expect(wrapper.emitted('optimizations-change')).toBeTruthy()
-      expect(wrapper.emitted('optimizations-change')[0][0]).toEqual(expect.objectContaining({
-        hardwareAcceleration: false
-      }))
+      expect(wrapper.emitted('optimizations-change')[0][0]).toEqual(
+        expect.objectContaining({
+          hardwareAcceleration: false
+        })
+      )
     })
 
     it('应该在优化设置改变时发出事件', () => {
@@ -189,10 +193,12 @@ describe('PreviewQualityControl.vue', () => {
       await performancePreset.trigger('click')
 
       expect(wrapper.emitted('preset-applied')).toBeTruthy()
-      expect(wrapper.emitted('preset-applied')[0][0]).toEqual(expect.objectContaining({
-        id: 'performance',
-        name: '性能优先'
-      }))
+      expect(wrapper.emitted('preset-applied')[0][0]).toEqual(
+        expect.objectContaining({
+          id: 'performance',
+          name: '性能优先'
+        })
+      )
     })
 
     it('应该在应用预设时发出事件', () => {
@@ -200,9 +206,11 @@ describe('PreviewQualityControl.vue', () => {
       wrapper.vm.applyPreset(preset)
 
       expect(wrapper.emitted('preset-applied')).toBeTruthy()
-      expect(wrapper.emitted('preset-applied')[0][0]).toEqual(expect.objectContaining({
-        id: 'performance'
-      }))
+      expect(wrapper.emitted('preset-applied')[0][0]).toEqual(
+        expect.objectContaining({
+          id: 'performance'
+        })
+      )
     })
 
     it('应用预设后应该更新相关设置', async () => {
@@ -230,9 +238,11 @@ describe('PreviewQualityControl.vue', () => {
       await cacheSelect.setValue('256')
 
       expect(wrapper.emitted('advanced-settings-change')).toBeTruthy()
-      expect(wrapper.emitted('advanced-settings-change')[0][0]).toEqual(expect.objectContaining({
-        cacheSize: '256'
-      }))
+      expect(wrapper.emitted('advanced-settings-change')[0][0]).toEqual(
+        expect.objectContaining({
+          cacheSize: '256'
+        })
+      )
     })
 
     it('应该在高级设置改变时发出事件', () => {
@@ -246,9 +256,11 @@ describe('PreviewQualityControl.vue', () => {
       await threadsSelect.setValue('8')
 
       expect(wrapper.emitted('advanced-settings-change')).toBeTruthy()
-      expect(wrapper.emitted('advanced-settings-change')[0][0]).toEqual(expect.objectContaining({
-        renderThreads: '8'
-      }))
+      expect(wrapper.emitted('advanced-settings-change')[0][0]).toEqual(
+        expect.objectContaining({
+          renderThreads: '8'
+        })
+      )
     })
   })
 
@@ -318,7 +330,10 @@ describe('PreviewQualityControl.vue', () => {
       const inputs = wrapper.findAll('input, select')
       // 检查是否有标签关联或者aria属性
       inputs.forEach(input => {
-        const hasLabel = input.attributes('aria-label') || input.attributes('aria-labelledby') || input.attributes('id')
+        const hasLabel =
+          input.attributes('aria-label') ||
+          input.attributes('aria-labelledby') ||
+          input.attributes('id')
         expect(hasLabel).toBeTruthy()
       })
     })
@@ -399,9 +414,12 @@ describe('PreviewQualityControl.vue', () => {
       const renderCount = { value: 0 }
 
       // 监听组件更新
-      wrapper.vm.$watch(() => wrapper.vm.currentQuality, () => {
-        renderCount.value++
-      })
+      wrapper.vm.$watch(
+        () => wrapper.vm.currentQuality,
+        () => {
+          renderCount.value++
+        }
+      )
 
       // 快速更新
       for (let i = 0; i < 5; i++) {

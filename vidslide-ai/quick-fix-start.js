@@ -16,10 +16,15 @@ console.log('\n🔍 快速诊断:')
 
 // 检查核心组件
 const components = {
-  'TemplateSelector': document.querySelector('.template-selector') || document.querySelector('[data-component*="Template"]'),
-  'UserAdjustmentPanel': document.querySelector('.adjustment-panel') || document.querySelector('[data-component*="Adjustment"]'),
-  'PictureInPicture': document.querySelector('.pip-controls') || document.querySelector('[data-component*="Pip"]'),
-  'Canvas': document.querySelector('canvas')
+  TemplateSelector:
+    document.querySelector('.template-selector') ||
+    document.querySelector('[data-component*="Template"]'),
+  UserAdjustmentPanel:
+    document.querySelector('.adjustment-panel') ||
+    document.querySelector('[data-component*="Adjustment"]'),
+  PictureInPicture:
+    document.querySelector('.pip-controls') || document.querySelector('[data-component*="Pip"]'),
+  Canvas: document.querySelector('canvas')
 }
 
 Object.entries(components).forEach(([name, element]) => {
@@ -28,7 +33,9 @@ Object.entries(components).forEach(([name, element]) => {
 
 // 检查事件连接
 console.log('\n🔗 事件连接检查:')
-const eventElements = document.querySelectorAll('[data-event], .template-card, input[type="range"], button')
+const eventElements = document.querySelectorAll(
+  '[data-event], .template-card, input[type="range"], button'
+)
 console.log(`📊 可交互元素数量: ${eventElements.length}`)
 
 // 检查样式系统
@@ -51,16 +58,16 @@ if (!window.materialService) issues.push('MaterialService未初始化')
 
 // 检查事件绑定
 const templateCards = document.querySelectorAll('.template-card')
-const templateCardsWithoutClick = Array.from(templateCards).filter(card =>
-  !card.onclick && !card.getAttribute('onclick') && !card.getAttribute('@click')
+const templateCardsWithoutClick = Array.from(templateCards).filter(
+  card => !card.onclick && !card.getAttribute('onclick') && !card.getAttribute('@click')
 )
 if (templateCardsWithoutClick.length > 0) {
   issues.push('模板卡片缺少点击事件')
 }
 
 const rangeInputs = document.querySelectorAll('input[type="range"]')
-const rangeInputsWithoutInput = Array.from(rangeInputs).filter(input =>
-  !input.oninput && !input.getAttribute('oninput') && !input.getAttribute('@input')
+const rangeInputsWithoutInput = Array.from(rangeInputs).filter(
+  input => !input.oninput && !input.getAttribute('oninput') && !input.getAttribute('@input')
 )
 if (rangeInputsWithoutInput.length > 0) {
   issues.push('参数控件缺少输入事件')

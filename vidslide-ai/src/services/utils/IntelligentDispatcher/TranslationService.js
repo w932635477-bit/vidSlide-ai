@@ -154,9 +154,13 @@ class TranslationService {
     const salt = Date.now().toString()
     const sign = this.generateSign(this.appId, text, salt, this.secretKey)
 
-    // 在开发环境下使用代理路径，生产环境使用直接路径
-    const isDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    const baseUrl = isDev ? '/api/translate' : 'https://fanyi-api.baidu.com'
+    // 在开发环境下使用代理路径，生产环境和测试环境使用直接路径
+    // 检测是否在浏览器开发环境中（非测试）
+    const isBrowserDev = typeof window !== 'undefined' &&
+                  window.location &&
+                  window.location.hostname === 'localhost' &&
+                  typeof process === 'undefined'
+    const baseUrl = isBrowserDev ? '/api/translate' : 'https://fanyi-api.baidu.com'
     const url = `${baseUrl}/api/trans/vip/translate?q=${encodeURIComponent(text)}&from=zh&to=en&appid=${this.appId}&salt=${salt}&sign=${sign}`
 
     try {
@@ -261,6 +265,13 @@ class TranslationService {
    */
   clearCache() {
     this.cache.clear()
+  }
+
+  /**
+   * 清空缓存并重新加载预翻译
+   */
+  resetCache() {
+    this.cache.clear()
     // 重新加载预翻译
     this.initialize()
   }
@@ -288,7 +299,8 @@ class TranslationService {
   async testConnection() {
     try {
       const testWord = '测试'
-      const result = await this.translate(testWord)
+      // 直接调用API而不是translate，避免缓存干扰
+      const result = await this.callBaiduAPI(testWord)
       return {
         success: true,
         testWord,

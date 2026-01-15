@@ -42,7 +42,7 @@ v-if="lastDecision && lastDecision.platforms.length > 0" class="platform-status"
       <el-tag
         v-for="platform in lastDecision.platforms"
         :key="platform.name"
-        size="mini"
+        size="small"
         :type="getPlatformType(platform)"
         class="platform-tag"
       >
@@ -68,7 +68,7 @@ v-if="lastDecision && lastDecision.translation" class="translation-status"
 trigger="click" @command="handleStrategyChange"
 >
         <el-button
-size="mini" type="text"
+size="small" type="link"
 class="control-button" aria-label="调度策略设置"
 >
           <el-icon>
@@ -96,8 +96,8 @@ class="control-button" aria-label="调度策略设置"
 
       <!-- 性能监控按钮 -->
       <el-button
-        size="mini"
-        type="text"
+        size="small"
+        type="link"
         class="control-button"
         aria-label="查看性能统计"
         @click="showPerformanceModal = true"

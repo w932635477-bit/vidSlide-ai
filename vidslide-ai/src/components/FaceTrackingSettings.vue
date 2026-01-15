@@ -18,8 +18,8 @@
             :key="mode.id"
             class="mode-btn"
             :class="{ active: currentMode === mode.id }"
-            @click="setTrackingMode(mode.id)"
             :disabled="!mode.available"
+            @click="setTrackingMode(mode.id)"
           >
             <div class="mode-icon">{{ mode.icon }}</div>
             <div class="mode-info">
@@ -38,13 +38,13 @@
         </label>
         <div class="sensitivity-control">
           <input
+            v-model="currentSensitivity"
             type="range"
             min="1"
             max="100"
-            v-model="currentSensitivity"
-            @input="updateSensitivity"
             class="sensitivity-slider"
             aria-label="跟踪灵敏度调节滑块"
+            @input="updateSensitivity"
           />
           <div class="sensitivity-labels">
             <span>低</span>
@@ -64,22 +64,22 @@
           <div class="boundary-item">
             <label class="boundary-label">
               <input
-                type="checkbox"
                 v-model="boundaryProtection.enabled"
-                @change="updateBoundaryProtection"
+                type="checkbox"
                 aria-label="启用边界保护"
+                @change="updateBoundaryProtection"
               />
               <span class="boundary-text">启用边界保护</span>
             </label>
           </div>
 
-          <div class="boundary-item" v-if="boundaryProtection.enabled">
+          <div v-if="boundaryProtection.enabled" class="boundary-item">
             <label class="boundary-label">
               保护区域:
               <select
                 v-model="boundaryProtection.margin"
-                @change="updateBoundaryProtection"
                 aria-label="边界保护区域设置"
+                @change="updateBoundaryProtection"
               >
                 <option value="10">10%</option>
                 <option value="20">20%</option>
@@ -89,13 +89,13 @@
             </label>
           </div>
 
-          <div class="boundary-item" v-if="boundaryProtection.enabled">
+          <div v-if="boundaryProtection.enabled" class="boundary-item">
             <label class="boundary-label">
               <input
-                type="checkbox"
                 v-model="boundaryProtection.keepInFrame"
-                @change="updateBoundaryProtection"
+                type="checkbox"
                 aria-label="保持人脸在画面内"
+                @change="updateBoundaryProtection"
               />
               <span class="boundary-text">保持人脸在画面内</span>
             </label>
@@ -111,8 +111,8 @@
             <label class="param-label">检测间隔:</label>
             <select
               v-model="performanceParams.detectionInterval"
-              @change="updatePerformanceParams"
               aria-label="人脸检测间隔设置"
+              @change="updatePerformanceParams"
             >
               <option value="100">100ms (高性能)</option>
               <option value="200">200ms (平衡)</option>
@@ -125,8 +125,8 @@
             <label class="param-label">跟踪精度:</label>
             <select
               v-model="performanceParams.trackingAccuracy"
-              @change="updatePerformanceParams"
               aria-label="跟踪精度设置"
+              @change="updatePerformanceParams"
             >
               <option value="low">低精度 (快速)</option>
               <option value="medium">中精度 (平衡)</option>
@@ -139,8 +139,8 @@
             <label class="param-label">最大跟踪目标:</label>
             <select
               v-model="performanceParams.maxTargets"
-              @change="updatePerformanceParams"
               aria-label="最大跟踪目标数量设置"
+              @change="updatePerformanceParams"
             >
               <option value="1">1个</option>
               <option value="3">3个</option>
@@ -158,10 +158,10 @@
           <div class="advanced-item">
             <label class="advanced-label">
               <input
-                type="checkbox"
                 v-model="advancedSettings.smoothTracking"
-                @change="updateAdvancedSettings"
+                type="checkbox"
                 aria-label="启用平滑跟踪"
+                @change="updateAdvancedSettings"
               />
               <span class="advanced-text">平滑跟踪 (减少抖动)</span>
             </label>
@@ -170,10 +170,10 @@
           <div class="advanced-item">
             <label class="advanced-label">
               <input
-                type="checkbox"
                 v-model="advancedSettings.poseEstimation"
-                @change="updateAdvancedSettings"
+                type="checkbox"
                 aria-label="启用姿态估计"
+                @change="updateAdvancedSettings"
               />
               <span class="advanced-text">姿态估计 (检测头部角度)</span>
             </label>
@@ -182,10 +182,10 @@
           <div class="advanced-item">
             <label class="advanced-label">
               <input
-                type="checkbox"
                 v-model="advancedSettings.expressionDetection"
-                @change="updateAdvancedSettings"
+                type="checkbox"
                 aria-label="启用表情检测"
+                @change="updateAdvancedSettings"
               />
               <span class="advanced-text">表情检测 (识别面部表情)</span>
             </label>
@@ -194,10 +194,10 @@
           <div class="advanced-item">
             <label class="advanced-label">
               <input
-                type="checkbox"
                 v-model="advancedSettings.ageGenderDetection"
-                @change="updateAdvancedSettings"
+                type="checkbox"
                 aria-label="启用年龄性别检测"
+                @change="updateAdvancedSettings"
               />
               <span class="advanced-text">年龄性别检测</span>
             </label>
@@ -210,13 +210,8 @@
         <label class="group-label">实时预览</label>
         <div class="preview-section">
           <div class="preview-canvas-container">
-            <canvas
-              ref="previewCanvas"
-              class="preview-canvas"
-              width="320"
-              height="240"
-            ></canvas>
-            <div class="preview-overlay" v-if="isPreviewActive">
+            <canvas ref="previewCanvas" class="preview-canvas" width="320" height="240"></canvas>
+            <div v-if="isPreviewActive" class="preview-overlay">
               <div class="tracking-info">
                 <div class="info-item">
                   <span class="info-label">跟踪目标:</span>
@@ -238,13 +233,13 @@
             <button
               class="preview-btn"
               :class="{ active: isPreviewActive }"
-              @click="togglePreview"
               :disabled="!canPreview"
+              @click="togglePreview"
             >
               {{ isPreviewActive ? '停止预览' : '开始预览' }}
             </button>
 
-            <div class="preview-status" v-if="!canPreview">
+            <div v-if="!canPreview" class="preview-status">
               <span class="status-warning">需要摄像头权限</span>
             </div>
           </div>
@@ -252,7 +247,7 @@
       </div>
 
       <!-- 调试信息 -->
-      <div class="setting-group" v-if="showDebugInfo">
+      <div v-if="showDebugInfo" class="setting-group">
         <label class="group-label">调试信息</label>
         <div class="debug-info">
           <div class="debug-item">
@@ -277,13 +272,9 @@
 
     <!-- 设置操作 -->
     <div class="settings-footer">
-      <button class="reset-btn" @click="resetToDefaults">
-        重置默认
-      </button>
-      <button class="apply-btn" @click="applySettings" :disabled="!hasChanges">
-        应用设置
-      </button>
-      <button class="debug-btn" @click="toggleDebugInfo" v-if="debugMode">
+      <button class="reset-btn" @click="resetToDefaults">重置默认</button>
+      <button class="apply-btn" :disabled="!hasChanges" @click="applySettings">应用设置</button>
+      <button v-if="debugMode" class="debug-btn" @click="toggleDebugInfo">
         {{ showDebugInfo ? '隐藏调试' : '显示调试' }}
       </button>
     </div>
@@ -292,6 +283,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+// 导入统一人脸跟踪服务
+import UnifiedFaceTracker, { TrackerEngine } from '../services/UnifiedFaceTracker.js'
 
 // 组件状态
 const currentMode = ref('single')
@@ -299,7 +292,12 @@ const currentSensitivity = ref(70)
 const hasChanges = ref(false)
 const isPreviewActive = ref(false)
 const showDebugInfo = ref(false)
-const debugMode = ref(false) // 在生产环境中设为false
+const debugMode = ref(true) // 启用调试模式显示引擎信息
+
+// 跟踪服务状态
+const trackerInitialized = ref(false)
+const currentEngine = ref(null)
+const videoStream = ref(null)
 
 // 跟踪模式
 const trackingModes = ref([
@@ -398,7 +396,7 @@ const canPreview = computed(() => {
 })
 
 // 方法
-const setTrackingMode = (mode) => {
+const setTrackingMode = mode => {
   if (currentMode.value !== mode) {
     currentMode.value = mode
     hasChanges.value = true
@@ -436,43 +434,159 @@ const togglePreview = async () => {
 
 const startPreview = async () => {
   try {
+    // 获取摄像头流
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: 320, height: 240, facingMode: 'user' }
     })
+    videoStream.value = stream
 
     const video = document.createElement('video')
     video.srcObject = stream
-    video.play()
+    video.playsInline = true
+    await video.play()
+
+    // 初始化人脸跟踪服务
+    if (!trackerInitialized.value) {
+      const result = await UnifiedFaceTracker.initialize({
+        maxNumFaces: parseInt(performanceParams.value.maxTargets) || 1,
+        smoothFactor: advancedSettings.value.smoothTracking ? 0.8 : 0.5,
+        minDetectionConfidence: currentSensitivity.value / 100
+      })
+
+      trackerInitialized.value = result.success
+      currentEngine.value = result.engine
+
+      // 更新调试信息中的模型版本
+      debugInfo.value.modelVersion = getEngineDisplayName(result.engine)
+
+      if (result.success) {
+        // 设置跟踪事件监听
+        UnifiedFaceTracker.on('trackingUpdate', handleTrackingUpdate)
+        UnifiedFaceTracker.on('faceDetected', handleFaceDetected)
+        UnifiedFaceTracker.on('faceLost', handleFaceLost)
+        console.log(`✅ 人脸跟踪服务初始化成功 (引擎: ${result.engine})`)
+      }
+    }
 
     await nextTick()
 
-    if (previewCanvas.value) {
+    if (previewCanvas.value && trackerInitialized.value) {
       const ctx = previewCanvas.value.getContext('2d')
+
+      // 启动人脸跟踪
+      await UnifiedFaceTracker.startTracking(video)
+
       const drawFrame = () => {
         if (!isPreviewActive.value) return
 
         ctx.drawImage(video, 0, 0, 320, 240)
 
-        // 模拟人脸检测结果
-        const faces = simulateFaceDetection()
-        drawFaceBoxes(ctx, faces)
+        // 使用真实的人脸跟踪数据绘制
+        const trackingState = UnifiedFaceTracker.getTrackingState()
+        if (trackingState.faceDetected && trackingState.faceBounds) {
+          drawRealFaceBox(ctx, trackingState)
+        }
 
         // 更新预览数据
+        const perfStats = UnifiedFaceTracker.getPerformanceStats()
         previewData.value = {
-          targetCount: faces.length,
-          confidence: faces.length > 0 ? Math.floor(Math.random() * 20) + 80 : 0,
-          fps: Math.floor(Math.random() * 10) + 25
+          targetCount: trackingState.faceCount || 0,
+          confidence: Math.round((trackingState.confidence || 0) * 100),
+          fps: perfStats.fps || 0
         }
+
+        // 更新调试信息
+        debugInfo.value.detectionTime = perfStats.averageProcessingTime || 0
+        debugInfo.value.trackingTime = Math.round(perfStats.averageProcessingTime * 0.6) || 0
 
         requestAnimationFrame(drawFrame)
       }
 
       drawFrame()
       isPreviewActive.value = true
+    } else if (!trackerInitialized.value) {
+      // 降级到模拟模式
+      console.warn('⚠️ 人脸跟踪服务不可用，使用模拟模式')
+      startSimulatedPreview(video)
     }
   } catch (error) {
     console.error('无法启动摄像头预览:', error)
   }
+}
+
+// 模拟预览模式（降级方案）
+const startSimulatedPreview = video => {
+  if (previewCanvas.value) {
+    const ctx = previewCanvas.value.getContext('2d')
+    const drawFrame = () => {
+      if (!isPreviewActive.value) return
+
+      ctx.drawImage(video, 0, 0, 320, 240)
+      const faces = simulateFaceDetection()
+      drawFaceBoxes(ctx, faces)
+
+      previewData.value = {
+        targetCount: faces.length,
+        confidence: faces.length > 0 ? Math.floor(Math.random() * 20) + 80 : 0,
+        fps: Math.floor(Math.random() * 10) + 25
+      }
+
+      requestAnimationFrame(drawFrame)
+    }
+
+    drawFrame()
+    isPreviewActive.value = true
+  }
+}
+
+// 绘制真实人脸检测框
+const drawRealFaceBox = (ctx, trackingState) => {
+  const bounds = trackingState.faceBounds
+  if (!bounds) return
+
+  // 转换归一化坐标到画布坐标
+  const x = bounds.minX * 320
+  const y = bounds.minY * 240
+  const width = (bounds.maxX - bounds.minX) * 320
+  const height = (bounds.maxY - bounds.minY) * 240
+
+  // 绘制人脸框
+  ctx.strokeStyle = '#34c759' // 绿色表示真实检测
+  ctx.lineWidth = 2
+  ctx.strokeRect(x, y, width, height)
+
+  // 绘制置信度
+  ctx.fillStyle = '#34c759'
+  ctx.font = '12px Arial'
+  ctx.fillText(`${Math.round(trackingState.confidence * 100)}%`, x, y - 5)
+
+  // 绘制引擎标识
+  ctx.fillStyle = '#007aff'
+  ctx.font = '10px Arial'
+  ctx.fillText(currentEngine.value || 'unknown', x, y + height + 12)
+}
+
+// 获取引擎显示名称
+const getEngineDisplayName = engine => {
+  const names = {
+    [TrackerEngine.MEDIAPIPE]: 'MediaPipe',
+    [TrackerEngine.FACEAPI]: 'Face-api.js',
+    [TrackerEngine.BASIC]: 'Basic'
+  }
+  return names[engine] || engine
+}
+
+// 人脸跟踪事件处理
+const handleTrackingUpdate = data => {
+  // 跟踪更新时的处理逻辑
+}
+
+const handleFaceDetected = data => {
+  console.log('🎯 检测到人脸:', data.faceCount)
+}
+
+const handleFaceLost = () => {
+  console.log('👤 人脸丢失')
 }
 
 const stopPreview = () => {
@@ -483,13 +597,15 @@ const stopPreview = () => {
     fps: 0
   }
 
-  // 停止所有媒体流
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        stream.getTracks().forEach(track => track.stop())
-      })
-      .catch(() => {})
+  // 停止人脸跟踪
+  if (trackerInitialized.value) {
+    UnifiedFaceTracker.stopTracking()
+  }
+
+  // 停止媒体流
+  if (videoStream.value) {
+    videoStream.value.getTracks().forEach(track => track.stop())
+    videoStream.value = null
   }
 }
 
@@ -567,34 +683,32 @@ const toggleDebugInfo = () => {
 }
 
 // 监听变化
-watch([currentMode, currentSensitivity, boundaryProtection, performanceParams, advancedSettings], () => {
-  hasChanges.value = true
-}, { deep: true })
+watch(
+  [currentMode, currentSensitivity, boundaryProtection, performanceParams, advancedSettings],
+  () => {
+    hasChanges.value = true
+  },
+  { deep: true }
+)
 
 // 生命周期
 onMounted(() => {
-  // 初始化调试信息更新
+  // 初始化调试信息
   if (debugMode.value) {
-    const updateDebugInfo = () => {
-      debugInfo.value = {
-        detectionTime: Math.floor(Math.random() * 50) + 10,
-        trackingTime: Math.floor(Math.random() * 30) + 5,
-        memoryUsage: Math.floor(Math.random() * 50) + 100,
-        modelVersion: '1.2.0'
-      }
-    }
-
-    updateDebugInfo()
-    const debugInterval = setInterval(updateDebugInfo, 2000)
-
-    onUnmounted(() => {
-      clearInterval(debugInterval)
-    })
+    // 初始显示引擎信息
+    debugInfo.value.modelVersion = '等待初始化...'
   }
 })
 
 onUnmounted(() => {
   stopPreview()
+
+  // 清理人脸跟踪事件监听
+  if (trackerInitialized.value) {
+    UnifiedFaceTracker.off('trackingUpdate', handleTrackingUpdate)
+    UnifiedFaceTracker.off('faceDetected', handleFaceDetected)
+    UnifiedFaceTracker.off('faceLost', handleFaceLost)
+  }
 })
 
 // 事件定义
@@ -663,8 +777,13 @@ const emit = defineEmits([
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .status-text {
@@ -832,8 +951,8 @@ const emit = defineEmits([
   flex: 1;
 }
 
-.boundary-settings input[type="checkbox"],
-.advanced-settings input[type="checkbox"] {
+.boundary-settings input[type='checkbox'],
+.advanced-settings input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: #007aff;

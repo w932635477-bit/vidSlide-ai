@@ -4,6 +4,15 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  // 优化依赖扫描
+  optimizeDeps: {
+    include: [
+      'vue',
+      'vue-router',
+      'element-plus',
+      'vue-i18n'
+    ]
+  },
   server: {
     port: 5173, // 使用Vite默认端口
     host: 'localhost', // 使用localhost避免权限问题
@@ -12,6 +21,7 @@ export default defineConfig({
     cors: true,
     // 代理百度API请求
     proxy: {
+      // 百度AI开放平台 - 获取Token
       '/api/baidu': {
         target: 'https://aip.baidubce.com',
         changeOrigin: true,
@@ -25,6 +35,23 @@ export default defineConfig({
           })
           proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('Received Response from Baidu API:', proxyRes.statusCode, req.url)
+          })
+        }
+      },
+      // 百度语音识别API
+      '/api/speech': {
+        target: 'https://vop.baidu.com',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/api\/speech/, ''),
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('speech proxy error', err)
+          })
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Sending Request to Baidu Speech:', req.method, req.url)
+          })
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received Response from Baidu Speech:', proxyRes.statusCode, req.url)
           })
         }
       },
@@ -61,13 +88,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           // Vue生态
-          'vue-vendor': ['vue', '@vue/runtime-core', '@vue/runtime-dom'],
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
           // UI库
           'ui-vendor': ['element-plus'],
-          // AI和多媒体处理
-          'ai-vendor': ['face-api.js', '@ffmpeg/ffmpeg'],
-          // 导出功能
-          'export-vendor': ['pptxgenjs'],
           // 工具库
           'utils-vendor': ['@vueuse/core']
         }

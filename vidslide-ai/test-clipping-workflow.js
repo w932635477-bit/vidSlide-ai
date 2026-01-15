@@ -59,7 +59,6 @@ async function testBackgroundRemoval() {
 
     console.log('  ✅ 背景移除服务测试完成')
     return true
-
   } catch (error) {
     console.error('  ❌ 背景移除服务测试失败:', error.message)
     return false
@@ -97,7 +96,9 @@ async function testSmartCropping() {
     console.log('  📐 测试裁剪矩形计算...')
     const subjectRect = { x: 20, y: 15, width: 60, height: 45 }
     const cropRect = service.calculateCropRect(subjectRect, 200, 150, 10)
-    console.log(`    ✅ 裁剪区域: ${cropRect.width}x${cropRect.height} at (${cropRect.x}, ${cropRect.y})`)
+    console.log(
+      `    ✅ 裁剪区域: ${cropRect.width}x${cropRect.height} at (${cropRect.x}, ${cropRect.y})`
+    )
 
     // 测试置信度计算
     console.log('  🎯 测试置信度计算...')
@@ -106,7 +107,6 @@ async function testSmartCropping() {
 
     console.log('  ✅ 智能裁剪服务测试完成')
     return true
-
   } catch (error) {
     console.error('  ❌ 智能裁剪服务测试失败:', error.message)
     return false
@@ -148,11 +148,12 @@ async function testImageOptimization() {
 
     console.log('  📊 测试质量评估...')
     const quality = optimizer.assessQuality(testImageData)
-    console.log(`    ✅ 图像质量: 亮度${quality.brightness}, 对比度${quality.contrast}, 锐度${quality.sharpness}, 总体${quality.overall}`)
+    console.log(
+      `    ✅ 图像质量: 亮度${quality.brightness}, 对比度${quality.contrast}, 锐度${quality.sharpness}, 总体${quality.overall}`
+    )
 
     console.log('  ✅ 图像质量优化服务测试完成')
     return true
-
   } catch (error) {
     console.error('  ❌ 图像质量优化服务测试失败:', error.message)
     return false
@@ -168,9 +169,15 @@ async function testServiceIntegration() {
 
     // 验证服务是否能正确导入
     console.log('  📦 验证服务导入...')
-    console.log(`    ✅ BackgroundRemovalService: ${typeof BackgroundRemovalService === 'function' ? '可用' : '不可用'}`)
-    console.log(`    ✅ SmartCropService: ${typeof SmartCropService === 'function' ? '可用' : '不可用'}`)
-    console.log(`    ✅ ImageQualityOptimizer: ${typeof ImageQualityOptimizer === 'function' ? '可用' : '不可用'}`)
+    console.log(
+      `    ✅ BackgroundRemovalService: ${typeof BackgroundRemovalService === 'function' ? '可用' : '不可用'}`
+    )
+    console.log(
+      `    ✅ SmartCropService: ${typeof SmartCropService === 'function' ? '可用' : '不可用'}`
+    )
+    console.log(
+      `    ✅ ImageQualityOptimizer: ${typeof ImageQualityOptimizer === 'function' ? '可用' : '不可用'}`
+    )
 
     // 测试服务实例化
     console.log('  🏗️ 测试服务实例化...')
@@ -184,7 +191,6 @@ async function testServiceIntegration() {
 
     console.log('  ✅ 服务集成测试完成')
     return true
-
   } catch (error) {
     console.error('  ❌ 服务集成测试失败:', error.message)
     return false
@@ -236,7 +242,6 @@ async function testCompleteWorkflow() {
 
     console.log('  🎉 完整工作流测试成功！')
     return true
-
   } catch (error) {
     console.error('  ❌ 完整工作流测试失败:', error.message)
     return false

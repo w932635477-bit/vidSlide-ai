@@ -13,9 +13,9 @@ class BackgroundRemovalService {
 
     // 服务优先级：WebAssembly本地处理 > API服务
     this.services = {
-      wasm: this.wasmBackgroundRemoval.bind(this),  // WebAssembly加速本地处理
-      removebg: this.removeBgService.bind(this),    // API备选1
-      claidai: this.claidAIService.bind(this)       // API备选2
+      wasm: this.wasmBackgroundRemoval.bind(this), // WebAssembly加速本地处理
+      removebg: this.removeBgService.bind(this), // API备选1
+      claidai: this.claidAIService.bind(this) // API备选2
     }
     this.currentService = null
   }
@@ -42,21 +42,23 @@ class BackgroundRemovalService {
           // const result = await this.wasmModule._removeBackground(imageData, options)
 
           // 临时返回模拟结果
-          return new Promise((resolve) => {
+          return new Promise(resolve => {
             setTimeout(() => {
               resolve({
-                imageBlob: imageData,  // 处理后的图片数据
-                maskBlob: null,        // 遮罩数据（可选）
-                processingTime: 150,   // 处理时间(ms)
-                method: 'wasm-local'   // 处理方法标识
+                imageBlob: imageData, // 处理后的图片数据
+                maskBlob: null, // 遮罩数据（可选）
+                processingTime: 150, // 处理时间(ms)
+                method: 'wasm-local' // 处理方法标识
               })
             }, 150)
           })
         },
 
         // 内存管理
-        malloc: (size) => new ArrayBuffer(size),
-        free: (ptr) => { /* 释放内存 */ }
+        malloc: size => new ArrayBuffer(size),
+        free: ptr => {
+          /* 释放内存 */
+        }
       }
 
       this.isInitialized = true
@@ -207,7 +209,6 @@ class BackgroundRemovalService {
         method: 'wasm-local',
         service: 'WebAssembly Local'
       }
-
     } catch (error) {
       console.error('WebAssembly背景移除失败:', error)
       throw new Error(`WebAssembly背景移除处理失败: ${error.message}`)
@@ -247,7 +248,7 @@ class BackgroundRemovalService {
    * @returns {Promise<Blob>} 图片Blob
    */
   async imageDataToBlob(imageData) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       canvas.width = imageData.width
@@ -296,7 +297,9 @@ class BackgroundRemovalService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(`Remove.bg API错误: ${response.status} - ${errorData.errors?.[0]?.title || '未知错误'}`)
+      throw new Error(
+        `Remove.bg API错误: ${response.status} - ${errorData.errors?.[0]?.title || '未知错误'}`
+      )
     }
 
     // 获取处理后的图片
@@ -335,7 +338,7 @@ class BackgroundRemovalService {
     const response = await fetch(`${config.baseUrl}/background-removal`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${config.apiKey}`
+        Authorization: `Bearer ${config.apiKey}`
       },
       body: formData
     })
@@ -395,7 +398,7 @@ class BackgroundRemovalService {
       ctx.fillStyle = '#ff0000'
       ctx.fillRect(0, 0, 100, 100)
 
-      testCanvas.toBlob(async (blob) => {
+      testCanvas.toBlob(async blob => {
         try {
           await this.services[serviceName](blob, { test: true })
           return true

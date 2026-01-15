@@ -30,6 +30,10 @@
     "ui-lock": "node scripts/ui-file-locker.js lock",
     "ui-unlock": "node scripts/ui-file-locker.js unlock",
     "ui-lock-status": "node scripts/ui-file-locker.js status",
+    "ui-check": "../scripts/check-ui-components.js",
+    "ui-monitor": "../scripts/monitor-ui-integration.js",
+    "ui-issues": "../scripts/identify-integration-issues.js",
+    "ui-report": "npm run ui-check && npm run ui-monitor && npm run ui-issues",
     "pre-commit": "npm run check-constraints && npm run ui-integrity-check"
   },
   "dependencies": {
@@ -44,6 +48,7 @@
     "pinia": "^2.1.7",
     "pptxgenjs": "^3.12.0",
     "vue": "^3.4.0",
+    "vue-i18n": "^9.14.5",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {

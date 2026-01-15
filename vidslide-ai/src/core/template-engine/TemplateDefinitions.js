@@ -89,7 +89,7 @@ export const TEMPLATE_CONFIGS = {
     description: '左右分屏展示对比内容',
     category: 'comparison',
     trigger: 'contrast-detection',
-    keywords: ['对比', '比较', '差异', '不同', '变化', '前后'],
+    keywords: ['对比', '比较', '差异', '不同', '变化', '前后', 'vs', 'VS'],
 
     visual: {
       position: 'center',
@@ -147,7 +147,7 @@ export const TEMPLATE_CONFIGS = {
     description: '全屏文字强调核心观点',
     category: 'attention-focus',
     trigger: 'importance-detection',
-    keywords: ['重要', '核心', '关键', '重点', '总结', '结论'],
+    keywords: ['理念', '核心', '关键', '重点', '总结', '结论'],
 
     visual: {
       position: 'center',

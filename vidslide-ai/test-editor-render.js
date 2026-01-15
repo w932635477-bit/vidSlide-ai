@@ -46,7 +46,6 @@ setTimeout(async () => {
       const element = editorView.querySelector(selector)
       console.log(`${element ? '✅' : '❌'} ${name}: ${element ? '存在' : '不存在'}`)
     })
-
   } else {
     console.log('❌ VideoEditorView组件未渲染')
 
@@ -54,7 +53,7 @@ setTimeout(async () => {
     const allDivs = app.querySelectorAll('div[class*="view"]')
     console.log('🔍 找到的view类元素:', allDivs.length)
     allDivs.forEach((div, i) => {
-      console.log(`  ${i+1}. ${div.className}`)
+      console.log(`  ${i + 1}. ${div.className}`)
     })
   }
 
@@ -63,5 +62,4 @@ setTimeout(async () => {
   // 这里无法直接检查控制台，但可以检查页面上的错误指示器
 
   console.log('\n🎯 测试完成！请查看上述结果。')
-
 }, 3000) // 等待3秒让组件完全加载

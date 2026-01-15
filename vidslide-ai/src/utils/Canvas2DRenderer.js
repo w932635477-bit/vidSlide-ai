@@ -70,7 +70,6 @@ class Canvas2DRenderer {
         fps: () => this.fps,
         stop: () => this.stopRenderLoop()
       }
-
     } catch (error) {
       console.error('Canvas 2D模板渲染失败:', error)
       throw new Error(`Canvas 2D渲染失败: ${error.message}`)
@@ -131,7 +130,6 @@ class Canvas2DRenderer {
       if (props.animation) {
         this.applyAnimation(layer, props.animation)
       }
-
     } finally {
       // 恢复上下文状态
       this.ctx.restore()
@@ -159,7 +157,13 @@ class Canvas2DRenderer {
     if (props.border) {
       this.ctx.strokeStyle = props.border.color || '#000000'
       this.ctx.lineWidth = props.border.width || 1
-      this.strokeRoundedRect(bounds.x, bounds.y, bounds.width, bounds.height, props.borderRadius || 0)
+      this.strokeRoundedRect(
+        bounds.x,
+        bounds.y,
+        bounds.width,
+        bounds.height,
+        props.borderRadius || 0
+      )
     }
 
     // 渲染背景图片
@@ -266,7 +270,10 @@ class Canvas2DRenderer {
    * @returns {Object} 边界对象
    */
   calculateBounds(props) {
-    let x = 0, y = 0, width = 100, height = 100
+    let x = 0,
+      y = 0,
+      width = 100,
+      height = 100
 
     // 根据位置计算坐标
     if (props.position) {
@@ -521,11 +528,15 @@ class Canvas2DRenderer {
     const { format = 'png', quality = 0.9 } = options
 
     return new Promise(resolve => {
-      this.canvas.toBlob(blob => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result)
-        reader.readAsDataURL(blob)
-      }, `image/${format}`, quality)
+      this.canvas.toBlob(
+        blob => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result)
+          reader.readAsDataURL(blob)
+        },
+        `image/${format}`,
+        quality
+      )
     })
   }
 
@@ -539,8 +550,434 @@ class Canvas2DRenderer {
       isWebGL: false,
       renderer: 'Canvas 2D',
       maxTextureSize: null,
-      supportedFeatures: ['images', 'text', 'animations', 'transforms']
+      supportedFeatures: ['images', 'text', 'animations', 'transforms', 'compositions']
     }
+  }
+
+  // ========== 组合渲染支持 ==========
+
+  /**
+   * 渲染模板组合序列
+   * @param {Object} composition - 组合配置
+   * @param {Object} options - 渲染选项
+   * @returns {Object} 渲染控制器
+   */
+  async renderComposition(composition, options = {}) {
+    this.initialize()
+
+    const { width = 1080, height = 1920, onSceneChange = null } = options
+
+    this.canvas.width = width
+    this.canvas.height = height
+
+    // 组合状态
+    this.compositionState = {
+      composition,
+      currentSceneIndex: 0,
+      startTime: performance.now(),
+      isPlaying: true,
+      onSceneChange
+    }
+
+    // 开始组合渲染循环
+    this.startCompositionLoop()
+
+    return {
+      success: true,
+      renderer: 'canvas2d-composition',
+      play: () => this.playComposition(),
+      pause: () => this.pauseComposition(),
+      seekToScene: (index) => this.seekToScene(index),
+      getCurrentScene: () => this.getCurrentScene(),
+      stop: () => this.stopComposition()
+    }
+  }
+
+  /**
+   * 开始组合渲染循环
+   */
+  startCompositionLoop() {
+    if (this.compositionLoopId) {
+      cancelAnimationFrame(this.compositionLoopId)
+    }
+
+    const loop = async () => {
+      if (!this.compositionState?.isPlaying) {
+        this.compositionLoopId = requestAnimationFrame(loop)
+        return
+      }
+
+      const elapsed = performance.now() - this.compositionState.startTime
+      const { composition, currentSceneIndex, onSceneChange } = this.compositionState
+
+      // 计算当前应该显示的场景
+      let accumulatedTime = 0
+      let targetSceneIndex = 0
+
+      for (let i = 0; i < composition.scenes.length; i++) {
+        const sceneDuration = composition.scenes[i].duration
+        if (elapsed < accumulatedTime + sceneDuration) {
+          targetSceneIndex = i
+          break
+        }
+        accumulatedTime += sceneDuration
+        targetSceneIndex = i
+      }
+
+      // 检查是否需要切换场景
+      if (targetSceneIndex !== currentSceneIndex) {
+        this.compositionState.currentSceneIndex = targetSceneIndex
+
+        // 触发场景切换回调
+        if (onSceneChange) {
+          onSceneChange(targetSceneIndex, composition.scenes[targetSceneIndex])
+        }
+      }
+
+      // 渲染当前场景
+      const currentScene = composition.scenes[targetSceneIndex]
+      if (currentScene) {
+        const sceneElapsed = elapsed - accumulatedTime
+        await this.renderScene(currentScene, sceneElapsed)
+      }
+
+      // 检查是否播放完成
+      if (elapsed >= composition.totalDuration) {
+        // 循环播放或停止
+        this.compositionState.startTime = performance.now()
+        this.compositionState.currentSceneIndex = 0
+      }
+
+      this.compositionLoopId = requestAnimationFrame(loop)
+    }
+
+    this.compositionLoopId = requestAnimationFrame(loop)
+  }
+
+  /**
+   * 渲染单个场景
+   * @param {Object} scene - 场景配置
+   * @param {number} elapsed - 场景内经过时间
+   */
+  async renderScene(scene, elapsed) {
+    this.clear()
+
+    const { template, content, duration } = scene
+    const progress = Math.min(elapsed / duration, 1)
+
+    // 应用场景转场效果
+    this.applySceneTransition(scene, progress)
+
+    // 渲染模板
+    if (template) {
+      await this.renderTemplateWithContent(template, content, elapsed)
+    }
+  }
+
+  /**
+   * 使用内容渲染模板
+   * @param {Object} template - 模板定义
+   * @param {Object} content - 内容数据
+   * @param {number} elapsed - 经过时间
+   */
+  async renderTemplateWithContent(template, content, elapsed) {
+    // 按z-index排序所有层级
+    const allLayers = []
+    for (const layerType of Object.keys(template.layers)) {
+      for (const layer of template.layers[layerType]) {
+        allLayers.push({ ...layer, content })
+      }
+    }
+
+    allLayers.sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))
+
+    // 逐层渲染
+    for (const layer of allLayers) {
+      await this.renderLayerWithContent(layer, content, elapsed)
+    }
+  }
+
+  /**
+   * 渲染带内容的层
+   * @param {Object} layer - 层定义
+   * @param {Object} content - 内容数据
+   * @param {number} elapsed - 经过时间
+   */
+  async renderLayerWithContent(layer, content, elapsed) {
+    const props = layer.properties
+
+    this.ctx.save()
+
+    try {
+      // 应用动画
+      if (props.animation) {
+        const animProgress = Math.min(elapsed / (props.animation.duration || 500), 1)
+        this.applyAnimationWithProgress(props.animation, animProgress)
+      }
+
+      // 计算边界
+      const bounds = this.calculateBounds(props)
+
+      // 渲染背景
+      if (props.backgroundColor && props.backgroundColor !== 'transparent') {
+        this.ctx.fillStyle = props.backgroundColor
+        this.ctx.globalAlpha = props.opacity || 1.0
+        this.fillRoundedRect(bounds.x, bounds.y, bounds.width, bounds.height, props.borderRadius || 0)
+        this.ctx.globalAlpha = 1.0
+      }
+
+      // 渲染边框
+      if (props.border) {
+        this.ctx.strokeStyle = props.border.color || '#FFFFFF'
+        this.ctx.lineWidth = props.border.width || 1
+        this.strokeRoundedRect(bounds.x, bounds.y, bounds.width, bounds.height, props.borderRadius || 0)
+      }
+
+      // 渲染文字内容
+      await this.renderLayerText(layer, content, bounds, elapsed)
+
+    } finally {
+      this.ctx.restore()
+    }
+  }
+
+  /**
+   * 渲染层文字内容
+   * @param {Object} layer - 层定义
+   * @param {Object} content - 内容数据
+   * @param {Object} bounds - 边界
+   * @param {number} elapsed - 经过时间
+   */
+  async renderLayerText(layer, content, bounds, elapsed) {
+    const props = layer.properties
+    let text = props.text || ''
+
+    // 根据层ID映射内容
+    switch (layer.id) {
+      case 'main-title':
+        text = content.title || text
+        break
+      case 'subtitle':
+        text = content.subtitle || text
+        break
+      case 'section-title':
+        text = content.sectionTitle || text
+        break
+      case 'hero-number':
+        text = content.number || text
+        break
+      case 'number-label':
+        text = content.label || text
+        break
+      case 'quote-text':
+        text = content.quote || text
+        break
+      case 'quote-author':
+        text = content.author ? `— ${content.author}` : ''
+        break
+      case 'comparison-title':
+        text = content.title || '对比分析'
+        break
+      case 'left-title':
+        text = content.leftTitle || '优势'
+        break
+      case 'right-title':
+        text = content.rightTitle || '劣势'
+        break
+    }
+
+    // 渲染要点列表
+    if (layer.id === 'bullet-list' && content.bullets) {
+      await this.renderBulletList(content.bullets, bounds, props, elapsed)
+      return
+    }
+
+    // 渲染左侧要点
+    if (layer.id === 'left-points' && content.leftPoints) {
+      await this.renderBulletList(content.leftPoints, bounds, props, elapsed)
+      return
+    }
+
+    // 渲染右侧要点
+    if (layer.id === 'right-points' && content.rightPoints) {
+      await this.renderBulletList(content.rightPoints, bounds, props, elapsed)
+      return
+    }
+
+    // 渲染普通文字
+    if (text) {
+      this.renderText(text, bounds, props)
+    }
+  }
+
+  /**
+   * 渲染要点列表
+   * @param {Array} bullets - 要点数组
+   * @param {Object} bounds - 边界
+   * @param {Object} props - 属性
+   * @param {number} elapsed - 经过时间
+   */
+  async renderBulletList(bullets, bounds, props, elapsed) {
+    const itemSpacing = props.itemSpacing || 50
+    const bulletColor = props.bulletColor || '#4ECDC4'
+    const fontSize = props.fontSize || 24
+    const textColor = props.color || '#E0E0E0'
+
+    bullets.forEach((bullet, index) => {
+      // 计算动画延迟
+      const stagger = props.animation?.stagger || 200
+      const itemDelay = index * stagger
+      const itemProgress = Math.max(0, Math.min((elapsed - itemDelay) / 300, 1))
+
+      if (itemProgress <= 0) return
+
+      this.ctx.save()
+      this.ctx.globalAlpha = itemProgress
+
+      const y = bounds.y + index * itemSpacing
+
+      // 绘制圆点
+      this.ctx.fillStyle = bulletColor
+      this.ctx.beginPath()
+      this.ctx.arc(bounds.x, y + fontSize / 2, 4, 0, Math.PI * 2)
+      this.ctx.fill()
+
+      // 绘制文字
+      this.ctx.fillStyle = textColor
+      this.ctx.font = `${fontSize}px ${props.fontFamily || 'PingFang SC, sans-serif'}`
+      this.ctx.textBaseline = 'middle'
+      this.ctx.fillText(bullet, bounds.x + 20, y + fontSize / 2)
+
+      this.ctx.restore()
+    })
+  }
+
+  /**
+   * 应用带进度的动画
+   * @param {Object} animation - 动画配置
+   * @param {number} progress - 进度 0-1
+   */
+  applyAnimationWithProgress(animation, progress) {
+    const easeOut = t => 1 - Math.pow(1 - t, 3)
+    const easedProgress = easeOut(progress)
+
+    switch (animation.type) {
+      case 'fade-in':
+        this.ctx.globalAlpha = easedProgress
+        break
+
+      case 'slide-up':
+        const offset = animation.offset || 30
+        this.ctx.translate(0, offset * (1 - easedProgress))
+        break
+
+      case 'slide-left':
+        const slideOffset = animation.offset || 50
+        this.ctx.translate(slideOffset * (1 - easedProgress), 0)
+        break
+
+      case 'scale-in':
+        const fromScale = animation.from?.scale || 0.8
+        const toScale = animation.to?.scale || 1.0
+        const currentScale = fromScale + (toScale - fromScale) * easedProgress
+        // 从中心缩放
+        this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2)
+        this.ctx.scale(currentScale, currentScale)
+        this.ctx.translate(-this.canvas.width / 2, -this.canvas.height / 2)
+        break
+
+      case 'bounce-in':
+        const bounceScale = 1 + Math.sin(easedProgress * Math.PI) * 0.1
+        this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2)
+        this.ctx.scale(bounceScale, bounceScale)
+        this.ctx.translate(-this.canvas.width / 2, -this.canvas.height / 2)
+        this.ctx.globalAlpha = easedProgress
+        break
+    }
+  }
+
+  /**
+   * 应用场景转场效果
+   * @param {Object} scene - 场景
+   * @param {number} progress - 场景进度
+   */
+  applySceneTransition(scene, progress) {
+    // 入场动画（前10%时间）
+    if (progress < 0.1) {
+      const enterProgress = progress / 0.1
+      this.ctx.globalAlpha = enterProgress
+    }
+    // 出场动画（后10%时间）
+    else if (progress > 0.9) {
+      const exitProgress = (progress - 0.9) / 0.1
+      this.ctx.globalAlpha = 1 - exitProgress
+    }
+  }
+
+  /**
+   * 播放组合
+   */
+  playComposition() {
+    if (this.compositionState) {
+      this.compositionState.isPlaying = true
+    }
+  }
+
+  /**
+   * 暂停组合
+   */
+  pauseComposition() {
+    if (this.compositionState) {
+      this.compositionState.isPlaying = false
+    }
+  }
+
+  /**
+   * 跳转到指定场景
+   * @param {number} index - 场景索引
+   */
+  seekToScene(index) {
+    if (!this.compositionState) return
+
+    const { composition } = this.compositionState
+
+    if (index < 0 || index >= composition.scenes.length) return
+
+    // 计算目标时间
+    let targetTime = 0
+    for (let i = 0; i < index; i++) {
+      targetTime += composition.scenes[i].duration
+    }
+
+    this.compositionState.startTime = performance.now() - targetTime
+    this.compositionState.currentSceneIndex = index
+  }
+
+  /**
+   * 获取当前场景
+   * @returns {Object} 当前场景信息
+   */
+  getCurrentScene() {
+    if (!this.compositionState) return null
+
+    const { composition, currentSceneIndex } = this.compositionState
+    return {
+      index: currentSceneIndex,
+      scene: composition.scenes[currentSceneIndex],
+      total: composition.scenes.length
+    }
+  }
+
+  /**
+   * 停止组合渲染
+   */
+  stopComposition() {
+    if (this.compositionLoopId) {
+      cancelAnimationFrame(this.compositionLoopId)
+      this.compositionLoopId = null
+    }
+    this.compositionState = null
+    this.clear()
   }
 
   /**
@@ -548,6 +985,7 @@ class Canvas2DRenderer {
    */
   cleanup() {
     this.stopRenderLoop()
+    this.stopComposition()
     this.templates.clear()
     this.animations.clear()
     this.isInitialized = false

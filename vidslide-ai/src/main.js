@@ -23,6 +23,9 @@ console.log('✅ App.vue 导入成功')
 import router from './router'
 console.log('✅ Router 导入成功')
 
+import i18n from './i18n'
+console.log('✅ i18n 导入成功')
+
 /**
  * app 函数
  * 紧急补齐阶段功能实现
@@ -39,6 +42,10 @@ console.log('✅ 路由器安装成功')
 console.log('🚀 安装ElementPlus')
 app.use(ElementPlus)
 console.log('✅ ElementPlus安装成功')
+
+console.log('🚀 安装i18n')
+app.use(i18n)
+console.log('✅ i18n安装成功')
 
 console.log('🚀 挂载应用到#app')
 app.mount('#app')

@@ -331,16 +331,18 @@ describe('TemplateCustomEditor.vue', () => {
     })
 
     it('应该能够加载已保存的模板', async () => {
-      const mockTemplates = [{
-        name: '测试模板',
-        slides: [
-          {
-            background: '#ffffff',
-            elements: [{ type: 'text', content: '测试内容' }]
-          }
-        ],
-        updatedAt: new Date().toISOString()
-      }]
+      const mockTemplates = [
+        {
+          name: '测试模板',
+          slides: [
+            {
+              background: '#ffffff',
+              elements: [{ type: 'text', content: '测试内容' }]
+            }
+          ],
+          updatedAt: new Date().toISOString()
+        }
+      ]
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockTemplates))
 
@@ -500,7 +502,10 @@ describe('TemplateCustomEditor.vue', () => {
 
       wrapper.vm.onDragStart(mockEvent, element)
 
-      expect(mockEvent.dataTransfer.setData).toHaveBeenCalledWith('application/json', expect.any(String))
+      expect(mockEvent.dataTransfer.setData).toHaveBeenCalledWith(
+        'application/json',
+        expect.any(String)
+      )
     })
 
     it('应该处理拖拽放下事件', async () => {

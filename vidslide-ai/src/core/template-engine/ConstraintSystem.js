@@ -605,7 +605,7 @@ export class ConstraintSystem {
 
    */
 
-  validateColors(adjustments, templateType, violations, warnings, _suggestions) {
+  validateColors(adjustments, templateType, violations, warnings, suggestions) {
     /**
      * colorConstraints 函数
      * VidSlide AI 紧急补齐阶段功能实现
@@ -699,7 +699,8 @@ export class ConstraintSystem {
          * @description isAvoided 功能的具体实现
          */
         // isAvoided - 变量声明
-        const isAvoided = colorConstraints.professionalism.avoidCombinations.some(combo =>
+        const avoidCombinations = this.constraints.professionalism?.avoidCombinations || []
+        const isAvoided = avoidCombinations.some(combo =>
           this.colorsMatch(combo, colorCombination)
         )
 

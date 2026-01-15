@@ -42,7 +42,13 @@ export class TemplateParser {
      */
 
     if (!content || typeof content !== 'string') {
-      return this.getDefaultTemplate()
+      const defaultTemplate = this.getDefaultTemplate()
+      return {
+        template: defaultTemplate,
+        data: { originalContent: '', processedContent: '', metadata: {}, content: { title: '', text: '' } },
+        confidence: defaultTemplate.confidence || 0.5,
+        alternatives: []
+      }
     }
 
     // 1. 评估所有模板的匹配度
@@ -171,22 +177,22 @@ export class TemplateParser {
 
       [TEMPLATE_TYPES.SPLIT_SCREEN]: () => {
         // 检测对比模式
-        const contrastWords = ['对比', '比较', '差异', '不同', '变化', '前后']
-        const contrastMatches = contrastWords.filter(word => content.includes(word)).length
+        const contrastWords = ['对比', '比较', '差异', '不同', '变化', '前后', 'vs', 'VS']
+        const contrastMatches = contrastWords.filter(word => content.toLowerCase().includes(word.toLowerCase())).length
         return Math.min(contrastMatches * 0.3, 1.0)
       },
 
       [TEMPLATE_TYPES.CHART_ANALYSIS]: () => {
         // 检测数据模式
         const numberMatches = content.match(/\d+(\.\d+)?%?/g)
-        const dataWords = ['数据', '统计', '增长', '下降', '比例', '百分比']
+        const dataWords = ['数据', '统计', '增长', '下降', '比例', '百分比', '销售额']
         const dataMatches = dataWords.filter(word => content.includes(word)).length
         return Math.min((numberMatches?.length || 0) * 0.2 + dataMatches * 0.3, 1.0)
       },
 
       [TEMPLATE_TYPES.EMPHASIS_FOCUS]: () => {
         // 检测强调模式
-        const emphasisWords = ['重要', '核心', '关键', '重点', '总结', '结论']
+        const emphasisWords = ['重要', '核心', '关键', '重点', '总结', '结论', '理念']
         const emphasisMatches = emphasisWords.filter(word => content.includes(word)).length
         const length = content.length
         // 短而重要的内容适合强调
@@ -195,7 +201,9 @@ export class TemplateParser {
       }
     }
 
-    const evaluator = features[config.name] || (() => 0.5)
+    // 使用模板类型作为key来查找评估函数
+    const templateType = Object.keys(TEMPLATE_CONFIGS).find(key => TEMPLATE_CONFIGS[key] === config)
+    const evaluator = features[templateType] || (() => 0.5)
     return evaluator()
   }
 
@@ -669,7 +677,7 @@ export class TemplateParser {
   parseChartContent(content) {
     // 提取数字数据
     const numbers = content.match(/\d+(\.\d+)?%?/g) || []
-    const labels = content.split(/\d+(\.\d+)?%?/).filter(part => part.trim())
+    const labels = content.split(/\d+(?:\.\d+)?%?/).filter(part => part && part.trim())
 
     return {
       title: labels[0] || '数据分析',

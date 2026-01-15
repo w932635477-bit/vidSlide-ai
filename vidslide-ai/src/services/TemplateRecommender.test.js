@@ -34,7 +34,7 @@ describe('TemplateRecommender', () => {
     beforeEach(async () => {
       // Mock architecture
       vi.spyOn(recommender.architecture, 'initialize').mockResolvedValue()
-      vi.spyOn(recommender.architecture, 'getTemplate').mockImplementation((id) => ({
+      vi.spyOn(recommender.architecture, 'getTemplate').mockImplementation(id => ({
         id,
         name: `${id} template`,
         category: 'test',
@@ -80,7 +80,9 @@ describe('TemplateRecommender', () => {
     it('应该限制推荐数量', async () => {
       const contentAnalysis = { keywords: ['演讲', '演示', '视频'] }
 
-      const recommendations = await recommender.generateRecommendations(contentAnalysis, { maxRecommendations: 2 })
+      const recommendations = await recommender.generateRecommendations(contentAnalysis, {
+        maxRecommendations: 2
+      })
 
       expect(recommendations.length).toBeLessThanOrEqual(2)
     })
@@ -92,7 +94,9 @@ describe('TemplateRecommender', () => {
 
       // 检查是否按分数降序排序
       for (let i = 1; i < recommendations.length; i++) {
-        expect(recommendations[i - 1].finalScore).toBeGreaterThanOrEqual(recommendations[i].finalScore)
+        expect(recommendations[i - 1].finalScore).toBeGreaterThanOrEqual(
+          recommendations[i].finalScore
+        )
       }
     })
   })
@@ -214,9 +218,7 @@ describe('TemplateRecommender', () => {
 
       recommender.learnFromFeedback('template-id', true, {})
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('用户反馈')
-      )
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('用户反馈'))
 
       consoleSpy.mockRestore()
     })

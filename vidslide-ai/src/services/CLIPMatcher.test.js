@@ -147,9 +147,7 @@ describe('CLIPMatcher', () => {
         { id: 'mat2', tags: ['其他'] }
       ]
 
-      vi.spyOn(matcher, 'findBestMatches').mockResolvedValue([
-        { similarity: 0.8, rank: 1 }
-      ])
+      vi.spyOn(matcher, 'findBestMatches').mockResolvedValue([{ similarity: 0.8, rank: 1 }])
 
       const selected = await matcher.selectMaterials(contentAnalysis, materials)
 

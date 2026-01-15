@@ -7,19 +7,19 @@ export class SceneDetection {
   constructor(options = {}) {
     this.options = {
       // 图像差异检测参数
-      diffThreshold: 0.15,        // 差异阈值 (0-1)
-      minSceneDuration: 2.0,      // 最小场景持续时间(秒)
-      maxSceneDuration: 30.0,     // 最大场景持续时间(秒)
+      diffThreshold: 0.15, // 差异阈值 (0-1)
+      minSceneDuration: 2.0, // 最小场景持续时间(秒)
+      maxSceneDuration: 30.0, // 最大场景持续时间(秒)
 
       // 运动检测参数
-      motionThreshold: 0.05,      // 运动阈值
-      opticalFlowThreshold: 0.1,  // 光流阈值
-      blockSize: 16,              // 运动检测块大小
+      motionThreshold: 0.05, // 运动阈值
+      opticalFlowThreshold: 0.1, // 光流阈值
+      blockSize: 16, // 运动检测块大小
 
       // 镜头切换检测参数
-      cutThreshold: 0.3,          // 剪辑点阈值
-      fadeThreshold: 0.1,         // 淡入淡出阈值
-      transitionMinFrames: 3,     // 过渡最小帧数
+      cutThreshold: 0.3, // 剪辑点阈值
+      fadeThreshold: 0.1, // 淡入淡出阈值
+      transitionMinFrames: 3, // 过渡最小帧数
 
       ...options
     }
@@ -108,9 +108,7 @@ export class SceneDetection {
     // 分块检测运动
     for (let y = 0; y < height - blockSize; y += blockSize) {
       for (let x = 0; x < width - blockSize; x += blockSize) {
-        const motion = this.calculateBlockMotion(
-          currentFrame, previousFrame, x, y, blockSize
-        )
+        const motion = this.calculateBlockMotion(currentFrame, previousFrame, x, y, blockSize)
         totalMotion += motion
         blockCount++
       }
@@ -166,9 +164,7 @@ export class SceneDetection {
     // 在图像上采样点计算光流
     for (let y = windowSize; y < height - windowSize; y += 10) {
       for (let x = windowSize; x < width - windowSize; x += 10) {
-        const flow = this.calculateOpticalFlowAtPoint(
-          currentFrame, previousFrame, x, y, windowSize
-        )
+        const flow = this.calculateOpticalFlowAtPoint(currentFrame, previousFrame, x, y, windowSize)
 
         if (flow.magnitude > 0) {
           totalFlow += flow.magnitude
@@ -190,7 +186,9 @@ export class SceneDetection {
     const width = currentFrame.width
     const height = currentFrame.height
 
-    let Ix = 0, Iy = 0, It = 0
+    let Ix = 0,
+      Iy = 0,
+      It = 0
 
     // 计算空间和时间导数
     for (let wy = -halfWindow; wy <= halfWindow; wy++) {
@@ -274,10 +272,10 @@ export class SceneDetection {
     const brightnessDiff2 = Math.abs(nextBrightness - currentBrightness)
 
     // 简化的淡入淡出检测
-    const isFadeIn = brightnessDiff1 > this.options.fadeThreshold &&
-                     currentBrightness > previousBrightness
-    const isFadeOut = brightnessDiff1 > this.options.fadeThreshold &&
-                      currentBrightness < previousBrightness
+    const isFadeIn =
+      brightnessDiff1 > this.options.fadeThreshold && currentBrightness > previousBrightness
+    const isFadeOut =
+      brightnessDiff1 > this.options.fadeThreshold && currentBrightness < previousBrightness
 
     if (isFadeIn) {
       return { isFade: true, type: 'fade-in', confidence: brightnessDiff1 }
@@ -382,20 +380,23 @@ export class SceneDetection {
     this.previousFrame = null
     this.frameBuffer = []
 
-    for (let time = startTime; time < endTime; time += (1 / frameRate)) {
+    for (let time = startTime; time < endTime; time += 1 / frameRate) {
       try {
         // 提取当前帧
         const currentFrame = this.extractFrame(videoElement, time)
         let nextFrame = null
 
         // 如果不是第一帧，尝试获取下一帧用于检测
-        if (time + (1 / frameRate) < endTime) {
-          nextFrame = this.extractFrame(videoElement, time + (1 / frameRate))
+        if (time + 1 / frameRate < endTime) {
+          nextFrame = this.extractFrame(videoElement, time + 1 / frameRate)
         }
 
         // 检测场景切换
         const sceneResult = this.detectSceneChange(
-          currentFrame, this.previousFrame, nextFrame, time
+          currentFrame,
+          this.previousFrame,
+          nextFrame,
+          time
         )
 
         if (sceneResult.isSceneChange) {
@@ -418,7 +419,6 @@ export class SceneDetection {
 
         // 添加小延迟避免阻塞UI
         await new Promise(resolve => setTimeout(resolve, 10))
-
       } catch (error) {
         console.error('场景检测过程中出错:', error)
       }
@@ -463,7 +463,9 @@ export class FaceRecognitionValidator {
     this.capabilities.canvas = !!document.createElement('canvas').getContext
     this.capabilities.webgl = this.checkWebGLSupport()
     this.capabilities.webassembly = typeof WebAssembly === 'object'
-    this.capabilities.getUserMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+    this.capabilities.getUserMedia = !!(
+      navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+    )
 
     console.log('📋 Web API支持情况:', this.capabilities)
 
@@ -476,11 +478,12 @@ export class FaceRecognitionValidator {
     console.log('📋 AdvancedFaceTracker功能验证:', trackerFunctional)
 
     // 综合判断
-    this.isAvailable = this.capabilities.canvas &&
-                      this.capabilities.webgl &&
-                      this.capabilities.webassembly &&
-                      faceMeshAvailable &&
-                      trackerFunctional
+    this.isAvailable =
+      this.capabilities.canvas &&
+      this.capabilities.webgl &&
+      this.capabilities.webassembly &&
+      faceMeshAvailable &&
+      trackerFunctional
 
     console.log('🎯 人脸识别功能总体可用性:', this.isAvailable)
 
@@ -516,7 +519,7 @@ export class FaceRecognitionValidator {
       const script = document.createElement('script')
       script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js'
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         script.onload = () => {
           // 检查FaceMesh是否可用
           setTimeout(() => {
@@ -556,16 +559,15 @@ export class FaceRecognitionValidator {
       ].every(method => typeof tracker[method] === 'function')
 
       // 检查事件系统
-      const hasEventSystem = typeof tracker.emit === 'function' &&
-                            typeof tracker.on === 'function'
+      const hasEventSystem = typeof tracker.emit === 'function' && typeof tracker.on === 'function'
 
       // 检查配置选项
-      const hasValidOptions = tracker.options &&
-                             typeof tracker.options.maxNumFaces === 'number' &&
-                             typeof tracker.options.minDetectionConfidence === 'number'
+      const hasValidOptions =
+        tracker.options &&
+        typeof tracker.options.maxNumFaces === 'number' &&
+        typeof tracker.options.minDetectionConfidence === 'number'
 
       return hasRequiredMethods && hasEventSystem && hasValidOptions
-
     } catch (error) {
       console.error('验证FaceTracker功能时出错:', error)
       return false

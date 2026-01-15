@@ -6,12 +6,23 @@
 class SafeHtmlRenderer {
   constructor() {
     this.allowedTags = [
-      'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'strong', 'em', 'u', 'br', 'img', 'a'
-    ];
-    this.allowedAttributes = [
-      'class', 'id', 'style', 'src', 'alt', 'href', 'target'
-    ];
+      'div',
+      'span',
+      'p',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'strong',
+      'em',
+      'u',
+      'br',
+      'img',
+      'a'
+    ]
+    this.allowedAttributes = ['class', 'id', 'style', 'src', 'alt', 'href', 'target']
   }
 
   /**
@@ -20,16 +31,16 @@ class SafeHtmlRenderer {
    * @returns {string} - 清理后的安全HTML
    */
   sanitize(html) {
-    if (!html) return '';
+    if (!html) return ''
 
     // 创建DOM元素进行清理
-    const div = document.createElement('div');
-    div.innerHTML = html;
+    const div = document.createElement('div')
+    div.innerHTML = html
 
     // 递归清理所有元素
-    this.cleanElement(div);
+    this.cleanElement(div)
 
-    return div.innerHTML;
+    return div.innerHTML
   }
 
   /**
@@ -37,26 +48,26 @@ class SafeHtmlRenderer {
    * @param {Element} element - 要清理的元素
    */
   cleanElement(element) {
-    const children = Array.from(element.children);
+    const children = Array.from(element.children)
 
     for (const child of children) {
       // 检查标签是否允许
       if (!this.allowedTags.includes(child.tagName.toLowerCase())) {
         // 移除不允许的标签
-        element.removeChild(child);
-        continue;
+        element.removeChild(child)
+        continue
       }
 
       // 清理属性
-      const attributes = Array.from(child.attributes);
+      const attributes = Array.from(child.attributes)
       for (const attr of attributes) {
         if (!this.allowedAttributes.includes(attr.name.toLowerCase())) {
-          child.removeAttribute(attr.name);
+          child.removeAttribute(attr.name)
         }
       }
 
       // 递归处理子元素
-      this.cleanElement(child);
+      this.cleanElement(child)
     }
   }
 
@@ -66,23 +77,23 @@ class SafeHtmlRenderer {
    * @returns {string} - 转义后的文本
    */
   escape(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 }
 
 // 导出单例实例
-export const safeHtml = new SafeHtmlRenderer();
+export const safeHtml = new SafeHtmlRenderer()
 
 // Vue指令版本
 export const SafeHtmlDirective = {
   mounted(el, binding) {
-    el.innerHTML = safeHtml.sanitize(binding.value);
+    el.innerHTML = safeHtml.sanitize(binding.value)
   },
   updated(el, binding) {
-    el.innerHTML = safeHtml.sanitize(binding.value);
+    el.innerHTML = safeHtml.sanitize(binding.value)
   }
-};
+}
 
-export default SafeHtmlRenderer;
+export default SafeHtmlRenderer

@@ -281,6 +281,9 @@ export class TemplateRenderer {
     const { visual, content } = config
     const { width, height } = this.calculateElementSize(visual.size)
 
+    // 安全获取数据内容
+    const dataContent = data?.content || { title: '', text: '' }
+
     // 计算位置
     /**
      * position 函数
@@ -327,9 +330,9 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.title) {
+    if (dataContent.title) {
       this.visualEffects.drawText(
-        data.content.title,
+        dataContent.title,
         position.x + 20,
         position.y + 25,
         content.title
@@ -345,9 +348,9 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.text) {
+    if (dataContent.text) {
       this.visualEffects.drawMultilineText(
-        data.content.text,
+        dataContent.text,
         position.x + 20,
         position.y + 50,
         width - 40,
@@ -399,6 +402,9 @@ export class TemplateRenderer {
     const { visual, content } = config
     const { width, height } = this.calculateElementSize(visual.size)
 
+    // 安全获取数据内容
+    const dataContent = data?.content || { years: [], events: [] }
+
     // 计算位置
     /**
      * position 函数
@@ -434,7 +440,7 @@ export class TemplateRenderer {
      * @description timelineData 功能的具体实现
      */
     // timelineData - 变量声明
-    const timelineData = this.prepareTimelineData(data.content)
+    const timelineData = this.prepareTimelineData(dataContent)
 
     // 绘制时间线
     this.visualEffects.drawTimeline(
@@ -494,6 +500,9 @@ export class TemplateRenderer {
   renderSplitScreen(config, data, options) {
     const { visual, content } = config
     const { width, height } = this.calculateElementSize(visual.size)
+
+    // 安全获取数据内容
+    const dataContent = data?.content || { left: { label: '', content: '' }, right: { label: '', content: '' } }
 
     // 计算位置
     /**
@@ -577,9 +586,9 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.left && data.content.left.label) {
+    if (dataContent.left && dataContent.left.label) {
       this.visualEffects.drawText(
-        data.content.left.label,
+        dataContent.left.label,
         leftPanel.x + 20,
         leftPanel.y + 30,
         content.labels
@@ -597,9 +606,9 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.right && data.content.right.label) {
+    if (dataContent.right && dataContent.right.label) {
       this.visualEffects.drawText(
-        data.content.right.label,
+        dataContent.right.label,
         rightPanel.x + 20,
         rightPanel.y + 30,
         content.labels
@@ -615,9 +624,9 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.left && data.content.left.content) {
+    if (dataContent.left && dataContent.left.content) {
       this.visualEffects.drawMultilineText(
-        data.content.left.content,
+        dataContent.left.content,
         leftPanel.x + 20,
         leftPanel.y + 60,
         leftPanel.width - 40,
@@ -637,9 +646,9 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.right && data.content.right.content) {
+    if (dataContent.right && dataContent.right.content) {
       this.visualEffects.drawMultilineText(
-        data.content.right.content,
+        dataContent.right.content,
         rightPanel.x + 20,
         rightPanel.y + 60,
         rightPanel.width - 40,
@@ -696,6 +705,9 @@ export class TemplateRenderer {
     const { visual, content } = config
     const { width, height } = this.calculateElementSize(visual.size)
 
+    // 安全获取数据内容
+    const dataContent = data?.content || { title: '', data: [] }
+
     // 计算位置
     /**
      * position 函数
@@ -742,8 +754,8 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.title) {
-      this.visualEffects.drawText(data.content.title, position.x + width / 2, position.y + 30, {
+    if (dataContent.title) {
+      this.visualEffects.drawText(dataContent.title, position.x + width / 2, position.y + 30, {
         ...content.title,
         textAlign: 'center'
       })
@@ -756,7 +768,7 @@ export class TemplateRenderer {
      * @description chartData 功能的具体实现
      */
     // chartData - 变量声明
-    const chartData = this.prepareChartData(data.content)
+    const chartData = this.prepareChartData(dataContent)
 
     // 绘制图表
     /**
@@ -825,6 +837,9 @@ export class TemplateRenderer {
   renderEmphasisFocus(config, data, options) {
     const { visual, content } = config
 
+    // 安全获取数据内容
+    const dataContent = data?.content || { title: '', subtitle: '' }
+
     // 全屏渲染
     /**
      * position 函数
@@ -872,8 +887,8 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.title) {
-      this.visualEffects.drawText(data.content.title, size.width / 2, size.height / 2 - 50, {
+    if (dataContent.title) {
+      this.visualEffects.drawText(dataContent.title, size.width / 2, size.height / 2 - 50, {
         ...content.title,
         textAlign: 'center'
       })
@@ -888,8 +903,8 @@ export class TemplateRenderer {
 
      */
 
-    if (data.content.subtitle) {
-      this.visualEffects.drawText(data.content.subtitle, size.width / 2, size.height / 2 + 50, {
+    if (dataContent.subtitle) {
+      this.visualEffects.drawText(dataContent.subtitle, size.width / 2, size.height / 2 + 50, {
         ...content.subtitle,
         textAlign: 'center'
       })
@@ -1342,7 +1357,10 @@ export class TemplateRenderer {
      * @description template 功能的具体实现
      */
     // template - 变量声明
-    const template = { ...parsedResult.template }
+    const template = {
+      ...parsedResult.template,
+      data: parsedResult.data // 包含解析后的数据
+    }
 
     // 如果有违反项，应用自动修复
     /**

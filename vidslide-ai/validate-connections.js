@@ -36,8 +36,10 @@ const components = [
 ]
 
 components.forEach(component => {
-  if (document.querySelector(`[data-component="${component}"]`) ||
-      document.querySelector(component.toLowerCase().replace('view', '-view'))) {
+  if (
+    document.querySelector(`[data-component="${component}"]`) ||
+    document.querySelector(component.toLowerCase().replace('view', '-view'))
+  ) {
     console.log(`✅ ${component}组件存在`)
   } else {
     console.log(`❌ ${component}组件未找到`)
@@ -104,12 +106,7 @@ if (canvas) {
 // 验证6: 检查样式系统
 console.log('\n6️⃣ 检查样式系统...')
 const rootStyles = getComputedStyle(document.documentElement)
-const designTokens = [
-  '--apple-blue',
-  '--apple-gray',
-  '--bg-primary',
-  '--text-primary'
-]
+const designTokens = ['--apple-blue', '--apple-gray', '--bg-primary', '--text-primary']
 
 designTokens.forEach(token => {
   const value = rootStyles.getPropertyValue(token)
@@ -143,7 +140,9 @@ if (buttons.length > 0) {
 console.log('\n8️⃣ 性能检查...')
 if ('performance' in window) {
   const perfData = performance.getEntriesByType('navigation')[0]
-  console.log(`⚡ DOM加载时间: ${perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart}ms`)
+  console.log(
+    `⚡ DOM加载时间: ${perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart}ms`
+  )
   console.log(`🚀 页面加载时间: ${perfData.loadEventEnd - perfData.loadEventStart}ms`)
 }
 

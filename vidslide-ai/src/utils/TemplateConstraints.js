@@ -346,7 +346,8 @@ class TemplateConstraints {
     }
 
     // 获取属性约束
-    const propertyConstraints = typeConstraints.properties?.[property] || layerConstraints?.[property]
+    const propertyConstraints =
+      typeConstraints.properties?.[property] || layerConstraints?.[property]
     if (!propertyConstraints) {
       return { valid: true, warnings: ['无特定约束'] }
     }

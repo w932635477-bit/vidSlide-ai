@@ -40,34 +40,129 @@ class TemplateRecommender {
           reason: '视频内容适合叠加展示和演讲者聚焦'
         },
         presentation: {
-          templates: ['info-card', 'keyword-highlight', 'timeline', 'minimalist'],
-          weight: 0.8,
-          reason: '演示内容适合结构化展示'
+          templates: ['ppt-title-slide', 'ppt-bullet-points', 'info-card', 'keyword-highlight', 'timeline', 'minimalist'],
+          weight: 0.85,
+          reason: '演示内容适合PPT风格结构化展示'
         },
         educational: {
-          templates: ['educational', 'timeline', 'split-screen', 'document-display'],
+          templates: ['ppt-bullet-points', 'educational', 'timeline', 'split-screen', 'document-display', 'knowledge-sharing'],
           weight: 0.85,
-          reason: '教育内容适合逻辑化和文档展示'
+          reason: '教育内容适合要点列表和逻辑化展示'
         },
         promotional: {
-          templates: ['product-showcase', 'picture-in-picture', 'keyword-highlight'],
-          weight: 0.75,
-          reason: '宣传内容适合产品展示和吸引眼球'
+          templates: ['douyin-marketing', 'traffic-acquisition', 'product-showcase', 'ad-performance'],
+          weight: 0.9,
+          reason: '营销推广内容适合短视频营销模板'
         },
         data: {
-          templates: ['chart-analysis', 'timeline', 'split-screen'],
+          templates: ['ppt-big-number', 'data-storytelling', 'chart-analysis', 'ad-performance', 'timeline'],
           weight: 0.9,
-          reason: '数据内容适合图表和对比展示'
+          reason: '数据内容适合大数字展示和数据故事模板'
         },
         document: {
           templates: ['document-display', 'minimalist', 'info-card'],
           weight: 0.8,
           reason: '文档内容适合文件展示和简洁布局'
+        },
+        // 短视频/自媒体类型
+        shortVideo: {
+          templates: ['douyin-marketing', 'traffic-acquisition', 'personal-ip', 'fan-engagement'],
+          weight: 0.95,
+          reason: '短视频内容适合抖音营销和流量获客模板'
+        },
+        marketing: {
+          templates: ['traffic-acquisition', 'ad-performance', 'douyin-marketing', 'product-showcase'],
+          weight: 0.9,
+          reason: '营销内容适合流量和投放效果模板'
+        },
+        review: {
+          templates: ['ppt-comparison', 'comparison-review', 'split-screen', 'product-showcase'],
+          weight: 0.85,
+          reason: '评测内容适合PPT对比和种草模板'
+        },
+        // PPT风格内容类型
+        pptStyle: {
+          templates: ['ppt-title-slide', 'ppt-bullet-points', 'ppt-big-number', 'ppt-comparison', 'ppt-quote'],
+          weight: 0.9,
+          reason: 'PPT风格内容适合专业演示模板'
+        },
+        quote: {
+          templates: ['ppt-quote', 'keyword-highlight', 'minimalist'],
+          weight: 0.85,
+          reason: '金句引用内容适合引用展示模板'
         }
       },
 
       // 关键词规则
       keywords: {
+        // ========== 短视频/自媒体专用规则 ==========
+
+        // 抖音/短视频平台
+        shortVideo: {
+          patterns: ['抖音', '快手', '小红书', '视频号', 'B站', '短视频', '直播', '带货'],
+          template: 'douyin-marketing',
+          weight: 0.95,
+          reason: '短视频平台内容适合抖音营销模板'
+        },
+
+        // 流量获客
+        trafficAcquisition: {
+          patterns: ['获客', '流量', '转化', '变现', '引流', '私域', '公域', '漏斗', '陌生流量', '流量推送'],
+          template: 'traffic-acquisition',
+          weight: 0.95,
+          reason: '流量获客内容适合流量漏斗模板'
+        },
+
+        // 广告投放
+        advertising: {
+          patterns: ['投放', '巨量AD', '质量AD', '广告', 'ROI', 'CPM', 'CPC', 'CTR', '推广', '信息流'],
+          template: 'ad-performance',
+          weight: 0.9,
+          reason: '广告投放内容适合投放效果模板'
+        },
+
+        // IP打造
+        personalBrand: {
+          patterns: ['做IP', 'IP', 'KOL', 'KOC', '个人品牌', '人设', '账号', '自媒体', 'MCN'],
+          template: 'personal-ip',
+          weight: 0.9,
+          reason: 'IP打造内容适合个人品牌模板'
+        },
+
+        // 粉丝互动
+        fanEngagement: {
+          patterns: ['粉丝', '互动', '点赞', '评论', '分享', '收藏', '关注', '原生互动', '社区'],
+          template: 'fan-engagement',
+          weight: 0.85,
+          reason: '粉丝互动内容适合互动展示模板'
+        },
+
+        // 干货分享
+        knowledgeSharing: {
+          patterns: ['干货', '技巧', '方法', '攻略', '教程', '分享', '总结', '玩法', '套路'],
+          template: 'knowledge-sharing',
+          weight: 0.85,
+          reason: '干货分享内容适合知识展示模板'
+        },
+
+        // 种草评测
+        review: {
+          patterns: ['种草', '拔草', '评测', '测评', '推荐', '好物', '安利', '避坑'],
+          template: 'comparison-review',
+          weight: 0.85,
+          reason: '种草评测内容适合对比推荐模板'
+        },
+
+        // 数据故事
+        dataStory: {
+          patterns: ['增长', '下降', '趋势', '数据', '统计', '分析', '报告', '指标'],
+          template: 'data-storytelling',
+          weight: 0.9,
+          reason: '数据内容适合数据故事模板'
+        },
+
+        // ========== 通用规则 ==========
+
         // 时间相关
         time: {
           patterns: ['时间', '发展', '历程', '阶段', '历史', '未来', '过去'],
@@ -78,23 +173,15 @@ class TemplateRecommender {
 
         // 对比相关
         comparison: {
-          patterns: ['对比', '区别', '比较', '优缺点', '差异', '选择', 'vs'],
+          patterns: ['对比', '区别', '比较', '优缺点', '差异', '选择', 'vs', 'VS'],
           template: 'split-screen',
           weight: 0.85,
           reason: '对比内容适合分屏展示'
         },
 
-        // 数据相关
-        data: {
-          patterns: ['数据', '统计', '增长', '下降', '趋势', '分析', '报告'],
-          template: 'chart-analysis', // 未来扩展
-          weight: 0.8,
-          reason: '数据内容适合图表展示'
-        },
-
         // 关键词强调
         keywords: {
-          patterns: ['重要', '关键', '重点', '强调', '注意', '记住'],
+          patterns: ['重要', '关键', '重点', '强调', '注意', '记住', '核心'],
           template: 'keyword-highlight',
           weight: 0.75,
           reason: '强调内容适合关键词高亮'
@@ -110,7 +197,7 @@ class TemplateRecommender {
 
         // 产品相关
         product: {
-          patterns: ['产品', '商品', '服务', '功能', '特点', '优势'],
+          patterns: ['产品', '商品', '服务', '功能', '特点', '优势', '价格', '优惠'],
           template: 'product-showcase',
           weight: 0.85,
           reason: '产品内容适合产品展示模板'
@@ -118,7 +205,7 @@ class TemplateRecommender {
 
         // 教育相关
         education: {
-          patterns: ['学习', '教学', '课程', '教育', '培训', '知识'],
+          patterns: ['学习', '教学', '课程', '教育', '培训', '知识', '技能'],
           template: 'educational',
           weight: 0.85,
           reason: '教育内容适合教育模板'
@@ -134,10 +221,52 @@ class TemplateRecommender {
 
         // 对话弹窗相关
         popup: {
-          patterns: ['重要', '注意', '提醒', '提示', '强调'],
+          patterns: ['提醒', '提示', '警告', '通知'],
           template: 'dialog-popup',
           weight: 0.75,
           reason: '需要强调的内容适合弹窗展示'
+        },
+
+        // ========== PPT风格专用规则 ==========
+
+        // PPT标题/开场
+        pptTitle: {
+          patterns: ['开场', '标题', '主题', '今天', '介绍', '欢迎', '大家好'],
+          template: 'ppt-title-slide',
+          weight: 0.85,
+          reason: '开场内容适合PPT标题幻灯片'
+        },
+
+        // PPT要点/列表
+        pptBullets: {
+          patterns: ['第一', '第二', '第三', '首先', '其次', '然后', '最后', '要点', '步骤', '方法', '技巧'],
+          template: 'ppt-bullet-points',
+          weight: 0.9,
+          reason: '列举内容适合PPT要点列表模板'
+        },
+
+        // PPT大数字
+        pptNumber: {
+          patterns: ['增长', '下降', '提升', '达到', '超过', '突破', '%', '万', '亿', '倍'],
+          template: 'ppt-big-number',
+          weight: 0.9,
+          reason: '数据增长内容适合PPT大数字展示'
+        },
+
+        // PPT对比
+        pptComparison: {
+          patterns: ['对比', '区别', '不同', '优点', '缺点', '好处', '坏处', '利弊', 'vs', 'VS'],
+          template: 'ppt-comparison',
+          weight: 0.9,
+          reason: '对比分析内容适合PPT左右对比模板'
+        },
+
+        // PPT金句
+        pptQuote: {
+          patterns: ['金句', '名言', '格言', '记住', '核心', '关键', '重要的是', '一句话'],
+          template: 'ppt-quote',
+          weight: 0.85,
+          reason: '金句名言内容适合PPT引用模板'
         }
       },
 
@@ -249,7 +378,10 @@ class TemplateRecommender {
     const personalizedRecs = this.applyUserPreferences(uniqueRecommendations, options)
 
     // 8. 排序和限制数量
-    const finalRecommendations = this.sortAndLimitRecommendations(personalizedRecs, options.maxRecommendations || 3)
+    const finalRecommendations = this.sortAndLimitRecommendations(
+      personalizedRecs,
+      options.maxRecommendations || 3
+    )
 
     // 缓存结果
     this.setCache(cacheKey, finalRecommendations)
@@ -292,7 +424,10 @@ class TemplateRecommender {
    */
   analyzeKeywords(keywords) {
     const recommendations = []
-    const keywordText = keywords.map(k => k.text || k).join(' ').toLowerCase()
+    const keywordText = keywords
+      .map(k => k.text || k)
+      .join(' ')
+      .toLowerCase()
 
     for (const [ruleName, rule] of Object.entries(this.rules.keywords)) {
       let matchCount = 0
@@ -314,9 +449,7 @@ class TemplateRecommender {
             score,
             reason: rule.reason,
             source: 'keywords',
-            matchedPatterns: rule.patterns.filter(p =>
-              keywordText.includes(p.toLowerCase())
-            ),
+            matchedPatterns: rule.patterns.filter(p => keywordText.includes(p.toLowerCase())),
             matchCount
           })
         }
@@ -492,11 +625,14 @@ class TemplateRecommender {
   calculateFinalScore(data) {
     const { totalScore, sources, maxScore } = data
 
+    // sources 是 Set，需要使用 size 而不是 length
+    const sourceCount = sources.size || sources.length || 1
+
     // 基础分数：平均分
-    const avgScore = totalScore / sources.length
+    const avgScore = totalScore / sourceCount
 
     // 多样性奖励：匹配多个规则的奖励
-    const diversityBonus = Math.min(sources.length * 0.1, 0.3)
+    const diversityBonus = Math.min(sourceCount * 0.1, 0.3)
 
     // 最高分权重
     const maxScoreWeight = maxScore * 0.2
@@ -570,14 +706,25 @@ class TemplateRecommender {
     // 创建简化的指纹用于缓存
     const fingerprint = {
       contentType: contentAnalysis.contentType,
-      keywords: contentAnalysis.keywords?.slice(0, 5).map(k => k.text || k).join(','),
-      textDensity: Math.round(contentAnalysis.textDensity * 10) / 10,
-      dataMentions: Math.round(contentAnalysis.dataMentions * 10) / 10,
+      keywords: contentAnalysis.keywords
+        ?.slice(0, 5)
+        .map(k => k.text || k)
+        .join(','),
+      textDensity: Math.round((contentAnalysis.textDensity || 0) * 10) / 10,
+      dataMentions: Math.round((contentAnalysis.dataMentions || 0) * 10) / 10,
       sentiment: contentAnalysis.sentiment,
       userPrefs: options.userPreferences
     }
 
-    return btoa(JSON.stringify(fingerprint)).slice(0, 32)
+    // 使用简单的哈希函数代替btoa（支持中文）
+    const str = JSON.stringify(fingerprint)
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return 'cache_' + Math.abs(hash).toString(36)
   }
 
   /**

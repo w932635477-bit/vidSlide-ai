@@ -7,14 +7,9 @@
   支持位置调节、大小控制、样式选择、动画效果等高级功能
 -->
 <template>
-  <aside
-class="picture-in-picture" role="complementary"
-aria-label="画中画效果控制面板"
->
+  <aside class="picture-in-picture" role="complementary" aria-label="画中画效果控制面板">
     <!-- 画中画控制面板 - 主要的用户交互区域 -->
-    <section
-class="pip-controls" aria-labelledby="pip-controls-heading"
->
+    <section class="pip-controls" aria-labelledby="pip-controls-heading">
       <header class="control-header">
         <h2 id="pip-controls-heading">画中画效果</h2>
         <!-- 状态指示器：显示画中画是否激活 -->
@@ -31,13 +26,8 @@ class="pip-controls" aria-labelledby="pip-controls-heading"
       <!-- 位置选择 -->
       <fieldset class="control-section">
         <legend class="control-label">显示位置</legend>
-        <div
-class="position-grid" role="radiogroup"
-aria-labelledby="position-label"
->
-          <span
-id="position-label" class="sr-only"
->选择画中画显示位置</span>
+        <div class="position-grid" role="radiogroup" aria-labelledby="position-label">
+          <span id="position-label" class="sr-only">选择画中画显示位置</span>
           <div
             v-for="position in positionOptions"
             :key="position.id"
@@ -51,9 +41,7 @@ id="position-label" class="sr-only"
             @keydown.enter="setPosition(position.id)"
             @keydown.space.prevent="setPosition(position.id)"
           >
-            <div
-class="position-icon" aria-hidden="true"
->
+            <div class="position-icon" aria-hidden="true">
               {{ position.icon }}
             </div>
             <span class="position-name">{{ position.name }}</span>
@@ -75,15 +63,12 @@ class="position-icon" aria-hidden="true"
             :aria-valuetext="`画中画大小: ${pipConfig.size}百分比`"
             @change="updatePipConfig"
           />
-          <div
-class="size-display" aria-live="polite">{{ pipConfig.size }}%</div>
+          <div class="size-display" aria-live="polite">{{ pipConfig.size }}%</div>
         </div>
 
         <!-- 样式选择 -->
         <div class="control-section">
-          <label
-class="control-label" for="style-radio-group"
->视觉样式</label>
+          <label class="control-label" for="style-radio-group">视觉样式</label>
           <el-radio-group
             id="style-radio-group"
             v-model="pipConfig.style"
@@ -99,9 +84,7 @@ class="control-label" for="style-radio-group"
 
         <!-- 动画设置 -->
         <div class="control-section">
-          <label
-class="control-label" for="animation-select"
->入场动画</label>
+          <label class="control-label" for="animation-select">入场动画</label>
           <el-select
             id="animation-select"
             v-model="pipConfig.animation"
@@ -109,38 +92,37 @@ class="control-label" for="animation-select"
             size="small"
             @change="updatePipConfig"
           >
-            <el-option
-label="fade-in" value="fade-in"> 淡入 </el-option>
-            <el-option
-label="scale-in" value="scale-in"> 缩放 </el-option>
-            <el-option
-label="slide-in" value="slide-in"> 滑入 </el-option>
-            <el-option
-label="bounce-in" value="bounce-in"> 弹跳 </el-option>
+            <el-option label="fade-in" value="fade-in"> 淡入 </el-option>
+            <el-option label="scale-in" value="scale-in"> 缩放 </el-option>
+            <el-option label="slide-in" value="slide-in"> 滑入 </el-option>
+            <el-option label="bounce-in" value="bounce-in"> 弹跳 </el-option>
           </el-select>
         </div>
 
         <!-- 人脸跟踪控制 -->
-        <div
-v-if="faceTrackingSupported" class="control-section"
->
+        <div v-if="faceTrackingSupported" class="control-section">
           <label class="control-label">高级功能</label>
           <div class="face-tracking-controls">
             <el-checkbox
               v-model="faceTrackingEnabled"
-              :disabled="!faceTracker || !props.videoElement"
+              :disabled="!props.videoElement"
               @change="toggleFaceTracking"
             >
               启用智能人脸跟踪
             </el-checkbox>
 
+            <!-- 当前引擎信息 -->
+            <div v-if="currentTrackerEngine" class="engine-info">
+              <el-tag size="small" type="info">
+                {{ getEngineDisplayName(currentTrackerEngine) }}
+              </el-tag>
+            </div>
+
             <div
               v-if="faceTrackingEnabled && trackingPerformance.faceDetected"
               class="tracking-status"
             >
-              <el-tag
-size="small" type="success"
->
+              <el-tag size="small" type="success">
                 人脸已检测 (置信度: {{ Math.round(trackingPerformance.confidence * 100) }}%)
               </el-tag>
               <small class="tracking-fps"> 跟踪FPS: {{ trackingPerformance.fps }} </small>
@@ -159,22 +141,14 @@ size="small" type="success"
             {{ isPipActive ? '停止画中画' : '启动画中画' }}
           </el-button>
 
-          <el-button
-type="warning" size="small"
-:disabled="!isPipActive" @click="resetToDefault"
->
+          <el-button type="warning" size="small" :disabled="!isPipActive" @click="resetToDefault">
             重置默认
           </el-button>
         </div>
 
         <!-- 画中画预览区域 -->
-        <div
-v-if="isPipActive" class="pip-preview"
-:style="previewStyle"
->
-          <div
-class="pip-container" :style="containerStyle"
->
+        <div v-if="isPipActive" class="pip-preview" :style="previewStyle">
+          <div class="pip-container" :style="containerStyle">
             <div class="pip-content">
               <!-- 这里会显示实际的画中画内容 -->
               <div class="pip-placeholder">
@@ -187,16 +161,11 @@ class="pip-container" :style="containerStyle"
           </div>
 
           <!-- 背景遮罩 -->
-          <div
-v-if="pipConfig.showOverlay" class="pip-overlay"
-:style="overlayStyle"
-/>
+          <div v-if="pipConfig.showOverlay" class="pip-overlay" :style="overlayStyle" />
         </div>
 
         <!-- 性能监控 -->
-        <div
-v-if="showPerformanceInfo" class="performance-info"
->
+        <div v-if="showPerformanceInfo" class="performance-info">
           <small class="performance-text">
             渲染时间: {{ renderTime }}ms | FPS: {{ currentFps }}
           </small>
@@ -214,7 +183,7 @@ v-if="showPerformanceInfo" class="performance-info"
   - 性能监控
   - 事件通信
 -->
-<script setup>
+<script setup name="PictureInPicture">
 /**
  * PictureInPicture 画中画效果组件
  *
@@ -236,7 +205,8 @@ v-if="showPerformanceInfo" class="performance-info"
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { VideoPlay } from '@element-plus/icons-vue'
-import { AdvancedFaceTracker, checkFaceTrackingSupport } from '../utils/advancedFaceTracker.js'
+// 使用统一人脸跟踪服务，支持多浏览器（Chrome/Firefox/Safari/Edge）
+import UnifiedFaceTracker, { TrackerEngine } from '../services/UnifiedFaceTracker.js'
 
 // Props (暂时未使用 - 组件正在重构中)
 const props = defineProps({
@@ -293,14 +263,15 @@ const animationFrame = ref(null) // 动画帧ID
 let lastFrameTime = 0 // 上一帧时间戳
 let frameCount = 0 // 帧计数器
 
-// 人脸跟踪器
-const faceTracker = ref(null)
+// 人脸跟踪器 - 使用统一跟踪服务
 const faceTrackingEnabled = ref(false)
 const faceTrackingSupported = ref(false)
+const currentTrackerEngine = ref(null) // 当前使用的引擎类型
 const trackingPerformance = ref({
   fps: 0,
   confidence: 0,
-  faceDetected: false
+  faceDetected: false,
+  engine: null // 显示当前引擎
 })
 
 // 可选的画中画位置
@@ -688,14 +659,41 @@ const handleTrackingPerformance = performance => {
   trackingPerformance.value.fps = performance.fps
 }
 
+// 获取引擎显示名称
+const getEngineDisplayName = engine => {
+  const names = {
+    [TrackerEngine.MEDIAPIPE]: 'MediaPipe (高精度)',
+    [TrackerEngine.FACEAPI]: 'Face-api.js (兼容)',
+    [TrackerEngine.BASIC]: '基础模式'
+  }
+  return names[engine] || engine
+}
+
+// 处理引擎切换事件
+const handleEngineChanged = ({ engine, reason }) => {
+  currentTrackerEngine.value = engine
+  trackingPerformance.value.engine = engine
+
+  const engineNames = {
+    [TrackerEngine.MEDIAPIPE]: 'MediaPipe (高精度)',
+    [TrackerEngine.FACEAPI]: 'Face-api.js (兼容模式)',
+    [TrackerEngine.BASIC]: '基础模式'
+  }
+
+  if (reason === 'error_fallback' || reason === 'all_failed') {
+    ElMessage.warning(`人脸跟踪已切换到 ${engineNames[engine] || engine}`)
+  }
+  console.log(`🔄 人脸跟踪引擎: ${engineNames[engine] || engine} (原因: ${reason})`)
+}
+
 // 切换人脸跟踪
 const toggleFaceTracking = async () => {
   if (!faceTrackingSupported.value) {
-    ElMessage.warning('您的浏览器不支持高级人脸跟踪功能')
+    ElMessage.warning('您的浏览器不支持人脸跟踪功能')
     return
   }
 
-  if (!faceTracker.value) {
+  if (!UnifiedFaceTracker.isInitialized) {
     ElMessage.error('人脸跟踪器未初始化')
     return
   }
@@ -703,15 +701,17 @@ const toggleFaceTracking = async () => {
   try {
     if (faceTrackingEnabled.value) {
       // 停止跟踪
-      faceTracker.value.stopTracking()
+      UnifiedFaceTracker.stopTracking()
       faceTrackingEnabled.value = false
       console.log('⏹️ 人脸跟踪已停止')
     } else {
       // 开始跟踪
       if (props.videoElement) {
-        await faceTracker.value.startTracking(props.videoElement)
+        await UnifiedFaceTracker.startTracking(props.videoElement)
         faceTrackingEnabled.value = true
-        console.log('🎬 人脸跟踪已启动')
+        const engineInfo = UnifiedFaceTracker.getEngineInfo()
+        console.log(`🎬 人脸跟踪已启动 (引擎: ${engineInfo.name})`)
+        ElMessage.success(`人脸跟踪已启动 - ${engineInfo.name}`)
       } else {
         ElMessage.warning('请先加载视频')
       }
@@ -726,30 +726,38 @@ onMounted(async () => {
   // 初始化设置
   console.log('PictureInPicture component mounted')
 
-  // 检查人脸跟踪支持
-  faceTrackingSupported.value = checkFaceTrackingSupport().overall
+  // 初始化统一人脸跟踪服务（自动检测浏览器并选择最佳引擎）
+  try {
+    const result = await UnifiedFaceTracker.initialize({
+      maxNumFaces: 1,
+      smoothFactor: 0.8,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    })
 
-  // 初始化人脸跟踪器
-  if (faceTrackingSupported.value) {
-    try {
-      faceTracker.value = new AdvancedFaceTracker({
-        maxNumFaces: 1,
-        smoothFactor: 0.8
-      })
+    faceTrackingSupported.value = result.success
+    currentTrackerEngine.value = result.engine
+    trackingPerformance.value.engine = result.engine
 
-      await faceTracker.value.initialize()
-
+    if (result.success) {
       // 设置事件监听器
-      faceTracker.value.addEventListener('faceDetected', handleFaceDetected)
-      faceTracker.value.addEventListener('faceLost', handleFaceLost)
-      faceTracker.value.addEventListener('trackingUpdate', handleTrackingUpdate)
-      faceTracker.value.addEventListener('performanceUpdate', handleTrackingPerformance)
+      UnifiedFaceTracker.on('faceDetected', handleFaceDetected)
+      UnifiedFaceTracker.on('faceLost', handleFaceLost)
+      UnifiedFaceTracker.on('trackingUpdate', handleTrackingUpdate)
+      UnifiedFaceTracker.on('engineChanged', handleEngineChanged)
 
-      console.log('✅ 人脸跟踪器初始化成功')
-    } catch (error) {
-      console.warn('❌ 人脸跟踪器初始化失败:', error)
-      faceTrackingSupported.value = false
+      const engineInfo = UnifiedFaceTracker.getEngineInfo()
+      console.log(`✅ 人脸跟踪服务初始化成功`)
+      console.log(`   引擎: ${engineInfo.name}`)
+      console.log(`   关键点数: ${engineInfo.landmarkCount}`)
+
+      if (result.fallback) {
+        console.warn('⚠️ 使用降级模式（基础模式）')
+      }
     }
+  } catch (error) {
+    console.warn('❌ 人脸跟踪服务初始化失败:', error)
+    faceTrackingSupported.value = false
   }
 })
 
@@ -757,10 +765,13 @@ onUnmounted(() => {
   // 清理资源
   stopPerformanceMonitoring()
 
-  // 清理人脸跟踪器
-  if (faceTracker.value) {
-    faceTracker.value.dispose()
-    faceTracker.value = null
+  // 清理人脸跟踪器事件监听
+  if (faceTrackingSupported.value) {
+    UnifiedFaceTracker.off('faceDetected', handleFaceDetected)
+    UnifiedFaceTracker.off('faceLost', handleFaceLost)
+    UnifiedFaceTracker.off('trackingUpdate', handleTrackingUpdate)
+    UnifiedFaceTracker.off('engineChanged', handleEngineChanged)
+    UnifiedFaceTracker.stopTracking()
   }
 })
 </script>

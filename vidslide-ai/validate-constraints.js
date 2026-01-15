@@ -28,7 +28,7 @@ class ConstraintValidator {
       const content = fs.readFileSync(componentPath, 'utf8')
 
       // 检查是否使用Vue 3 Composition API
-      if (!content.includes('import {') || !content.includes('from \'vue\'')) {
+      if (!content.includes('import {') || !content.includes("from 'vue'")) {
         this.errors.push(`${componentPath}: 未使用Vue 3 Composition API`)
       }
 
@@ -43,7 +43,7 @@ class ConstraintValidator {
       // 检查是否使用了Canvas 2D
       if (
         content.includes('CanvasRenderingContext2D') ||
-        content.includes('canvas.getContext(\'2d\')')
+        content.includes("canvas.getContext('2d')")
       ) {
         console.log('  ✅ 使用了Canvas 2D API')
       }
@@ -74,7 +74,7 @@ class ConstraintValidator {
       const content = fs.readFileSync(testPath, 'utf8')
 
       // 检查是否使用了Vitest
-      if (!content.includes('vitest') && !content.includes('from \'vitest\'')) {
+      if (!content.includes('vitest') && !content.includes("from 'vitest'")) {
         this.warnings.push(`${testPath}: 未明确使用Vitest`)
       }
 

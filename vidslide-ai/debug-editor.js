@@ -26,7 +26,7 @@ if (app) {
     const vueComponents = app.querySelectorAll('[class*="view"]')
     console.log('🔍 找到的view类元素:', vueComponents.length)
     vueComponents.forEach((el, i) => {
-      console.log(`  ${i+1}. ${el.className}: ${el.tagName}`)
+      console.log(`  ${i + 1}. ${el.className}: ${el.tagName}`)
     })
   }
 } else {
@@ -117,7 +117,6 @@ if (fileInput) {
       console.log('❌ 上传未成功')
     }
   }, 1000)
-
 } else {
   console.log('❌ 视频输入框不存在')
 }

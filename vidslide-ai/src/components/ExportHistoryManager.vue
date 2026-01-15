@@ -428,8 +428,6 @@ const loadExportHistory = () => {
  * @returns {Array} 模拟的导出历史记录数组
  */
 const generateMockHistory = () => {
-
-const generateMockHistory = () => {
   const types = ['video', 'presentation', 'template']
   const statuses = ['success', 'failed', 'processing', 'cancelled']
   const formats = ['MP4', 'PDF', 'JSON', 'PPTX']
@@ -730,31 +728,6 @@ const formatDateTime = (dateString) => {
  * @param {number} seconds - 持续时间（秒）
  * @returns {string} 格式化的持续时间字符串
  */
-const formatDuration = (seconds) => {
-  if (!seconds) return '未知'
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  } else {
-    return `${minutes}:${secs.toString().padStart(2, '0')}`
-  }
-}
-
-const formatDateTime = (dateString) => {
-  const date = new Date(dateString)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
-}
-
 const formatDuration = (seconds) => {
   if (!seconds) return '未知'
   const hours = Math.floor(seconds / 3600)

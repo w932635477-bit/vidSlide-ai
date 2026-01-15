@@ -119,9 +119,7 @@ describe('ColorMatcher.vue', () => {
     })
 
     it('应该能够设置协调配色方案', () => {
-      const schemes = [
-        { name: '互补色', colors: ['#ff0000', '#00ffff'] }
-      ]
+      const schemes = [{ name: '互补色', colors: ['#ff0000', '#00ffff'] }]
       wrapper.vm.harmonizedPalette = schemes
       expect(wrapper.vm.harmonizedPalette).toEqual(schemes)
     })

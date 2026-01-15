@@ -4,10 +4,12 @@
  */
 
 // 核心组件
-export { default as TemplateRenderer } from './TemplateRenderer.js'
-export { default as TemplateParser } from './TemplateParser.js'
-export { default as VisualEffects } from './VisualEffects.js'
-export { default as ConstraintSystem } from './ConstraintSystem.js'
+import TemplateRenderer from './TemplateRenderer.js'
+import TemplateParser from './TemplateParser.js'
+import VisualEffects from './VisualEffects.js'
+import ConstraintSystem from './ConstraintSystem.js'
+
+export { TemplateRenderer, TemplateParser, VisualEffects, ConstraintSystem }
 
 // 模板定义和配置
 import {
@@ -60,11 +62,7 @@ export class TemplateEngineFactory {
    * @param {CanvasRenderingContext2D} context - 画布上下文
    * @returns {TemplateRenderer} 渲染器实例
    */
-  static /**
-   * createRenderer 方法
-   * VidSlide AI 功能实现
-   */
-  createRenderer(canvas, context) {
+  static createRenderer(canvas, context) {
     return new TemplateRenderer(canvas, context)
   }
 
@@ -72,11 +70,7 @@ export class TemplateEngineFactory {
    * 创建模板解析器实例
    * @returns {TemplateParser} 解析器实例
    */
-  static /**
-   * createParser 方法
-   * VidSlide AI 功能实现
-   */
-  createParser() {
+  static createParser() {
     return new TemplateParser()
   }
 
@@ -86,11 +80,7 @@ export class TemplateEngineFactory {
    * @param {CanvasRenderingContext2D} context - 画布上下文
    * @returns {VisualEffects} 视觉效果实例
    */
-  static /**
-   * createVisualEffects 方法
-   * VidSlide AI 功能实现
-   */
-  createVisualEffects(canvas, context) {
+  static createVisualEffects(canvas, context) {
     return new VisualEffects(canvas, context)
   }
 
@@ -98,21 +88,12 @@ export class TemplateEngineFactory {
    * 创建约束系统实例
    * @returns {ConstraintSystem} 约束系统实例
    */
-  static /**
-   * createConstraintSystem 方法
-   * VidSlide AI 功能实现
-   */
-  createConstraintSystem() {
+  static createConstraintSystem() {
     return new ConstraintSystem()
   }
 }
 
-// 默认导出 - 动态导入所有组件
-const TemplateRenderer = (await import('./TemplateRenderer.js')).default
-const TemplateParser = (await import('./TemplateParser.js')).default
-const VisualEffects = (await import('./VisualEffects.js')).default
-const ConstraintSystem = (await import('./ConstraintSystem.js')).default
-
+// 默认导出
 export default {
   TemplateRenderer,
   TemplateParser,

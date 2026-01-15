@@ -891,7 +891,6 @@ class MaterialService {
         confidence: match.similarity,
         smartRank: match.rank
       }))
-
     } catch (error) {
       console.warn('❌ CLIP智能匹配失败，使用传统方法:', error.message)
 
@@ -963,7 +962,7 @@ class MaterialService {
    * @returns {Promise<ImageData>} 图像数据
    */
   async imageToImageData(img) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
       canvas.width = img.width
@@ -1001,9 +1000,9 @@ class MaterialService {
       .map(material => {
         const nameMatch = (material.name || '').toLowerCase().includes(queryLower) ? 1 : 0
         const descMatch = (material.description || '').toLowerCase().includes(queryLower) ? 0.8 : 0
-        const tagMatch = (material.tags || []).some(tag =>
-          tag.toLowerCase().includes(queryLower)
-        ) ? 0.6 : 0
+        const tagMatch = (material.tags || []).some(tag => tag.toLowerCase().includes(queryLower))
+          ? 0.6
+          : 0
 
         const score = Math.max(nameMatch, descMatch, tagMatch)
 

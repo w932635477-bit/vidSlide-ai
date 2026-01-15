@@ -12,7 +12,6 @@ vi.mock('../config/api-keys.js', () => ({
   isAPIConfigured: vi.fn()
 }))
 
-
 describe('BackgroundRemovalService', () => {
   let service
   let mockGetAPIConfig
@@ -105,8 +104,9 @@ describe('BackgroundRemovalService', () => {
 
       const mockImageFile = new File(['test'], 'test.png', { type: 'image/png' })
 
-      await expect(service.wasmBackgroundRemoval(mockImageFile))
-        .rejects.toThrow('WebAssembly背景移除模块未加载')
+      await expect(service.wasmBackgroundRemoval(mockImageFile)).rejects.toThrow(
+        'WebAssembly背景移除模块未加载'
+      )
     })
   })
 
@@ -125,8 +125,9 @@ describe('BackgroundRemovalService', () => {
 
       const mockImageFile = new File(['test'], 'test.png', { type: 'image/png' })
 
-      await expect(service.removeBackground(mockImageFile))
-        .rejects.toThrow('没有可用的背景移除服务')
+      await expect(service.removeBackground(mockImageFile)).rejects.toThrow(
+        '没有可用的背景移除服务'
+      )
     })
   })
 
@@ -142,8 +143,9 @@ describe('BackgroundRemovalService', () => {
       const mockImageFile = new File(['test'], 'test.png', { type: 'image/png' })
 
       // 由于所有服务都会失败，应该抛出错误
-      await expect(service.removeBackground(mockImageFile))
-        .rejects.toThrow('所有背景移除服务都不可用')
+      await expect(service.removeBackground(mockImageFile)).rejects.toThrow(
+        '所有背景移除服务都不可用'
+      )
     })
 
     it('应该提供用户友好的错误信息', async () => {
@@ -151,8 +153,9 @@ describe('BackgroundRemovalService', () => {
 
       const mockImageFile = new File(['test'], 'test.png', { type: 'image/png' })
 
-      await expect(service.removeBackground(mockImageFile))
-        .rejects.toThrow('没有可用的背景移除服务，请配置API密钥或检查WebAssembly支持')
+      await expect(service.removeBackground(mockImageFile)).rejects.toThrow(
+        '没有可用的背景移除服务，请配置API密钥或检查WebAssembly支持'
+      )
     })
   })
 

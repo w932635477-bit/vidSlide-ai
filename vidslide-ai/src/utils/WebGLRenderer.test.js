@@ -201,7 +201,7 @@ describe('WebGLRenderer', () => {
 
   describe('截图功能', () => {
     it('应该生成截图', async () => {
-      renderer.canvas.toBlob = vi.fn().mockImplementation((callback) => {
+      renderer.canvas.toBlob = vi.fn().mockImplementation(callback => {
         callback(new Blob(['screenshot'], { type: 'image/png' }))
       })
 

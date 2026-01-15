@@ -35,14 +35,14 @@ class ImageQualityOptimizer {
       console.log('开始图像质量优化...')
 
       const {
-        targetResolution = null,    // 目标分辨率 {width, height}
-        colorProfile = null,        // 目标色彩配置
-        brightness = 0,             // 亮度调整 (-100 to 100)
-        contrast = 0,               // 对比度调整 (-100 to 100)
-        saturation = 0,             // 饱和度调整 (-100 to 100)
-        sharpness = 0,              // 锐度调整 (0-100)
-        noiseReduction = 0,         // 降噪强度 (0-100)
-        enableUpscaling = true      // 是否启用超分辨率
+        targetResolution = null, // 目标分辨率 {width, height}
+        colorProfile = null, // 目标色彩配置
+        brightness = 0, // 亮度调整 (-100 to 100)
+        contrast = 0, // 对比度调整 (-100 to 100)
+        saturation = 0, // 饱和度调整 (-100 to 100)
+        sharpness = 0, // 锐度调整 (0-100)
+        noiseReduction = 0, // 降噪强度 (0-100)
+        enableUpscaling = true // 是否启用超分辨率
       } = options
 
       // 加载原始图片
@@ -54,7 +54,11 @@ class ImageQualityOptimizer {
 
       // 1. 分辨率优化（超分辨率或降采样）
       if (targetResolution) {
-        optimizedData = await this.optimizeResolution(optimizedData, targetResolution, enableUpscaling)
+        optimizedData = await this.optimizeResolution(
+          optimizedData,
+          targetResolution,
+          enableUpscaling
+        )
       }
 
       // 2. 色彩校正
@@ -101,7 +105,6 @@ class ImageQualityOptimizer {
         },
         quality: this.assessQuality(optimizedData)
       }
-
     } catch (error) {
       console.error('图像质量优化失败:', error)
       throw new Error(`图像质量优化失败: ${error.message}`)
@@ -204,7 +207,9 @@ class ImageQualityOptimizer {
     const { r: targetR, g: targetG, b: targetB } = colorProfile
 
     // 计算平均色彩值
-    let totalR = 0, totalG = 0, totalB = 0
+    let totalR = 0,
+      totalG = 0,
+      totalB = 0
     for (let i = 0; i < data.length; i += 4) {
       totalR += data[i]
       totalG += data[i + 1]
@@ -223,7 +228,7 @@ class ImageQualityOptimizer {
 
     // 应用色彩校正
     for (let i = 0; i < data.length; i += 4) {
-      data[i] = Math.min(255, Math.max(0, data[i] * rFactor))         // R
+      data[i] = Math.min(255, Math.max(0, data[i] * rFactor)) // R
       data[i + 1] = Math.min(255, Math.max(0, data[i + 1] * gFactor)) // G
       data[i + 2] = Math.min(255, Math.max(0, data[i + 2] * bFactor)) // B
       // Alpha通道保持不变
@@ -251,9 +256,9 @@ class ImageQualityOptimizer {
       data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + brightnessFactor * 255))
 
       // 对比度调整
-      data[i] = Math.min(255, Math.max(0, ((data[i] - 128) * contrastFactor) + 128))
-      data[i + 1] = Math.min(255, Math.max(0, ((data[i + 1] - 128) * contrastFactor) + 128))
-      data[i + 2] = Math.min(255, Math.max(0, ((data[i + 2] - 128) * contrastFactor) + 128))
+      data[i] = Math.min(255, Math.max(0, (data[i] - 128) * contrastFactor + 128))
+      data[i + 1] = Math.min(255, Math.max(0, (data[i + 1] - 128) * contrastFactor + 128))
+      data[i + 2] = Math.min(255, Math.max(0, (data[i + 2] - 128) * contrastFactor + 128))
     }
 
     return imageData
@@ -302,15 +307,12 @@ class ImageQualityOptimizer {
     const originalData = new Uint8ClampedArray(data)
 
     // Laplacian算子锐化
-    const kernel = [
-      0, -1, 0,
-      -1, 5, -1,
-      0, -1, 0
-    ]
+    const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0]
 
     for (let y = 1; y < height - 1; y++) {
       for (let x = 1; x < width - 1; x++) {
-        for (let c = 0; c < 3; c++) { // RGB通道
+        for (let c = 0; c < 3; c++) {
+          // RGB通道
           let sum = 0
           for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
@@ -321,9 +323,10 @@ class ImageQualityOptimizer {
           }
 
           const currentIdx = (y * width + x) * 4 + c
-          data[currentIdx] = Math.min(255, Math.max(0,
-            originalData[currentIdx] + (sum - originalData[currentIdx]) * strength
-          ))
+          data[currentIdx] = Math.min(
+            255,
+            Math.max(0, originalData[currentIdx] + (sum - originalData[currentIdx]) * strength)
+          )
         }
       }
     }
@@ -365,9 +368,7 @@ class ImageQualityOptimizer {
 
           // 与原始值混合
           const currentIdx = (y * width + x) * 4 + c
-          data[currentIdx] = Math.round(
-            originalData[currentIdx] * (1 - factor) + median * factor
-          )
+          data[currentIdx] = Math.round(originalData[currentIdx] * (1 - factor) + median * factor)
         }
       }
     }
@@ -393,7 +394,7 @@ class ImageQualityOptimizer {
       const b = data[i + 2]
       brightness += (r + g + b) / 3
     }
-    brightness /= (data.length / 4)
+    brightness /= data.length / 4
 
     // 计算对比度和锐度
     let sumSquares = 0
@@ -403,7 +404,7 @@ class ImageQualityOptimizer {
       contrast += Math.abs(gray - brightness)
     }
 
-    contrast /= (data.length / 4)
+    contrast /= data.length / 4
     const variance = sumSquares / (data.length / 4) - brightness * brightness
     sharpness = Math.sqrt(variance)
 
@@ -411,7 +412,7 @@ class ImageQualityOptimizer {
       brightness: Math.round(brightness),
       contrast: Math.round(contrast),
       sharpness: Math.round(sharpness),
-      overall: Math.round((brightness / 255 * 30 + contrast / 128 * 35 + sharpness / 50 * 35))
+      overall: Math.round((brightness / 255) * 30 + (contrast / 128) * 35 + (sharpness / 50) * 35)
     }
   }
 
