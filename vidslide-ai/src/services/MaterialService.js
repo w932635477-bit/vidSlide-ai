@@ -10,6 +10,14 @@ import IntelligentDispatcher from './IntelligentDispatcher.js'
 import CLIPMatcher from './CLIPMatcher.js'
 import SmartCache from './SmartCache.js'
 import OfflineSupport from './OfflineSupport.js'
+import {
+  findRecipe,
+  searchRecipes,
+  searchRecipesByKeyword,
+  getRecommendedRecipes,
+  getAllRecipes,
+  getRecipeStats
+} from '../data/curatedMaterialRecipes.js'
 
 class MaterialService {
   constructor() {
@@ -1589,6 +1597,151 @@ class MaterialService {
     } catch (error) {
       console.warn('素材服务优化失败:', error)
     }
+  }
+
+  // ==================== 精选素材配方库方法 ====================
+
+  /**
+   * 获取精选素材（使用配方）
+   * @param {string} recipeId - 配方ID
+   * @returns {Promise<Object>} 素材对象
+   */
+  async getCuratedMaterial(recipeId) {
+    const recipe = findRecipe(recipeId)
+    if (!recipe) {
+      throw new Error(`配方不存在: ${recipeId}`)
+    }
+
+    console.log(`💎 获取精选素材: ${recipe.name}`)
+
+    // 1. 先查SmartCache
+    const cached = await this.smartCache.search(recipe.searchQuery, {
+      limit: 1
+    })
+
+    if (cached.length > 0) {
+      console.log(`💾 使用缓存的精选素材: ${recipe.name}`)
+      return {
+        ...cached[0],
+        recipe: recipe,
+        isCurated: true,
+        source: 'cache'
+      }
+    }
+
+    // 2. 使用配方从外部API获取
+    console.log(`🔍 使用配方获取素材: ${recipe.name}`)
+    const results = await this.searchMaterials(recipe.searchQuery, {
+      limit: 5,
+      platforms: recipe.platforms,
+      filters: recipe.filters
+    })
+
+    if (results.materials.length === 0) {
+      throw new Error(`未找到符合配方的素材: ${recipe.name}`)
+    }
+
+    // 3. 返回最佳匹配
+    return {
+      ...results.materials[0],
+      recipe: recipe,
+      isCurated: true,
+      source: results.source
+    }
+  }
+
+  /**
+   * 获取推荐的精选素材
+   * @param {Object} context - 上下文信息
+   * @param {number} limit - 返回数量限制
+   * @returns {Promise<Array>} 精选素材数组
+   */
+  async getRecommendedCuratedMaterials(context, limit = 10) {
+    console.log('💎 获取推荐的精选素材...')
+
+    const recipes = getRecommendedRecipes(context)
+    const materials = []
+
+    for (const recipe of recipes.slice(0, limit)) {
+      try {
+        const material = await this.getCuratedMaterial(recipe.id)
+        materials.push(material)
+      } catch (error) {
+        console.warn(`获取精选素材失败: ${recipe.name}`, error)
+      }
+    }
+
+    console.log(`✅ 获取到 ${materials.length} 个精选素材`)
+    return materials
+  }
+
+  /**
+   * 浏览精选素材库
+   * @param {string|null} category - 类别名称（可选）
+   * @returns {Array} 配方数组
+   */
+  browseCuratedLibrary(category = null) {
+    if (category) {
+      const allRecipes = getAllRecipes()
+      return allRecipes[category] || []
+    }
+
+    // 返回所有配方
+    const allRecipes = getAllRecipes()
+    const result = []
+    for (const [cat, recipes] of Object.entries(allRecipes)) {
+      result.push(...recipes.map(r => ({ ...r, category: cat })))
+    }
+
+    return result
+  }
+
+  /**
+   * 搜索精选配方
+   * @param {string} keyword - 搜索关键词
+   * @returns {Array} 匹配的配方数组
+   */
+  searchCuratedRecipes(keyword) {
+    return searchRecipesByKeyword(keyword)
+  }
+
+  /**
+   * 按标签搜索配方
+   * @param {Array<string>} tags - 标签数组
+   * @returns {Array} 匹配的配方数组
+   */
+  searchRecipesByTags(tags) {
+    return searchRecipes(tags)
+  }
+
+  /**
+   * 获取配方库统计信息
+   * @returns {Object} 统计信息
+   */
+  getCuratedLibraryStats() {
+    return getRecipeStats()
+  }
+
+  /**
+   * 批量获取精选素材（按配方ID列表）
+   * @param {Array<string>} recipeIds - 配方ID数组
+   * @returns {Promise<Array>} 素材数组
+   */
+  async getCuratedMaterialsBatch(recipeIds) {
+    console.log(`💎 批量获取 ${recipeIds.length} 个精选素材...`)
+
+    const materials = []
+    for (const recipeId of recipeIds) {
+      try {
+        const material = await this.getCuratedMaterial(recipeId)
+        materials.push(material)
+      } catch (error) {
+        console.warn(`获取精选素材失败: ${recipeId}`, error)
+      }
+    }
+
+    console.log(`✅ 成功获取 ${materials.length}/${recipeIds.length} 个精选素材`)
+    return materials
   }
 }
 

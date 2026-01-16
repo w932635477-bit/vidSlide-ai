@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>精选素材配方库测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .test-section h2 {
+      margin-top: 0;
+      color: #ffd700;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    #log {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid;
+    }
+    .log-info { border-color: #3498db; }
+    .log-success { border-color: #2ecc71; }
+    .log-warning { border-color: #f39c12; }
+    .log-error { border-color: #e74c3c; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 15px;
+    }
+    .stat-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #ffd700;
+    }
+    .stat-card p {
+      margin: 5px 0;
+      font-size: 13px;
+    }
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .recipe-card {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .recipe-card:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    .recipe-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #ffd700;
+    }
+    .recipe-desc {
+      font-size: 13px;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+    .recipe-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .tag {
+      padding: 3px 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    .material-preview {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .material-preview img {
+      max-width: 100%;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💎 精选素材配方库测试</h1>
+
+    <div class="test-section">
+      <h2>📋 测试说明</h2>
+      <p>本页面测试精选素材配方库的功能。配方库只存储搜索策略，不存储实际文件。</p>
+      <p>测试流程：</p>
+      <ol>
+        <li>初始化服务</li>
+        <li>浏览配方库（查看所有配方）</li>
+        <li>搜索配方（按关键词）</li>
+        <li>获取推荐配方（基于上下文）</li>
+        <li>使用配方获取素材（从外部API或缓存）</li>
+      </ol>
+    </div>
+
+    <div class="test-section">
+      <h2>🧪 测试操作</h2>
+      <button onclick="testInitialization()">1. 初始化服务</button>
+      <button onclick="testBrowseRecipes()">2. 浏览配方库</button>
+      <button onclick="testSearchRecipes()">3. 搜索配方</button>
+      <button onclick="testRecommendedRecipes()">4. 获取推荐配方</button>
+      <button onclick="testGetCuratedMaterial()">5. 使用配方获取素材</button>
+      <button onclick="testBatchGetMaterials()">6. 批量获取素材</button>
+      <button onclick="testRecipeStats()">7. 查看配方统计</button>
+      <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+      <h2>📊 配方库统计</h2>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <h3>配方总数</h3>
+          <p id="total-recipes">-</p>
+        </div>
+        <div class="stat-card">
+          <h3>类别数量</h3>
+          <p id="total-categories">-</p>
+        </div>
+        <div class="stat-card">
+          <h3>高优先级配方</h3>
+          <p id="high-priority-recipes">-</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>🎨 配方展示</h2>
+      <div class="recipe-grid" id="recipe-grid"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>🖼️ 素材预览</h2>
+      <div class="material-preview" id="material-preview">
+        <p>点击"使用配方获取素材"按钮查看素材</p>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>📝 测试日志</h2>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import MaterialService from './src/services/MaterialService.js'
+    import {
+      getAllRecipes,
+      searchRecipesByKeyword,
+      getRecommendedRecipes,
+      getRecipeStats
+    } from './src/data/curatedMaterialRecipes.js'
+
+    // 全局变量
+    window.materialService = MaterialService
+    window.getAllRecipes = getAllRecipes
+    window.searchRecipesByKeyword = searchRecipesByKeyword
+    window.getRecommendedRecipes = getRecommendedRecipes
+    window.getRecipeStats = getRecipeStats
+
+    // 日志函数
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log')
+      const entry = document.createElement('div')
+      entry.className = `log-entry log-${type}`
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      logDiv.appendChild(entry)
+      logDiv.scrollTop = logDiv.scrollHeight
+      console.log(message)
+    }
+
+    window.log = log
+
+    // 清空日志
+    window.clearLog = function() {
+      document.getElementById('log').innerHTML = ''
+      log('日志已清空', 'info')
+    }
+
+    // 更新统计显示
+    function updateStats() {
+      const stats = getRecipeStats()
+      document.getElementById('total-recipes').textContent = stats.total
+      document.getElementById('total-categories').textContent = stats.categories
+
+      // 计算高优先级配方数量
+      const allRecipes = getAllRecipes()
+      let highPriorityCount = 0
+      for (const recipes of Object.values(allRecipes)) {
+        highPriorityCount += recipes.filter(r => r.priority === 'high').length
+      }
+      document.getElementById('high-priority-recipes').textContent = highPriorityCount
+    }
+
+    // 显示配方卡片
+    function displayRecipes(recipes) {
+      const grid = document.getElementById('recipe-grid')
+      grid.innerHTML = ''
+
+      recipes.forEach(recipe => {
+        const card = document.createElement('div')
+        card.className = 'recipe-card'
+        card.innerHTML = `
+          <div class="recipe-name">${recipe.name}</div>
+          <div class="recipe-desc">${recipe.description}</div>
+          <div class="recipe-tags">
+            ${recipe.tags.slice(0, 4).map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+        `
+        card.onclick = () => {
+          log(`选中配方: ${recipe.name}`, 'info')
+          window.selectedRecipe = recipe
+        }
+        grid.appendChild(card)
+      })
+    }
+
+    // 测试1: 初始化服务
+    window.testInitialization = async function() {
+      log('开始初始化服务...', 'info')
+
+      try {
+        await window.materialService.initialize()
+        log('✓ 服务初始化成功', 'success')
+        updateStats()
+      } catch (error) {
+        log(`✗ 初始化失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试2: 浏览配方库
+    window.testBrowseRecipes = function() {
+      log('浏览配方库...', 'info')
+
+      try {
+        const allRecipes = window.materialService.browseCuratedLibrary()
+        log(`✓ 找到 ${allRecipes.length} 个配方`, 'success')
+
+        // 按类别分组显示
+        const byCategory = {}
+        allRecipes.forEach(recipe => {
+          if (!byCategory[recipe.category]) {
+            byCategory[recipe.category] = []
+          }
+          byCategory[recipe.category].push(recipe)
+        })
+
+        for (const [category, recipes] of Object.entries(byCategory)) {
+          log(`  - ${category}: ${recipes.length} 个配方`, 'info')
+        }
+
+        displayRecipes(allRecipes)
+      } catch (error) {
+        log(`✗ 浏览失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试3: 搜索配方
+    window.testSearchRecipes = function() {
+      const keyword = prompt('请输入搜索关键词:', '科技')
+      if (!keyword) return
+
+      log(`搜索配方: "${keyword}"...`, 'info')
+
+      try {
+        const results = window.materialService.searchCuratedRecipes(keyword)
+        log(`✓ 找到 ${results.length} 个匹配的配方`, 'success')
+
+        results.forEach(recipe => {
+          log(`  - ${recipe.name} (${recipe.category})`, 'info')
+        })
+
+        displayRecipes(results)
+      } catch (error) {
+        log(`✗ 搜索失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试4: 获取推荐配方
+    window.testRecommendedRecipes = function() {
+      log('获取推荐配方...', 'info')
+
+      try {
+        const context = {
+          keywords: ['科技', 'AI', '人工智能', '数据'],
+          type: 'mixed',
+          scene: 'presentation'
+        }
+
+        const recipes = getRecommendedRecipes(context)
+        log(`✓ 获取到 ${recipes.length} 个推荐配方`, 'success')
+
+        recipes.forEach(recipe => {
+          log(`  - ${recipe.name} (优先级: ${recipe.priority})`, 'info')
+        })
+
+        displayRecipes(recipes)
+      } catch (error) {
+        log(`✗ 获取失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试5: 使用配方获取素材
+    window.testGetCuratedMaterial = async function() {
+      if (!window.selectedRecipe) {
+        log('⚠ 请先选择一个配方', 'warning')
+        return
+      }
+
+      const recipe = window.selectedRecipe
+      log(`使用配方获取素材: ${recipe.name}...`, 'info')
+
+      try {
+        const material = await window.materialService.getCuratedMaterial(recipe.id)
+        log(`✓ 获取到素材`, 'success')
+        log(`  - 来源: ${material.source}`, 'info')
+        log(`  - URL: ${material.url || material.imageUrl}`, 'info')
+
+        // 显示素材预览
+        const preview = document.getElementById('material-preview')
+        preview.innerHTML = `
+          <h3>${recipe.name}</h3>
+          <p>${recipe.description}</p>
+          <p><strong>来源:</strong> ${material.source}</p>
+          <p><strong>URL:</strong> <a href="${material.url || material.imageUrl}" target="_blank">${material.url || material.imageUrl}</a></p>
+          ${material.imageUrl ? `<img src="${material.imageUrl}" alt="${recipe.name}">` : ''}
+        `
+      } catch (error) {
+        log(`✗ 获取失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试6: 批量获取素材
+    window.testBatchGetMaterials = async function() {
+      log('批量获取素材...', 'info')
+
+      try {
+        const recipeIds = ['tech-bg-001', 'biz-meeting-001', 'data-chart-001']
+        log(`  - 配方ID: ${recipeIds.join(', ')}`, 'info')
+
+        const materials = await window.materialService.getCuratedMaterialsBatch(recipeIds)
+        log(`✓ 成功获取 ${materials.length} 个素材`, 'success')
+
+        materials.forEach((material, index) => {
+          log(`  ${index + 1}. ${material.recipe.name} (来源: ${material.source})`, 'info')
+        })
+      } catch (error) {
+        log(`✗ 批量获取失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试7: 查看配方统计
+    window.testRecipeStats = function() {
+      log('查看配方统计...', 'info')
+
+      try {
+        const stats = window.materialService.getCuratedLibraryStats()
+        log(`✓ 配方库统计:`, 'success')
+        log(`  - 总配方数: ${stats.total}`, 'info')
+        log(`  - 类别数: ${stats.categories}`, 'info')
+
+        for (const [category, count] of Object.entries(stats.breakdown)) {
+          log(`  - ${category}: ${count} 个配方`, 'info')
+        }
+
+        updateStats()
+      } catch (error) {
+        log(`✗ 获取统计失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 页面加载时自动初始化
+    window.addEventListener('load', async () => {
+      log('页面加载完成，准备测试...', 'info')
+      log('点击 "1. 初始化服务" 开始测试', 'info')
+      updateStats()
+    })
+  </script>
+</body>
+</html>

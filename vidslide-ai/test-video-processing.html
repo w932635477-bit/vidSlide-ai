@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>视频处理服务测试 - VidSlide AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .upload-area {
+      border: 2px dashed #667eea;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .upload-area:hover {
+      border-color: #764ba2;
+      background: #f0f4ff;
+    }
+
+    .upload-area.drag-over {
+      border-color: #10b981;
+      background: #f0fdf4;
+      transform: scale(1.02);
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .upload-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .video-preview {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .video-preview video {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-section {
+      margin-top: 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .result-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .result-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .result-card-info {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .scene-list {
+      margin-top: 20px;
+    }
+
+    .scene-item {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .scene-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .scene-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .scene-duration {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .scene-stats {
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .keyword-tag {
+      padding: 6px 12px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .log-section {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .log-entry {
+      margin-bottom: 5px;
+      padding: 5px;
+      border-left: 3px solid #667eea;
+      padding-left: 10px;
+    }
+
+    .log-entry.success {
+      border-left-color: #10b981;
+    }
+
+    .log-entry.error {
+      border-left-color: #ef4444;
+    }
+
+    .log-entry.warning {
+      border-left-color: #f59e0b;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-box {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎬 视频处理服务测试</h1>
+      <p>测试视频上传、关键帧提取、场景检测、语音识别等功能</p>
+    </div>
+
+    <div class="content">
+      <!-- 视频上传区域 -->
+      <div class="section">
+        <div class="section-title">
+          <span>📤</span>
+          <span>1. 上传视频</span>
+        </div>
+        <div
+          id="uploadArea"
+          class="upload-area"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          <div class="upload-icon">🎥</div>
+          <h3>点击或拖拽上传视频文件</h3>
+          <p style="margin: 10px 0; color: #6b7280;">支持 MP4, AVI, MOV, WMV 格式</p>
+          <button class="upload-btn">选择文件</button>
+          <input
+            type="file"
+            id="fileInput"
+            accept="video/*"
+            style="display: none;"
+          />
+        </div>
+
+        <div id="videoPreview" class="video-preview" style="display: none;">
+          <video id="videoElement" controls></video>
+          <div style="margin-top: 15px; text-align: left;">
+            <p><strong>文件名:</strong> <span id="fileName"></span></p>
+            <p><strong>时长:</strong> <span id="duration"></span></p>
+            <p><strong>分辨率:</strong> <span id="resolution"></span></p>
+            <p><strong>文件大小:</strong> <span id="fileSize"></span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 处理控制 -->
+      <div class="section">
+        <div class="section-title">
+          <span>⚙️</span>
+          <span>2. 处理控制</span>
+        </div>
+        <div class="controls">
+          <button id="extractKeyframesBtn" class="btn btn-primary" disabled>
+            提取关键帧
+          </button>
+          <button id="detectScenesBtn" class="btn btn-primary" disabled>
+            检测场景
+          </button>
+          <button id="recognizeSpeechBtn" class="btn btn-primary" disabled>
+            语音识别
+          </button>
+          <button id="processAllBtn" class="btn btn-primary" disabled>
+            完整处理
+          </button>
+          <button id="resetBtn" class="btn btn-secondary">
+            重置
+          </button>
+        </div>
+
+        <div id="progressSection" class="progress-section" style="display: none;">
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="progress-info">
+            <span id="progressText">准备中...</span>
+            <span id="progressPercent">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 统计信息 -->
+      <div id="statsSection" class="section" style="display: none;">
+        <div class="section-title">
+          <span>📊</span>
+          <span>3. 统计信息</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="keyframesCount">0</div>
+            <div class="stat-label">关键帧数量</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="scenesCount">0</div>
+            <div class="stat-label">场景数量</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="keywordsCount">0</div>
+            <div class="stat-label">关键词数量</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="segmentsCount">0</div>
+            <div class="stat-label">分段数量</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 关键帧展示 -->
+      <div id="keyframesSection" class="section" style="display: none;">
+        <div class="section-title">
+          <span>🖼️</span>
+          <span>4. 关键帧</span>
+        </div>
+        <div id="keyframesGrid" class="results-grid"></div>
+      </div>
+
+      <!-- 场景展示 -->
+      <div id="scenesSection" class="section" style="display: none;">
+        <div class="section-title">
+          <span>🎞️</span>
+          <span>5. 场景</span>
+        </div>
+        <div id="scenesList" class="scene-list"></div>
+      </div>
+
+      <!-- 关键词展示 -->
+      <div id="keywordsSection" class="section" style="display: none;">
+        <div class="section-title">
+          <span>🔑</span>
+          <span>6. 关键词</span>
+        </div>
+        <div id="keywordsList" class="keywords-list"></div>
+      </div>
+
+      <!-- 日志 -->
+      <div class="section">
+        <div class="section-title">
+          <span>📝</span>
+          <span>7. 处理日志</span>
+        </div>
+        <div id="logSection" class="log-section"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { VideoProcessingService } from './src/services/VideoProcessingService.js'
+    import { SceneDetector } from './src/services/SceneDetector.js'
+
+    // 初始化服务
+    const videoService = new VideoProcessingService()
+    const sceneDetector = new SceneDetector()
+
+    // DOM元素
+    const uploadArea = document.getElementById('uploadArea')
+    const fileInput = document.getElementById('fileInput')
+    const videoPreview = document.getElementById('videoPreview')
+    const videoElement = document.getElementById('videoElement')
+    const progressSection = document.getElementById('progressSection')
+    const progressFill = document.getElementById('progressFill')
+    const progressText = document.getElementById('progressText')
+    const progressPercent = document.getElementById('progressPercent')
+    const logSection = document.getElementById('logSection')
+
+    // 按钮
+    const extractKeyframesBtn = document.getElementById('extractKeyframesBtn')
+    const detectScenesBtn = document.getElementById('detectScenesBtn')
+    const recognizeSpeechBtn = document.getElementById('recognizeSpeechBtn')
+    const processAllBtn = document.getElementById('processAllBtn')
+    const resetBtn = document.getElementById('resetBtn')
+
+    // 日志函数
+    function log(message, type = 'info') {
+      const entry = document.createElement('div')
+      entry.className = `log-entry ${type}`
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      logSection.appendChild(entry)
+      logSection.scrollTop = logSection.scrollHeight
+    }
+
+    // 更新进度
+    function updateProgress(progress, text) {
+      progressSection.style.display = 'block'
+      progressFill.style.width = `${progress}%`
+      progressPercent.textContent = `${Math.round(progress)}%`
+      progressText.textContent = text
+    }
+
+    // 格式化时间
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60)
+      const secs = Math.floor(seconds % 60)
+      return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    // 格式化文件大小
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 B'
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+    }
+
+    // 文件上传处理
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        await handleVideoUpload(file)
+      }
+    })
+
+    // 拖拽上传
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault()
+      uploadArea.classList.add('drag-over')
+    })
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('drag-over')
+    })
+
+    uploadArea.addEventListener('drop', async (e) => {
+      e.preventDefault()
+      uploadArea.classList.remove('drag-over')
+      const file = e.dataTransfer.files[0]
+      if (file && file.type.startsWith('video/')) {
+        await handleVideoUpload(file)
+      }
+    })
+
+    // 处理视频上传
+    async function handleVideoUpload(file) {
+      try {
+        log('开始加载视频...', 'info')
+        updateProgress(5, '加载视频文件...')
+
+        const metadata = await videoService.loadVideo(file)
+
+        // 显示视频预览
+        videoElement.src = URL.createObjectURL(file)
+        videoPreview.style.display = 'block'
+
+        // 显示元数据
+        document.getElementById('fileName').textContent = metadata.fileName
+        document.getElementById('duration').textContent = formatTime(metadata.duration)
+        document.getElementById('resolution').textContent = `${metadata.width} x ${metadata.height}`
+        document.getElementById('fileSize').textContent = formatFileSize(metadata.fileSize)
+
+        // 启用按钮
+        extractKeyframesBtn.disabled = false
+        detectScenesBtn.disabled = false
+        recognizeSpeechBtn.disabled = false
+        processAllBtn.disabled = false
+
+        updateProgress(100, '视频加载完成')
+        log(`视频加载成功: ${metadata.fileName}`, 'success')
+
+        setTimeout(() => {
+          progressSection.style.display = 'none'
+        }, 2000)
+      } catch (error) {
+        log(`视频加载失败: ${error.message}`, 'error')
+        console.error(error)
+      }
+    }
+
+    // 提取关键帧
+    extractKeyframesBtn.addEventListener('click', async () => {
+      try {
+        log('开始提取关键帧...', 'info')
+        extractKeyframesBtn.disabled = true
+
+        const keyframes = await videoService.extractKeyframes({
+          interval: 2,
+          maxFrames: 30,
+          quality: 0.8
+        })
+
+        // 显示关键帧
+        displayKeyframes(keyframes)
+
+        // 更新统计
+        document.getElementById('keyframesCount').textContent = keyframes.length
+        document.getElementById('statsSection').style.display = 'block'
+
+        log(`成功提取 ${keyframes.length} 个关键帧`, 'success')
+        extractKeyframesBtn.disabled = false
+      } catch (error) {
+        log(`关键帧提取失败: ${error.message}`, 'error')
+        console.error(error)
+        extractKeyframesBtn.disabled = false
+      }
+    })
+
+    // 检测场景
+    detectScenesBtn.addEventListener('click', async () => {
+      try {
+        log('开始检测场景...', 'info')
+        detectScenesBtn.disabled = true
+
+        const scenes = await videoService.detectScenes()
+
+        // 显示场景
+        displayScenes(scenes)
+
+        // 更新统计
+        document.getElementById('scenesCount').textContent = scenes.length
+        document.getElementById('statsSection').style.display = 'block'
+
+        log(`成功检测 ${scenes.length} 个场景`, 'success')
+        detectScenesBtn.disabled = false
+      } catch (error) {
+        log(`场景检测失败: ${error.message}`, 'error')
+        console.error(error)
+        detectScenesBtn.disabled = false
+      }
+    })
+
+    // 完整处理
+    processAllBtn.addEventListener('click', async () => {
+      try {
+        log('开始完整处理流程...', 'info')
+        processAllBtn.disabled = true
+
+        const result = await videoService.processVideo(
+          videoService.videoFile,
+          {
+            keyframe: { interval: 2, maxFrames: 30 },
+            segment: { minSegmentDuration: 10, maxSegmentDuration: 60 }
+          },
+          (progress) => {
+            updateProgress(progress.progress, `处理中: ${progress.step}`)
+            log(`${progress.step}: ${progress.progress}%`, 'info')
+          }
+        )
+
+        // 显示所有结果
+        displayKeyframes(result.keyframes)
+        displayScenes(result.scenes)
+
+        // 更新统计
+        document.getElementById('keyframesCount').textContent = result.keyframes.length
+        document.getElementById('scenesCount').textContent = result.scenes.length
+        document.getElementById('segmentsCount').textContent = result.segments.length
+        document.getElementById('statsSection').style.display = 'block'
+
+        log('完整处理流程完成', 'success')
+        processAllBtn.disabled = false
+      } catch (error) {
+        log(`处理失败: ${error.message}`, 'error')
+        console.error(error)
+        processAllBtn.disabled = false
+      }
+    })
+
+    // 重置
+    resetBtn.addEventListener('click', () => {
+      videoService.reset()
+      videoPreview.style.display = 'none'
+      progressSection.style.display = 'none'
+      document.getElementById('statsSection').style.display = 'none'
+      document.getElementById('keyframesSection').style.display = 'none'
+      document.getElementById('scenesSection').style.display = 'none'
+      document.getElementById('keywordsSection').style.display = 'none'
+      logSection.innerHTML = ''
+
+      extractKeyframesBtn.disabled = true
+      detectScenesBtn.disabled = true
+      recognizeSpeechBtn.disabled = true
+      processAllBtn.disabled = true
+
+      log('已重置', 'info')
+    })
+
+    // 显示关键帧
+    function displayKeyframes(keyframes) {
+      const grid = document.getElementById('keyframesGrid')
+      grid.innerHTML = ''
+
+      keyframes.forEach((kf, index) => {
+        const card = document.createElement('div')
+        card.className = 'result-card'
+        card.innerHTML = `
+          <img src="${kf.thumbnailUrl}" alt="关键帧 ${index + 1}">
+          <div class="result-card-title">关键帧 ${index + 1}</div>
+          <div class="result-card-info">
+            时间: ${formatTime(kf.timestamp)}<br>
+            重要性: ${(kf.importance * 100).toFixed(1)}%
+          </div>
+        `
+        grid.appendChild(card)
+      })
+
+      document.getElementById('keyframesSection').style.display = 'block'
+    }
+
+    // 显示场景
+    function displayScenes(scenes) {
+      const list = document.getElementById('scenesList')
+      list.innerHTML = ''
+
+      scenes.forEach((scene, index) => {
+        const item = document.createElement('div')
+        item.className = 'scene-item'
+        item.innerHTML = `
+          <div class="scene-header">
+            <div class="scene-title">${scene.title || `场景 ${index + 1}`}</div>
+            <div class="scene-duration">${formatTime(scene.startTime)} - ${formatTime(scene.endTime)}</div>
+          </div>
+          <div class="scene-stats">
+            <span>关键帧: ${scene.keyframes.length}</span>
+            <span>时长: ${formatTime(scene.endTime - scene.startTime)}</span>
+          </div>
+        `
+        list.appendChild(item)
+      })
+
+      document.getElementById('scenesSection').style.display = 'block'
+    }
+
+    log('视频处理服务已初始化', 'success')
+  </script>
+</body>
+</html>

@@ -58,6 +58,47 @@
       </div>
     </section>
 
+    <!-- 精选素材推荐 -->
+    <section
+      v-if="recommendedRecipes.length > 0"
+      class="curated-section"
+      role="complementary"
+      aria-labelledby="curated-heading"
+    >
+      <h3 id="curated-heading" class="section-title">💎 精选素材推荐</h3>
+      <p class="section-hint">基于您的内容，我们推荐以下精选素材</p>
+
+      <div class="curated-grid">
+        <div
+          v-for="recipe in recommendedRecipes"
+          :key="recipe.id"
+          class="recipe-card"
+          @click="useCuratedMaterial(recipe)"
+          @keydown.enter="useCuratedMaterial(recipe)"
+          @keydown.space="useCuratedMaterial(recipe)"
+          role="button"
+          tabindex="0"
+          :aria-label="`使用精选素材 ${recipe.name}`"
+        >
+          <div class="recipe-icon">🎨</div>
+          <div class="recipe-name">{{ recipe.name }}</div>
+          <div class="recipe-desc">{{ recipe.description }}</div>
+          <div class="recipe-tags">
+            <span
+              v-for="tag in recipe.tags.slice(0, 3)"
+              :key="tag"
+              class="tag"
+            >
+              {{ tag }}
+            </span>
+          </div>
+          <button class="use-btn" @click.stop="useCuratedMaterial(recipe)">
+            使用此素材
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- 素材需求列表 -->
     <section
       class="requirements-section"
@@ -435,6 +476,8 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import MaterialService from '../services/MaterialService.js'
+import { getRecommendedRecipes } from '../data/curatedMaterialRecipes.js'
 
 // Props
 const props = defineProps({
@@ -473,6 +516,7 @@ const analysisProgress = ref(0)
 const selectedType = ref('all')
 const selectedPriority = ref('all')
 const detailRequirement = ref(null)
+const recommendedRecipes = ref([])
 
 // Computed properties
 const filteredRequirements = computed(() => {
@@ -756,8 +800,54 @@ const showRequirementDetails = (requirement) => {
   detailRequirement.value = requirement
 }
 
-const closeDetailModal = () => {
+const closeRequirementDetails = () => {
   detailRequirement.value = null
+}
+
+// 精选素材推荐相关方法
+const updateRecommendedRecipes = () => {
+  if (props.keywords.length === 0) {
+    recommendedRecipes.value = []
+    return
+  }
+
+  const context = {
+    keywords: props.keywords.map(k => k.text),
+    type: 'mixed',
+    scene: 'presentation'
+  }
+
+  const recipes = getRecommendedRecipes(context)
+  recommendedRecipes.value = recipes.slice(0, 6) // 最多显示6个推荐
+  console.log('💎 更新精选素材推荐:', recommendedRecipes.value.length)
+}
+
+const useCuratedMaterial = async (recipe) => {
+  try {
+    console.log('💎 使用精选素材:', recipe.name)
+
+    // 初始化MaterialService
+    await MaterialService.initialize()
+
+    // 获取精选素材
+    const material = await MaterialService.getCuratedMaterial(recipe.id)
+
+    console.log('✅ 获取到精选素材:', material)
+
+    // 可以在这里显示素材预览或直接添加到画布
+    // 暂时通过emit发送事件
+    emit('material-search-requested', {
+      id: recipe.id,
+      title: recipe.name,
+      description: recipe.description,
+      type: 'curated',
+      priority: recipe.priority,
+      relatedKeywords: recipe.tags,
+      material: material
+    })
+  } catch (error) {
+    console.error('❌ 获取精选素材失败:', error)
+  }
 }
 
 const clearSelection = () => {
@@ -824,7 +914,9 @@ watch(() => props.keywords, (newKeywords) => {
   if (newKeywords.length > 0 && props.autoAnalyze) {
     startAnalysis()
   }
-}, { deep: true })
+  // 更新精选素材推荐
+  updateRecommendedRecipes()
+}, { deep: true, immediate: true })
 
 watch(() => props.keyframes, (newKeyframes) => {
   if (newKeyframes.length > 0 && props.autoAnalyze) {
@@ -843,6 +935,8 @@ onMounted(() => {
   if (props.autoAnalyze && hasInputData.value) {
     startAnalysis()
   }
+  // 初始化精选素材推荐
+  updateRecommendedRecipes()
 })
 
 // Expose methods for parent component
@@ -1684,6 +1778,115 @@ defineExpose({
   border: 0;
 }
 
+/* 精选素材推荐样式 */
+.curated-section {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.9);
+  margin: 0 0 8px 0;
+}
+
+.section-hint {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0 0 20px 0;
+}
+
+.curated-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.recipe-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.recipe-card:focus {
+  outline: 2px solid rgba(255, 215, 0, 0.6);
+  outline-offset: 2px;
+}
+
+.recipe-icon {
+  font-size: 32px;
+  text-align: center;
+}
+
+.recipe-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.9);
+  text-align: center;
+}
+
+.recipe-desc {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+  line-height: 1.4;
+  min-height: 40px;
+}
+
+.recipe-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.recipe-tags .tag {
+  padding: 4px 10px;
+  background: rgba(255, 215, 0, 0.15);
+  border-radius: 12px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+
+.use-btn {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.9) 0%, rgba(255, 165, 0, 0.9) 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.use-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 1) 0%, rgba(255, 165, 0, 1) 100%);
+  transform: scale(1.05);
+}
+
+.use-btn:active {
+  transform: scale(0.98);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .material-requirement-analyzer {
@@ -1694,6 +1897,10 @@ defineExpose({
   .overview-stats {
     flex-direction: column;
     gap: 12px;
+  }
+
+  .curated-grid {
+    grid-template-columns: 1fr;
   }
 
   .requirements-controls {
