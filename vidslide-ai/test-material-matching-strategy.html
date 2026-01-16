@@ -247,101 +247,150 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎯 素材匹配策略测试</h1>
+    <h1>🎯 素材搜索策略测试（外部优先）</h1>
 
-    <!-- 测试1: 本地匹配度计算 -->
+    <!-- 策略说明 -->
+    <div class="test-section">
+      <h2>📖 新策略说明</h2>
+      <p style="color: rgba(255,255,255,0.7); line-height: 1.6; margin-top: 12px;">
+        <strong>外部优先策略</strong>：优先使用外部API（Unsplash、Pexels等）搜索素材，失败时降级到本地缓存，最后降级到预置素材。<br>
+        <strong>优势</strong>：无限素材库、始终最新、零维护成本、更简洁的用户体验。
+      </p>
+    </div>
+
+    <!-- 测试1: 外部API搜索 -->
     <div class="test-section">
       <h2>
-        <span>测试1: 本地匹配度计算</span>
-        <span class="status-badge pending" id="match-rate-status">待测试</span>
+        <span>测试1: 外部API搜索（优先策略）</span>
+        <span class="status-badge pending" id="external-search-status">待测试</span>
       </h2>
 
       <div class="test-grid">
         <div class="test-card">
-          <h3>📊 高匹配度场景（≥80%）</h3>
-          <p>测试关键词: "科技", "商务", "办公"</p>
-          <button class="btn btn-primary" onclick="testHighMatchRate()">开始测试</button>
-          <div id="high-match-results" class="result-box" style="display: none;"></div>
+          <h3>🌐 通用关键词搜索</h3>
+          <p>测试关键词: "technology", "business"</p>
+          <button class="btn btn-primary" onclick="testExternalSearch()">开始测试</button>
+          <div id="external-search-results" class="result-box" style="display: none;"></div>
         </div>
 
         <div class="test-card">
-          <h3>📉 低匹配度场景（&lt;80%）</h3>
-          <p>测试关键词: "纽约城市景观", "埃菲尔铁塔"</p>
-          <button class="btn btn-primary" onclick="testLowMatchRate()">开始测试</button>
-          <div id="low-match-results" class="result-box" style="display: none;"></div>
+          <h3>🇨🇳 中文关键词搜索</h3>
+          <p>测试关键词: "科技", "商务"</p>
+          <button class="btn btn-primary" onclick="testChineseSearch()">开始测试</button>
+          <div id="chinese-search-results" class="result-box" style="display: none;"></div>
         </div>
 
         <div class="test-card">
-          <h3>🔍 自定义关键词测试</h3>
+          <h3>🔍 自定义关键词搜索</h3>
           <div class="input-group">
-            <label>输入关键词（逗号分隔）:</label>
-            <input type="text" id="custom-keywords" placeholder="例如: 科技, 创新, AI">
+            <label>输入关键词:</label>
+            <input type="text" id="custom-keywords" placeholder="例如: AI, innovation">
           </div>
-          <button class="btn btn-primary" onclick="testCustomMatchRate()">测试匹配度</button>
-          <div id="custom-match-results" class="result-box" style="display: none;"></div>
+          <button class="btn btn-primary" onclick="testCustomSearch()">搜索素材</button>
+          <div id="custom-search-results" class="result-box" style="display: none;"></div>
         </div>
       </div>
     </div>
 
-    <!-- 测试2: 匹配阈值判断 -->
+    <!-- 测试2: 缓存降级测试 -->
     <div class="test-section">
       <h2>
-        <span>测试2: 匹配阈值判断</span>
-        <span class="status-badge pending" id="threshold-status">待测试</span>
+        <span>测试2: 缓存降级机制</span>
+        <span class="status-badge pending" id="cache-status">待测试</span>
       </h2>
 
       <div class="test-grid">
         <div class="test-card">
-          <h3>✅ 精确匹配（≥90%）</h3>
-          <p>测试完全匹配的关键词</p>
-          <button class="btn btn-primary" onclick="testExactMatch()">开始测试</button>
-          <div id="exact-match-results" class="result-box" style="display: none;"></div>
+          <h3>💾 缓存搜索测试</h3>
+          <p>测试本地缓存素材搜索</p>
+          <button class="btn btn-primary" onclick="testCacheSearch()">测试缓存</button>
+          <div id="cache-search-results" class="result-box" style="display: none;"></div>
         </div>
 
         <div class="test-card">
-          <h3>🧠 语义相似（≥0.7）</h3>
-          <p>测试CLIP语义匹配</p>
-          <button class="btn btn-primary" onclick="testSemanticMatch()">开始测试</button>
-          <div id="semantic-match-results" class="result-box" style="display: none;"></div>
-        </div>
-
-        <div class="test-card">
-          <h3>🏢 行业相关</h3>
-          <p>测试行业关联匹配</p>
-          <button class="btn btn-primary" onclick="testIndustryMatch()">开始测试</button>
-          <div id="industry-match-results" class="result-box" style="display: none;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 测试3: 授权流程 -->
-    <div class="test-section">
-      <h2>
-        <span>测试3: 用户授权流程</span>
-        <span class="status-badge pending" id="auth-status">待测试</span>
-      </h2>
-
-      <div class="test-grid">
-        <div class="test-card">
-          <h3>🔓 触发授权对话框</h3>
-          <p>模拟本地匹配度&lt;80%的场景</p>
-          <button class="btn btn-primary" onclick="testAuthorizationTrigger()">触发授权</button>
-        </div>
-
-        <div class="test-card">
-          <h3>📊 授权统计</h3>
+          <h3>📊 缓存统计</h3>
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="value" id="auth-trigger-count">0</div>
-              <div class="label">触发次数</div>
+              <div class="value" id="cache-count">-</div>
+              <div class="label">缓存素材数</div>
             </div>
             <div class="stat-card">
-              <div class="value" id="auth-granted-count">0</div>
-              <div class="label">授权次数</div>
+              <div class="value" id="cache-size">-</div>
+              <div class="label">缓存大小</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top: 12px;" onclick="getCacheStats()">查看统计</button>
+        </div>
+
+        <div class="test-card">
+          <h3>🔄 强制本地模式</h3>
+          <p>测试仅使用本地缓存（模拟离线）</p>
+          <button class="btn btn-primary" onclick="testForceLocal()">测试离线模式</button>
+          <div id="force-local-results" class="result-box" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 测试3: 预置素材降级 -->
+    <div class="test-section">
+      <h2>
+        <span>测试3: 预置素材（最后降级）</span>
+        <span class="status-badge pending" id="preset-status">待测试</span>
+      </h2>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>📦 预置素材搜索</h3>
+          <p>测试8个预置素材的搜索</p>
+          <button class="btn btn-primary" onclick="testPresetSearch()">测试预置素材</button>
+          <div id="preset-search-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>📋 预置素材列表</h3>
+          <p>查看所有预置素材</p>
+          <button class="btn btn-primary" onclick="listPresetMaterials()">查看列表</button>
+          <div id="preset-list-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>🎯 分类测试</h3>
+          <p>测试不同分类的预置素材</p>
+          <button class="btn btn-primary" onclick="testPresetCategories()">测试分类</button>
+          <div id="preset-category-results" class="result-box" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 测试4: 完整降级流程 -->
+    <div class="test-section">
+      <h2>
+        <span>测试4: 完整降级流程</span>
+        <span class="status-badge pending" id="fallback-status">待测试</span>
+      </h2>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>🔄 外部→缓存→预置</h3>
+          <p>测试完整的三级降级流程</p>
+          <button class="btn btn-primary" onclick="testFullFallback()">测试降级</button>
+          <div id="fallback-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>📊 搜索统计</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="value" id="external-count">0</div>
+              <div class="label">外部搜索</div>
             </div>
             <div class="stat-card">
-              <div class="value" id="local-only-count">0</div>
-              <div class="label">仅本地次数</div>
+              <div class="value" id="cache-hit-count">0</div>
+              <div class="label">缓存命中</div>
+            </div>
+            <div class="stat-card">
+              <div class="value" id="preset-count">0</div>
+              <div class="label">预置素材</div>
             </div>
           </div>
         </div>
@@ -363,9 +412,9 @@
     // 全局变量
     window.materialService = materialService
     window.testStats = {
-      authTriggerCount: 0,
-      authGrantedCount: 0,
-      localOnlyCount: 0
+      externalCount: 0,
+      cacheHitCount: 0,
+      presetCount: 0
     }
 
     // 初始化服务
@@ -374,6 +423,7 @@
         log('初始化 MaterialService...', 'info')
         await window.materialService.initialize()
         log('✓ MaterialService 初始化成功', 'success')
+        log('✓ 策略: 外部优先 → 缓存降级 → 预置素材', 'info')
       } catch (error) {
         log(`✗ 初始化失败: ${error.message}`, 'error')
         console.error(error)
@@ -391,79 +441,80 @@
       logBox.scrollTop = logBox.scrollHeight
     }
 
-    // 测试1: 高匹配度场景
-    window.testHighMatchRate = async function() {
-      log('开始测试高匹配度场景...', 'info')
-      const resultsDiv = document.getElementById('high-match-results')
+    // 测试1: 外部API搜索
+    window.testExternalSearch = async function() {
+      log('开始测试外部API搜索...', 'info')
+      const resultsDiv = document.getElementById('external-search-results')
       resultsDiv.style.display = 'block'
-      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">计算中...</p>'
-
-      const keywords = ['科技', '商务', '办公']
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">搜索中...</p>'
 
       try {
-        const result = await window.materialService.calculateLocalMatchRate(keywords)
+        const result = await window.materialService.searchMaterials('technology business', {
+          limit: 10
+        })
 
-        log(`✓ 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, result.matchRate >= 0.8 ? 'success' : 'warning')
-        log(`  - 平均置信度: ${(result.avgConfidence * 100).toFixed(1)}%`, 'info')
-        log(`  - 关键词覆盖率: ${(result.coverageRate * 100).toFixed(1)}%`, 'info')
-
-        resultsDiv.innerHTML = `
-          <div class="result-item">
-            <div class="title">匹配度: ${(result.matchRate * 100).toFixed(1)}%</div>
-            <div class="meta">
-              置信度: ${(result.avgConfidence * 100).toFixed(1)}% |
-              覆盖率: ${(result.coverageRate * 100).toFixed(1)}% |
-              匹配素材: ${result.matchedCount}个
-            </div>
-          </div>
-          <div class="result-item">
-            <div class="title">覆盖关键词: ${result.coveredKeywords?.join(', ') || '无'}</div>
-            <div class="meta">未覆盖: ${result.uncoveredKeywords?.join(', ') || '无'}</div>
-          </div>
-        `
-
-        const status = document.getElementById('match-rate-status')
-        if (result.matchRate >= 0.8) {
-          status.className = 'status-badge success'
-          status.textContent = '✓ 通过'
-        } else {
-          status.className = 'status-badge error'
-          status.textContent = '✗ 失败'
+        log(`✓ 搜索成功: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
+        if (result.platforms) {
+          log(`  - 平台: ${result.platforms.join(', ')}`, 'info')
         }
+
+        if (result.source === 'external') {
+          window.testStats.externalCount++
+          document.getElementById('external-count').textContent = window.testStats.externalCount
+        }
+
+        resultsDiv.innerHTML = `
+          <div class="result-item">
+            <div class="title">找到 ${result.materials.length} 个素材</div>
+            <div class="meta">
+              来源: ${result.source} |
+              ${result.platforms ? `平台: ${result.platforms.join(', ')}` : ''}
+            </div>
+          </div>
+          ${result.materials.slice(0, 3).map(m => `
+            <div class="result-item">
+              <div class="title">${m.title || m.description || 'Untitled'}</div>
+              <div class="meta">ID: ${m.id} | 来源: ${m.source}</div>
+            </div>
+          `).join('')}
+        `
+
+        const status = document.getElementById('external-search-status')
+        status.className = 'status-badge success'
+        status.textContent = '✓ 通过'
       } catch (error) {
         log(`✗ 测试失败: ${error.message}`, 'error')
         resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
       }
     }
 
-    // 测试2: 低匹配度场景
-    window.testLowMatchRate = async function() {
-      log('开始测试低匹配度场景...', 'info')
-      const resultsDiv = document.getElementById('low-match-results')
+    // 测试2: 中文关键词搜索
+    window.testChineseSearch = async function() {
+      log('开始测试中文关键词搜索...', 'info')
+      const resultsDiv = document.getElementById('chinese-search-results')
       resultsDiv.style.display = 'block'
-      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">计算中...</p>'
-
-      const keywords = ['纽约城市景观', '埃菲尔铁塔']
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">搜索中...</p>'
 
       try {
-        const result = await window.materialService.calculateLocalMatchRate(keywords)
+        const result = await window.materialService.searchMaterials('科技 商务', {
+          limit: 10
+        })
 
-        log(`✓ 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, result.matchRate < 0.8 ? 'success' : 'warning')
-        log(`  - 应触发授权对话框: ${result.matchRate <= 0.8 ? '是' : '否'}`, result.matchRate <= 0.8 ? 'success' : 'error')
+        log(`✓ 搜索成功: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
 
         resultsDiv.innerHTML = `
           <div class="result-item">
-            <div class="title">匹配度: ${(result.matchRate * 100).toFixed(1)}%</div>
-            <div class="meta">
-              置信度: ${(result.avgConfidence * 100).toFixed(1)}% |
-              覆盖率: ${(result.coverageRate * 100).toFixed(1)}% |
-              匹配素材: ${result.matchedCount}个
+            <div class="title">找到 ${result.materials.length} 个素材</div>
+            <div class="meta">来源: ${result.source}</div>
+          </div>
+          ${result.materials.slice(0, 3).map(m => `
+            <div class="result-item">
+              <div class="title">${m.title || m.description || 'Untitled'}</div>
+              <div class="meta">ID: ${m.id}</div>
             </div>
-          </div>
-          <div class="result-item">
-            <div class="title">授权判断: ${result.matchRate <= 0.8 ? '需要授权' : '无需授权'}</div>
-            <div class="meta">${result.details}</div>
-          </div>
+          `).join('')}
         `
       } catch (error) {
         log(`✗ 测试失败: ${error.message}`, 'error')
@@ -471,42 +522,118 @@
       }
     }
 
-    // 测试3: 自定义关键词
-    window.testCustomMatchRate = async function() {
+    // 测试3: 自定义关键词搜索
+    window.testCustomSearch = async function() {
       const input = document.getElementById('custom-keywords')
-      const keywords = input.value.split(',').map(k => k.trim()).filter(k => k)
+      const keyword = input.value.trim()
 
-      if (keywords.length === 0) {
+      if (!keyword) {
         log('⚠ 请输入关键词', 'warning')
         return
       }
 
-      log(`开始测试自定义关键词: ${keywords.join(', ')}`, 'info')
-      const resultsDiv = document.getElementById('custom-match-results')
+      log(`开始搜索: "${keyword}"`, 'info')
+      const resultsDiv = document.getElementById('custom-search-results')
       resultsDiv.style.display = 'block'
-      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">计算中...</p>'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">搜索中...</p>'
 
       try {
-        const result = await window.materialService.calculateLocalMatchRate(keywords)
+        const result = await window.materialService.searchMaterials(keyword, {
+          limit: 10
+        })
 
-        log(`✓ 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, 'success')
+        log(`✓ 搜索成功: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
 
         resultsDiv.innerHTML = `
           <div class="result-item">
-            <div class="title">匹配度: ${(result.matchRate * 100).toFixed(1)}%</div>
-            <div class="meta">
-              置信度: ${(result.avgConfidence * 100).toFixed(1)}% |
-              覆盖率: ${(result.coverageRate * 100).toFixed(1)}% |
-              匹配素材: ${result.matchedCount}个
+            <div class="title">找到 ${result.materials.length} 个素材</div>
+            <div class="meta">来源: ${result.source}</div>
+          </div>
+          ${result.materials.slice(0, 5).map(m => `
+            <div class="result-item">
+              <div class="title">${m.title || m.description || 'Untitled'}</div>
+              <div class="meta">ID: ${m.id} | 来源: ${m.source}</div>
             </div>
-          </div>
+          `).join('')}
+        `
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
+      }
+    }
+
+    // 测试4: 缓存搜索
+    window.testCacheSearch = async function() {
+      log('开始测试缓存搜索...', 'info')
+      const resultsDiv = document.getElementById('cache-search-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">搜索中...</p>'
+
+      try {
+        const result = await window.materialService.searchMaterials('technology', {
+          limit: 10,
+          forceLocal: true
+        })
+
+        log(`✓ 缓存搜索完成: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
+
+        if (result.source === 'cache') {
+          window.testStats.cacheHitCount++
+          document.getElementById('cache-hit-count').textContent = window.testStats.cacheHitCount
+        }
+
+        resultsDiv.innerHTML = `
           <div class="result-item">
-            <div class="title">覆盖关键词: ${result.coveredKeywords?.join(', ') || '无'}</div>
-            <div class="meta">未覆盖: ${result.uncoveredKeywords?.join(', ') || '无'}</div>
+            <div class="title">找到 ${result.materials.length} 个缓存素材</div>
+            <div class="meta">来源: ${result.source}</div>
           </div>
+        `
+
+        const status = document.getElementById('cache-status')
+        status.className = 'status-badge success'
+        status.textContent = '✓ 通过'
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
+      }
+    }
+
+    // 测试5: 缓存统计
+    window.getCacheStats = async function() {
+      log('获取缓存统计...', 'info')
+
+      try {
+        // 这里需要MaterialService提供缓存统计方法
+        log('⚠ 缓存统计功能待实现', 'warning')
+        document.getElementById('cache-count').textContent = '待实现'
+        document.getElementById('cache-size').textContent = '待实现'
+      } catch (error) {
+        log(`✗ 获取失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试6: 强制本地模式
+    window.testForceLocal = async function() {
+      log('开始测试强制本地模式（模拟离线）...', 'info')
+      const resultsDiv = document.getElementById('force-local-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">搜索中...</p>'
+
+      try {
+        const result = await window.materialService.searchMaterials('business', {
+          limit: 10,
+          forceLocal: true
+        })
+
+        log(`✓ 本地搜索完成: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
+
+        resultsDiv.innerHTML = `
           <div class="result-item">
-            <div class="title">授权判断: ${result.matchRate <= 0.8 ? '需要授权' : '无需授权'}</div>
-            <div class="meta">${result.details}</div>
+            <div class="title">找到 ${result.materials.length} 个素材（离线模式）</div>
+            <div class="meta">来源: ${result.source}</div>
           </div>
         `
       } catch (error) {
@@ -515,144 +642,193 @@
       }
     }
 
-    // 测试4: 精确匹配
-    window.testExactMatch = async function() {
-      log('开始测试精确匹配...', 'info')
-      const resultsDiv = document.getElementById('exact-match-results')
+    // 测试7: 预置素材搜索
+    window.testPresetSearch = async function() {
+      log('开始测试预置素材搜索...', 'info')
+      const resultsDiv = document.getElementById('preset-search-results')
       resultsDiv.style.display = 'block'
-      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">测试中...</p>'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">搜索中...</p>'
 
-      const testCases = [
-        { keywords: ['科技'], expectedMatch: true },
-        { keywords: ['商务'], expectedMatch: true },
-        { keywords: ['办公'], expectedMatch: true }
-      ]
+      try {
+        const result = await window.materialService.searchPresetMaterials('technology', {
+          limit: 10
+        })
 
-      let passCount = 0
-      let html = ''
+        log(`✓ 预置素材搜索完成: ${result.materials.length} 个素材`, 'success')
 
-      for (const testCase of testCases) {
-        try {
-          const result = await window.materialService.calculateLocalMatchRate(testCase.keywords)
-          const passed = result.matchRate >= 0.9
-
-          if (passed) passCount++
-
-          html += `
-            <div class="result-item">
-              <div class="title">${testCase.keywords.join(', ')} - ${passed ? '✓ 通过' : '✗ 失败'}</div>
-              <div class="meta">匹配度: ${(result.matchRate * 100).toFixed(1)}% (期望 ≥90%)</div>
-            </div>
-          `
-
-          log(`${passed ? '✓' : '✗'} "${testCase.keywords.join(', ')}" 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, passed ? 'success' : 'error')
-        } catch (error) {
-          log(`✗ "${testCase.keywords.join(', ')}" 测试失败: ${error.message}`, 'error')
+        if (result.materials.length > 0) {
+          window.testStats.presetCount++
+          document.getElementById('preset-count').textContent = window.testStats.presetCount
         }
-      }
 
-      resultsDiv.innerHTML = html
+        resultsDiv.innerHTML = `
+          <div class="result-item">
+            <div class="title">找到 ${result.materials.length} 个预置素材</div>
+            <div class="meta">总计: ${result.total}</div>
+          </div>
+          ${result.materials.map(m => `
+            <div class="result-item">
+              <div class="title">${m.name}</div>
+              <div class="meta">ID: ${m.id} | 标签: ${m.tags.join(', ')}</div>
+            </div>
+          `).join('')}
+        `
 
-      const status = document.getElementById('threshold-status')
-      if (passCount === testCases.length) {
+        const status = document.getElementById('preset-status')
         status.className = 'status-badge success'
         status.textContent = '✓ 通过'
-      } else {
-        status.className = 'status-badge error'
-        status.textContent = `${passCount}/${testCases.length} 通过`
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
       }
     }
 
-    // 测试5: 语义相似
-    window.testSemanticMatch = async function() {
-      log('开始测试语义相似匹配...', 'info')
-      const resultsDiv = document.getElementById('semantic-match-results')
+    // 测试8: 列出预置素材
+    window.listPresetMaterials = async function() {
+      log('列出所有预置素材...', 'info')
+      const resultsDiv = document.getElementById('preset-list-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">加载中...</p>'
+
+      try {
+        const result = await window.materialService.searchPresetMaterials('', {
+          limit: 100
+        })
+
+        log(`✓ 共有 ${result.materials.length} 个预置素材`, 'success')
+
+        resultsDiv.innerHTML = result.materials.map(m => `
+          <div class="result-item">
+            <div class="title">${m.name}</div>
+            <div class="meta">
+              ID: ${m.id} |
+              分类: ${m.industry || '未分类'} |
+              标签: ${m.tags.slice(0, 3).join(', ')}
+            </div>
+          </div>
+        `).join('')
+      } catch (error) {
+        log(`✗ 获取失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
+      }
+    }
+
+    // 测试9: 预置素材分类测试
+    window.testPresetCategories = async function() {
+      log('开始测试预置素材分类...', 'info')
+      const resultsDiv = document.getElementById('preset-category-results')
       resultsDiv.style.display = 'block'
       resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">测试中...</p>'
 
-      log('⚠ 语义匹配需要CLIP模型，当前使用模拟实现', 'warning')
-
-      const testCases = [
-        { keywords: ['技术', '创新'], expectedSimilar: true },
-        { keywords: ['会议', '讨论'], expectedSimilar: true }
-      ]
-
+      const categories = ['technology', 'business', 'education', 'computer']
       let html = ''
 
-      for (const testCase of testCases) {
+      for (const category of categories) {
         try {
-          const result = await window.materialService.calculateLocalMatchRate(testCase.keywords)
+          const result = await window.materialService.searchPresetMaterials(category, {
+            limit: 10
+          })
 
           html += `
             <div class="result-item">
-              <div class="title">${testCase.keywords.join(', ')}</div>
-              <div class="meta">
-                匹配度: ${(result.matchRate * 100).toFixed(1)}% |
-                置信度: ${(result.avgConfidence * 100).toFixed(1)}%
-              </div>
+              <div class="title">${category}: ${result.materials.length} 个素材</div>
+              <div class="meta">${result.materials.map(m => m.name).join(', ')}</div>
             </div>
           `
 
-          log(`✓ "${testCase.keywords.join(', ')}" 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, 'success')
+          log(`✓ ${category}: ${result.materials.length} 个素材`, 'success')
         } catch (error) {
-          log(`✗ "${testCase.keywords.join(', ')}" 测试失败: ${error.message}`, 'error')
+          log(`✗ ${category} 测试失败: ${error.message}`, 'error')
         }
       }
 
       resultsDiv.innerHTML = html
     }
 
-    // 测试6: 行业相关
-    window.testIndustryMatch = async function() {
-      log('开始测试行业相关匹配...', 'info')
-      const resultsDiv = document.getElementById('industry-match-results')
+    // 测试10: 完整降级流程
+    window.testFullFallback = async function() {
+      log('开始测试完整降级流程...', 'info')
+      const resultsDiv = document.getElementById('fallback-results')
       resultsDiv.style.display = 'block'
       resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">测试中...</p>'
 
-      const testCases = [
-        { keywords: ['科技', 'technology'], industry: '科技' },
-        { keywords: ['金融', 'finance'], industry: '金融' },
-        { keywords: ['医疗', 'health'], industry: '医疗' }
-      ]
-
       let html = ''
 
-      for (const testCase of testCases) {
-        try {
-          const result = await window.materialService.calculateLocalMatchRate(testCase.keywords)
+      // 测试1: 外部搜索
+      try {
+        log('步骤1: 测试外部API搜索...', 'info')
+        const result1 = await window.materialService.searchMaterials('innovation', {
+          limit: 5
+        })
+        html += `
+          <div class="result-item">
+            <div class="title">步骤1: 外部搜索 - ${result1.source === 'external' ? '✓ 成功' : '✗ 失败'}</div>
+            <div class="meta">找到 ${result1.materials.length} 个素材 | 来源: ${result1.source}</div>
+          </div>
+        `
+        log(`✓ 外部搜索: ${result1.materials.length} 个素材`, result1.source === 'external' ? 'success' : 'warning')
+      } catch (error) {
+        html += `
+          <div class="result-item">
+            <div class="title">步骤1: 外部搜索 - ✗ 失败</div>
+            <div class="meta">${error.message}</div>
+          </div>
+        `
+        log(`✗ 外部搜索失败: ${error.message}`, 'error')
+      }
 
-          html += `
-            <div class="result-item">
-              <div class="title">${testCase.keywords.join(', ')} (${testCase.industry})</div>
-              <div class="meta">
-                匹配度: ${(result.matchRate * 100).toFixed(1)}% |
-                匹配素材: ${result.matchedCount}个
-              </div>
-            </div>
-          `
+      // 测试2: 缓存降级
+      try {
+        log('步骤2: 测试缓存降级...', 'info')
+        const result2 = await window.materialService.searchMaterials('technology', {
+          limit: 5,
+          forceLocal: true
+        })
+        html += `
+          <div class="result-item">
+            <div class="title">步骤2: 缓存降级 - ${result2.source === 'cache' ? '✓ 成功' : '⚠ 降级到预置'}</div>
+            <div class="meta">找到 ${result2.materials.length} 个素材 | 来源: ${result2.source}</div>
+          </div>
+        `
+        log(`✓ 缓存搜索: ${result2.materials.length} 个素材`, 'success')
+      } catch (error) {
+        html += `
+          <div class="result-item">
+            <div class="title">步骤2: 缓存降级 - ✗ 失败</div>
+            <div class="meta">${error.message}</div>
+          </div>
+        `
+        log(`✗ 缓存搜索失败: ${error.message}`, 'error')
+      }
 
-          log(`✓ "${testCase.keywords.join(', ')}" (${testCase.industry}) 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, 'success')
-        } catch (error) {
-          log(`✗ "${testCase.keywords.join(', ')}" 测试失败: ${error.message}`, 'error')
-        }
+      // 测试3: 预置素材降级
+      try {
+        log('步骤3: 测试预置素材降级...', 'info')
+        const result3 = await window.materialService.searchPresetMaterials('business', {
+          limit: 5
+        })
+        html += `
+          <div class="result-item">
+            <div class="title">步骤3: 预置素材 - ✓ 成功</div>
+            <div class="meta">找到 ${result3.materials.length} 个素材</div>
+          </div>
+        `
+        log(`✓ 预置素材: ${result3.materials.length} 个素材`, 'success')
+      } catch (error) {
+        html += `
+          <div class="result-item">
+            <div class="title">步骤3: 预置素材 - ✗ 失败</div>
+            <div class="meta">${error.message}</div>
+          </div>
+        `
+        log(`✗ 预置素材失败: ${error.message}`, 'error')
       }
 
       resultsDiv.innerHTML = html
-    }
 
-    // 测试7: 授权触发
-    window.testAuthorizationTrigger = function() {
-      log('模拟触发授权对话框...', 'info')
-      window.testStats.authTriggerCount++
-      document.getElementById('auth-trigger-count').textContent = window.testStats.authTriggerCount
-
-      log('⚠ 授权对话框需要在实际UI中测试', 'warning')
-      log('✓ 触发条件: 本地匹配度 ≤ 80%', 'info')
-      log('✓ 对话框应显示: 搜索关键词、隐私保护说明、授权选项', 'info')
-
-      const status = document.getElementById('auth-status')
+      const status = document.getElementById('fallback-status')
       status.className = 'status-badge success'
-      status.textContent = '✓ 已触发'
+      status.textContent = '✓ 完成'
     }
 
     // 页面加载时初始化
