@@ -1018,6 +1018,322 @@ class MaterialService {
   }
 
   /**
+   * 计算本地素材匹配度
+   * @param {string|Array} keywords - 关键词（字符串或数组）
+   * @returns {Promise<Object>} 匹配度评估结果
+   */
+  async calculateLocalMatchRate(keywords) {
+    try {
+      // 标准化关键词为数组
+      const keywordArray = Array.isArray(keywords) ? keywords : [keywords]
+
+      if (keywordArray.length === 0) {
+        return {
+          matchRate: 0,
+          avgConfidence: 0,
+          coverageRate: 0,
+          matchedCount: 0,
+          details: '无关键词'
+        }
+      }
+
+      console.log(`📊 计算本地匹配度: ${keywordArray.join(', ')}`)
+
+      // 搜索本地素材
+      const localResults = await this.searchLocalMaterials(keywordArray.join(' '), {
+        limit: 50 // 多取一些用于评估
+      })
+
+      if (localResults.materials.length === 0) {
+        console.log('📊 本地匹配度: 0% (无匹配素材)')
+        return {
+          matchRate: 0,
+          avgConfidence: 0,
+          coverageRate: 0,
+          matchedCount: 0,
+          details: '本地无匹配素材'
+        }
+      }
+
+      // 评估每个素材的匹配质量
+      const evaluatedMaterials = await this.evaluateMaterialsMatchQuality(
+        keywordArray,
+        localResults.materials
+      )
+
+      // 计算平均置信度
+      const avgConfidence =
+        evaluatedMaterials.reduce((sum, m) => sum + (m.confidence || 0), 0) /
+        evaluatedMaterials.length
+
+      // 计算关键词覆盖率
+      const coveredKeywords = new Set()
+      evaluatedMaterials.forEach(material => {
+        keywordArray.forEach(keyword => {
+          const keywordLower = keyword.toLowerCase()
+          const materialText = [
+            material.name,
+            material.description,
+            ...(material.tags || []),
+            ...(material.keywords || [])
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+
+          if (materialText.includes(keywordLower)) {
+            coveredKeywords.add(keyword)
+          }
+        })
+      })
+
+      const coverageRate = coveredKeywords.size / keywordArray.length
+
+      // 综合评分：置信度 * 0.6 + 覆盖率 * 0.4
+      const matchRate = avgConfidence * 0.6 + coverageRate * 0.4
+
+      console.log(`📊 本地匹配度: ${(matchRate * 100).toFixed(1)}%`)
+      console.log(`   - 平均置信度: ${(avgConfidence * 100).toFixed(1)}%`)
+      console.log(`   - 关键词覆盖率: ${(coverageRate * 100).toFixed(1)}% (${coveredKeywords.size}/${keywordArray.length})`)
+      console.log(`   - 匹配素材数: ${evaluatedMaterials.length}`)
+
+      return {
+        matchRate,
+        avgConfidence,
+        coverageRate,
+        matchedCount: evaluatedMaterials.length,
+        coveredKeywords: Array.from(coveredKeywords),
+        uncoveredKeywords: keywordArray.filter(k => !coveredKeywords.has(k)),
+        topMatches: evaluatedMaterials.slice(0, 5),
+        details: `匹配度${(matchRate * 100).toFixed(1)}%，覆盖${coveredKeywords.size}/${keywordArray.length}个关键词`
+      }
+    } catch (error) {
+      console.error('计算本地匹配度失败:', error)
+      return {
+        matchRate: 0,
+        avgConfidence: 0,
+        coverageRate: 0,
+        matchedCount: 0,
+        error: error.message
+      }
+    }
+  }
+
+  /**
+   * 评估素材匹配质量
+   * @param {Array} keywords - 关键词数组
+   * @param {Array} materials - 素材数组
+   * @returns {Promise<Array>} 评估后的素材数组
+   */
+  async evaluateMaterialsMatchQuality(keywords, materials) {
+    const results = []
+
+    for (const material of materials) {
+      let matchType = 'none'
+      let confidence = 0
+
+      // 1. 精确匹配检查（≥90%）
+      const exactMatch = this.isExactMatch(keywords, material)
+      if (exactMatch.isMatch) {
+        matchType = 'exact'
+        confidence = exactMatch.confidence
+      }
+      // 2. 语义相似检查（≥0.7）
+      else {
+        try {
+          // 使用CLIP进行语义匹配
+          const semanticScore = await this.calculateSemanticSimilarity(keywords, material)
+          if (semanticScore >= 0.7) {
+            matchType = 'semantic'
+            confidence = semanticScore
+          }
+          // 3. 行业相关检查
+          else {
+            const industryMatch = this.isIndustryRelated(keywords, material)
+            if (industryMatch.isMatch) {
+              matchType = 'industry'
+              confidence = industryMatch.confidence
+            }
+          }
+        } catch (error) {
+          // CLIP失败时降级到关键词匹配
+          const keywordScore = this.calculateKeywordSimilarity(keywords, material)
+          if (keywordScore >= 0.5) {
+            matchType = 'keyword'
+            confidence = keywordScore
+          }
+        }
+      }
+
+      if (matchType !== 'none') {
+        results.push({
+          ...material,
+          matchType,
+          confidence
+        })
+      }
+    }
+
+    return results.sort((a, b) => b.confidence - a.confidence)
+  }
+
+  /**
+   * 精确匹配判断（≥90%）
+   * @param {Array} keywords - 关键词数组
+   * @param {Object} material - 素材对象
+   * @returns {Object} 匹配结果
+   */
+  isExactMatch(keywords, material) {
+    const materialText = [
+      material.name,
+      material.title,
+      ...(material.tags || []),
+      ...(material.keywords || [])
+    ]
+      .filter(Boolean)
+      .map(t => t.toLowerCase())
+
+    let matchCount = 0
+    const matchedKeywords = []
+
+    for (const keyword of keywords) {
+      const keywordLower = keyword.toLowerCase()
+      // 检查是否有完全匹配
+      if (materialText.some(text => text === keywordLower || text.includes(keywordLower))) {
+        matchCount++
+        matchedKeywords.push(keyword)
+      }
+    }
+
+    const matchRate = matchCount / keywords.length
+
+    return {
+      isMatch: matchRate >= 0.9,
+      confidence: matchRate >= 0.9 ? 0.95 : matchRate,
+      matchedKeywords,
+      matchRate
+    }
+  }
+
+  /**
+   * 计算语义相似度（使用CLIP或降级方案）
+   * @param {Array} keywords - 关键词数组
+   * @param {Object} material - 素材对象
+   * @returns {Promise<number>} 相似度分数（0-1）
+   */
+  async calculateSemanticSimilarity(keywords, material) {
+    try {
+      // 尝试使用CLIP
+      const query = keywords.join(' ')
+      const similarities = await this.clipMatcher.matchTextToImages(query, [material])
+      return similarities[0] || 0
+    } catch (error) {
+      // 降级到关键词相似度
+      return this.calculateKeywordSimilarity(keywords, material)
+    }
+  }
+
+  /**
+   * 计算关键词相似度（降级方案）
+   * @param {Array} keywords - 关键词数组
+   * @param {Object} material - 素材对象
+   * @returns {number} 相似度分数（0-1）
+   */
+  calculateKeywordSimilarity(keywords, material) {
+    const materialText = [
+      material.name,
+      material.description,
+      ...(material.tags || []),
+      ...(material.keywords || [])
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+
+    let totalScore = 0
+    for (const keyword of keywords) {
+      const keywordLower = keyword.toLowerCase()
+      if (materialText.includes(keywordLower)) {
+        // 完全包含得1分
+        totalScore += 1
+      } else {
+        // 部分匹配得0.5分
+        const words = keywordLower.split(/\s+/)
+        const partialMatches = words.filter(word => materialText.includes(word)).length
+        totalScore += (partialMatches / words.length) * 0.5
+      }
+    }
+
+    return Math.min(totalScore / keywords.length, 1)
+  }
+
+  /**
+   * 行业相关性判断
+   * @param {Array} keywords - 关键词数组
+   * @param {Object} material - 素材对象
+   * @returns {Object} 匹配结果
+   */
+  isIndustryRelated(keywords, material) {
+    const industryMap = {
+      科技: ['technology', 'tech', 'digital', 'innovation', 'ai', 'software', 'hardware', '数字', '创新', '智能'],
+      教育: ['education', 'learning', 'teaching', 'school', 'university', 'student', '学习', '教学', '学校', '大学'],
+      金融: ['finance', 'money', 'banking', 'investment', 'stock', 'economy', '金融', '投资', '银行', '经济'],
+      医疗: ['medical', 'health', 'healthcare', 'hospital', 'doctor', 'medicine', '医疗', '健康', '医院', '医生'],
+      商务: ['business', 'office', 'meeting', 'corporate', 'professional', '商务', '办公', '会议', '企业'],
+      旅游: ['travel', 'tourism', 'vacation', 'destination', 'hotel', '旅游', '度假', '酒店', '景点'],
+      美食: ['food', 'restaurant', 'cuisine', 'cooking', 'dining', '美食', '餐厅', '烹饪', '饮食'],
+      时尚: ['fashion', 'style', 'clothing', 'design', 'trend', '时尚', '服装', '设计', '潮流'],
+      体育: ['sports', 'fitness', 'exercise', 'athlete', 'game', '体育', '健身', '运动', '比赛'],
+      娱乐: ['entertainment', 'movie', 'music', 'game', 'show', '娱乐', '电影', '音乐', '游戏']
+    }
+
+    // 检查关键词所属行业
+    const keywordIndustries = new Set()
+    for (const keyword of keywords) {
+      const keywordLower = keyword.toLowerCase()
+      for (const [industry, terms] of Object.entries(industryMap)) {
+        if (terms.some(term => keywordLower.includes(term) || term.includes(keywordLower))) {
+          keywordIndustries.add(industry)
+        }
+      }
+    }
+
+    // 检查素材所属行业
+    const materialText = [
+      material.name,
+      material.description,
+      material.industry,
+      material.scene,
+      ...(material.tags || []),
+      ...(material.keywords || [])
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+
+    const materialIndustries = new Set()
+    for (const [industry, terms] of Object.entries(industryMap)) {
+      if (terms.some(term => materialText.includes(term))) {
+        materialIndustries.add(industry)
+      }
+    }
+
+    // 计算行业交集
+    const commonIndustries = [...keywordIndustries].filter(ind => materialIndustries.has(ind))
+
+    const isMatch = commonIndustries.length > 0
+    const confidence = isMatch ? 0.6 + (commonIndustries.length * 0.1) : 0
+
+    return {
+      isMatch,
+      confidence: Math.min(confidence, 0.85),
+      keywordIndustries: Array.from(keywordIndustries),
+      materialIndustries: Array.from(materialIndustries),
+      commonIndustries
+    }
+  }
+
+  /**
    * 清理缓存和优化
    */
   async optimize() {

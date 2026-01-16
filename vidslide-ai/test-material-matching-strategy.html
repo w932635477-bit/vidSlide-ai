@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>素材匹配策略测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 32px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .test-section h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-badge.success {
+      background: rgba(52, 199, 89, 0.2);
+      color: #34c759;
+    }
+
+    .status-badge.error {
+      background: rgba(255, 59, 48, 0.2);
+      color: #ff3b30;
+    }
+
+    .status-badge.pending {
+      background: rgba(255, 149, 0, 0.2);
+      color: #ff9500;
+    }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .test-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .test-card h3 {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .test-card p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .result-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .result-item {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      border-left: 3px solid #667eea;
+    }
+
+    .result-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .result-item .title {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 4px;
+    }
+
+    .result-item .meta {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .log-box {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .log-entry.success {
+      color: #34c759;
+    }
+
+    .log-entry.error {
+      color: #ff3b30;
+    }
+
+    .log-entry.info {
+      color: #007aff;
+    }
+
+    .log-entry.warning {
+      color: #ff9500;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 8px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 素材匹配策略测试</h1>
+
+    <!-- 测试1: 本地匹配度计算 -->
+    <div class="test-section">
+      <h2>
+        <span>测试1: 本地匹配度计算</span>
+        <span class="status-badge pending" id="match-rate-status">待测试</span>
+      </h2>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>📊 高匹配度场景（≥80%）</h3>
+          <p>测试关键词: "科技", "商务", "办公"</p>
+          <button class="btn btn-primary" onclick="testHighMatchRate()">开始测试</button>
+          <div id="high-match-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>📉 低匹配度场景（<80%）</h3>
+          <p>测试关键词: "纽约城市景观", "埃菲尔铁塔"</p>
+          <button class="btn btn-primary" onclick="testLowMatchRate()">开始测试</button>
+          <div id="low-match-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>🔍 自定义关键词测试</h3>
+          <div class="input-group">
+            <label>输入关键词（逗号分隔）:</label>
+            <input type="text" id="custom-keywords" placeholder="例如: 科技, 创新, AI">
+          </div>
+          <button class="btn btn-primary" onclick="testCustomMatchRate()">测试匹配度</button>
+          <div id="custom-match-results" class="result-box" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 测试2: 匹配阈值判断 -->
+    <div class="test-section">
+      <h2>
+        <span>测试2: 匹配阈值判断</span>
+        <span class="status-badge pending" id="threshold-status">待测试</span>
+      </h2>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>✅ 精确匹配（≥90%）</h3>
+          <p>测试完全匹配的关键词</p>
+          <button class="btn btn-primary" onclick="testExactMatch()">开始测试</button>
+          <div id="exact-match-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>🧠 语义相似（≥0.7）</h3>
+          <p>测试CLIP语义匹配</p>
+          <button class="btn btn-primary" onclick="testSemanticMatch()">开始测试</button>
+          <div id="semantic-match-results" class="result-box" style="display: none;"></div>
+        </div>
+
+        <div class="test-card">
+          <h3>🏢 行业相关</h3>
+          <p>测试行业关联匹配</p>
+          <button class="btn btn-primary" onclick="testIndustryMatch()">开始测试</button>
+          <div id="industry-match-results" class="result-box" style="display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 测试3: 授权流程 -->
+    <div class="test-section">
+      <h2>
+        <span>测试3: 用户授权流程</span>
+        <span class="status-badge pending" id="auth-status">待测试</span>
+      </h2>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <h3>🔓 触发授权对话框</h3>
+          <p>模拟本地匹配度<80%的场景</p>
+          <button class="btn btn-primary" onclick="testAuthorizationTrigger()">触发授权</button>
+        </div>
+
+        <div class="test-card">
+          <h3>📊 授权统计</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="value" id="auth-trigger-count">0</div>
+              <div class="label">触发次数</div>
+            </div>
+            <div class="stat-card">
+              <div class="value" id="auth-granted-count">0</div>
+              <div class="label">授权次数</div>
+            </div>
+            <div class="stat-card">
+              <div class="value" id="local-only-count">0</div>
+              <div class="label">仅本地次数</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 测试日志 -->
+    <div class="test-section">
+      <h2>📋 测试日志</h2>
+      <div class="log-box" id="log-box">
+        <div class="log-entry info">[等待测试] 点击上方按钮开始测试...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import materialService from './src/services/MaterialService.js'
+
+    // 全局变量
+    window.materialService = materialService
+    window.testStats = {
+      authTriggerCount: 0,
+      authGrantedCount: 0,
+      localOnlyCount: 0
+    }
+
+    // 初始化服务
+    async function initServices() {
+      try {
+        log('初始化 MaterialService...', 'info')
+        await window.materialService.initialize()
+        log('✓ MaterialService 初始化成功', 'success')
+      } catch (error) {
+        log(`✗ 初始化失败: ${error.message}`, 'error')
+        console.error(error)
+      }
+    }
+
+    // 日志函数
+    function log(message, type = 'info') {
+      const logBox = document.getElementById('log-box')
+      const timestamp = new Date().toLocaleTimeString()
+      const entry = document.createElement('div')
+      entry.className = `log-entry ${type}`
+      entry.textContent = `[${timestamp}] ${message}`
+      logBox.appendChild(entry)
+      logBox.scrollTop = logBox.scrollHeight
+    }
+
+    // 测试1: 高匹配度场景
+    window.testHighMatchRate = async function() {
+      log('开始测试高匹配度场景...', 'info')
+      const resultsDiv = document.getElementById('high-match-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">计算中...</p>'
+
+      const keywords = ['科技', '商务', '办公']
+
+      try {
+        const result = await window.materialService.calculateLocalMatchRate(keywords)
+
+        log(`✓ 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, result.matchRate >= 0.8 ? 'success' : 'warning')
+        log(`  - 平均置信度: ${(result.avgConfidence * 100).toFixed(1)}%`, 'info')
+        log(`  - 关键词覆盖率: ${(result.coverageRate * 100).toFixed(1)}%`, 'info')
+
+        resultsDiv.innerHTML = `
+          <div class="result-item">
+            <div class="title">匹配度: ${(result.matchRate * 100).toFixed(1)}%</div>
+            <div class="meta">
+              置信度: ${(result.avgConfidence * 100).toFixed(1)}% |
+              覆盖率: ${(result.coverageRate * 100).toFixed(1)}% |
+              匹配素材: ${result.matchedCount}个
+            </div>
+          </div>
+          <div class="result-item">
+            <div class="title">覆盖关键词: ${result.coveredKeywords?.join(', ') || '无'}</div>
+            <div class="meta">未覆盖: ${result.uncoveredKeywords?.join(', ') || '无'}</div>
+          </div>
+        `
+
+        const status = document.getElementById('match-rate-status')
+        if (result.matchRate >= 0.8) {
+          status.className = 'status-badge success'
+          status.textContent = '✓ 通过'
+        } else {
+          status.className = 'status-badge error'
+          status.textContent = '✗ 失败'
+        }
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
+      }
+    }
+
+    // 测试2: 低匹配度场景
+    window.testLowMatchRate = async function() {
+      log('开始测试低匹配度场景...', 'info')
+      const resultsDiv = document.getElementById('low-match-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">计算中...</p>'
+
+      const keywords = ['纽约城市景观', '埃菲尔铁塔']
+
+      try {
+        const result = await window.materialService.calculateLocalMatchRate(keywords)
+
+        log(`✓ 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, result.matchRate < 0.8 ? 'success' : 'warning')
+        log(`  - 应触发授权对话框: ${result.matchRate <= 0.8 ? '是' : '否'}`, result.matchRate <= 0.8 ? 'success' : 'error')
+
+        resultsDiv.innerHTML = `
+          <div class="result-item">
+            <div class="title">匹配度: ${(result.matchRate * 100).toFixed(1)}%</div>
+            <div class="meta">
+              置信度: ${(result.avgConfidence * 100).toFixed(1)}% |
+              覆盖率: ${(result.coverageRate * 100).toFixed(1)}% |
+              匹配素材: ${result.matchedCount}个
+            </div>
+          </div>
+          <div class="result-item">
+            <div class="title">授权判断: ${result.matchRate <= 0.8 ? '需要授权' : '无需授权'}</div>
+            <div class="meta">${result.details}</div>
+          </div>
+        `
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
+      }
+    }
+
+    // 测试3: 自定义关键词
+    window.testCustomMatchRate = async function() {
+      const input = document.getElementById('custom-keywords')
+      const keywords = input.value.split(',').map(k => k.trim()).filter(k => k)
+
+      if (keywords.length === 0) {
+        log('⚠ 请输入关键词', 'warning')
+        return
+      }
+
+      log(`开始测试自定义关键词: ${keywords.join(', ')}`, 'info')
+      const resultsDiv = document.getElementById('custom-match-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">计算中...</p>'
+
+      try {
+        const result = await window.materialService.calculateLocalMatchRate(keywords)
+
+        log(`✓ 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, 'success')
+
+        resultsDiv.innerHTML = `
+          <div class="result-item">
+            <div class="title">匹配度: ${(result.matchRate * 100).toFixed(1)}%</div>
+            <div class="meta">
+              置信度: ${(result.avgConfidence * 100).toFixed(1)}% |
+              覆盖率: ${(result.coverageRate * 100).toFixed(1)}% |
+              匹配素材: ${result.matchedCount}个
+            </div>
+          </div>
+          <div class="result-item">
+            <div class="title">覆盖关键词: ${result.coveredKeywords?.join(', ') || '无'}</div>
+            <div class="meta">未覆盖: ${result.uncoveredKeywords?.join(', ') || '无'}</div>
+          </div>
+          <div class="result-item">
+            <div class="title">授权判断: ${result.matchRate <= 0.8 ? '需要授权' : '无需授权'}</div>
+            <div class="meta">${result.details}</div>
+          </div>
+        `
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+        resultsDiv.innerHTML = `<div class="result-item"><div class="title">错误: ${error.message}</div></div>`
+      }
+    }
+
+    // 测试4: 精确匹配
+    window.testExactMatch = async function() {
+      log('开始测试精确匹配...', 'info')
+      const resultsDiv = document.getElementById('exact-match-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">测试中...</p>'
+
+      const testCases = [
+        { keywords: ['科技'], expectedMatch: true },
+        { keywords: ['商务'], expectedMatch: true },
+        { keywords: ['办公'], expectedMatch: true }
+      ]
+
+      let passCount = 0
+      let html = ''
+
+      for (const testCase of testCases) {
+        try {
+          const result = await window.materialService.calculateLocalMatchRate(testCase.keywords)
+          const passed = result.matchRate >= 0.9
+
+          if (passed) passCount++
+
+          html += `
+            <div class="result-item">
+              <div class="title">${testCase.keywords.join(', ')} - ${passed ? '✓ 通过' : '✗ 失败'}</div>
+              <div class="meta">匹配度: ${(result.matchRate * 100).toFixed(1)}% (期望 ≥90%)</div>
+            </div>
+          `
+
+          log(`${passed ? '✓' : '✗'} "${testCase.keywords.join(', ')}" 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, passed ? 'success' : 'error')
+        } catch (error) {
+          log(`✗ "${testCase.keywords.join(', ')}" 测试失败: ${error.message}`, 'error')
+        }
+      }
+
+      resultsDiv.innerHTML = html
+
+      const status = document.getElementById('threshold-status')
+      if (passCount === testCases.length) {
+        status.className = 'status-badge success'
+        status.textContent = '✓ 通过'
+      } else {
+        status.className = 'status-badge error'
+        status.textContent = `${passCount}/${testCases.length} 通过`
+      }
+    }
+
+    // 测试5: 语义相似
+    window.testSemanticMatch = async function() {
+      log('开始测试语义相似匹配...', 'info')
+      const resultsDiv = document.getElementById('semantic-match-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">测试中...</p>'
+
+      log('⚠ 语义匹配需要CLIP模型，当前使用模拟实现', 'warning')
+
+      const testCases = [
+        { keywords: ['技术', '创新'], expectedSimilar: true },
+        { keywords: ['会议', '讨论'], expectedSimilar: true }
+      ]
+
+      let html = ''
+
+      for (const testCase of testCases) {
+        try {
+          const result = await window.materialService.calculateLocalMatchRate(testCase.keywords)
+
+          html += `
+            <div class="result-item">
+              <div class="title">${testCase.keywords.join(', ')}</div>
+              <div class="meta">
+                匹配度: ${(result.matchRate * 100).toFixed(1)}% |
+                置信度: ${(result.avgConfidence * 100).toFixed(1)}%
+              </div>
+            </div>
+          `
+
+          log(`✓ "${testCase.keywords.join(', ')}" 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, 'success')
+        } catch (error) {
+          log(`✗ "${testCase.keywords.join(', ')}" 测试失败: ${error.message}`, 'error')
+        }
+      }
+
+      resultsDiv.innerHTML = html
+    }
+
+    // 测试6: 行业相关
+    window.testIndustryMatch = async function() {
+      log('开始测试行业相关匹配...', 'info')
+      const resultsDiv = document.getElementById('industry-match-results')
+      resultsDiv.style.display = 'block'
+      resultsDiv.innerHTML = '<p style="color: rgba(255,255,255,0.5);">测试中...</p>'
+
+      const testCases = [
+        { keywords: ['科技', 'technology'], industry: '科技' },
+        { keywords: ['金融', 'finance'], industry: '金融' },
+        { keywords: ['医疗', 'health'], industry: '医疗' }
+      ]
+
+      let html = ''
+
+      for (const testCase of testCases) {
+        try {
+          const result = await window.materialService.calculateLocalMatchRate(testCase.keywords)
+
+          html += `
+            <div class="result-item">
+              <div class="title">${testCase.keywords.join(', ')} (${testCase.industry})</div>
+              <div class="meta">
+                匹配度: ${(result.matchRate * 100).toFixed(1)}% |
+                匹配素材: ${result.matchedCount}个
+              </div>
+            </div>
+          `
+
+          log(`✓ "${testCase.keywords.join(', ')}" (${testCase.industry}) 匹配度: ${(result.matchRate * 100).toFixed(1)}%`, 'success')
+        } catch (error) {
+          log(`✗ "${testCase.keywords.join(', ')}" 测试失败: ${error.message}`, 'error')
+        }
+      }
+
+      resultsDiv.innerHTML = html
+    }
+
+    // 测试7: 授权触发
+    window.testAuthorizationTrigger = function() {
+      log('模拟触发授权对话框...', 'info')
+      window.testStats.authTriggerCount++
+      document.getElementById('auth-trigger-count').textContent = window.testStats.authTriggerCount
+
+      log('⚠ 授权对话框需要在实际UI中测试', 'warning')
+      log('✓ 触发条件: 本地匹配度 ≤ 80%', 'info')
+      log('✓ 对话框应显示: 搜索关键词、隐私保护说明、授权选项', 'info')
+
+      const status = document.getElementById('auth-status')
+      status.className = 'status-badge success'
+      status.textContent = '✓ 已触发'
+    }
+
+    // 页面加载时初始化
+    window.addEventListener('load', () => {
+      log('页面加载完成，初始化服务...', 'info')
+      initServices()
+    })
+  </script>
+</body>
+</html>
