@@ -212,12 +212,40 @@
                   </div>
                 </div>
 
+                <!-- 场景检测结果 -->
+                <div v-if="detectedScenes.length > 0" class="scenes-section">
+                  <div class="section-header">
+                    <h4>🎞️ 场景</h4>
+                    <span class="section-count">{{ detectedScenes.length }}个</span>
+                  </div>
+                  <div class="scenes-list">
+                    <div
+                      v-for="(scene, index) in detectedScenes"
+                      :key="scene.id"
+                      class="scene-item"
+                      @click="seekToTime(scene.startTime)"
+                    >
+                      <div class="scene-number">{{ index + 1 }}</div>
+                      <div class="scene-info">
+                        <div class="scene-title">{{ scene.title || `场景 ${index + 1}` }}</div>
+                        <div class="scene-time">
+                          {{ formatTime(scene.startTime) }} - {{ formatTime(scene.endTime) }}
+                        </div>
+                        <div class="scene-duration">
+                          时长: {{ formatTime(scene.endTime - scene.startTime) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- 空状态 -->
                 <div v-if="!isAIAnalyzing && !aiAnalysisComplete" class="empty-analysis">
                   <div class="empty-icon">🎬</div>
                   <p>点击"智能分析"自动完成以下任务：</p>
                   <ul class="feature-list">
                     <li>📸 智能关键帧提取</li>
+                    <li>🎞️ 场景自动检测</li>
                     <li>🎤 语音识别转文字</li>
                     <li>🏷️ 关键词自动提取</li>
                     <li>💡 重点内容高亮</li>
@@ -433,6 +461,9 @@ import MaterialService from '../services/MaterialService.js'
 import { getSpeechRecognitionService } from '../services/SpeechRecognitionService.js'
 import { getBaiduSpeechService } from '../services/BaiduSpeechService.js'
 
+// 导入视频处理服务
+import { getVideoProcessingService } from '../services/VideoProcessingService.js'
+
 // 响应式状态
 const videoSrc = ref('')
 const videoFile = ref(null) // 保存原始视频文件用于语音识别
@@ -520,6 +551,11 @@ const extractedKeywords = ref([])
 const isSpeechRecognizing = ref(false)
 const speechService = ref(null)
 const isEditingTranscript = ref(false)
+
+// 视频处理服务
+const videoProcessingService = ref(null)
+const detectedScenes = ref([])
+const videoSegments = ref([])
 
 // 切换转录文本编辑模式
 const toggleTranscriptEdit = async () => {
@@ -676,16 +712,63 @@ const startAIAnalysis = async () => {
   extractedKeyframes.value = []
   transcriptText.value = ''
   extractedKeywords.value = []
+  detectedScenes.value = []
 
   try {
-    // 步骤1: 关键帧提取 (0-20%)
-    currentAnalysisStep.value = '提取关键帧...'
-    await simulateAnalysisStep(0, 20, 1500)
-    extractedKeyframes.value = generateMockKeyframes()
+    // 初始化视频处理服务
+    if (!videoProcessingService.value) {
+      videoProcessingService.value = getVideoProcessingService()
+    }
 
-    // 步骤2: 语音识别 (20-80%)
+    // 步骤1: 加载视频 (0-10%)
+    currentAnalysisStep.value = '加载视频...'
+    aiAnalysisProgress.value = 0
+
+    if (videoFile.value) {
+      await videoProcessingService.value.loadVideo(videoFile.value)
+      aiAnalysisProgress.value = 10
+    }
+
+    // 步骤2: 关键帧提取 (10-30%)
+    currentAnalysisStep.value = '提取关键帧...'
+
+    if (videoFile.value) {
+      const keyframes = await videoProcessingService.value.extractKeyframes({
+        interval: 2,
+        maxFrames: 30,
+        quality: 0.8
+      })
+
+      // 转换为现有格式
+      extractedKeyframes.value = keyframes.map(kf => ({
+        time: kf.timestamp,
+        thumbnail: kf.thumbnailUrl,
+        importance: kf.importance
+      }))
+
+      aiAnalysisProgress.value = 30
+      console.log(`✅ 提取了 ${keyframes.length} 个关键帧`)
+    } else {
+      // 如果没有文件，使用模拟数据
+      await simulateAnalysisStep(10, 30, 1500)
+      extractedKeyframes.value = generateMockKeyframes()
+    }
+
+    // 步骤3: 场景检测 (30-40%)
+    currentAnalysisStep.value = '检测场景...'
+
+    if (videoFile.value && extractedKeyframes.value.length > 0) {
+      const scenes = await videoProcessingService.value.detectScenes()
+      detectedScenes.value = scenes
+      aiAnalysisProgress.value = 40
+      console.log(`✅ 检测到 ${scenes.length} 个场景`)
+    } else {
+      await simulateAnalysisStep(30, 40, 1000)
+    }
+
+    // 步骤4: 语音识别 (40-80%)
     currentAnalysisStep.value = '语音识别中...'
-    aiAnalysisProgress.value = 20
+    aiAnalysisProgress.value = 40
     isSpeechRecognizing.value = true
 
     // 尝试使用百度语音识别API（更准确）
@@ -697,8 +780,8 @@ const startAIAnalysis = async () => {
 
       try {
         const recognizedText = await baiduService.transcribeVideo(videoFile.value, (progress) => {
-          // 更新进度 (20-80%)
-          aiAnalysisProgress.value = 20 + Math.round(progress * 60)
+          // 更新进度 (40-80%)
+          aiAnalysisProgress.value = 40 + Math.round(progress * 40)
         })
 
         if (recognizedText) {
@@ -729,13 +812,13 @@ const startAIAnalysis = async () => {
     } else {
       // 没有视频文件，跳过语音识别
       transcriptText.value = '【提示】无法进行语音识别，请重新上传视频。'
-      await simulateAnalysisStep(20, 80, 1000)
+      await simulateAnalysisStep(40, 80, 1000)
     }
 
     isSpeechRecognizing.value = false
     aiAnalysisProgress.value = 80
 
-    // 步骤3: 提取关键词 (80-95%)
+    // 步骤5: 提取关键词 (80-95%)
     currentAnalysisStep.value = '提取关键词...'
     await simulateAnalysisStep(80, 95, 800)
 
@@ -823,8 +906,8 @@ const fallbackToWebSpeechAPI = async () => {
         const elapsed = Date.now() - startTime
         const videoProgress = videoElement.value ? videoElement.value.currentTime / videoDuration.value : 0
 
-        // 更新进度 (20-80%)
-        aiAnalysisProgress.value = 20 + Math.round(videoProgress * 60)
+        // 更新进度 (40-80%)
+        aiAnalysisProgress.value = 40 + Math.round(videoProgress * 40)
 
         if (videoElement.value?.ended || elapsed > maxWaitTime) {
           resolve()
@@ -846,7 +929,7 @@ const fallbackToWebSpeechAPI = async () => {
   } else {
     // 浏览器不支持语音识别
     transcriptText.value = '【提示】您的浏览器不支持语音识别功能，请使用Chrome浏览器获得最佳体验，或配置百度语音API。'
-    await simulateAnalysisStep(20, 80, 1000)
+    await simulateAnalysisStep(40, 80, 1000)
   }
 }
 
@@ -2392,6 +2475,78 @@ onUnmounted(() => {
 .keyword-score {
   font-size: 10px;
   opacity: 0.7;
+}
+
+/* 场景列表样式 */
+.scenes-section {
+  padding: 12px 16px;
+  background: #F9F9FB;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.scenes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.scene-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  border: 1px solid #E5E5EA;
+}
+
+.scene-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.scene-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.scene-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.scene-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 4px;
+}
+
+.scene-time {
+  font-size: 11px;
+  color: #8E8E93;
+  margin-bottom: 2px;
+}
+
+.scene-duration {
+  font-size: 10px;
+  color: #667eea;
+  font-weight: 500;
 }
 
 /* 空状态 */
