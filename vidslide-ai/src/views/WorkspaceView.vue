@@ -425,7 +425,6 @@ import ErrorHandler from '../components/ErrorHandler.vue'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import AIContentAnalyzer from '../components/AIContentAnalyzer.vue'
 import MaterialRequirementAnalyzer from '../components/MaterialRequirementAnalyzer.vue'
-import AuthorizationDialog from '../components/AuthorizationDialog.vue'
 
 // 导入素材服务
 import MaterialService from '../services/MaterialService.js'
@@ -521,12 +520,6 @@ const extractedKeywords = ref([])
 const isSpeechRecognizing = ref(false)
 const speechService = ref(null)
 const isEditingTranscript = ref(false)
-
-// 素材授权相关状态
-const showAuthDialog = ref(false)
-const pendingSearchKeywords = ref([])
-const materialAuthGranted = ref(false)
-const useLocalOnly = ref(false)
 
 // 切换转录文本编辑模式
 const toggleTranscriptEdit = async () => {
@@ -961,148 +954,65 @@ const handleRequirementSelected = (selectedRequirements) => {
 }
 
 // 素材搜索请求事件
+/**
+ * 处理素材搜索请求（外部优先策略）
+ */
 const handleMaterialSearchRequested = async (requirement) => {
-  console.log('搜索素材请求:', requirement)
-
   try {
+    console.log('🔍 收到素材搜索请求:', requirement)
+
     // 初始化素材服务
     await MaterialService.initialize()
 
-    // 构建搜索关键词
+    // 提取搜索关键词
     const searchKeywords = requirement.relatedKeywords || [requirement.title]
-
-    // 检查是否已授权或设置为仅本地模式
-    const localOnlySetting = localStorage.getItem('material_local_only') === 'true'
-
-    if (localOnlySetting) {
-      // 仅使用本地素材
-      console.log('🔒 用户设置为仅使用本地素材')
-      await searchLocalMaterialsOnly(searchKeywords, requirement)
+    if (searchKeywords.length === 0) {
+      ElMessage.warning('没有可用的搜索关键词')
       return
     }
 
-    // 1. 计算本地匹配度
-    console.log('📊 计算本地素材匹配度...')
-    const matchRateResult = await MaterialService.calculateLocalMatchRate(searchKeywords)
+    const searchKeyword = searchKeywords.join(' ')
+    console.log(`🔍 搜索关键词: "${searchKeyword}"`)
 
-    console.log(`📊 本地匹配度: ${(matchRateResult.matchRate * 100).toFixed(1)}%`)
-    console.log(`   - 平均置信度: ${(matchRateResult.avgConfidence * 100).toFixed(1)}%`)
-    console.log(`   - 关键词覆盖率: ${(matchRateResult.coverageRate * 100).toFixed(1)}%`)
+    // 显示加载状态
+    ElMessage.info('正在搜索素材...')
 
-    // 2. 判断是否需要外部素材（本地匹配度 ≤ 80%）
-    if (matchRateResult.matchRate <= 0.8 && !materialAuthGranted.value) {
-      console.log('⚠️ 本地匹配度不足，需要请求用户授权访问外部素材')
-
-      // 显示授权对话框
-      pendingSearchKeywords.value = searchKeywords
-      showAuthDialog.value = true
-
-      // 等待用户授权（通过事件处理）
-      return
-    }
-
-    // 3. 本地匹配度足够或已授权，执行搜索
-    const searchKeyword = searchKeywords[0] || requirement.title
+    // 直接搜索（外部优先策略）
     const results = await MaterialService.searchMaterials(searchKeyword, {
       limit: 20,
       context: {
         type: requirement.type,
-        priority: requirement.priority
-      },
-      forceExternal: materialAuthGranted.value && matchRateResult.matchRate <= 0.8
-    })
-
-    if (results.success && results.materials.length > 0) {
-      ElMessage.success(`找到 ${results.materials.length} 个相关素材`)
-      console.log('搜索结果:', results.materials)
-
-      // 显示匹配质量信息
-      if (results.searchStats) {
-        console.log('📊 搜索统计:', results.searchStats)
+        scene: requirement.scene || requirement.priority
       }
-
-      // TODO: 显示素材选择弹窗
-    } else {
-      ElMessage.warning('未找到相关素材，请尝试其他关键词')
-    }
-  } catch (error) {
-    console.error('素材搜索失败:', error)
-    ElMessage.error('素材搜索失败: ' + error.message)
-  }
-}
-
-// 仅搜索本地素材
-const searchLocalMaterialsOnly = async (keywords, requirement) => {
-  try {
-    const searchKeyword = keywords[0] || requirement.title
-    const localResults = await MaterialService.searchLocalMaterials(searchKeyword, {
-      limit: 20
     })
 
-    if (localResults.materials.length > 0) {
-      ElMessage.success(`找到 ${localResults.materials.length} 个本地素材`)
-      console.log('本地搜索结果:', localResults.materials)
-      // TODO: 显示素材选择弹窗
-    } else {
-      ElMessage.warning('本地未找到相关素材')
+    console.log('✅ 搜索完成:', results)
+
+    // 显示搜索结果提示
+    if (results.source === 'external') {
+      ElMessage.success(
+        `找到 ${results.materials.length} 个素材（来自 ${results.platforms.join(', ')}）`
+      )
+    } else if (results.source === 'cache') {
+      ElMessage.info(`找到 ${results.materials.length} 个缓存素材`)
+    } else if (results.source === 'preset') {
+      ElMessage.warning(
+        `找到 ${results.materials.length} 个预置素材（建议联网获取更多）`
+      )
     }
-  } catch (error) {
-    console.error('本地素材搜索失败:', error)
-    ElMessage.error('本地素材搜索失败: ' + error.message)
-  }
-}
 
-// 处理用户授权
-const handleMaterialAuthorize = async (authData) => {
-  console.log('✅ 用户已授权访问外部素材')
-  materialAuthGranted.value = true
-  showAuthDialog.value = false
-
-  // 继续搜索外部素材
-  try {
-    const searchKeyword = authData.keywords[0]
-    const results = await MaterialService.searchMaterials(searchKeyword, {
-      limit: 20,
-      forceExternal: true
-    })
-
-    if (results.success && results.materials.length > 0) {
-      ElMessage.success(`找到 ${results.materials.length} 个素材（包含外部素材）`)
+    // 更新搜索结果（如果有结果展示区域）
+    if (results.materials.length > 0) {
+      // 这里可以添加结果展示逻辑
       console.log('搜索结果:', results.materials)
       // TODO: 显示素材选择弹窗
     } else {
       ElMessage.warning('未找到相关素材')
     }
   } catch (error) {
-    console.error('素材搜索失败:', error)
-    ElMessage.error('素材搜索失败: ' + error.message)
+    console.error('❌ 素材搜索失败:', error)
+    ElMessage.error(`搜索失败: ${error.message}`)
   }
-}
-
-// 处理用户取消授权
-const handleAuthCancel = () => {
-  console.log('❌ 用户取消授权')
-  showAuthDialog.value = false
-  ElMessage.info('已取消外部素材搜索')
-}
-
-// 处理用户选择仅使用本地素材
-const handleUseLocalOnly = async () => {
-  console.log('🔒 用户选择仅使用本地素材')
-  showAuthDialog.value = false
-  useLocalOnly.value = true
-
-  // 保存用户偏好
-  localStorage.setItem('material_local_only', 'true')
-
-  // 使用本地素材搜索
-  if (pendingSearchKeywords.value.length > 0) {
-    await searchLocalMaterialsOnly(pendingSearchKeywords.value, {
-      title: pendingSearchKeywords.value[0]
-    })
-  }
-
-  ElMessage.success('已设置为仅使用本地素材')
 }
 
 // 添加到画布请求事件
