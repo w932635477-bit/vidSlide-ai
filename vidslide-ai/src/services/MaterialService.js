@@ -60,7 +60,7 @@ class MaterialService {
   }
 
   /**
-   * 搜索素材 (核心方法)
+   * 搜索素材 (核心方法 - 外部优先策略)
    */
   async searchMaterials(query, options = {}) {
     if (!this.isInitialized) {
@@ -69,9 +69,9 @@ class MaterialService {
 
     this.stats.totalSearches++
 
-    const { limit = 20, context = {}, forceExternal = false } = options
+    const { limit = 20, context = {}, forceLocal = false } = options
 
-    console.log(`🔍 素材搜索: "${query}", 上下文:`, context)
+    console.log(`🔍 素材搜索: "${query}", 策略: ${forceLocal ? '仅本地' : '外部优先'}`)
 
     // 步骤1: 智能调度器决策
     console.log('🎯 请求智能调度器决策...')
@@ -88,12 +88,12 @@ class MaterialService {
       }
     } catch (error) {
       console.error('智能调度器调用失败:', error)
-      // 降级到默认策略
+      // 降级到默认策略（外部优先）
       dispatchDecision = {
         strategy: { name: 'parallel_platforms' },
         platforms: [
-          { name: 'baidu', score: 0.5 },
-          { name: 'unsplash', score: 0.5 }
+          { name: 'unsplash', score: 0.6 },
+          { name: 'pexels', score: 0.5 }
         ],
         confidence: 0.5,
         translation: null,
@@ -111,77 +111,95 @@ class MaterialService {
       )
     }
 
-    // 步骤2: 本地素材库搜索
+    // 步骤2: 外部优先搜索
+    if (!forceLocal) {
+      try {
+        console.log('🌐 优先使用外部API搜索...')
+
+        const externalResults = await this.searchExternalMaterials(query, {
+          ...options,
+          platforms: dispatchDecision.platforms,
+          translation: dispatchDecision.translation,
+          limit
+        })
+
+        if (externalResults.images && externalResults.images.length > 0) {
+          console.log(`✅ 外部搜索成功: ${externalResults.images.length} 个素材`)
+          this.stats.externalCalls++
+
+          // 缓存外部结果到本地
+          await this.cacheExternalResults(externalResults.images, query)
+
+          // CLIP智能排序（可选）
+          let finalMaterials = externalResults.images
+          if (options.enableSmartMatching !== false) {
+            try {
+              finalMaterials = await this.smartMatchMaterials(query, externalResults.images, context)
+              console.log('🧠 已应用CLIP智能排序')
+            } catch (error) {
+              console.warn('CLIP排序失败，使用默认排序:', error.message)
+            }
+          }
+
+          return {
+            success: true,
+            materials: finalMaterials.slice(0, limit),
+            totalCount: finalMaterials.length,
+            source: 'external',
+            platforms: dispatchDecision.platforms.map(p => p.name),
+            cached: false,
+            searchStats: {
+              localHits: 0,
+              externalHits: externalResults.images.length,
+              strategy: 'external_first',
+              smartMatching: options.enableSmartMatching !== false
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ 外部搜索失败，降级到本地缓存:', error.message)
+      }
+    }
+
+    // 步骤3: 降级到本地缓存
+    console.log('📚 使用本地缓存素材...')
     const localResults = await this.searchLocalMaterials(query, {
       ...options,
-      limit: limit * 2 // 多取一些用于评估
+      limit
     })
 
-    console.log(`📚 本地搜索结果: ${localResults.materials.length} 个素材`)
-
-    // 步骤3: 基于调度器决策评估是否需要外部获取
-    const evaluation = this.evaluateSearchResultsWithDispatcher(
-      localResults,
-      query,
-      context,
-      dispatchDecision
-    )
-
-    if (evaluation.shouldFetchExternal || forceExternal) {
-      console.log(`🌐 触发外部获取: ${evaluation.reason}`)
-
-      // 步骤3: 获取外部素材
-      const remainingLimit = Math.max(0, limit - localResults.materials.length)
-      const externalResults = await this.searchExternalMaterials(query, {
-        ...options,
-        limit: remainingLimit // 补充剩余数量
-      })
-
-      // 步骤4: 合并和排序结果
-      const combinedResults = await this.mergeResults(localResults, externalResults, query)
-
-      // 步骤5: CLIP智能排序（可选）
-      let finalMaterials = combinedResults.materials
-      if (options.enableSmartMatching !== false && combinedResults.materials.length > 0) {
-        try {
-          finalMaterials = await this.smartMatchMaterials(query, combinedResults.materials, context)
-          console.log('🧠 已应用CLIP智能排序')
-        } catch (error) {
-          console.warn('CLIP排序失败，使用默认排序:', error.message)
-        }
-      }
-
-      console.log(
-        `🎯 最终结果: ${finalMaterials.length} 个素材 (${localResults.materials.length}本地 + ${externalResults.images?.length || 0}外部)`
-      )
-
-      return {
-        success: true,
-        materials: finalMaterials.slice(0, limit),
-        totalCount: finalMaterials.length,
-        fromCache: false,
-        searchStats: {
-          localHits: localResults.materials.length,
-          externalHits: externalResults.images?.length || 0,
-          needsExternal: true,
-          reason: evaluation.reason,
-          smartMatching: options.enableSmartMatching !== false
-        }
-      }
-    } else {
-      console.log(`✅ 本地满足需求: ${evaluation.reason}`)
+    if (localResults.materials.length > 0) {
+      console.log(`✅ 本地缓存命中: ${localResults.materials.length} 个素材`)
+      this.stats.cacheHits++
 
       return {
         success: true,
         materials: localResults.materials.slice(0, limit),
         totalCount: localResults.materials.length,
-        fromCache: localResults.fromCache,
+        source: 'cache',
+        cached: true,
         searchStats: {
           localHits: localResults.materials.length,
           externalHits: 0,
-          needsExternal: false,
-          reason: evaluation.reason
+          strategy: 'cache_fallback'
         }
+      }
+    }
+
+    // 步骤4: 最后降级到预置素材
+    console.log('📦 使用预置素材...')
+    const presetResults = await this.searchPresetMaterials(query, { limit })
+
+    return {
+      success: presetResults.materials.length > 0,
+      materials: presetResults.materials || [],
+      totalCount: presetResults.materials?.length || 0,
+      source: 'preset',
+      cached: false,
+      searchStats: {
+        localHits: presetResults.materials?.length || 0,
+        externalHits: 0,
+        strategy: 'preset_fallback'
       }
     }
   }
@@ -1330,6 +1348,152 @@ class MaterialService {
       keywordIndustries: Array.from(keywordIndustries),
       materialIndustries: Array.from(materialIndustries),
       commonIndustries
+    }
+  }
+
+  /**
+   * 缓存外部搜索结果
+   * @param {Array} materials - 素材数组
+   * @param {string} query - 搜索关键词
+   */
+  async cacheExternalResults(materials, query) {
+    try {
+      // 只缓存元数据，不下载图片
+      const cacheData = materials.map(material => ({
+        ...material,
+        cachedAt: Date.now(),
+        query,
+        source: 'external_cache'
+      }))
+
+      // 存储到IndexedDB
+      await this.localLibrary.cacheStore.addBatch(cacheData)
+
+      console.log(`💾 已缓存 ${materials.length} 个素材元数据`)
+    } catch (error) {
+      console.warn('缓存失败:', error)
+    }
+  }
+
+  /**
+   * 搜索预置素材（最小化本地素材库）
+   * @param {string} query - 搜索关键词
+   * @param {Object} options - 搜索选项
+   * @returns {Promise<Object>} 搜索结果
+   */
+  async searchPresetMaterials(query, options = {}) {
+    // 只保留8个高质量预置素材作为最后降级
+    const presetMaterials = [
+      {
+        id: 'preset-tech-001',
+        name: '科技背景',
+        title: '科技背景',
+        url: '/materials-test/technology/unsplash_oRKF_ZBJYGM.jpg',
+        thumbnail: '/materials-test/technology/unsplash_oRKF_ZBJYGM.jpg',
+        tags: ['科技', 'technology', 'tech', '数字', 'digital'],
+        keywords: ['科技', '技术', '创新', '数字化'],
+        source: 'preset',
+        industry: '科技'
+      },
+      {
+        id: 'preset-tech-002',
+        name: '科技设备',
+        title: '科技设备',
+        url: '/materials-test/technology/pexels_546819.jpeg',
+        thumbnail: '/materials-test/technology/pexels_546819.jpeg',
+        tags: ['科技', 'technology', 'computer', '电脑'],
+        keywords: ['科技', '电脑', '设备', '技术'],
+        source: 'preset',
+        industry: '科技'
+      },
+      {
+        id: 'preset-business-001',
+        name: '商务会议',
+        title: '商务会议',
+        url: '/materials-test/business/pexels_3184416.jpeg',
+        thumbnail: '/materials-test/business/pexels_3184416.jpeg',
+        tags: ['商务', 'business', 'meeting', '会议', 'office'],
+        keywords: ['商务', '会议', '办公', '企业'],
+        source: 'preset',
+        industry: '商务'
+      },
+      {
+        id: 'preset-business-002',
+        name: '商务场景',
+        title: '商务场景',
+        url: '/materials-test/business/unsplash_qW_k6x5OfRc.jpg',
+        thumbnail: '/materials-test/business/unsplash_qW_k6x5OfRc.jpg',
+        tags: ['商务', 'business', 'professional', '专业'],
+        keywords: ['商务', '专业', '职场', '工作'],
+        source: 'preset',
+        industry: '商务'
+      },
+      {
+        id: 'preset-education-001',
+        name: '教育学习',
+        title: '教育学习',
+        url: '/materials-test/education/unsplash_lUaaKCUANVI.jpg',
+        thumbnail: '/materials-test/education/unsplash_lUaaKCUANVI.jpg',
+        tags: ['教育', 'education', 'learning', '学习', 'study'],
+        keywords: ['教育', '学习', '培训', '课程'],
+        source: 'preset',
+        industry: '教育'
+      },
+      {
+        id: 'preset-education-002',
+        name: '教育场景',
+        title: '教育场景',
+        url: '/materials-test/education/pexels_301926.jpeg',
+        thumbnail: '/materials-test/education/pexels_301926.jpeg',
+        tags: ['教育', 'education', 'school', '学校'],
+        keywords: ['教育', '学校', '教学', '知识'],
+        source: 'preset',
+        industry: '教育'
+      },
+      {
+        id: 'preset-computer-001',
+        name: '计算机设备',
+        title: '计算机设备',
+        url: '/materials-test/computer/unsplash_Bd7gNnWJBkU.jpg',
+        thumbnail: '/materials-test/computer/unsplash_Bd7gNnWJBkU.jpg',
+        tags: ['computer', 'technology', '电脑', '科技'],
+        keywords: ['电脑', '计算机', '设备', '技术'],
+        source: 'preset',
+        industry: '科技'
+      },
+      {
+        id: 'preset-computer-002',
+        name: '计算机工作',
+        title: '计算机工作',
+        url: '/materials-test/computer/pexels_577585.jpeg',
+        thumbnail: '/materials-test/computer/pexels_577585.jpeg',
+        tags: ['computer', 'work', '电脑', '工作'],
+        keywords: ['电脑', '工作', '编程', '开发'],
+        source: 'preset',
+        industry: '科技'
+      }
+    ]
+
+    const queryLower = query.toLowerCase()
+    const results = presetMaterials.filter(material => {
+      // 匹配标签
+      if (material.tags.some(tag => tag.toLowerCase().includes(queryLower))) {
+        return true
+      }
+      // 匹配关键词
+      if (material.keywords.some(kw => kw.toLowerCase().includes(queryLower))) {
+        return true
+      }
+      // 匹配名称
+      if (material.name.toLowerCase().includes(queryLower)) {
+        return true
+      }
+      return false
+    })
+
+    return {
+      materials: results,
+      total: results.length
     }
   }
 
