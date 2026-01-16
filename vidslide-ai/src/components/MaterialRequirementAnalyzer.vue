@@ -680,15 +680,21 @@ const generateRecommendations = async () => {
 }
 
 const inferMaterialType = (keyword) => {
+  const lowerKeyword = keyword.toLowerCase()
+
   const typeMappings = {
+    // 图表类关键词（优先级高）
+    'chart': 'chart',
+    'diagram': 'diagram',
+    'graph': 'chart',
+
     // 图片类关键词
     'image': 'image',
     'photo': 'image',
     'picture': 'image',
     'illustration': 'illustration',
+    'infographic': 'illustration',
     'graphic': 'illustration',
-    'diagram': 'diagram',
-    'chart': 'chart',
     'icon': 'icon',
     'background': 'background',
 
@@ -699,7 +705,7 @@ const inferMaterialType = (keyword) => {
   }
 
   for (const [key, type] of Object.entries(typeMappings)) {
-    if (keyword.toLowerCase().includes(key)) {
+    if (lowerKeyword.includes(key)) {
       return type
     }
   }

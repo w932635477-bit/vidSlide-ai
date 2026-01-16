@@ -980,8 +980,80 @@ const handleMaterialSearchRequested = async (requirement) => {
 // 添加到画布请求事件
 const handleCanvasAddRequested = (requirement) => {
   console.log('添加到画布请求:', requirement)
-  ElMessage.info(`素材需求"${requirement.title}"已添加到待处理列表`)
-  // TODO: 实现实际的画布添加逻辑
+
+  try {
+    // 根据素材类型添加到对应的内容数据
+    if (requirement.type === 'image' || requirement.type === 'illustration' || requirement.type === 'background') {
+      // 添加图片素材
+      if (!contentData.value.imageUrls) {
+        contentData.value.imageUrls = []
+      }
+
+      // 检查是否已存在
+      const exists = contentData.value.imageUrls.some(img =>
+        img.id === requirement.id || img.title === requirement.title
+      )
+
+      if (!exists) {
+        contentData.value.imageUrls.push({
+          id: requirement.id,
+          title: requirement.title,
+          type: requirement.type,
+          url: requirement.previewUrl || '',
+          keywords: requirement.relatedKeywords || []
+        })
+        ElMessage.success(`图片素材"${requirement.title}"已添加到画布`)
+      } else {
+        ElMessage.warning(`素材"${requirement.title}"已在画布中`)
+      }
+    } else if (requirement.type === 'chart' || requirement.type === 'diagram') {
+      // 添加图表素材
+      if (!contentData.value.chartData) {
+        contentData.value.chartData = []
+      }
+
+      if (!Array.isArray(contentData.value.chartData)) {
+        contentData.value.chartData = []
+      }
+
+      const exists = contentData.value.chartData.some(chart =>
+        chart.id === requirement.id || chart.title === requirement.title
+      )
+
+      if (!exists) {
+        contentData.value.chartData.push({
+          id: requirement.id,
+          title: requirement.title,
+          type: requirement.type,
+          description: requirement.description,
+          keywords: requirement.relatedKeywords || []
+        })
+        ElMessage.success(`图表素材"${requirement.title}"已添加到画布`)
+      } else {
+        ElMessage.warning(`素材"${requirement.title}"已在画布中`)
+      }
+    } else {
+      // 其他类型素材添加到文本内容
+      if (!contentData.value.textContent) {
+        contentData.value.textContent = []
+      }
+
+      contentData.value.textContent.push({
+        id: requirement.id,
+        title: requirement.title,
+        type: requirement.type,
+        content: requirement.description || requirement.title
+      })
+      ElMessage.success(`素材"${requirement.title}"已添加到画布`)
+    }
+
+    // 更新画布状态
+    console.log('当前画布内容:', contentData.value)
+
+  } catch (error) {
+    console.error('添加到画布失败:', error)
+    ElMessage.error(`添加失败: ${error.message}`)
+  }
 }
 
 // 素材分析开始事件
