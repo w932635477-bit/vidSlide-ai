@@ -605,12 +605,41 @@
       log('获取缓存统计...', 'info')
 
       try {
-        // 这里需要MaterialService提供缓存统计方法
-        log('⚠ 缓存统计功能待实现', 'warning')
-        document.getElementById('cache-count').textContent = '待实现'
-        document.getElementById('cache-size').textContent = '待实现'
+        const stats = await window.materialService.getCacheStats()
+
+        log('✓ 缓存统计获取成功', 'success')
+
+        // 显示智能缓存统计
+        if (stats.smartCache) {
+          log(`  - 缓存大小: ${stats.smartCache.size}/${stats.smartCache.maxSize}`, 'info')
+          log(`  - 命中率: ${stats.smartCache.hitRate}`, 'info')
+          log(`  - 总命中: ${stats.smartCache.hits}`, 'info')
+          log(`  - 总未命中: ${stats.smartCache.misses}`, 'info')
+
+          document.getElementById('cache-count').textContent =
+            `${stats.smartCache.size}/${stats.smartCache.maxSize}`
+          document.getElementById('cache-size').textContent =
+            `命中率: ${stats.smartCache.hitRate}`
+        }
+
+        // 显示离线支持统计
+        if (stats.offlineSupport) {
+          log(`  - 网络状态: ${stats.offlineSupport.isOnline ? '在线' : '离线'}`, 'info')
+          log(`  - 离线次数: ${stats.offlineSupport.offlineCount}`, 'info')
+          log(`  - 总离线时长: ${stats.offlineSupport.totalOfflineTime}`, 'info')
+          log(`  - 离线期间缓存命中: ${stats.offlineSupport.cacheHitsWhileOffline}`, 'info')
+        }
+
+        // 显示服务统计
+        if (stats.service) {
+          log(`  - 总搜索次数: ${stats.service.totalSearches}`, 'info')
+          log(`  - 外部调用: ${stats.service.externalCalls}`, 'info')
+          log(`  - 缓存命中: ${stats.service.cacheHits}`, 'info')
+        }
       } catch (error) {
         log(`✗ 获取失败: ${error.message}`, 'error')
+        document.getElementById('cache-count').textContent = '错误'
+        document.getElementById('cache-size').textContent = error.message
       }
     }
 

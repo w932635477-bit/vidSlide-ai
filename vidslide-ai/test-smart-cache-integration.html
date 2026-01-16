@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能缓存和离线支持集成测试</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .test-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .test-section h2 {
+      margin-top: 0;
+      color: #ffd700;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    #log {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid;
+    }
+    .log-info { border-color: #3498db; }
+    .log-success { border-color: #2ecc71; }
+    .log-warning { border-color: #f39c12; }
+    .log-error { border-color: #e74c3c; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 15px;
+    }
+    .stat-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #ffd700;
+    }
+    .stat-card p {
+      margin: 5px 0;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 智能缓存和离线支持集成测试</h1>
+
+    <div class="test-section">
+      <h2>📋 测试说明</h2>
+      <p>本页面测试 SmartCache 和 OfflineSupport 与 MaterialService 的集成。</p>
+      <p>测试流程：</p>
+      <ol>
+        <li>初始化服务（自动加载 SmartCache 和 OfflineSupport）</li>
+        <li>执行外部搜索（结果会自动缓存到 SmartCache）</li>
+        <li>查看缓存统计（验证 LRU 缓存工作）</li>
+        <li>测试缓存命中（再次搜索相同关键词）</li>
+        <li>测试离线模式（强制本地搜索）</li>
+      </ol>
+    </div>
+
+    <div class="test-section">
+      <h2>🧪 测试操作</h2>
+      <button onclick="testInitialization()">1. 初始化服务</button>
+      <button onclick="testExternalSearch()">2. 外部搜索（缓存）</button>
+      <button onclick="testCacheHit()">3. 测试缓存命中</button>
+      <button onclick="testCacheStats()">4. 查看缓存统计</button>
+      <button onclick="testOfflineMode()">5. 测试离线模式</button>
+      <button onclick="testNetworkStatus()">6. 查看网络状态</button>
+      <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+      <h2>📊 统计信息</h2>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <h3>智能缓存</h3>
+          <p id="cache-size">-</p>
+          <p id="cache-hits">-</p>
+          <p id="cache-hit-rate">-</p>
+        </div>
+        <div class="stat-card">
+          <h3>离线支持</h3>
+          <p id="network-status">-</p>
+          <p id="offline-count">-</p>
+          <p id="offline-time">-</p>
+        </div>
+        <div class="stat-card">
+          <h3>服务统计</h3>
+          <p id="total-searches">-</p>
+          <p id="external-calls">-</p>
+          <p id="cache-hits-service">-</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>📝 测试日志</h2>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import MaterialService from './src/services/MaterialService.js'
+
+    // 全局变量
+    window.materialService = MaterialService
+    window.testKeywords = ['technology', 'business', 'education']
+    window.currentKeywordIndex = 0
+
+    // 日志函数
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('log')
+      const entry = document.createElement('div')
+      entry.className = `log-entry log-${type}`
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+      logDiv.appendChild(entry)
+      logDiv.scrollTop = logDiv.scrollHeight
+      console.log(message)
+    }
+
+    window.log = log
+
+    // 清空日志
+    window.clearLog = function() {
+      document.getElementById('log').innerHTML = ''
+      log('日志已清空', 'info')
+    }
+
+    // 更新统计显示
+    async function updateStats() {
+      try {
+        const stats = await window.materialService.getCacheStats()
+
+        // 智能缓存统计
+        if (stats.smartCache) {
+          document.getElementById('cache-size').textContent =
+            `大小: ${stats.smartCache.size}/${stats.smartCache.maxSize}`
+          document.getElementById('cache-hits').textContent =
+            `命中: ${stats.smartCache.hits} | 未命中: ${stats.smartCache.misses}`
+          document.getElementById('cache-hit-rate').textContent =
+            `命中率: ${stats.smartCache.hitRate}`
+        }
+
+        // 离线支持统计
+        if (stats.offlineSupport) {
+          document.getElementById('network-status').textContent =
+            `状态: ${stats.offlineSupport.isOnline ? '🟢 在线' : '🔴 离线'}`
+          document.getElementById('offline-count').textContent =
+            `离线次数: ${stats.offlineSupport.offlineCount}`
+          document.getElementById('offline-time').textContent =
+            `总离线时长: ${stats.offlineSupport.totalOfflineTime}`
+        }
+
+        // 服务统计
+        if (stats.service) {
+          document.getElementById('total-searches').textContent =
+            `总搜索: ${stats.service.totalSearches}`
+          document.getElementById('external-calls').textContent =
+            `外部调用: ${stats.service.externalCalls}`
+          document.getElementById('cache-hits-service').textContent =
+            `缓存命中: ${stats.service.cacheHits}`
+        }
+      } catch (error) {
+        log(`更新统计失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试1: 初始化服务
+    window.testInitialization = async function() {
+      log('开始初始化服务...', 'info')
+
+      try {
+        await window.materialService.initialize()
+        log('✓ 服务初始化成功', 'success')
+        log('  - MaterialService 已初始化', 'info')
+        log('  - SmartCache 已启动', 'info')
+        log('  - OfflineSupport 已启动', 'info')
+
+        await updateStats()
+      } catch (error) {
+        log(`✗ 初始化失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试2: 外部搜索（会自动缓存）
+    window.testExternalSearch = async function() {
+      const keyword = window.testKeywords[window.currentKeywordIndex]
+      window.currentKeywordIndex = (window.currentKeywordIndex + 1) % window.testKeywords.length
+
+      log(`开始外部搜索: "${keyword}"...`, 'info')
+
+      try {
+        const result = await window.materialService.searchMaterials(keyword, {
+          limit: 10
+        })
+
+        log(`✓ 搜索完成: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
+        if (result.platforms) {
+          log(`  - 平台: ${result.platforms.join(', ')}`, 'info')
+        }
+
+        await updateStats()
+      } catch (error) {
+        log(`✗ 搜索失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试3: 测试缓存命中
+    window.testCacheHit = async function() {
+      log('测试缓存命中（搜索 "technology"）...', 'info')
+
+      try {
+        const result = await window.materialService.searchMaterials('technology', {
+          limit: 10
+        })
+
+        log(`✓ 搜索完成: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
+
+        if (result.source === 'cache') {
+          log('  ✓ 缓存命中！', 'success')
+        } else {
+          log('  ⚠ 未命中缓存（可能是首次搜索）', 'warning')
+        }
+
+        await updateStats()
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试4: 查看缓存统计
+    window.testCacheStats = async function() {
+      log('获取缓存统计...', 'info')
+
+      try {
+        const stats = await window.materialService.getCacheStats()
+
+        log('✓ 缓存统计获取成功', 'success')
+
+        // 智能缓存
+        if (stats.smartCache) {
+          log('📦 智能缓存统计:', 'info')
+          log(`  - 大小: ${stats.smartCache.size}/${stats.smartCache.maxSize}`, 'info')
+          log(`  - 命中: ${stats.smartCache.hits}`, 'info')
+          log(`  - 未命中: ${stats.smartCache.misses}`, 'info')
+          log(`  - 命中率: ${stats.smartCache.hitRate}`, 'info')
+        }
+
+        // 离线支持
+        if (stats.offlineSupport) {
+          log('📡 离线支持统计:', 'info')
+          log(`  - 网络状态: ${stats.offlineSupport.isOnline ? '在线' : '离线'}`, 'info')
+          log(`  - 离线次数: ${stats.offlineSupport.offlineCount}`, 'info')
+          log(`  - 总离线时长: ${stats.offlineSupport.totalOfflineTime}`, 'info')
+          log(`  - 离线期间缓存命中: ${stats.offlineSupport.cacheHitsWhileOffline}`, 'info')
+        }
+
+        // 服务统计
+        if (stats.service) {
+          log('🔧 服务统计:', 'info')
+          log(`  - 总搜索次数: ${stats.service.totalSearches}`, 'info')
+          log(`  - 外部调用: ${stats.service.externalCalls}`, 'info')
+          log(`  - 缓存命中: ${stats.service.cacheHits}`, 'info')
+        }
+
+        await updateStats()
+      } catch (error) {
+        log(`✗ 获取失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试5: 测试离线模式
+    window.testOfflineMode = async function() {
+      log('测试离线模式（强制本地搜索）...', 'info')
+
+      try {
+        const result = await window.materialService.searchMaterials('business', {
+          limit: 10,
+          forceLocal: true
+        })
+
+        log(`✓ 离线搜索完成: ${result.materials.length} 个素材`, 'success')
+        log(`  - 来源: ${result.source}`, 'info')
+
+        await updateStats()
+      } catch (error) {
+        log(`✗ 测试失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 测试6: 查看网络状态
+    window.testNetworkStatus = async function() {
+      log('查看网络状态...', 'info')
+
+      try {
+        const status = window.materialService.offlineSupport.getStatus()
+
+        log('✓ 网络状态获取成功', 'success')
+        log(`  - 在线: ${status.isOnline ? '是' : '否'}`, 'info')
+        log(`  - 当前离线时长: ${status.currentOfflineDuration}ms`, 'info')
+
+        await updateStats()
+      } catch (error) {
+        log(`✗ 获取失败: ${error.message}`, 'error')
+      }
+    }
+
+    // 页面加载时自动初始化
+    window.addEventListener('load', async () => {
+      log('页面加载完成，准备测试...', 'info')
+      log('点击 "1. 初始化服务" 开始测试', 'info')
+    })
+  </script>
+</body>
+</html>

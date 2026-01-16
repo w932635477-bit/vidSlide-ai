@@ -8,6 +8,8 @@ import FreeAPIService from './FreeAPIService.js'
 import BaiduImageService from './BaiduImageService.js'
 import IntelligentDispatcher from './IntelligentDispatcher.js'
 import CLIPMatcher from './CLIPMatcher.js'
+import SmartCache from './SmartCache.js'
+import OfflineSupport from './OfflineSupport.js'
 
 class MaterialService {
   constructor() {
@@ -16,6 +18,8 @@ class MaterialService {
     this.baiduImage = new BaiduImageService()
     this.intelligentDispatcher = IntelligentDispatcher
     this.clipMatcher = CLIPMatcher
+    this.smartCache = SmartCache
+    this.offlineSupport = OfflineSupport
     this.isInitialized = false
 
     // 统计数据
@@ -50,6 +54,27 @@ class MaterialService {
 
       // 初始化智能调度器
       await this.intelligentDispatcher.initialize()
+
+      // 初始化智能缓存系统
+      console.log('💾 初始化智能缓存系统...')
+      await this.smartCache.initialize()
+      this.smartCache.startAutoCleanup()
+      console.log('✅ 智能缓存系统已启动')
+
+      // 初始化离线支持
+      console.log('📡 初始化离线支持...')
+      this.offlineSupport.initialize()
+
+      // 添加网络状态监听器
+      this.offlineSupport.addListener((status, isOnline) => {
+        console.log(`📡 网络状态变化: ${status} (${isOnline ? '在线' : '离线'})`)
+        if (isOnline) {
+          console.log('✅ 网络已恢复，可以使用外部API')
+        } else {
+          console.log('⚠️ 网络已断开，将使用缓存素材')
+        }
+      })
+      console.log('✅ 离线支持已启动')
 
       this.isInitialized = true
       console.log('✅ 素材服务初始化完成')
@@ -111,8 +136,8 @@ class MaterialService {
       )
     }
 
-    // 步骤2: 外部优先搜索
-    if (!forceLocal) {
+    // 步骤2: 外部优先搜索（检查网络状态）
+    if (!forceLocal && this.offlineSupport.canUseExternalAPI()) {
       try {
         console.log('🌐 优先使用外部API搜索...')
 
@@ -209,7 +234,29 @@ class MaterialService {
    */
   async searchLocalMaterials(query, options = {}) {
     try {
-      // 使用新的分层搜索
+      // 首先尝试智能缓存
+      const cachedResults = await this.smartCache.search(query, {
+        limit: options.limit || 20
+      })
+
+      if (cachedResults.length > 0) {
+        console.log(`💾 智能缓存命中: ${cachedResults.length} 个素材`)
+        this.stats.cacheHits += cachedResults.length
+        this.offlineSupport.recordCacheHit()
+
+        return {
+          materials: cachedResults,
+          totalCount: cachedResults.length,
+          fromCache: true,
+          breakdown: {
+            preset: 0,
+            cached: cachedResults.length
+          }
+        }
+      }
+
+      // 缓存未命中，使用本地素材库（预置素材）
+      console.log('💾 智能缓存未命中，搜索预置素材...')
       const results = await this.localLibrary.searchMaterials(query, options)
 
       // 合并本地和缓存的结果
@@ -1358,18 +1405,11 @@ class MaterialService {
    */
   async cacheExternalResults(materials, query) {
     try {
-      // 只缓存元数据，不下载图片
-      const cacheData = materials.map(material => ({
-        ...material,
-        cachedAt: Date.now(),
-        query,
-        source: 'external_cache'
-      }))
+      // 使用智能缓存系统（LRU + TTL）
+      await this.smartCache.addBatch(materials, query)
 
-      // 存储到IndexedDB
-      await this.localLibrary.cacheStore.addBatch(cacheData)
-
-      console.log(`💾 已缓存 ${materials.length} 个素材元数据`)
+      this.stats.externalCached += materials.length
+      console.log(`💾 已缓存 ${materials.length} 个素材元数据到智能缓存`)
     } catch (error) {
       console.warn('缓存失败:', error)
     }
@@ -1494,6 +1534,46 @@ class MaterialService {
     return {
       materials: results,
       total: results.length
+    }
+  }
+
+  /**
+   * 获取缓存统计信息
+   */
+  async getCacheStats() {
+    try {
+      // 获取智能缓存统计
+      const cacheStats = await this.smartCache.getStats()
+
+      // 获取离线支持统计
+      const offlineStats = this.offlineSupport.getStats()
+
+      // 获取服务统计
+      const serviceStats = {
+        totalSearches: this.stats.totalSearches,
+        externalCalls: this.stats.externalCalls,
+        externalCacheHits: this.stats.externalCacheHits,
+        externalCached: this.stats.externalCached,
+        cacheHits: this.stats.cacheHits,
+        localHits: this.stats.localHits,
+        chineseQueries: this.stats.chineseQueries,
+        baiduCalls: this.stats.baiduCalls,
+        dispatcherCalls: this.stats.dispatcherCalls,
+        dispatcherCacheHits: this.stats.dispatcherCacheHits
+      }
+
+      return {
+        smartCache: cacheStats,
+        offlineSupport: offlineStats,
+        service: serviceStats
+      }
+    } catch (error) {
+      console.error('获取缓存统计失败:', error)
+      return {
+        smartCache: null,
+        offlineSupport: null,
+        service: this.stats
+      }
     }
   }
 
