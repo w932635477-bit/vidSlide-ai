@@ -136,31 +136,32 @@
             </div>
 
             <div class="tolerance-controls">
-            <label for="tolerance-slider" class="control-label">
-              容差范围: {{ tolerance }}
-            </label>
-            <input
-              id="tolerance-slider"
-              v-model="tolerance"
-              type="range"
-              min="0"
-              max="255"
-              step="5"
-              class="tolerance-slider"
-              @input="updateTolerance"
-              aria-label="调整颜色匹配容差"
-            />
-            <div class="tolerance-presets">
-              <button
-                v-for="preset in tolerancePresets"
-                :key="preset.value"
-                @click="setTolerance(preset.value)"
-                class="preset-btn"
-                :class="{ active: tolerance === preset.value }"
-                :aria-label="`设置容差为${preset.label}`"
-              >
-                {{ preset.label }}
-              </button>
+              <label for="tolerance-slider" class="control-label">
+                容差范围: {{ tolerance }}
+              </label>
+              <input
+                id="tolerance-slider"
+                v-model="tolerance"
+                type="range"
+                min="0"
+                max="255"
+                step="5"
+                class="tolerance-slider"
+                @input="updateTolerance"
+                aria-label="调整颜色匹配容差"
+              />
+              <div class="tolerance-presets">
+                <button
+                  v-for="preset in tolerancePresets"
+                  :key="preset.value"
+                  @click="setTolerance(preset.value)"
+                  class="preset-btn"
+                  :class="{ active: tolerance === preset.value }"
+                  :aria-label="`设置容差为${preset.label}`"
+                >
+                  {{ preset.label }}
+                </button>
+              </div>
             </div>
           </div>
 

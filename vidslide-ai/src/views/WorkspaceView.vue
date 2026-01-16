@@ -18,14 +18,14 @@
       @cancel="handleProgressCancel"
     />
 
-    <!-- 素材授权对话框 -->
-    <AuthorizationDialog
+    <!-- 素材授权对话框 - 待实现 -->
+    <!-- <AuthorizationDialog
       :visible="showAuthDialog"
       :searchKeywords="pendingSearchKeywords"
       @authorize="handleMaterialAuthorize"
       @cancel="handleAuthCancel"
       @use-local-only="handleUseLocalOnly"
-    />
+    /> -->
 
     <!-- 头部工具栏 - 简洁毛玻璃效果 -->
     <header class="workspace-header">
@@ -108,13 +108,42 @@
                   </div>
                 </div>
 
+                <!-- 动画系统 -->
+                <AnimationSystem
+                  v-if="videoSrc && aiAnalysisComplete"
+                  :video-element="videoElement"
+                  :keywords="extractedKeywords"
+                  :current-time="currentTime"
+                  :is-playing="isPlaying"
+                  @animation-triggered="handleAnimationTriggered"
+                />
+
                 <!-- 视频控制覆盖层 -->
                 <div class="video-controls-overlay" v-if="videoSrc">
                   <div class="video-info">
                     <span class="video-time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
                   </div>
                 </div>
+
+                <!-- 预览质量控制 -->
+                <div v-if="videoSrc && showQualityControl" class="quality-control-panel">
+                  <PreviewQualityControl
+                    @resolution-change="handleResolutionChange"
+                    @quality-change="handleQualityChange"
+                    @optimizations-change="handleOptimizationsChange"
+                  />
+                </div>
               </div>
+
+              <!-- 预览质量控制切换按钮 -->
+              <button
+                v-if="videoSrc"
+                class="quality-toggle-btn"
+                @click="toggleQualityControl"
+                :title="showQualityControl ? '隐藏质量控制' : '显示质量控制'"
+              >
+                ⚙️ {{ showQualityControl ? '隐藏' : '质量' }}
+              </button>
             </div>
 
             <!-- 右侧：AI分析结果面板 -->
@@ -152,21 +181,67 @@
                   </div>
                 </div>
 
-                <!-- 关键帧提取结果 - 紧凑版 -->
+                <!-- 关键帧提取结果 - 带缩略图 -->
                 <div v-if="extractedKeyframes.length > 0" class="keyframes-section compact">
                   <div class="section-header">
                     <h4>📸 关键帧</h4>
-                    <span class="section-count">{{ extractedKeyframes.length }}帧</span>
+                    <div class="section-actions">
+                      <span class="section-count">{{ extractedKeyframes.length }}帧</span>
+                      <button
+                        v-if="selectedKeyframes.length > 0"
+                        @click="exportSelectedKeyframes"
+                        class="export-btn"
+                        title="导出选中的关键帧"
+                      >
+                        导出 ({{ selectedKeyframes.length }})
+                      </button>
+                      <button
+                        v-if="selectedKeyframes.length > 0"
+                        @click="deleteSelectedKeyframes"
+                        class="delete-btn"
+                        title="删除选中的关键帧"
+                      >
+                        删除
+                      </button>
+                    </div>
                   </div>
-                  <div class="keyframes-scroll">
+                  <div class="keyframes-grid">
                     <div
                       v-for="(frame, index) in extractedKeyframes"
                       :key="index"
-                      class="keyframe-item-compact"
-                      @click="seekToTime(frame.time)"
+                      class="keyframe-card"
+                      :class="{ 'selected': isKeyframeSelected(frame) }"
+                      @click.exact="seekToTime(frame.time)"
+                      @click.ctrl.exact="toggleKeyframeSelection(frame)"
+                      @click.meta.exact="toggleKeyframeSelection(frame)"
+                      :title="`跳转到 ${formatTime(frame.time)}`"
                     >
-                      <span class="frame-number">{{ index + 1 }}</span>
-                      <span class="keyframe-time">{{ formatTime(frame.time) }}</span>
+                      <div class="keyframe-thumbnail-wrapper">
+                        <img
+                          v-if="frame.thumbnail"
+                          :src="frame.thumbnail"
+                          :alt="`关键帧 ${index + 1}`"
+                          class="keyframe-thumbnail"
+                        />
+                        <div v-else class="keyframe-placeholder">
+                          <span class="frame-icon">🎬</span>
+                        </div>
+                        <div class="keyframe-overlay">
+                          <span class="frame-number">{{ index + 1 }}</span>
+                        </div>
+                        <div
+                          v-if="isKeyframeSelected(frame)"
+                          class="keyframe-selected-badge"
+                        >
+                          ✓
+                        </div>
+                      </div>
+                      <div class="keyframe-info">
+                        <span class="keyframe-time">{{ formatTime(frame.time) }}</span>
+                        <span v-if="frame.importance" class="keyframe-importance">
+                          {{ (frame.importance * 100).toFixed(0) }}%
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -223,17 +298,63 @@
                       v-for="(scene, index) in detectedScenes"
                       :key="scene.id"
                       class="scene-item"
-                      @click="seekToTime(scene.startTime)"
+                      :class="{ 'active': isSceneActive(scene) }"
                     >
-                      <div class="scene-number">{{ index + 1 }}</div>
-                      <div class="scene-info">
-                        <div class="scene-title">{{ scene.title || `场景 ${index + 1}` }}</div>
-                        <div class="scene-time">
-                          {{ formatTime(scene.startTime) }} - {{ formatTime(scene.endTime) }}
+                      <div
+                        class="scene-content"
+                        @click="jumpToScene(scene)"
+                        @mouseenter="previewScene(scene)"
+                        @mouseleave="clearScenePreview"
+                      >
+                        <div class="scene-thumbnail-wrapper">
+                          <div class="scene-number">{{ index + 1 }}</div>
+                          <div v-if="scene.keyframes && scene.keyframes.length > 0" class="scene-preview">
+                            <img
+                              :src="scene.keyframes[0].thumbnail"
+                              :alt="`场景 ${index + 1}`"
+                              class="scene-thumbnail"
+                            />
+                          </div>
+                          <div v-else class="scene-preview-placeholder">
+                            <span class="scene-icon">🎬</span>
+                          </div>
                         </div>
-                        <div class="scene-duration">
-                          时长: {{ formatTime(scene.endTime - scene.startTime) }}
+                        <div class="scene-info">
+                          <div class="scene-title">{{ scene.title || `场景 ${index + 1}` }}</div>
+                          <div class="scene-time">
+                            {{ formatTime(scene.startTime) }} - {{ formatTime(scene.endTime) }}
+                          </div>
+                          <div class="scene-duration">
+                            时长: {{ formatTime(scene.endTime - scene.startTime) }}
+                          </div>
                         </div>
+                        <div class="scene-action">
+                          <span class="play-icon">▶</span>
+                        </div>
+                      </div>
+                      <div class="scene-edit-actions">
+                        <button
+                          @click.stop="editSceneTitle(scene, index)"
+                          class="scene-edit-btn"
+                          title="编辑标题"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          v-if="index < detectedScenes.length - 1"
+                          @click.stop="mergeScenes(index)"
+                          class="scene-merge-btn"
+                          title="与下一场景合并"
+                        >
+                          🔗
+                        </button>
+                        <button
+                          @click.stop="deleteScene(index)"
+                          class="scene-delete-btn"
+                          title="删除场景"
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -330,6 +451,48 @@
               @analysis-started="handleMaterialAnalysisStarted"
               @analysis-completed="handleMaterialAnalysisCompleted"
             />
+          </div>
+
+          <!-- 智能工具标签页 -->
+          <div v-if="activeTab === 'smart-tools'" class="tab-content smart-tools-tab">
+            <div class="smart-tools-container">
+              <!-- 工具选择器 -->
+              <div class="tools-selector">
+                <button
+                  v-for="tool in smartTools"
+                  :key="tool.id"
+                  class="tool-selector-btn"
+                  :class="{ active: activeSmartTool === tool.id }"
+                  @click="activeSmartTool = tool.id"
+                >
+                  <span class="tool-icon">{{ tool.icon }}</span>
+                  <span class="tool-name">{{ tool.name }}</span>
+                </button>
+              </div>
+
+              <!-- 工具内容区域 -->
+              <div class="tool-content-area">
+                <!-- 智能裁切工具 -->
+                <div v-if="activeSmartTool === 'crop'" class="tool-panel">
+                  <SmartCropTool />
+                </div>
+
+                <!-- 背景移除工具 -->
+                <div v-if="activeSmartTool === 'background'" class="tool-panel">
+                  <BackgroundRemover />
+                </div>
+
+                <!-- 色彩匹配工具 -->
+                <div v-if="activeSmartTool === 'color'" class="tool-panel">
+                  <ColorMatcher />
+                </div>
+
+                <!-- PPT生成工具 -->
+                <div v-if="activeSmartTool === 'ppt'" class="tool-panel">
+                  <PptGenerator :content-analysis="getContentAnalysis()" />
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- 模板选择标签页 -->
@@ -453,6 +616,12 @@ import ErrorHandler from '../components/ErrorHandler.vue'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import AIContentAnalyzer from '../components/AIContentAnalyzer.vue'
 import MaterialRequirementAnalyzer from '../components/MaterialRequirementAnalyzer.vue'
+import SmartCropTool from '../components/SmartCropTool.vue'
+import BackgroundRemover from '../components/BackgroundRemover.vue'
+import ColorMatcher from '../components/ColorMatcher.vue'
+import PptGenerator from '../components/PptGenerator.vue'
+import AnimationSystem from '../components/AnimationSystem.vue'
+import PreviewQualityControl from '../components/PreviewQualityControl.vue'
 
 // 导入素材服务
 import MaterialService from '../services/MaterialService.js'
@@ -476,6 +645,16 @@ const isPlaying = ref(false)
 const animations = ref([])
 const projectData = ref(null)
 
+// 预览质量控制状态
+const showQualityControl = ref(false)
+const previewResolution = ref('1080p')
+const previewQuality = ref(80)
+const previewOptimizations = ref({
+  hardwareAcceleration: true,
+  multithreaded: true,
+  memoryOptimization: true
+})
+
 // 视频尺寸相关状态
 const videoWidth = ref(0)
 const videoHeight = ref(0)
@@ -496,6 +675,15 @@ const isPanelCollapsed = ref(false)
 const activeTab = ref('analysis')
 const currentWorkflowStep = ref('upload')
 
+// 智能工具相关状态
+const activeSmartTool = ref('crop')
+const smartTools = computed(() => [
+  { id: 'crop', name: '智能裁切', icon: '✂️' },
+  { id: 'background', name: '背景移除', icon: '🎭' },
+  { id: 'color', name: '色彩匹配', icon: '🎨' },
+  { id: 'ppt', name: 'PPT生成', icon: '📊' }
+])
+
 // 工作流程步骤
 const workflowSteps = computed(() => [
   { id: 'upload', label: '上传' },
@@ -510,6 +698,7 @@ const workflowSteps = computed(() => [
 const panelTabs = computed(() => [
   { id: 'analysis', label: 'AI分析', icon: '🧠' },
   { id: 'materials', label: '素材需求', icon: '📦' },
+  { id: 'smart-tools', label: '智能工具', icon: '🛠️' },
   { id: 'templates', label: t('workspace.status.template'), icon: '📋' },
   { id: 'pip', label: t('workspace.status.pip'), icon: '📺' },
   { id: 'animations', label: t('workspace.animations.title'), icon: '✨' },
@@ -544,6 +733,7 @@ const aiAnalysisComplete = ref(false)
 const aiAnalysisProgress = ref(0)
 const currentAnalysisStep = ref('')
 const extractedKeyframes = ref([])
+const selectedKeyframes = ref([])
 const transcriptText = ref('')
 const extractedKeywords = ref([])
 
@@ -617,6 +807,209 @@ const seekToTime = (time) => {
   if (videoElement.value) {
     videoElement.value.currentTime = time
   }
+}
+
+// 跳转到场景
+const jumpToScene = (scene) => {
+  if (videoElement.value) {
+    videoElement.value.currentTime = scene.startTime
+    // 如果视频暂停，自动播放
+    if (videoElement.value.paused) {
+      videoElement.value.play()
+    }
+  }
+}
+
+// 检查场景是否激活
+const isSceneActive = (scene) => {
+  if (!videoElement.value) return false
+  const currentTime = videoElement.value.currentTime
+  return currentTime >= scene.startTime && currentTime <= scene.endTime
+}
+
+// 预览场景
+const previewScene = (scene) => {
+  // 可以在这里添加场景预览逻辑，比如显示场景的关键帧
+  console.log('预览场景:', scene.title)
+}
+
+// 清除场景预览
+const clearScenePreview = () => {
+  // 清除预览状态
+}
+
+// 键盘快捷键处理
+const handleKeyboardShortcuts = (event) => {
+  // 如果正在输入文本，不处理快捷键
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+    return
+  }
+
+  if (!videoElement.value) return
+
+  switch (event.key) {
+    case ' ': // 空格键：播放/暂停
+      event.preventDefault()
+      if (videoElement.value.paused) {
+        videoElement.value.play()
+      } else {
+        videoElement.value.pause()
+      }
+      break
+
+    case 'ArrowLeft': // 左箭头：后退5秒
+      event.preventDefault()
+      videoElement.value.currentTime = Math.max(0, videoElement.value.currentTime - 5)
+      break
+
+    case 'ArrowRight': // 右箭头：前进5秒
+      event.preventDefault()
+      videoElement.value.currentTime = Math.min(
+        videoElement.value.duration,
+        videoElement.value.currentTime + 5
+      )
+      break
+
+    case 'ArrowUp': // 上箭头：增加音量
+      event.preventDefault()
+      videoElement.value.volume = Math.min(1, videoElement.value.volume + 0.1)
+      break
+
+    case 'ArrowDown': // 下箭头：减少音量
+      event.preventDefault()
+      videoElement.value.volume = Math.max(0, videoElement.value.volume - 0.1)
+      break
+
+    case 'f': // F键：全屏
+    case 'F':
+      event.preventDefault()
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+      } else if (videoElement.value.requestFullscreen) {
+        videoElement.value.requestFullscreen()
+      }
+      break
+
+    case 'm': // M键：静音/取消静音
+    case 'M':
+      event.preventDefault()
+      videoElement.value.muted = !videoElement.value.muted
+      break
+
+    case '0': // 0键：跳到开始
+      event.preventDefault()
+      videoElement.value.currentTime = 0
+      break
+
+    case '1': // 1-9键：跳到对应百分比位置
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      event.preventDefault()
+      const percent = parseInt(event.key) / 10
+      videoElement.value.currentTime = videoElement.value.duration * percent
+      break
+  }
+}
+
+// 关键帧管理功能
+const toggleKeyframeSelection = (frame) => {
+  const index = selectedKeyframes.value.findIndex(f => f.time === frame.time)
+  if (index > -1) {
+    selectedKeyframes.value.splice(index, 1)
+  } else {
+    selectedKeyframes.value.push(frame)
+  }
+}
+
+const isKeyframeSelected = (frame) => {
+  return selectedKeyframes.value.some(f => f.time === frame.time)
+}
+
+const exportSelectedKeyframes = () => {
+  if (selectedKeyframes.value.length === 0) return
+
+  // 创建一个zip文件或者逐个下载
+  selectedKeyframes.value.forEach((frame, index) => {
+    const link = document.createElement('a')
+    link.href = frame.thumbnail
+    link.download = `keyframe-${index + 1}-${formatTime(frame.time)}.jpg`
+    link.click()
+  })
+
+  ElMessage.success(`已导出 ${selectedKeyframes.value.length} 个关键帧`)
+  selectedKeyframes.value = []
+}
+
+const deleteSelectedKeyframes = () => {
+  if (selectedKeyframes.value.length === 0) return
+
+  // 从extractedKeyframes中删除选中的帧
+  extractedKeyframes.value = extractedKeyframes.value.filter(
+    frame => !selectedKeyframes.value.some(f => f.time === frame.time)
+  )
+
+  ElMessage.success(`已删除 ${selectedKeyframes.value.length} 个关键帧`)
+  selectedKeyframes.value = []
+}
+
+// 场景编辑功能
+const editSceneTitle = async (scene, index) => {
+  const { value: newTitle } = await ElMessageBox.prompt('请输入新的场景标题', '编辑场景', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: scene.title || `场景 ${index + 1}`,
+    inputPattern: /.+/,
+    inputErrorMessage: '标题不能为空'
+  })
+
+  if (newTitle) {
+    scene.title = newTitle
+    ElMessage.success('场景标题已更新')
+  }
+}
+
+const mergeScenes = (index) => {
+  if (index >= detectedScenes.value.length - 1) return
+
+  const currentScene = detectedScenes.value[index]
+  const nextScene = detectedScenes.value[index + 1]
+
+  // 合并场景
+  currentScene.endTime = nextScene.endTime
+  currentScene.title = `${currentScene.title || `场景 ${index + 1}`} + ${nextScene.title || `场景 ${index + 2}`}`
+
+  // 合并关键帧
+  if (currentScene.keyframes && nextScene.keyframes) {
+    currentScene.keyframes = [...currentScene.keyframes, ...nextScene.keyframes]
+  }
+
+  // 删除下一个场景
+  detectedScenes.value.splice(index + 1, 1)
+
+  ElMessage.success('场景已合并')
+}
+
+const deleteScene = (index) => {
+  ElMessageBox.confirm(
+    '确定要删除这个场景吗？',
+    '删除场景',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    detectedScenes.value.splice(index, 1)
+    ElMessage.success('场景已删除')
+  }).catch(() => {
+    // 用户取消
+  })
 }
 
 // 开始语音识别
@@ -1378,6 +1771,48 @@ const pipStyle = computed(() => {
   }
 })
 
+// 智能工具方法
+const analyzeForTemplates = () => {
+  if (!transcriptText.value && !extractedKeywords.value.length) {
+    ElMessage.warning('请先进行AI分析以获取视频内容')
+    activeTab.value = 'analysis'
+    return
+  }
+
+  ElMessage.info('模板推荐功能开发中，敬请期待！')
+  // TODO: 集成 TemplateRecommender 服务
+  // const contentAnalysis = {
+  //   keywords: extractedKeywords.value,
+  //   transcript: transcriptText.value,
+  //   contentType: 'video',
+  //   dataMentions: 0,
+  //   sentiment: 'neutral'
+  // }
+  // const recommendations = await TemplateRecommender.generateRecommendations(contentAnalysis)
+}
+
+// 获取内容分析数据用于PPT生成
+const getContentAnalysis = () => {
+  if (!transcriptText.value && !extractedKeywords.value.length) {
+    return null
+  }
+
+  // 获取视频文件名（去除扩展名）
+  const fileName = videoFile.value?.name?.replace(/\.[^/.]+$/, '') || '视频内容演示'
+
+  return {
+    title: fileName,
+    subtitle: '',
+    keywords: extractedKeywords.value,
+    transcript: transcriptText.value,
+    scenes: detectedScenes.value,
+    duration: videoDuration.value,
+    contentType: 'video',
+    dataMentions: 0,
+    sentiment: 'neutral'
+  }
+}
+
 // 方法
 const newProject = () => {
   ElMessageBox.confirm(
@@ -1681,6 +2116,34 @@ const selectMarker = (marker) => {
   }
 }
 
+// 处理动画触发事件
+const handleAnimationTriggered = (animationData) => {
+  console.log('动画触发:', animationData)
+  // 可以在这里添加额外的动画处理逻辑
+  // 例如：记录动画事件、更新UI状态等
+}
+
+// 预览质量控制相关方法
+const toggleQualityControl = () => {
+  showQualityControl.value = !showQualityControl.value
+}
+
+const handleResolutionChange = (resolution) => {
+  previewResolution.value = resolution
+  console.log('预览分辨率已更改:', resolution)
+  ElMessage.info(`预览分辨率已设置为 ${resolution}`)
+}
+
+const handleQualityChange = (quality) => {
+  previewQuality.value = quality
+  console.log('预览质量已更改:', quality)
+}
+
+const handleOptimizationsChange = (optimizations) => {
+  previewOptimizations.value = optimizations
+  console.log('优化设置已更改:', optimizations)
+}
+
 const resetWorkspace = () => {
   // 释放视频资源
   if (videoSrc.value) {
@@ -1707,6 +2170,9 @@ const resetWorkspace = () => {
 // 生命周期
 onMounted(() => {
   console.log('WorkspaceView mounted')
+
+  // 添加键盘快捷键监听
+  window.addEventListener('keydown', handleKeyboardShortcuts)
 })
 
 onUnmounted(() => {
@@ -1714,6 +2180,9 @@ onUnmounted(() => {
   if (videoSrc.value) {
     URL.revokeObjectURL(videoSrc.value)
   }
+
+  // 移除键盘事件监听
+  window.removeEventListener('keydown', handleKeyboardShortcuts)
 })
 </script>
 
@@ -1933,6 +2402,46 @@ onUnmounted(() => {
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+/* ==========================================
+   预览质量控制面板
+   ========================================== */
+.quality-control-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 50;
+  max-width: 320px;
+  max-height: 80%;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.quality-toggle-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 40;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quality-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
 }
 
 /* ==========================================
@@ -2198,6 +2707,177 @@ onUnmounted(() => {
 .keyframe-item-compact .keyframe-time {
   font-size: 11px;
   color: rgba(255,255,255,0.9);
+}
+
+/* 关键帧网格样式 */
+.keyframes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 8px 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.keyframe-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 200ms ease;
+  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.keyframe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.keyframe-card.selected {
+  border-color: #667eea;
+  border-width: 2px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.keyframe-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(102, 126, 234, 0.1);
+  pointer-events: none;
+}
+
+.keyframe-thumbnail-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  background: #F5F5F7;
+  overflow: hidden;
+}
+
+.keyframe-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.keyframe-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.keyframe-placeholder .frame-icon {
+  font-size: 24px;
+  opacity: 0.8;
+}
+
+.keyframe-overlay {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.keyframe-overlay .frame-number {
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+}
+
+.keyframe-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: #F9F9FB;
+}
+
+.keyframe-info .keyframe-time {
+  font-size: 11px;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+.keyframe-info .keyframe-importance {
+  font-size: 10px;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.keyframe-selected-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  z-index: 3;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-btn,
+.delete-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.export-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.delete-btn {
+  background: #FF3B30;
+  color: white;
+}
+
+.delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
 }
 
 /* 分析提示 */
@@ -2495,34 +3175,136 @@ onUnmounted(() => {
 
 .scene-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
   background: white;
   border-radius: 8px;
   cursor: pointer;
   transition: all 200ms ease;
   border: 1px solid #E5E5EA;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.scene-edit-actions {
+  display: flex;
+  gap: 6px;
+  padding: 0 4px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.scene-item:hover .scene-edit-actions {
+  opacity: 1;
+}
+
+.scene-edit-btn,
+.scene-merge-btn,
+.scene-delete-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  background: #F5F5F7;
+}
+
+.scene-edit-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.1);
+}
+
+.scene-merge-btn:hover {
+  background: rgba(52, 199, 89, 0.1);
+  transform: scale(1.1);
+}
+
+.scene-delete-btn:hover {
+  background: rgba(255, 59, 48, 0.1);
+  transform: scale(1.1);
 }
 
 .scene-item:hover {
   transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
 }
 
+.scene-item.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.scene-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.scene-thumbnail-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .scene-number {
-  width: 32px;
-  height: 32px;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
-  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scene-preview {
+  width: 80px;
+  height: 45px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #F5F5F7;
+}
+
+.scene-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scene-preview-placeholder {
+  width: 80px;
+  height: 45px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-preview-placeholder .scene-icon {
+  font-size: 20px;
+  opacity: 0.8;
 }
 
 .scene-info {
@@ -2548,6 +3330,28 @@ onUnmounted(() => {
   color: #667eea;
   font-weight: 500;
 }
+
+.scene-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.1);
+  transition: all 200ms ease;
+  opacity: 0;
+}
+
+.scene-item:hover .scene-action {
+  opacity: 1;
+}
+
+.scene-action .play-icon {
+  font-size: 12px;
+  color: #667eea;
+}
+
 
 /* 空状态 */
 .empty-analysis {
@@ -2629,9 +3433,20 @@ onUnmounted(() => {
   overflow: hidden;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
     0 0 0 0.5px rgba(255, 255, 255, 0.2);
   pointer-events: auto;
   transition: all 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  cursor: move;
+}
+
+.pip-window:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 0.5px rgba(255, 255, 255, 0.3);
+  border-color: rgba(102, 126, 234, 0.8);
 }
 
 .pip-video {
@@ -2749,6 +3564,10 @@ onUnmounted(() => {
   border-top: 0.5px solid rgba(0, 0, 0, 0.1);
   transition: all 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
   flex-shrink: 0;
+  min-height: 250px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
 }
 
 .bottom-panel.collapsed {
@@ -2825,18 +3644,48 @@ onUnmounted(() => {
 
 .panel-content {
   padding: 12px 20px;
-  max-height: 160px;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
-/* AI分析标签页 - 需要更大的高度 */
+/* AI分析标签页 */
 .analysis-tab {
-  max-height: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .analysis-tab .ai-content-analyzer {
-  max-height: 400px;
+  flex: 1;
   overflow-y: auto;
+  min-height: 0;
+}
+
+/* 智能工具标签页 */
+.smart-tools-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.smart-tools-tab .smart-tools-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 素材需求标签页 */
+.materials-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.materials-tab .material-requirement-analyzer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 /* 模板选择标签页 */
@@ -3200,4 +4049,124 @@ onUnmounted(() => {
     color: #98989D;
   }
 }
+
+/* ========================================
+   智能工具标签页样式
+   ======================================== */
+
+.smart-tools-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+.tools-selector {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.tool-selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: #636366;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-selector-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #1D1D1F;
+}
+
+.tool-selector-btn.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-color: rgba(102, 126, 234, 0.4);
+  color: #007AFF;
+}
+
+.tool-icon {
+  font-size: 18px;
+}
+
+.tool-name {
+  font-size: 14px;
+}
+
+.tool-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.tool-panel {
+  height: 100%;
+}
+
+/* 模板推荐占位符 */
+.template-recommender-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 64px;
+  opacity: 0.6;
+}
+
+.template-recommender-placeholder h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.template-recommender-placeholder p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 400px;
+}
+
+.primary-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
 </style>

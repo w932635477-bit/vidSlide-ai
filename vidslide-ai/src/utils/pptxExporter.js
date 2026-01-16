@@ -49,6 +49,10 @@ export class PptxExporter {
    * 动态加载PptxGenJS库
    */
   async loadPptxGenJS() {
+    // 先加载JSZip依赖
+    await this.loadJSZip()
+
+    // 再加载PptxGenJS
     return new Promise((resolve, reject) => {
       const script = document.createElement('script')
       script.src = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js'
@@ -64,6 +68,33 @@ export class PptxExporter {
 
       // 设置超时
       setTimeout(() => reject(new Error('PptxGenJS库加载超时')), 15000)
+    })
+  }
+
+  /**
+   * 动态加载JSZip库（PptxGenJS的依赖）
+   */
+  async loadJSZip() {
+    if (typeof JSZip !== 'undefined' || typeof window.JSZip !== 'undefined') {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+      script.onload = () => {
+        if (typeof JSZip !== 'undefined' || typeof window.JSZip !== 'undefined') {
+          console.log('JSZip库加载成功')
+          resolve()
+        } else {
+          reject(new Error('JSZip库加载失败'))
+        }
+      }
+      script.onerror = () => reject(new Error('无法加载JSZip库'))
+      document.head.appendChild(script)
+
+      // 设置超时
+      setTimeout(() => reject(new Error('JSZip库加载超时')), 15000)
     })
   }
 
