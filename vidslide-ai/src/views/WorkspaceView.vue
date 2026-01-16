@@ -18,14 +18,14 @@
       @cancel="handleProgressCancel"
     />
 
-    <!-- 素材授权对话框 - 待实现 -->
-    <!-- <AuthorizationDialog
+    <!-- 素材授权对话框 -->
+    <AuthorizationDialog
       :visible="showAuthDialog"
       :searchKeywords="pendingSearchKeywords"
       @authorize="handleMaterialAuthorize"
       @cancel="handleAuthCancel"
       @use-local-only="handleUseLocalOnly"
-    /> -->
+    />
 
     <!-- 头部工具栏 - 简洁毛玻璃效果 -->
     <header class="workspace-header">
@@ -487,6 +487,15 @@
                   <ColorMatcher />
                 </div>
 
+                <!-- 关键帧提取工具 -->
+                <div v-if="activeSmartTool === 'keyframe'" class="tool-panel">
+                  <KeyframeExtractor
+                    :video-src="videoSrc"
+                    :video-duration="videoDuration"
+                    @keyframes-extracted="handleKeyframesExtracted"
+                  />
+                </div>
+
                 <!-- PPT生成工具 -->
                 <div v-if="activeSmartTool === 'ppt'" class="tool-panel">
                   <PptGenerator :content-analysis="getContentAnalysis()" />
@@ -497,23 +506,11 @@
 
           <!-- 模板选择标签页 -->
           <div v-if="activeTab === 'templates'" class="tab-content templates-tab">
-            <div class="templates-grid">
-              <div
-                v-for="template in templates"
-                :key="template.id"
-                class="template-card"
-                :class="{ selected: selectedTemplate?.id === template.id }"
-                @click="handleTemplateSelected(template)"
-              >
-                <div class="template-preview">
-                  <span class="template-icon">{{ template.icon }}</span>
-                </div>
-                <div class="template-info">
-                  <span class="template-name">{{ template.name }}</span>
-                  <span class="template-desc">{{ template.description }}</span>
-                </div>
-              </div>
-            </div>
+            <TemplateSelector
+              :content-type="contentType"
+              :video-duration="videoDuration"
+              @template-selected="handleTemplateSelected"
+            />
           </div>
 
           <!-- 画中画设置标签页 -->
@@ -622,6 +619,9 @@ import ColorMatcher from '../components/ColorMatcher.vue'
 import PptGenerator from '../components/PptGenerator.vue'
 import AnimationSystem from '../components/AnimationSystem.vue'
 import PreviewQualityControl from '../components/PreviewQualityControl.vue'
+import TemplateSelector from '../components/TemplateSelector.vue'
+import AuthorizationDialog from '../components/AuthorizationDialog.vue'
+import KeyframeExtractor from '../components/KeyframeExtractor.vue'
 
 // 导入素材服务
 import MaterialService from '../services/MaterialService.js'
@@ -681,6 +681,7 @@ const smartTools = computed(() => [
   { id: 'crop', name: '智能裁切', icon: '✂️' },
   { id: 'background', name: '背景移除', icon: '🎭' },
   { id: 'color', name: '色彩匹配', icon: '🎨' },
+  { id: 'keyframe', name: '关键帧提取', icon: '🎬' },
   { id: 'ppt', name: 'PPT生成', icon: '📊' }
 ])
 
@@ -736,6 +737,11 @@ const extractedKeyframes = ref([])
 const selectedKeyframes = ref([])
 const transcriptText = ref('')
 const extractedKeywords = ref([])
+const contentType = ref('general') // 内容类型，用于模板推荐
+
+// 素材授权相关状态
+const showAuthDialog = ref(false)
+const pendingSearchKeywords = ref([])
 
 // 语音识别相关状态
 const isSpeechRecognizing = ref(false)
@@ -1491,6 +1497,89 @@ const handleMaterialSearchRequested = async (requirement) => {
   }
 }
 
+// 素材授权处理
+const handleMaterialAuthorize = async (platforms) => {
+  console.log('用户授权平台:', platforms)
+
+  try {
+    // 使用授权的平台搜索素材
+    const searchKeyword = pendingSearchKeywords.value.join(' ')
+    const results = await MaterialService.searchMaterials(searchKeyword, {
+      limit: 20,
+      platforms: platforms // 只使用授权的平台
+    })
+
+    // 关闭授权对话框
+    showAuthDialog.value = false
+    pendingSearchKeywords.value = []
+
+    // 显示搜索结果
+    if (results.materials.length > 0) {
+      ElMessage.success(`找到 ${results.materials.length} 个素材`)
+      console.log('搜索结果:', results.materials)
+    } else {
+      ElMessage.warning('未找到相关素材')
+    }
+  } catch (error) {
+    console.error('授权搜索失败:', error)
+    ElMessage.error(`搜索失败: ${error.message}`)
+  }
+}
+
+// 取消授权
+const handleAuthCancel = () => {
+  console.log('用户取消授权')
+  showAuthDialog.value = false
+  pendingSearchKeywords.value = []
+  ElMessage.info('已取消素材搜索')
+}
+
+// 仅使用本地素材
+const handleUseLocalOnly = async () => {
+  console.log('用户选择仅使用本地素材')
+
+  try {
+    const searchKeyword = pendingSearchKeywords.value.join(' ')
+    const results = await MaterialService.searchMaterials(searchKeyword, {
+      limit: 20,
+      localOnly: true // 仅使用本地预置素材
+    })
+
+    // 关闭授权对话框
+    showAuthDialog.value = false
+    pendingSearchKeywords.value = []
+
+    // 显示搜索结果
+    if (results.materials.length > 0) {
+      ElMessage.success(`找到 ${results.materials.length} 个本地素材`)
+      console.log('本地素材:', results.materials)
+    } else {
+      ElMessage.warning('本地素材库中未找到相关素材')
+    }
+  } catch (error) {
+    console.error('本地搜索失败:', error)
+    ElMessage.error(`搜索失败: ${error.message}`)
+  }
+}
+
+// 关键帧提取完成处理
+const handleKeyframesExtracted = (keyframes) => {
+  console.log('关键帧提取完成:', keyframes)
+
+  // 更新提取的关键帧列表
+  extractedKeyframes.value = keyframes.map((kf, index) => ({
+    id: `keyframe-${index}`,
+    time: kf.time || kf.timestamp,
+    thumbnail: kf.thumbnail || kf.thumbnailUrl,
+    importance: kf.importance || 'medium'
+  }))
+
+  ElMessage.success(`成功提取 ${keyframes.length} 个关键帧`)
+
+  // 切换到AI分析标签页显示关键帧
+  activeTab.value = 'analysis'
+}
+
 // 添加到画布请求事件
 const handleCanvasAddRequested = (requirement) => {
   console.log('添加到画布请求:', requirement)
@@ -1691,39 +1780,6 @@ onUnmounted(() => {
 })
 
 // 模板数据 - 使用计算属性以便响应语言变化
-const templates = computed(() => [
-  {
-    id: 'pip',
-    name: t('workspace.templates.pip.name'),
-    description: t('workspace.templates.pip.desc'),
-    icon: '📺'
-  },
-  {
-    id: 'info-card',
-    name: t('workspace.templates.infoCard.name'),
-    description: t('workspace.templates.infoCard.desc'),
-    icon: '📊'
-  },
-  {
-    id: 'keyword',
-    name: t('workspace.templates.keyword.name'),
-    description: t('workspace.templates.keyword.desc'),
-    icon: '🔍'
-  },
-  {
-    id: 'document',
-    name: t('workspace.templates.document.name'),
-    description: t('workspace.templates.document.desc'),
-    icon: '📄'
-  },
-  {
-    id: 'title',
-    name: t('workspace.templates.title.name'),
-    description: t('workspace.templates.title.desc'),
-    icon: '📝'
-  }
-])
-
 // 画中画设置
 const pipSettings = ref({
   position: 'top-right',

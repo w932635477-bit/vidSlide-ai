@@ -128,7 +128,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { Warning, Close, Search, Shield, Check, HomeFilled } from '@element-plus/icons-vue'
+import { Warning, Close, Search, Lock, Check, HomeFilled } from '@element-plus/icons-vue'
 
 /**
  * 外部素材获取授权对话框
