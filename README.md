@@ -824,43 +824,63 @@ graph LR
 | **前端框架** | Vue 3 + Composition API | 轻量级，响应式系统完善 |
 | **状态管理** | Pinia | 简单高效，TypeScript支持 |
 | **渲染引擎** | Canvas + WebGL | 高性能，浏览器兼容性好 |
+| **视频模板渲染** | Remotion（本地服务器） | 专业级视频模板，30个预设模板，支持复杂动画和视觉效果 |
 | **AI处理** | TensorFlow.js + WebAssembly | 本地化，浏览器支持 |
 | **素材管理** | IndexedDB + Service Worker | 离线存储，缓存策略 |
 | **构建工具** | Vite | 快速启动，热更新 |
 
 #### 4.5.2 代码结构建议
 ```
-src/
-├─ core/
-│  ├─ template-engine/
-│  │  ├─ parser.js       # 模板解析
-│  │  ├─ renderer.js     # 模板渲染
-│  │  └─ constraints.js  # 约束系统
-│  ├─ ai/
-│  │  ├─ nlp.js          # 轻量NLP
-│  │  ├─ matcher.js      # 模板匹配
-│  │  └─ clip.js         # 多模态匹配
-│  ├─ media/
-│  │  ├─ local-source.js # 本地素材管理
-│  │  ├─ remote-source.js # 外部素材API
-│  │  └─ editor-wasm.js  # WebAssembly编辑
-│  └─ utils/
-├─ templates/
-│  ├─ base/
-│  │  ├─ layout.json
-│  │  └─ styles.css
-│  ├─ picture-in-picture/
-│  │  ├─ config.json
-│  │  └─ assets/
-│  └─ ... (其他模板)
-├─ components/
-│  ├─ Editor/
-│  │  ├─ AdjustmentPanel.vue
-│  │  └─ Preview.vue
-│  ├─ Privacy/
-│  │  └─ AuthorizationDialog.vue
-│  └─ ... (UI组件)
-└─ main.js
+VidSlide AI/
+├─ vidslide-ai/              # Vue主项目
+│  ├─ src/
+│  │  ├─ core/
+│  │  │  ├─ template-engine/
+│  │  │  │  ├─ parser.js       # 模板解析
+│  │  │  │  ├─ renderer.js     # 模板渲染
+│  │  │  │  └─ constraints.js  # 约束系统
+│  │  │  ├─ ai/
+│  │  │  │  ├─ nlp.js          # 轻量NLP
+│  │  │  │  ├─ matcher.js      # 模板匹配
+│  │  │  │  └─ clip.js         # 多模态匹配
+│  │  │  ├─ media/
+│  │  │  │  ├─ local-source.js # 本地素材管理
+│  │  │  │  ├─ remote-source.js # 外部素材API
+│  │  │  │  └─ editor-wasm.js  # WebAssembly编辑
+│  │  │  └─ utils/
+│  │  ├─ services/
+│  │  │  └─ RemotionService.js # Remotion集成服务
+│  │  ├─ templates/
+│  │  │  ├─ base/
+│  │  │  │  ├─ layout.json
+│  │  │  │  └─ styles.css
+│  │  │  ├─ picture-in-picture/
+│  │  │  │  ├─ config.json
+│  │  │  │  └─ assets/
+│  │  │  └─ ... (其他模板)
+│  │  ├─ components/
+│  │  │  ├─ Editor/
+│  │  │  │  ├─ AdjustmentPanel.vue
+│  │  │  │  └─ Preview.vue
+│  │  │  ├─ Privacy/
+│  │  │  │  └─ AuthorizationDialog.vue
+│  │  │  └─ ... (UI组件)
+│  │  └─ main.js
+│  └─ package.json
+│
+└─ remotion-templates/       # Remotion渲染项目（独立）
+   ├─ src/
+   │  ├─ templates/          # 30个视频模板
+   │  │  ├─ GlassmorphismStack.jsx
+   │  │  ├─ LuxuryProductShowcase.jsx
+   │  │  └─ ... (其他28个模板)
+   │  ├─ Root.jsx            # 模板注册
+   │  └─ index.jsx
+   ├─ output/                # 渲染输出目录
+   ├─ server.js              # HTTP渲染服务器
+   ├─ start-server.sh        # 一键启动脚本
+   ├─ test-server.sh         # 自动化测试脚本
+   └─ package.json
 ```
 
 #### 4.5.3 关键实施原则
@@ -1047,9 +1067,246 @@ src/
 
 ---
 
-**文档版本**：1.9（2026-01-03）  
-**最后更新**：完善2.3.3素材获取与剪辑流程，明确用户授权机制和API集成方案  
-**审批**：________________________  
+## 十、Remotion视频模板渲染集成
+
+### 10.1 技术方案概述
+
+VidSlide AI集成了Remotion作为专业视频模板渲染引擎，提供30个高质量视频模板，支持复杂动画和视觉效果。
+
+**架构设计**：
+- **独立部署**：Remotion渲染服务器独立于Vue主项目，仅在本地运行
+- **HTTP API通信**：Vue前端通过RESTful API与Remotion服务器通信
+- **技术隔离**：Remotion使用React框架，Vue主项目不直接依赖Remotion代码
+- **本地渲染**：所有视频渲染在本地完成，不涉及云端上传
+
+### 10.2 模板分类
+
+已实现30个专业视频模板，分为6大类别：
+
+#### 10.2.1 基础展示类（5个）
+- **GlassmorphismStack** - 磨砂玻璃3D堆叠
+- **LuxuryProductShowcase** - 奢华金色卡片
+- **NeumorphismSoft** - 新拟态柔和
+- **HolographicRainbow** - 全息彩虹
+- **MinimalWhiteSpace** - 极简留白
+
+#### 10.2.2 对比分析类（5个）
+- **SplitComparison** - 分屏对比
+- **BeforeAfterSlider** - 前后滑动对比
+- **DiagonalSplit** - 对角线分割
+- **CircularReveal** - 圆形揭示
+- **FlipCard** - 3D翻转卡片
+
+#### 10.2.3 数据可视化类（5个）
+- **AnimatedBarChart** - 动态柱状图
+- **CircularProgress** - 环形进度图
+- **LineChartFlow** - 流动曲线图
+- **RadarChart** - 雷达图展示
+- **InfographicGrid** - 信息图表网格
+
+#### 10.2.4 文字动画类（5个）
+- **KineticTypography** - 动态字体分解
+- **NeonGlowText** - 霓虹发光文字
+- **LiquidMorphText** - 液态变形文字
+- **GlitchText** - 故障艺术文字
+- **ThreeDExtrudeText** - 3D挤出文字
+
+#### 10.2.5 创意特效类（5个）
+- **ParticleExplosion** - 粒子爆炸
+- **RippleWave** - 涟漪波纹
+- **LightBeamScan** - 光束扫描
+- **MorphShapeTransition** - 形态变换
+- **FloatingIslands** - 漂浮岛屿
+
+#### 10.2.6 混合效果类（5个）
+- **MagneticCards** - 磁吸卡片
+- **PerspectiveGallery** - 透视画廊
+- **SplitFlap** - 翻页显示屏
+- **CrystalPrism** - 水晶棱镜
+- **InkSpread** - 墨水扩散
+
+### 10.3 API接口
+
+Remotion渲染服务器提供以下HTTP API接口：
+
+| 接口 | 方法 | 功能 | 说明 |
+|------|------|------|------|
+| `/health` | GET | 健康检查 | 检查服务器运行状态 |
+| `/templates` | GET | 获取模板列表 | 返回所有可用模板 |
+| `/render` | POST | 创建渲染任务 | 异步渲染视频，返回renderId |
+| `/progress/:renderId` | GET | 查询渲染进度 | 实时查询渲染状态和进度 |
+| `/cancel/:renderId` | POST | 取消渲染 | 取消正在进行的渲染任务 |
+| `/download/:renderId` | GET | 下载视频 | 下载渲染完成的视频文件 |
+
+### 10.4 Vue集成方案
+
+#### 10.4.1 RemotionService服务
+
+在`vidslide-ai/src/services/RemotionService.js`中实现：
+
+```javascript
+class RemotionService {
+  constructor() {
+    this.baseURL = 'http://localhost:3002'
+  }
+
+  // 获取模板列表
+  async getTemplates() {
+    const response = await fetch(`${this.baseURL}/templates`)
+    return response.json()
+  }
+
+  // 创建渲染任务
+  async renderVideo(templateId, props) {
+    const response = await fetch(`${this.baseURL}/render`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ composition: templateId, props })
+    })
+    return response.json()
+  }
+
+  // 查询渲染进度
+  async getRenderProgress(renderId) {
+    const response = await fetch(`${this.baseURL}/progress/${renderId}`)
+    return response.json()
+  }
+
+  // 轮询直到完成
+  async waitForRender(renderId, onProgress) {
+    return new Promise((resolve, reject) => {
+      const checkProgress = async () => {
+        const progress = await this.getRenderProgress(renderId)
+        if (onProgress) onProgress(progress)
+
+        if (progress.status === 'done') {
+          resolve(progress)
+        } else if (progress.status === 'error') {
+          reject(new Error(progress.error))
+        } else {
+          setTimeout(checkProgress, 1000)
+        }
+      }
+      checkProgress()
+    })
+  }
+}
+```
+
+#### 10.4.2 Vue组件使用示例
+
+```vue
+<template>
+  <div>
+    <button @click="renderVideo">渲染视频</button>
+    <div v-if="rendering">
+      渲染进度: {{ progress }}%
+    </div>
+    <video v-if="videoUrl" :src="videoUrl" controls></video>
+  </div>
+</template>
+
+<script>
+import RemotionService from '@/services/RemotionService'
+
+export default {
+  data() {
+    return {
+      rendering: false,
+      progress: 0,
+      videoUrl: null
+    }
+  },
+  methods: {
+    async renderVideo() {
+      this.rendering = true
+      try {
+        const { renderId } = await RemotionService.renderVideo(
+          'GlassmorphismStack',
+          { title: '我的视频', subtitle: '精彩内容' }
+        )
+
+        await RemotionService.waitForRender(renderId, (progress) => {
+          this.progress = progress.progress
+        })
+
+        this.videoUrl = `http://localhost:3002/download/${renderId}`
+      } catch (error) {
+        console.error('渲染失败:', error)
+      } finally {
+        this.rendering = false
+      }
+    }
+  }
+}
+</script>
+```
+
+### 10.5 性能指标
+
+| 指标 | 目标值 | 说明 |
+|------|--------|------|
+| **渲染速度** | 30-60秒/5秒视频 | 取决于模板复杂度和硬件性能 |
+| **视频质量** | 1080p, 30fps | H.264编码，专业级输出 |
+| **文件大小** | 平均500KB/视频 | 高压缩比，适合网络分享 |
+| **并发能力** | 最多3个任务 | 避免系统资源耗尽 |
+| **内存使用** | <2GB/任务 | 单个渲染任务内存占用 |
+
+### 10.6 启动和测试
+
+#### 10.6.1 启动Remotion服务器
+
+```bash
+# 方式1：使用一键启动脚本
+cd remotion-templates
+./start-server.sh
+
+# 方式2：手动启动
+cd remotion-templates
+node server.js
+```
+
+#### 10.6.2 测试服务器
+
+```bash
+# 运行自动化测试
+cd remotion-templates
+./test-server.sh
+
+# 手动测试API
+curl http://localhost:3002/health
+curl http://localhost:3002/templates
+```
+
+### 10.7 隐私和安全
+
+- **本地运行**：Remotion服务器仅在本地运行（http://localhost:3002），不涉及云端部署
+- **数据隔离**：所有渲染任务在本地完成，用户数据不上传到任何服务器
+- **任务清理**：自动清理旧的渲染文件，避免磁盘空间占用
+- **安全通信**：Vue前端与Remotion服务器通过本地HTTP通信，支持CORS
+
+### 10.8 文档资源
+
+Remotion相关完整文档位于`remotion-templates/`目录：
+
+- **SERVER_TEST_REPORT.md** - 服务器测试报告
+- **QUICK_REFERENCE.md** - API快速参考
+- **INTEGRATION_GUIDE.md** - Vue集成指南
+- **FINAL_SUMMARY.md** - 项目总结
+- **TEMPLATES_CATALOG.md** - 模板目录
+
+### 10.9 技术约束
+
+- **部署限制**：Remotion服务器仅在开发环境本地运行，不部署到生产环境
+- **技术栈例外**：Remotion模板使用React框架（这是允许的例外，因为Remotion基于React）
+- **Node.js使用**：仅用于本地渲染服务器，不涉及云端后端服务
+- **测试覆盖率**：Remotion服务器代码测试覆盖率≥70%
+
+---
+
+**文档版本**：2.0（2026-01-17）
+**最后更新**：添加Remotion视频模板渲染集成说明
+**审批**：________________________
 **日期**：________________________
 
 > **核心提醒**：本需求文档聚焦**用户价值**而非技术实现。所有功能必须服务于核心价值：让自媒体创作者30秒将视频内容转化为专业PPT。技术方案可调整，但用户价值不可妥协。

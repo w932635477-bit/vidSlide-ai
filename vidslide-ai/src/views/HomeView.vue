@@ -202,7 +202,16 @@ const handleLanguageChange = (locale) => {
 }
 
 const goToWorkspace = () => {
-  router.push('/workspace')
+  console.log('🚀 点击了"立即开始"按钮')
+  console.log('📍 当前路由:', router.currentRoute.value.path)
+  console.log('🎯 准备跳转到: /workspace')
+
+  try {
+    router.push('/workspace')
+    console.log('✅ 路由跳转命令已执行')
+  } catch (error) {
+    console.error('❌ 路由跳转失败:', error)
+  }
 }
 
 const watchDemo = () => {

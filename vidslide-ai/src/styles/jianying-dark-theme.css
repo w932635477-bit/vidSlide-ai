@@ -1,0 +1,354 @@
+/* 剪映风格 - Apple-inspired 深色主题全局样式 */
+
+/* 全局CSS变量 */
+:root {
+  /* Apple-inspired color palette */
+  --primary-color: #007AFF;
+  --primary-hover: #005BD3;
+  --secondary-color: #5856D6;
+  --accent-color: #FF3B30;
+  --success-color: #34C759;
+  --warning-color: #FF9500;
+
+  /* Background colors with subtle gradients */
+  --system-background: #000000;
+  --secondary-background: #1C1C1E;
+  --tertiary-background: #2C2C2E;
+  --quaternary-background: #3A3A3C;
+
+  /* Text colors with proper contrast */
+  --label-primary: #FFFFFF;
+  --label-secondary: #EBEBF599;
+  --label-tertiary: #EBEBF54D;
+  --label-quaternary: #EBEBF529;
+
+  /* Separator and border colors */
+  --separator-opaque: #38383A;
+  --separator-non-opaque: #54545899;
+
+  /* System colors */
+  --system-blue: #007AFF;
+  --system-green: #30D158;
+  --system-indigo: #5856D6;
+  --system-orange: #FF9F0A;
+  --system-pink: #FF2D55;
+  --system-purple: #AF52DE;
+  --system-red: #FF3B30;
+  --system-teal: #64D2FF;
+  --system-yellow: #FFD60A;
+
+  /* Specific component colors */
+  --timeline-bg: #1C1C1E;
+  --timeline-track: #2C2C2E;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+/* 全局深色主题覆盖 */
+body {
+  background: var(--system-background);
+  color: var(--label-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 覆盖所有子组件的背景色 */
+.workspace-main-area,
+.workspace-bottom-panel,
+.video-section,
+.editor-canvas,
+.panel-content,
+.tab-content {
+  background: var(--system-background) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖视频预览区域 */
+.video-section {
+  background: var(--secondary-background) !important;
+}
+
+.editor-canvas {
+  background: #000000 !important;
+}
+
+/* 覆盖底部面板样式 */
+.workspace-bottom-panel {
+  background: var(--timeline-bg) !important;
+  border-top: 1px solid var(--separator-opaque) !important;
+}
+
+.panel-tabs {
+  background: var(--tertiary-background) !important;
+  border-bottom: 1px solid var(--separator-opaque) !important;
+}
+
+.tab-btn {
+  background: transparent !important;
+  color: var(--label-secondary) !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tab-btn:hover {
+  background: var(--quaternary-background) !important;
+  color: var(--label-primary) !important;
+}
+
+.tab-btn.active {
+  background: var(--system-blue) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖按钮样式 */
+button,
+.btn,
+.el-button {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:hover,
+.btn:hover,
+.el-button:hover {
+  background: var(--quaternary-background) !important;
+  border-color: var(--system-blue) !important;
+}
+
+button.primary,
+.btn-primary,
+.el-button--primary {
+  background: var(--system-blue) !important;
+  border-color: var(--system-blue) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖输入框样式 */
+input,
+textarea,
+select,
+.el-input__inner,
+.el-textarea__inner {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.el-input__inner:focus,
+.el-textarea__inner:focus {
+  border-color: var(--system-blue) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1) !important;
+}
+
+/* 覆盖卡片样式 */
+.card,
+.el-card {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖对话框样式 */
+.dialog,
+.el-dialog,
+.el-message-box {
+  background: var(--secondary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖下拉菜单样式 */
+.dropdown,
+.el-dropdown-menu,
+.el-select-dropdown {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖滚动条样式 */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-background);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--quaternary-background);
+  border-radius: 6px;
+  border: 2px solid var(--secondary-background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--separator-opaque);
+}
+
+/* 覆盖 Element Plus 组件样式 */
+.el-message {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+.el-notification {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖表格样式 */
+.el-table {
+  background: var(--secondary-background) !important;
+  color: var(--label-primary) !important;
+}
+
+.el-table th,
+.el-table tr {
+  background: var(--tertiary-background) !important;
+  color: var(--label-primary) !important;
+}
+
+.el-table td {
+  border-bottom: 1px solid var(--separator-opaque) !important;
+}
+
+/* 覆盖标签页样式 */
+.el-tabs__header {
+  background: var(--tertiary-background) !important;
+  border-bottom: 1px solid var(--separator-opaque) !important;
+}
+
+.el-tabs__item {
+  color: var(--label-secondary) !important;
+}
+
+.el-tabs__item.is-active {
+  color: var(--system-blue) !important;
+}
+
+/* 覆盖开关样式 */
+.el-switch.is-checked .el-switch__core {
+  background-color: var(--system-blue) !important;
+}
+
+/* 覆盖滑块样式 */
+.el-slider__bar {
+  background-color: var(--system-blue) !important;
+}
+
+.el-slider__button {
+  border-color: var(--system-blue) !important;
+}
+
+/* 覆盖进度条样式 */
+.el-progress-bar__inner {
+  background-color: var(--system-blue) !important;
+}
+
+/* 覆盖标签样式 */
+.el-tag {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖徽章样式 */
+.el-badge__content {
+  background-color: var(--system-red) !important;
+}
+
+/* 覆盖加载样式 */
+.el-loading-mask {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* 覆盖空状态样式 */
+.el-empty {
+  color: var(--label-tertiary) !important;
+}
+
+/* 覆盖分页样式 */
+.el-pagination {
+  color: var(--label-primary) !important;
+}
+
+.el-pagination button {
+  background: var(--tertiary-background) !important;
+  color: var(--label-primary) !important;
+}
+
+.el-pagination .el-pager li {
+  background: var(--tertiary-background) !important;
+  color: var(--label-primary) !important;
+}
+
+.el-pagination .el-pager li.active {
+  background: var(--system-blue) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖时间选择器样式 */
+.el-picker-panel {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+  color: var(--label-primary) !important;
+}
+
+/* 覆盖颜色选择器样式 */
+.el-color-picker__panel {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+}
+
+/* 覆盖树形控件样式 */
+.el-tree {
+  background: var(--secondary-background) !important;
+  color: var(--label-primary) !important;
+}
+
+.el-tree-node__content:hover {
+  background: var(--quaternary-background) !important;
+}
+
+/* 覆盖穿梭框样式 */
+.el-transfer {
+  color: var(--label-primary) !important;
+}
+
+.el-transfer-panel {
+  background: var(--tertiary-background) !important;
+  border: 1px solid var(--separator-opaque) !important;
+}
+
+/* 覆盖时间轴样式 */
+.el-timeline-item__timestamp {
+  color: var(--label-secondary) !important;
+}
+
+/* 覆盖描述列表样式 */
+.el-descriptions {
+  color: var(--label-primary) !important;
+}
+
+.el-descriptions__label {
+  color: var(--label-secondary) !important;
+}
+
+/* 覆盖结果样式 */
+.el-result__title {
+  color: var(--label-primary) !important;
+}
+
+.el-result__subtitle {
+  color: var(--label-secondary) !important;
+}

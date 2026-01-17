@@ -29,6 +29,11 @@ const router = createRouter({
       component: () => import('../views/WorkspaceView.vue')
     },
     {
+      path: '/layout-test',
+      name: 'layout-test',
+      component: () => import('../views/LayoutTestPage.vue')
+    },
+    {
       path: '/help',
       name: 'help',
       component: () => import('../views/HelpView.vue')

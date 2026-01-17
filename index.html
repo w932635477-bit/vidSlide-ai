@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VidSlide AI - 完整工作版本</title>
+    <title>剪映风格 - VidSlide AI 视频编辑器</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
     <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
     <script src="https://unpkg.com/@element-plus/icons-vue/dist/index.iife.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,630 +16,1356 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
+        :root {
+            /* Apple-inspired color palette */
+            --primary-color: #007AFF;
+            --primary-hover: #005BD3;
+            --secondary-color: #5856D6;
+            --accent-color: #FF3B30;
+            --success-color: #34C759;
+            --warning-color: #FF9500;
+
+            /* Background colors with subtle gradients */
+            --system-background: #000000;
+            --secondary-background: #1C1C1E;
+            --tertiary-background: #2C2C2E;
+            --quaternary-background: #3A3A3C;
+
+            /* Text colors with proper contrast */
+            --label-primary: #FFFFFF;
+            --label-secondary: #EBEBF599;
+            --label-tertiary: #EBEBF54D;
+            --label-quaternary: #EBEBF529;
+
+            /* Separator and border colors */
+            --separator-opaque: #38383A;
+            --separator-non-opaque: #54545899;
+
+            /* System colors */
+            --system-blue: #007AFF;
+            --system-green: #30D158;
+            --system-indigo: #5856D6;
+            --system-orange: #FF9F0A;
+            --system-pink: #FF2D55;
+            --system-purple: #AF52DE;
+            --system-red: #FF3B30;
+            --system-teal: #64D2FF;
+            --system-yellow: #FFD60A;
+
+            /* Specific component colors */
+            --timeline-bg: #1C1C1E;
+            --timeline-track: #2C2C2E;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --card-shadow-hover: rgba(0, 0, 0, 0.15);
         }
 
-        .layout-container {
-            min-height: 100vh;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: var(--system-background);
+            color: var(--label-primary);
+            overflow: hidden;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 顶部工具栏 */
+        .header {
+            height: 52px;
+            background: var(--system-background);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--separator-opaque);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 1000;
+            position: relative;
+            box-shadow: 0 1px 0 var(--separator-non-opaque);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--label-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: -0.022em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1px;
+            margin-left: 32px;
+        }
+
+        .nav-tab {
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: var(--label-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: var(--secondary-background);
+            color: var(--label-primary);
+        }
+
+        .nav-tab.active {
+            background: var(--system-blue);
+            color: var(--label-primary);
+            font-weight: 500;
+        }
+
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 6px 12px;
+            background: var(--tertiary-background);
+            border: 1px solid var(--separator-opaque);
+            border-radius: 8px;
+            color: var(--label-primary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 32px;
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .header-btn:hover {
+            background: var(--quaternary-background);
+            border-color: var(--separator-opaque);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--card-shadow-hover);
+        }
+
+        .header-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .header-btn.primary {
+            background: var(--system-blue);
+            border-color: var(--system-blue);
+            color: var(--label-primary);
+            font-weight: 500;
+        }
+
+        .header-btn.primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        /* 主容器布局 */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* 左侧工具栏 */
+        .left-sidebar {
+            width: 280px;
+            background: var(--secondary-background);
+            border-right: 1px solid var(--separator-opaque);
             display: flex;
             flex-direction: column;
+            box-shadow: inset -1px 0 0 var(--separator-non-opaque);
         }
 
-        .main-content {
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--separator-opaque);
+            background: var(--tertiary-background);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: var(--label-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border-radius: 6px;
+            margin: 4px;
+        }
+
+        .sidebar-tab:hover {
+            background: var(--quaternary-background);
+            color: var(--label-primary);
+        }
+
+        .sidebar-tab.active {
+            background: var(--system-blue);
+            color: var(--label-primary);
+            font-weight: 500;
+        }
+
+        .sidebar-content {
             flex: 1;
             padding: 20px;
+            overflow-y: auto;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
+        .media-section {
+            margin-bottom: 24px;
         }
 
-        .video-editor {
+        .media-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--label-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.022em;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .media-grid {
             display: grid;
-            grid-template-rows: 2fr 1fr;
-            gap: 20px;
-            padding: 20px;
-            min-height: 600px;
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
 
-        .video-section {
-            border: 1px solid #e4e7ed;
+        .media-item {
+            padding: 16px;
             border-radius: 8px;
-            padding: 15px;
-            background: #fafafa;
-        }
-
-        .timeline-section {
-            border: 1px solid #e4e7ed;
-            border-radius: 8px;
-            padding: 15px;
-            background: #fafafa;
-            min-height: 120px;
-        }
-
-        .timeline {
-            width: 100%;
-            height: 80px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            position: relative;
-            margin: 10px 0;
+            background: var(--tertiary-background);
+            border: 1px solid var(--separator-opaque);
             cursor: pointer;
-        }
-
-        .timeline-body {
-            height: 100%;
-            background: #007bff;
-            border-radius: 4px;
-            width: 0%;
-            transition: width 0.1s;
-        }
-
-        .marker {
-            position: absolute;
-            top: -8px;
-            width: 16px;
-            height: 40px;
-            background: #dc3545;
-            border-radius: 2px;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .controls {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
-            gap: 10px;
             align-items: center;
-            margin: 10px 0;
-            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .media-item:hover {
+            background: var(--quaternary-background);
+            border-color: var(--system-blue);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--card-shadow-hover);
+        }
+
+        .media-item.selected {
+            background: var(--system-blue);
+            border-color: var(--system-blue);
+            color: var(--label-primary);
+        }
+
+        .media-item.selected .media-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--label-primary);
+        }
+
+        .media-item.selected .media-name {
+            color: var(--label-primary);
+        }
+
+        .media-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--quaternary-background);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--label-secondary);
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .media-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .media-name {
+            font-size: 13px;
+            color: var(--label-primary);
+            font-weight: 500;
+            line-height: 1.3;
+            letter-spacing: -0.022em;
+            margin-bottom: 2px;
+        }
+
+        .media-meta {
+            font-size: 11px;
+            color: var(--label-secondary);
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        /* 中间工作区 */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--system-background);
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secondary-background);
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16/9;
+            background: #000000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
+            position: relative;
+            border: 1px solid var(--separator-opaque);
         }
 
         .video-player {
             width: 100%;
-            max-height: 400px;
-            border-radius: 4px;
-            background: #000;
+            height: 100%;
+            object-fit: contain;
         }
 
-        .status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
-        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-
-        button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s;
-        }
-
-        .primary { background: #007bff; color: white; }
-        .primary:hover { background: #0056b3; }
-
-        .success-btn { background: #28a745; color: white; }
-        .success-btn:hover { background: #218838; }
-
-        .danger { background: #dc3545; color: white; }
-        .danger:hover { background: #c82333; }
-
-        .secondary { background: #6c757d; color: white; }
-        .secondary:hover { background: #545b62; }
-
-        input[type="file"] {
-            margin: 10px 0;
-            padding: 8px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
+        .preview-placeholder {
             width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--label-tertiary);
+            gap: 20px;
         }
 
-        h1, h2, h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        h1 { font-size: 24px; }
-        h2 { font-size: 20px; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
-        h3 { font-size: 16px; }
-
-        .tabs {
-            margin: 20px 0;
-        }
-
-        .tab-content {
-            padding: 20px 0;
-        }
-
-        .file-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-
-        .marker-list {
-            margin: 15px 0;
-        }
-
-        .marker-item {
-            padding: 5px 10px;
-            margin: 2px 0;
-            background: #e9ecef;
-            border-radius: 3px;
+        .upload-zone {
+            border: 2px dashed var(--separator-opaque);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--tertiary-background);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px var(--card-shadow);
         }
 
-        .marker-item:hover {
-            background: #dee2e6;
+        .upload-zone:hover {
+            border-color: var(--system-blue);
+            background: var(--quaternary-background);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 48px var(--card-shadow-hover);
         }
 
-        .marker-item.selected {
-            background: #007bff;
-            color: white;
+        .upload-icon {
+            font-size: 56px;
+            color: var(--label-tertiary);
+            margin-bottom: 20px;
+            opacity: 0.8;
         }
 
-        .debug-info {
+        .upload-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--label-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.022em;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: var(--label-secondary);
+            font-weight: 400;
+        }
+
+        /* 时间轴 */
+        .timeline-container {
+            height: 220px;
+            background: var(--timeline-bg);
+            border-top: 1px solid var(--separator-opaque);
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 1px 0 var(--separator-non-opaque);
+        }
+
+        .timeline-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--separator-opaque);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--label-primary);
+            letter-spacing: -0.022em;
+        }
+
+        .timeline-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .timeline-zoom {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 12px;
-            color: #666;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 4px;
+            color: var(--label-secondary);
+            font-weight: 400;
         }
 
-        .test-result {
-            margin: 5px 0;
-            padding: 5px 10px;
-            border-radius: 3px;
+        .zoom-btn {
+            width: 28px;
+            height: 28px;
+            background: var(--tertiary-background);
+            border: 1px solid var(--separator-opaque);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--label-primary);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .zoom-btn:hover {
+            background: var(--quaternary-background);
+            border-color: var(--system-blue);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--card-shadow-hover);
+        }
+
+        .zoom-btn:active {
+            transform: translateY(0);
+        }
+
+        .timeline-body {
+            flex: 1;
+            padding: 16px 24px;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .timeline-track {
+            height: 64px;
+            background: var(--tertiary-background);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid var(--separator-opaque);
+            box-shadow: 0 1px 3px var(--card-shadow);
+        }
+
+        .track-header {
+            position: absolute;
+            left: -64px;
+            top: 0;
+            width: 56px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 12px;
+            color: var(--label-secondary);
+            font-weight: 500;
+        }
+
+        .track-content {
+            height: 100%;
+            padding-left: 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .clip {
+            height: 48px;
+            background: linear-gradient(135deg, var(--system-blue), var(--system-indigo));
+            border-radius: 6px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            color: var(--label-primary);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: -0.022em;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .clip:hover {
+            transform: translateY(-50%) scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.4);
+        }
+
+        .clip.selected {
+            border: 2px solid var(--system-blue);
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2), 0 4px 16px rgba(0, 122, 255, 0.3);
+        }
+
+        .playhead {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--system-red);
+            z-index: 10;
+            pointer-events: none;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(255, 59, 48, 0.4);
+            animation: playheadPulse 2s infinite;
+        }
+
+        @keyframes playheadPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(255, 59, 48, 0.4); }
+            50% { box-shadow: 0 0 16px rgba(255, 59, 48, 0.6); }
+        }
+
+        .time-ruler {
+            height: 30px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .time-mark {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border-color);
+        }
+
+        .time-mark.major::after {
+            content: attr(data-time);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* 右侧属性面板 */
+        .right-panel {
+            width: 320px;
+            background: var(--secondary-background);
+            border-left: 1px solid var(--separator-opaque);
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 1px 0 0 var(--separator-non-opaque);
+        }
+
+        .panel-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--separator-opaque);
+            background: var(--tertiary-background);
+        }
+
+        .panel-tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: var(--label-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border-radius: 6px;
+            margin: 4px;
+        }
+
+        .panel-tab:hover {
+            background: var(--quaternary-background);
+            color: var(--label-primary);
+        }
+
+        .panel-tab.active {
+            background: var(--system-blue);
+            color: var(--label-primary);
+            font-weight: 500;
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .property-group {
+            margin-bottom: 32px;
+        }
+
+        .property-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--label-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.022em;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .property-item {
+            margin-bottom: 20px;
+        }
+
+        .property-label {
+            font-size: 12px;
+            color: var(--label-primary);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--tertiary-background);
+            border: 1px solid var(--separator-opaque);
+            border-radius: 8px;
+            color: var(--label-primary);
+            font-size: 14px;
+            font-weight: 400;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: var(--system-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1), 0 1px 2px var(--card-shadow);
+        }
+
+        .property-input:hover {
+            border-color: var(--separator-opaque);
+        }
+
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-input {
+            width: 44px;
+            height: 36px;
+            border: 1px solid var(--separator-opaque);
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px var(--card-shadow);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .color-input:hover {
+            border-color: var(--system-blue);
+            transform: scale(1.05);
+        }
+
+        .color-value {
+            font-size: 12px;
+            color: var(--label-secondary);
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            font-weight: 400;
+            letter-spacing: -0.022em;
+        }
+
+        /* 工具按钮 */
+        .tool-btn {
+            padding: 8px;
+            background: var(--tertiary-background);
+            border: 1px solid var(--separator-opaque);
+            border-radius: 8px;
+            color: var(--label-primary);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            min-width: 36px;
+            min-height: 36px;
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .tool-btn:hover {
+            background: var(--quaternary-background);
+            border-color: var(--system-blue);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px var(--card-shadow-hover);
+        }
+
+        .tool-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        .tool-btn.active {
+            background: var(--system-blue);
+            border-color: var(--system-blue);
+            color: var(--label-primary);
+        }
+
+        /* 状态指示器 */
+        .status-indicator {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-background);
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--quaternary-background);
+            border-radius: 6px;
+            border: 2px solid var(--secondary-background);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--separator-opaque);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: var(--secondary-background);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1440px) {
+            .left-sidebar { width: 260px; }
+            .right-panel { width: 300px; }
+        }
+
+        @media (max-width: 1200px) {
+            .left-sidebar { width: 240px; }
+            .right-panel { width: 280px; }
+            .preview-area { padding: 20px; }
+        }
+
+        @media (max-width: 1024px) {
+            .left-sidebar { width: 220px; }
+            .right-panel { width: 260px; }
+            .timeline-container { height: 200px; }
         }
 
         @media (max-width: 768px) {
-            .video-editor {
-                grid-template-rows: 1fr 1fr;
-                gap: 15px;
-                padding: 15px;
-            }
+            .left-sidebar { width: 200px; }
+            .right-panel { width: 240px; }
+            .timeline-container { height: 180px; }
+            .header-left .nav-tabs { display: none; }
+            .header-right { gap: 6px; }
+            .header-btn span { display: none; }
+        }
 
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        @media (max-width: 480px) {
+            .left-sidebar { width: 180px; }
+            .right-panel { width: 220px; }
+            .preview-area { padding: 16px; }
+            .timeline-container { height: 160px; }
+            .media-icon { width: 44px; height: 44px; }
+        }
 
-            button {
-                margin: 2px 0;
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideInFromBottom {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-in-bottom {
+            animation: slideInFromBottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scale-in {
+            animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 微妙的悬浮效果 */
+        .hover-lift {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--card-shadow-hover);
+        }
+
+        /* 隐藏文件输入 */
+        .file-input {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="layout-container">
-        <div class="main-content">
-            <div class="container">
-                <h1>🎬 VidSlide AI - 完整工作版本</h1>
+    <!-- 顶部工具栏 -->
+    <header class="header fade-in">
+        <div class="header-left">
+            <div class="logo hover-lift">
+                🎬 VidSlide AI
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active">编辑</button>
+                <button class="nav-tab">字幕</button>
+                <button class="nav-tab">特效</button>
+                <button class="nav-tab">音乐</button>
+                <button class="nav-tab">导出</button>
+            </nav>
+        </div>
+        <div class="header-right">
+            <button class="header-btn hover-lift" title="撤销 (⌘Z)">
+                <span>↶</span>
+            </button>
+            <button class="header-btn hover-lift" title="重做 (⌘⇧Z)">
+                <span>↷</span>
+            </button>
+            <button class="header-btn primary hover-lift" title="保存 (⌘S)">
+                <span>💾</span>
+            </button>
+        </div>
+    </header>
 
-                <!-- 测试结果状态 -->
-                <div id="test-results"></div>
-
-                <!-- Vue应用 -->
-                <div id="vue-app">
-                    <div class="video-editor">
-                        <!-- 视频上传区域 -->
-                        <div class="video-section">
-                            <h2>📁 视频上传</h2>
-                            <input type="file" accept="video/*" @change="handleVideoSelect" ref="fileInput">
-                            <div v-if="currentVideoFile" class="file-info status success">
-                                <h3>✅ 视频已选择</h3>
-                                <p>文件名: {{ currentVideoFile.name }}</p>
-                                <p>大小: {{ formatFileSize(currentVideoFile.size) }}</p>
-                                <p>类型: {{ currentVideoFile.type }}</p>
-                            </div>
-                            <div v-else class="status warning">
-                                <p>请先选择一个视频文件</p>
-                            </div>
-                            <button class="danger" @click="resetVideo" v-if="currentVideoFile">重置视频</button>
-                        </div>
-
-                        <!-- 视频播放区域 -->
-                        <div v-if="currentVideoFile" class="video-section">
-                            <h2>🎥 视频播放器</h2>
-                            <video
-                                ref="videoPlayer"
-                                :src="videoSrc"
-                                controls
-                                @loadedmetadata="handleVideoLoaded"
-                                @timeupdate="handleTimeUpdate"
-                                @play="handlePlay"
-                                @pause="handlePause"
-                                class="video-player"
-                            ></video>
-                            <div class="controls">
-                                <button @click="playVideo" :disabled="!canPlay">▶️ 播放</button>
-                                <button @click="pauseVideo" :disabled="!canPlay">⏸️ 暂停</button>
-                                <button @click="seekVideo(10)">⏩ +10秒</button>
-                                <button @click="seekVideo(-10)">⏪ -10秒</button>
-                                <span>时间: {{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 时间轴区域 -->
-                    <div v-if="currentVideoFile" class="timeline-section">
-                        <h2>⏱️ 时间轴</h2>
-                        <div class="timeline" @click="handleTimelineClick">
-                            <div class="timeline-body" :style="{ width: progressPercent + '%' }"></div>
-                            <!-- 时间轴标记 -->
-                            <div
-                                v-for="marker in markers"
-                                :key="marker.id"
-                                class="marker"
-                                :style="{ left: getMarkerPosition(marker) + '%' }"
-                                @click.stop="selectMarker(marker)"
-                            ></div>
-                        </div>
-                        <div class="controls">
-                            <button @click="addMarker">➕ 添加标记</button>
-                            <button @click="removeMarker" :disabled="!selectedMarkerId">🗑️ 删除标记</button>
-                            <span>标记数量: {{ markers.length }}</span>
-                            <span v-if="selectedMarkerId">选中: 标记{{ selectedMarkerId }}</span>
-                        </div>
-                        <div v-if="markers.length > 0" class="marker-list">
-                            <h3>标记列表:</h3>
-                            <div
-                                v-for="marker in markers"
-                                :key="marker.id"
-                                class="marker-item"
-                                :class="{ selected: marker.id === selectedMarkerId }"
-                                @click="selectMarker(marker)"
-                            >
-                                标记 {{ marker.id }}: {{ formatTime(marker.time) }}
+    <!-- 主工作区 -->
+    <div class="main-container">
+        <!-- 左侧工具栏 -->
+        <aside class="left-sidebar slide-in-bottom">
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" title="媒体素材">📹 媒体</button>
+                <button class="sidebar-tab" title="文字元素">📝 文字</button>
+                <button class="sidebar-tab" title="特效资源">✨ 特效</button>
+                <button class="sidebar-tab" title="音频素材">🎵 音乐</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="media-section">
+                    <div class="media-section-title">最近使用</div>
+                    <div class="media-grid">
+                        <div class="media-item hover-lift" v-for="item in mediaItems.slice(0, 2)" :key="item.id" @click="selectMediaItem(item)">
+                            <div class="media-icon">{{ item.icon }}</div>
+                            <div class="media-info">
+                                <div class="media-name">{{ item.name }}</div>
+                                <div class="media-meta">{{ item.type }}</div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- AI功能选项卡 (暂时禁用) -->
-                    <div class="tabs">
-                        <h2>🤖 AI功能 (开发中)</h2>
-                        <div class="tab-content">
-                            <div class="status warning">
-                                <h3>⚠️ AI功能临时禁用</h3>
-                                <p>正在修复基础功能，AI功能将在后续版本中恢复</p>
-                                <p>当前支持: 视频上传、播放、时间轴标记</p>
+                <div class="media-section">
+                    <div class="media-section-title">素材库</div>
+                    <div class="media-grid">
+                        <div class="media-item hover-lift" v-for="item in mediaItems" :key="item.id" @click="selectMediaItem(item)">
+                            <div class="media-icon">{{ item.icon }}</div>
+                            <div class="media-info">
+                                <div class="media-name">{{ item.name }}</div>
+                                <div class="media-meta">{{ item.type }}</div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- 调试信息 -->
-                    <div class="debug-info">
-                        <h3>🔧 调试信息</h3>
-                        <p>视频文件: {{ currentVideoFile ? '已选择' : '未选择' }}</p>
-                        <p>视频源: {{ videoSrc ? '已设置' : '未设置' }}</p>
-                        <p>当前时间: {{ currentTime }} ({{ typeof currentTime }})</p>
-                        <p>视频时长: {{ videoDuration }}</p>
-                        <p>播放状态: {{ isPlaying ? '播放中' : '暂停中' }}</p>
-                        <p>标记数量: {{ markers.length }}</p>
-                        <p>Vue版本: {{ vueVersion }}</p>
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
+
+        <!-- 中间工作区 -->
+        <main class="workspace">
+            <!-- 预览区域 -->
+            <div class="preview-area">
+                <div class="preview-container">
+                    <div v-if="currentVideo">
+                        <video
+                            ref="videoPlayer"
+                            :src="currentVideo.src"
+                            class="video-player"
+                            controls
+                            @loadedmetadata="onVideoLoaded"
+                            @timeupdate="onTimeUpdate"
+                            @play="onPlay"
+                            @pause="onPause"
+                        ></video>
+                    </div>
+                    <div v-else>
+                        <div class="preview-placeholder fade-in">
+                            <div class="upload-zone hover-lift" @click="triggerFileSelect">
+                                <div class="upload-icon">📹</div>
+                                <div class="upload-text">拖拽视频文件到此处</div>
+                                <div class="upload-hint">支持 MP4、MOV 等格式 • 最大 500MB</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时间轴 -->
+            <div class="timeline-container slide-in-bottom">
+                <div class="timeline-header">
+                    <span>时间轴</span>
+                    <div class="timeline-tools">
+                        <div class="timeline-zoom">
+                            <button class="zoom-btn hover-lift" @click="zoomOut" title="缩小">−</button>
+                            <span>{{ zoomLevel }}%</span>
+                            <button class="zoom-btn hover-lift" @click="zoomIn" title="放大">+</button>
+                        </div>
+                        <button class="tool-btn hover-lift" @click="addClip" title="添加片段 (⌘N)">
+                            <span style="font-size: 18px;">+</span>
+                        </button>
+                        <button class="tool-btn hover-lift" @click="splitClip" title="分割片段 (⌘B)">
+                            <span style="font-size: 16px;">✂️</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="timeline-body" ref="timelineBody">
+                    <div class="time-ruler">
+                        <div
+                            v-for="mark in timeMarks"
+                            :key="mark.time"
+                            class="time-mark"
+                            :class="{ major: mark.major }"
+                            :data-time="mark.label"
+                            :style="{ left: mark.position + 'px' }"
+                        ></div>
+                    </div>
+                    <div class="timeline-track">
+                        <div class="track-header">视频</div>
+                        <div class="track-content">
+                            <div
+                                v-for="clip in videoClips"
+                                :key="clip.id"
+                                class="clip"
+                                :class="{ selected: clip.selected }"
+                                :style="getClipStyle(clip)"
+                                @click="selectClip(clip)"
+                            >
+                                {{ clip.name }}
+                            </div>
+                            <div
+                                class="playhead"
+                                :style="{ left: playheadPosition + 'px' }"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 右侧属性面板 -->
+        <aside class="right-panel slide-in-bottom">
+            <div class="panel-tabs">
+                <button class="panel-tab active" title="基本属性">⚙️ 属性</button>
+                <button class="panel-tab" title="视觉特效">✨ 特效</button>
+                <button class="panel-tab" title="动画效果">🎭 动画</button>
+            </div>
+            <div class="panel-content">
+                <div v-if="selectedClip">
+                    <div class="property-group">
+                        <div class="property-title">基本属性</div>
+                        <div class="property-item">
+                            <label class="property-label">名称</label>
+                            <input
+                                class="property-input"
+                                v-model="selectedClip.name"
+                                type="text"
+                            >
+                        </div>
+                        <div class="property-item">
+                            <label class="property-label">开始时间</label>
+                            <input
+                                class="property-input"
+                                v-model="selectedClip.start"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+                        <div class="property-item">
+                            <label class="property-label">持续时间</label>
+                            <input
+                                class="property-input"
+                                v-model="selectedClip.duration"
+                                type="number"
+                                step="0.1"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="property-group">
+                        <div class="property-title">视觉效果</div>
+                        <div class="property-item">
+                            <label class="property-label">不透明度</label>
+                            <input
+                                class="property-input"
+                                v-model="selectedClip.opacity"
+                                type="range"
+                                min="0"
+                                max="100"
+                            >
+                        </div>
+                        <div class="property-item">
+                            <label class="property-label">色彩</label>
+                            <div class="color-picker">
+                                <input
+                                    class="color-input"
+                                    v-model="selectedClip.color"
+                                    type="color"
+                                >
+                                <span class="color-value">{{ selectedClip.color }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else>
+                    <div class="preview-placeholder" style="height: 200px;">
+                        <div style="text-align: center; color: var(--text-muted);">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🎬</div>
+                            <div>选择片段查看属性</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 
+    <!-- 隐藏的文件输入 -->
+    <input
+        ref="fileInput"
+        class="file-input"
+        type="file"
+        accept="video/*"
+        @change="onFileSelect"
+    >
+
     <script>
-        // 测试结果显示
-        function addTestResult(message, type = 'info') {
-            const results = document.getElementById('test-results');
-            const div = document.createElement('div');
-            div.className = `status test-result ${type}`;
-            div.innerHTML = `<small>${new Date().toLocaleTimeString()}</small><br>${message}`;
-            results.appendChild(div);
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
 
-        // 检查依赖加载
-        function checkDependencies() {
-            const dependencies = [
-                { name: 'Vue', loaded: typeof Vue !== 'undefined' },
-                { name: 'Element Plus', loaded: typeof ElementPlus !== 'undefined' }
-            ];
+        const app = createApp({
+            setup() {
+                // 状态管理
+                const fileInput = ref(null);
+                const videoPlayer = ref(null);
+                const timelineBody = ref(null);
+                const currentVideo = ref(null);
+                const selectedClip = ref(null);
+                const zoomLevel = ref(100);
+                const currentTime = ref(0);
+                const videoDuration = ref(0);
+                const isPlaying = ref(false);
 
-            let allLoaded = true;
-            dependencies.forEach(dep => {
-                if (dep.loaded) {
-                    addTestResult(`✅ ${dep.name} 加载成功`, 'success');
-                } else {
-                    addTestResult(`❌ ${dep.name} 加载失败`, 'error');
-                    allLoaded = false;
-                }
-            });
+                // 数据
+                const mediaItems = ref([
+                    { id: 1, name: '示例视频.mp4', icon: '🎥', type: 'video' },
+                    { id: 2, name: '背景音乐.mp3', icon: '🎵', type: 'audio' },
+                    { id: 3, name: '文字模板', icon: '📝', type: 'text' },
+                    { id: 4, name: '特效包', icon: '✨', type: 'effect' }
+                ]);
 
-            return allLoaded;
-        }
+                const videoClips = ref([
+                    {
+                        id: 1,
+                        name: '片段 1',
+                        start: 0,
+                        duration: 10,
+                        opacity: 100,
+                        color: '#00d4aa',
+                        selected: false
+                    },
+                    {
+                        id: 2,
+                        name: '片段 2',
+                        start: 10,
+                        duration: 15,
+                        opacity: 100,
+                        color: '#6366f1',
+                        selected: false
+                    }
+                ]);
 
-        // Vue应用
-        function initVueApp() {
-            if (!checkDependencies()) {
-                addTestResult('❌ 依赖加载失败，无法初始化Vue应用', 'error');
-                return;
-            }
+                // 计算属性
+                const playheadPosition = computed(() => {
+                    if (videoDuration.value === 0) return 0;
+                    return (currentTime.value / videoDuration.value) * (timelineBody.value?.clientWidth || 0) * (zoomLevel.value / 100);
+                });
 
-            const { createApp, ref, computed, onMounted, nextTick } = Vue;
+                const timeMarks = computed(() => {
+                    const marks = [];
+                    const duration = videoDuration.value || 60;
+                    const pixelsPerSecond = (timelineBody.value?.clientWidth || 800) * (zoomLevel.value / 100) / duration;
 
-            const app = createApp({
-                setup() {
-                    // 状态
-                    const currentVideoFile = ref(null);
-                    const videoSrc = ref('');
-                    const videoPlayer = ref(null);
-                    const currentTime = ref(0);
-                    const videoDuration = ref(0);
-                    const isPlaying = ref(false);
-                    const canPlay = ref(false);
-                    const markers = ref([]);
-                    const selectedMarkerId = ref('');
-                    let markerIdCounter = 1;
+                    for (let i = 0; i <= duration; i += 2) {
+                        marks.push({
+                            time: i,
+                            position: i * pixelsPerSecond,
+                            label: formatTime(i),
+                            major: i % 10 === 0
+                        });
+                    }
+                    return marks;
+                });
 
-                    // 计算属性
-                    const progressPercent = computed(() => {
-                        if (videoDuration.value === 0) return 0;
-                        return (currentTime.value / videoDuration.value) * 100;
-                    });
+                // 方法
+                const triggerFileSelect = () => {
+                    fileInput.value?.click();
+                };
 
-                    const vueVersion = computed(() => {
-                        return Vue ? Vue.version : '未知';
-                    });
-
-                    // 文件大小格式化
-                    const formatFileSize = (bytes) => {
-                        if (bytes === 0) return '0 Bytes';
-                        const k = 1024;
-                        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                        const i = Math.floor(Math.log(bytes) / Math.log(k));
-                        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-                    };
-
-                    // 时间格式化
-                    const formatTime = (seconds) => {
-                        if (typeof seconds !== 'number' || isNaN(seconds)) return '00:00';
-                        const mins = Math.floor(seconds / 60);
-                        const secs = Math.floor(seconds % 60);
-                        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                    };
-
-                    // 获取标记位置
-                    const getMarkerPosition = (marker) => {
-                        if (videoDuration.value === 0) return 0;
-                        return (marker.time / videoDuration.value) * 100;
-                    };
-
-                    // 事件处理
-                    const handleVideoSelect = async (event) => {
-                        const file = event.target.files[0];
-                        if (file) {
-                            try {
-                                addTestResult(`选择文件: ${file.name}`, 'info');
-
-                                // 验证文件类型
-                                if (!file.type.startsWith('video/')) {
-                                    addTestResult('请选择视频文件', 'error');
-                                    return;
-                                }
-
-                                // 设置文件
-                                currentVideoFile.value = file;
-                                videoSrc.value = URL.createObjectURL(file);
-
-                                addTestResult('✅ 视频文件设置成功', 'success');
-
-                            } catch (error) {
-                                addTestResult(`❌ 文件处理失败: ${error.message}`, 'error');
-                                console.error('File handling error:', error);
-                            }
-                        }
-                    };
-
-                    const resetVideo = () => {
-                        if (videoSrc.value) {
-                            URL.revokeObjectURL(videoSrc.value);
-                        }
-
-                        currentVideoFile.value = null;
-                        videoSrc.value = '';
-                        currentTime.value = 0;
-                        videoDuration.value = 0;
-                        isPlaying.value = false;
-                        canPlay.value = false;
-                        markers.value = [];
-                        selectedMarkerId.value = '';
-                        addTestResult('视频已重置', 'info');
-                    };
-
-                    const handleVideoLoaded = () => {
-                        if (videoPlayer.value) {
-                            videoDuration.value = videoPlayer.value.duration || 0;
-                            canPlay.value = true;
-                            addTestResult(`✅ 视频加载完成，时长: ${formatTime(videoDuration.value)}`, 'success');
-                        }
-                    };
-
-                    const handleTimeUpdate = () => {
-                        if (videoPlayer.value) {
-                            currentTime.value = videoPlayer.value.currentTime || 0;
-                        }
-                    };
-
-                    const handlePlay = () => {
-                        isPlaying.value = true;
-                        addTestResult('视频开始播放', 'info');
-                    };
-
-                    const handlePause = () => {
-                        isPlaying.value = false;
-                        addTestResult('视频暂停播放', 'info');
-                    };
-
-                    const playVideo = () => {
-                        if (videoPlayer.value) {
-                            videoPlayer.value.play();
-                        }
-                    };
-
-                    const pauseVideo = () => {
-                        if (videoPlayer.value) {
-                            videoPlayer.value.pause();
-                        }
-                    };
-
-                    const seekVideo = (seconds) => {
-                        if (videoPlayer.value) {
-                            const newTime = Math.max(0, Math.min(videoDuration.value, currentTime.value + seconds));
-                            videoPlayer.value.currentTime = newTime;
-                            currentTime.value = newTime;
-                        }
-                    };
-
-                    const handleTimelineClick = (event) => {
-                        if (videoDuration.value > 0 && videoPlayer.value) {
-                            const rect = event.target.getBoundingClientRect();
-                            const clickX = event.clientX - rect.left;
-                            const percentage = clickX / rect.width;
-                            const newTime = percentage * videoDuration.value;
-
-                            videoPlayer.value.currentTime = newTime;
-                            currentTime.value = newTime;
-                        }
-                    };
-
-                    const addMarker = () => {
-                        const marker = {
-                            id: markerIdCounter++,
-                            time: currentTime.value,
-                            title: `标记 ${markerIdCounter - 1}`
+                const onFileSelect = (event) => {
+                    const file = event.target.files[0];
+                    if (file && file.type.startsWith('video/')) {
+                        const videoUrl = URL.createObjectURL(file);
+                        currentVideo.value = {
+                            file: file,
+                            src: videoUrl,
+                            name: file.name,
+                            size: formatFileSize(file.size)
                         };
-                        markers.value.push(marker);
-                        selectedMarkerId.value = marker.id;
-                        addTestResult(`添加标记: ${formatTime(marker.time)}`, 'info');
-                    };
+                    }
+                };
 
-                    const removeMarker = () => {
-                        if (selectedMarkerId.value) {
-                            const index = markers.value.findIndex(m => m.id === selectedMarkerId.value);
-                            if (index > -1) {
-                                markers.value.splice(index, 1);
-                                selectedMarkerId.value = '';
-                                addTestResult('标记已删除', 'info');
-                            }
-                        }
-                    };
+                const onVideoLoaded = () => {
+                    if (videoPlayer.value) {
+                        videoDuration.value = videoPlayer.value.duration;
+                    }
+                };
 
-                    const selectMarker = (marker) => {
-                        selectedMarkerId.value = marker.id;
-                        if (videoPlayer.value) {
-                            videoPlayer.value.currentTime = marker.time;
-                            currentTime.value = marker.time;
-                        }
-                        addTestResult(`选择标记: ${formatTime(marker.time)}`, 'info');
-                    };
+                const onTimeUpdate = () => {
+                    if (videoPlayer.value) {
+                        currentTime.value = videoPlayer.value.currentTime;
+                    }
+                };
 
-                    // 初始化
-                    onMounted(() => {
-                        addTestResult('✅ Vue应用初始化完成', 'success');
-                    });
+                const onPlay = () => {
+                    isPlaying.value = true;
+                };
 
+                const onPause = () => {
+                    isPlaying.value = false;
+                };
+
+                const selectMediaItem = (item) => {
+                    console.log('Selected media item:', item);
+                };
+
+                const selectClip = (clip) => {
+                    videoClips.value.forEach(c => c.selected = false);
+                    clip.selected = true;
+                    selectedClip.value = clip;
+                };
+
+                const getClipStyle = (clip) => {
+                    const pixelsPerSecond = (timelineBody.value?.clientWidth || 800) * (zoomLevel.value / 100) / (videoDuration.value || 60);
                     return {
-                        currentVideoFile,
-                        videoSrc,
-                        videoPlayer,
-                        currentTime,
-                        videoDuration,
-                        isPlaying,
-                        canPlay,
-                        markers,
-                        selectedMarkerId,
-                        progressPercent,
-                        vueVersion,
-                        formatFileSize,
-                        formatTime,
-                        getMarkerPosition,
-                        handleVideoSelect,
-                        resetVideo,
-                        handleVideoLoaded,
-                        handleTimeUpdate,
-                        handlePlay,
-                        handlePause,
-                        playVideo,
-                        pauseVideo,
-                        seekVideo,
-                        handleTimelineClick,
-                        addMarker,
-                        removeMarker,
-                        selectMarker
+                        left: (clip.start * pixelsPerSecond) + 'px',
+                        width: (clip.duration * pixelsPerSecond) + 'px',
+                        background: `linear-gradient(135deg, ${clip.color}, ${adjustColor(clip.color, -20)})`
                     };
-                }
-            });
+                };
 
-            // 挂载应用
-            try {
-                app.mount('#vue-app');
-                addTestResult('✅ Vue应用挂载成功', 'success');
-                addTestResult('🎉 VidSlide AI 基础功能现已完全可用！', 'success');
-            } catch (error) {
-                addTestResult(`❌ Vue应用挂载失败: ${error.message}`, 'error');
-                console.error('Vue app mount failed:', error);
+                const zoomIn = () => {
+                    zoomLevel.value = Math.min(zoomLevel.value + 25, 400);
+                };
+
+                const zoomOut = () => {
+                    zoomLevel.value = Math.max(zoomLevel.value - 25, 25);
+                };
+
+                const addClip = () => {
+                    const newClip = {
+                        id: Date.now(),
+                        name: `片段 ${videoClips.value.length + 1}`,
+                        start: currentTime.value,
+                        duration: 5,
+                        opacity: 100,
+                        color: '#00d4aa',
+                        selected: true
+                    };
+                    videoClips.value.push(newClip);
+                    selectedClip.value = newClip;
+                };
+
+                const splitClip = () => {
+                    if (selectedClip.value) {
+                        const clip = selectedClip.value;
+                        const splitTime = currentTime.value - clip.start;
+                        if (splitTime > 0 && splitTime < clip.duration) {
+                            const secondPart = {
+                                id: Date.now(),
+                                name: `${clip.name} (2)`,
+                                start: clip.start + splitTime,
+                                duration: clip.duration - splitTime,
+                                opacity: clip.opacity,
+                                color: clip.color,
+                                selected: false
+                            };
+                            clip.duration = splitTime;
+                            clip.name = `${clip.name} (1)`;
+                            videoClips.value.push(secondPart);
+                        }
+                    }
+                };
+
+                // 工具函数
+                const formatTime = (seconds) => {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                };
+
+                const formatFileSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                const adjustColor = (color, amount) => {
+                    const usePound = color[0] === '#';
+                    const col = usePound ? color.slice(1) : color;
+
+                    const num = parseInt(col, 16);
+                    let r = (num >> 16) + amount;
+                    let g = (num >> 8 & 0x00FF) + amount;
+                    let b = (num & 0x0000FF) + amount;
+
+                    r = r > 255 ? 255 : r < 0 ? 0 : r;
+                    g = g > 255 ? 255 : g < 0 ? 0 : g;
+                    b = b > 255 ? 255 : b < 0 ? 0 : b;
+
+                    return (usePound ? '#' : '') + (r << 16 | g << 8 | b).toString(16);
+                };
+
+                onMounted(() => {
+                    // 初始化第一个片段为选中状态
+                    if (videoClips.value.length > 0) {
+                        videoClips.value[0].selected = true;
+                        selectedClip.value = videoClips.value[0];
+                    }
+                });
+
+                return {
+                    fileInput,
+                    videoPlayer,
+                    timelineBody,
+                    currentVideo,
+                    selectedClip,
+                    zoomLevel,
+                    currentTime,
+                    videoDuration,
+                    isPlaying,
+                    mediaItems,
+                    videoClips,
+                    playheadPosition,
+                    timeMarks,
+                    triggerFileSelect,
+                    onFileSelect,
+                    onVideoLoaded,
+                    onTimeUpdate,
+                    onPlay,
+                    onPause,
+                    selectMediaItem,
+                    selectClip,
+                    getClipStyle,
+                    zoomIn,
+                    zoomOut,
+                    addClip,
+                    splitClip
+                };
             }
-
-            // 错误处理
-            window.addEventListener('error', (event) => {
-                addTestResult(`❌ 页面错误: ${event.error.message}`, 'error');
-            });
-
-            app.config.errorHandler = (err, instance, info) => {
-                addTestResult(`❌ Vue错误: ${err.message}`, 'error');
-                console.error('Vue error:', err, info);
-            };
-        }
-
-        // 页面加载完成后初始化
-        window.addEventListener('load', () => {
-            addTestResult('页面加载完成，准备初始化Vue应用...', 'info');
-
-            // 检查依赖加载
-            let checkInterval = setInterval(() => {
-                if (typeof Vue !== 'undefined' && typeof ElementPlus !== 'undefined') {
-                    clearInterval(checkInterval);
-                    initVueApp();
-                }
-            }, 100);
-
-            // 超时处理
-            setTimeout(() => {
-                if (typeof Vue === 'undefined' || typeof ElementPlus === 'undefined') {
-                    clearInterval(checkInterval);
-                    addTestResult('❌ 依赖加载超时，请检查网络连接', 'error');
-                    addTestResult('💡 建议: 使用 offline-test.html 离线版本', 'info');
-                }
-            }, 10000);
         });
+
+        app.mount('#app');
     </script>
 </body>
 </html>

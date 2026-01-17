@@ -1,98 +1,48 @@
 #!/bin/bash
 
-# VidSlide AI 首页优化验证脚本
-# 用于检查CSS优化是否正确应用
-
-echo "🔍 VidSlide AI 首页优化验证"
-echo "================================"
+# 大文件优化验证脚本
+echo "======================================"
+echo "VidSlide AI 大文件优化验证"
+echo "======================================"
 echo ""
 
-# 检查CSS文件
-echo "📄 检查CSS文件..."
-CSS_FILE="/Users/weilei/VidSlide AI/vidslide-ai/src/styles/home-apple-style.css"
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-if [ -f "$CSS_FILE" ]; then
-    FILE_SIZE=$(ls -lh "$CSS_FILE" | awk '{print $5}')
-    echo "✅ CSS文件存在: $FILE_SIZE"
+PASSED=0
+FAILED=0
 
-    # 检查关键优化点
-    echo ""
-    echo "🎨 检查关键优化..."
-
-    # 检查间距系统
-    if grep -q "spacing-lg: 48px" "$CSS_FILE"; then
-        echo "✅ 间距系统已升级 (spacing-lg: 48px)"
+test_result() {
+    if [ $1 -eq 0 ]; then
+        echo -e "${GREEN}✓ PASSED${NC}: $2"
+        ((PASSED++))
     else
-        echo "❌ 间距系统未升级"
+        echo -e "${RED}✗ FAILED${NC}: $2"
+        ((FAILED++))
     fi
+}
 
-    # 检查Logo尺寸
-    if grep -q "width: 40px" "$CSS_FILE"; then
-        echo "✅ Logo尺寸已增大 (40px)"
-    else
-        echo "❌ Logo尺寸未增大"
-    fi
+echo "1. 检查文件结构..."
+echo "-----------------------------------"
 
-    # 检查导航栏不透明度
-    if grep -q "rgba(255, 255, 255, 0.92)" "$CSS_FILE"; then
-        echo "✅ 导航栏不透明度已提高 (0.92)"
-    else
-        echo "❌ 导航栏不透明度未提高"
-    fi
-
-    # 检查Apple标准色值
-    if grep -q "#1D1D1F" "$CSS_FILE"; then
-        echo "✅ Apple标准色值已应用 (#1D1D1F)"
-    else
-        echo "❌ Apple标准色值未应用"
-    fi
-
-    # 检查背景图片
-    if grep -q "hero-bg.png" "$CSS_FILE"; then
-        echo "✅ 背景图片已添加"
-    else
-        echo "❌ 背景图片未添加"
-    fi
-else
-    echo "❌ CSS文件不存在"
-fi
+[ -f "vidslide-ai/src/components/asset-browser/AssetBrowserHeader.vue" ] && test_result 0 "AssetBrowserHeader.vue 存在" || test_result 1 "AssetBrowserHeader.vue 不存在"
+[ -f "vidslide-ai/src/components/asset-browser/AssetSearchFilters.vue" ] && test_result 0 "AssetSearchFilters.vue 存在" || test_result 1 "AssetSearchFilters.vue 不存在"
+[ -f "vidslide-ai/src/components/asset-browser/AssetItem.vue" ] && test_result 0 "AssetItem.vue 存在" || test_result 1 "AssetItem.vue 不存在"
+[ -f "vidslide-ai/src/components/asset-browser/AssetGrid.vue" ] && test_result 0 "AssetGrid.vue 存在" || test_result 1 "AssetGrid.vue 不存在"
 
 echo ""
-echo "🖼️  检查图片资源..."
+echo "2. 检查构建..."
+echo "-----------------------------------"
 
-# 检查背景图片
-if [ -f "/Users/weilei/VidSlide AI/vidslide-ai/public/assets/hero-bg.png" ]; then
-    BG_SIZE=$(ls -lh "/Users/weilei/VidSlide AI/vidslide-ai/public/assets/hero-bg.png" | awk '{print $5}')
-    echo "✅ 英雄区背景图: $BG_SIZE"
-else
-    echo "❌ 英雄区背景图不存在"
-fi
+cd vidslide-ai && npm run build > /dev/null 2>&1 && test_result 0 "项目构建成功" || test_result 1 "项目构建失败"
 
-# 检查占位符图片
-PLACEHOLDER_COUNT=$(find "/Users/weilei/VidSlide AI/vidslide-ai/public/assets/placeholders" -name "*.png" 2>/dev/null | wc -l)
-echo "✅ 占位符图片: $PLACEHOLDER_COUNT 张"
+cd ..
 
 echo ""
-echo "🌐 检查开发服务器..."
+echo "======================================"
+echo "验证结果: 通过 $PASSED, 失败 $FAILED"
+echo "======================================"
 
-# 检查开发服务器是否运行
-if curl -s http://localhost:5176/ > /dev/null 2>&1; then
-    echo "✅ 开发服务器运行中: http://localhost:5176/"
-else
-    echo "❌ 开发服务器未运行"
-    echo "   请运行: cd vidslide-ai && npm run dev"
-fi
-
-echo ""
-echo "================================"
-echo "📊 验证完成！"
-echo ""
-echo "💡 如果样式没有生效，请尝试："
-echo "   1. 在浏览器中按 Cmd+Shift+R 强制刷新"
-echo "   2. 清除浏览器缓存"
-echo "   3. 使用无痕模式访问"
-echo ""
-echo "📖 查看详细文档："
-echo "   - OPTIMIZATION_COMPLETE.md - 优化完成报告"
-echo "   - OPTIMIZATION_REPORT.md - 详细优化说明"
-echo "   - public/assets/PLACEHOLDER_IMAGES.md - 图片使用说明"
+[ $FAILED -eq 0 ] && echo -e "${GREEN}✓ 验证通过！${NC}" && exit 0 || echo -e "${RED}✗ 验证失败${NC}" && exit 1

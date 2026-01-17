@@ -69,6 +69,8 @@
 </template>
 
 <script>
+import TemplateArchitecture from '../utils/TemplateArchitecture.js'
+
 export default {
   name: 'TemplateSelector',
   props: {
@@ -84,79 +86,97 @@ export default {
   data() {
     return {
       selectedTemplate: null,
-      templates: [
-        {
-          id: 'pip-basic',
-          name: '画中画模板',
-          description: '视频与PPT并排显示，适合讲解类内容',
-          icon: '📺',
-          layout: 'pip',
-          hasSecondary: true,
-          tags: ['视频', '讲解', '演示'],
-          scenes: ['产品介绍', '课程讲解', '功能演示'],
-          features: ['人脸跟踪', '智能切换', '响应式布局'],
-          adjustable: true,
-          recommended: true
-        },
-        {
-          id: 'info-cards',
-          name: '信息卡片模板',
-          description: '结构化展示多个信息点，适合数据展示',
-          icon: '📊',
-          layout: 'grid',
-          hasSecondary: false,
-          tags: ['数据', '列表', '对比'],
-          scenes: ['数据分析', '功能对比', '要点总结'],
-          features: ['自动布局', '颜色区分', '动画效果'],
-          adjustable: true,
-          recommended: false
-        },
-        {
-          id: 'keyword-highlight',
-          name: '关键词高亮模板',
-          description: '突出显示重要关键词，适合演讲强调',
-          icon: '🎯',
-          layout: 'overlay',
-          hasSecondary: false,
-          tags: ['关键词', '强调', '高亮'],
-          scenes: ['演讲稿', '要点强调', '术语解释'],
-          features: ['智能识别', '动态显示', '中英对照'],
-          adjustable: true,
-          recommended: false
-        },
-        {
-          id: 'document-showcase',
-          name: '文档展示模板',
-          description: '3D效果展示多个文档，适合资料分享',
-          icon: '📄',
-          layout: 'stacked',
-          hasSecondary: false,
-          tags: ['文档', '资料', '展示'],
-          scenes: ['资料分享', '文件展示', '内容预览'],
-          features: ['3D效果', '交互导航', '详细信息'],
-          adjustable: true,
-          recommended: false
-        },
-        {
-          id: 'title-slide',
-          name: '标题幻灯片模板',
-          description: '简洁的标题展示，适合章节开始',
-          icon: '📝',
-          layout: 'centered',
-          hasSecondary: false,
-          tags: ['标题', '章节', '开始'],
-          scenes: ['章节标题', '主题介绍', '内容开始'],
-          features: ['居中布局', '渐入动画', '装饰元素'],
-          adjustable: true,
-          recommended: false
-        }
-      ]
+      templates: [],
+      loading: true
     };
   },
-  created() {
-    this.updateRecommendations();
+  async created() {
+    await this.loadTemplates();
   },
   methods: {
+    async loadTemplates() {
+      try {
+        // 初始化TemplateArchitecture
+        await TemplateArchitecture.initialize();
+
+        // 获取所有模板
+        const allTemplates = TemplateArchitecture.getAllTemplates();
+        console.log(`✅ TemplateSelector: 加载了 ${allTemplates.length} 个模板`)
+
+        // 转换为UI需要的格式
+        this.templates = allTemplates.map(template => ({
+          id: template.id,
+          name: template.name,
+          description: template.description,
+          icon: this.getTemplateIcon(template.category),
+          layout: template.category,
+          hasSecondary: template.layers.dynamic && template.layers.dynamic.length > 0,
+          tags: this.getTemplateTags(template),
+          scenes: this.getTemplateScenes(template),
+          features: this.getTemplateFeatures(template),
+          adjustable: template.layers.adjustable && template.layers.adjustable.length > 0,
+          recommended: false
+        }));
+
+        console.log(`✅ TemplateSelector: 转换后有 ${this.templates.length} 个模板可显示`)
+
+        // 更新推荐
+        this.updateRecommendations();
+        this.loading = false;
+      } catch (error) {
+        console.error('加载模板失败:', error);
+        this.loading = false;
+      }
+    },
+
+    getTemplateIcon(category) {
+      const iconMap = {
+        'overlay': '📺',
+        'split': '📊',
+        'fullscreen': '🎯',
+        'grid': '📋',
+        'timeline': '⏱️',
+        'comparison': '⚖️',
+        'data': '📈',
+        'marketing': '🎬',
+        'educational': '📚',
+        'default': '📄'
+      };
+      return iconMap[category] || iconMap['default'];
+    },
+
+    getTemplateTags(template) {
+      // 根据模板类别生成标签
+      const tags = [template.category];
+      if (template.name.includes('画中画')) tags.push('视频', '讲解');
+      if (template.name.includes('信息')) tags.push('数据', '列表');
+      if (template.name.includes('关键词')) tags.push('关键词', '强调');
+      if (template.name.includes('文档')) tags.push('文档', '资料');
+      if (template.name.includes('标题')) tags.push('标题', '章节');
+      return tags.slice(0, 3);
+    },
+
+    getTemplateScenes(template) {
+      // 根据模板类型生成适用场景
+      const scenes = [];
+      if (template.name.includes('画中画')) scenes.push('产品介绍', '课程讲解', '功能演示');
+      else if (template.name.includes('信息')) scenes.push('数据分析', '功能对比', '要点总结');
+      else if (template.name.includes('关键词')) scenes.push('演讲稿', '要点强调', '术语解释');
+      else if (template.name.includes('文档')) scenes.push('资料分享', '文件展示', '内容预览');
+      else if (template.name.includes('标题')) scenes.push('章节标题', '主题介绍', '内容开始');
+      else scenes.push('通用场景', '内容展示', '信息传达');
+      return scenes;
+    },
+
+    getTemplateFeatures(template) {
+      // 根据模板层级生成特性列表
+      const features = [];
+      if (template.layers.fixed) features.push('预设布局');
+      if (template.layers.dynamic) features.push('AI生成');
+      if (template.layers.adjustable) features.push('可调整');
+      return features;
+    },
+
     updateRecommendations() {
       // 基于内容类型和视频时长更新推荐
       this.templates.forEach(template => {
@@ -165,17 +185,17 @@ export default {
     },
 
     isRecommended(template) {
-      // 简单的推荐逻辑，实际项目中会更复杂
-      if (this.contentType === 'presentation' && template.id === 'pip-basic') {
+      // 简单的推荐逻辑
+      if (this.contentType === 'presentation' && template.id === 'picture-in-picture') {
         return true;
       }
-      if (this.contentType === 'data' && template.id === 'info-cards') {
+      if (this.contentType === 'data' && template.id === 'info-card') {
         return true;
       }
       if (this.contentType === 'educational' && template.id === 'keyword-highlight') {
         return true;
       }
-      if (this.videoDuration > 300 && template.id === 'document-showcase') {
+      if (this.videoDuration > 300 && template.id === 'document-display') {
         return true;
       }
       return false;

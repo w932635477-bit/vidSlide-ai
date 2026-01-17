@@ -69,6 +69,25 @@ class BaiduNLPService {
     try {
       const token = await this.getAccessToken()
 
+      // 百度NLP API有内容长度限制，需要智能截断
+      // 根据实际测试，限制约为2000-3000字符，这里设置为2000保证稳定
+      const MAX_CONTENT_LENGTH = 2000
+      let processedText = text
+
+      if (text.length > MAX_CONTENT_LENGTH) {
+        console.warn(`[BaiduNLP] 文本过长 (${text.length}字符)，进行智能截断...`)
+
+        // 智能截断策略：优先保留开头和结尾，因为它们通常包含重要信息
+        const headLength = Math.floor(MAX_CONTENT_LENGTH * 0.7) // 前70%
+        const tailLength = Math.floor(MAX_CONTENT_LENGTH * 0.3) // 后30%
+
+        const head = text.substring(0, headLength)
+        const tail = text.substring(text.length - tailLength)
+
+        processedText = head + '...' + tail
+        console.log(`[BaiduNLP] 截断后长度: ${processedText.length}字符`)
+      }
+
       // 百度NLP关键词提取API
       const url = `/api/baidu/rpc/2.0/nlp/v1/keyword?access_token=${token}`
 
@@ -79,7 +98,7 @@ class BaiduNLPService {
         },
         body: JSON.stringify({
           title: '视频内容',  // 标题不能为空
-          content: text  // 正文内容
+          content: processedText  // 使用处理后的文本
         })
       })
 

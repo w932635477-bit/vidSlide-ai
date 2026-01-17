@@ -10,7 +10,6 @@
  * 5. 内容分析和智能分段
  */
 
-import { getSpeechRecognitionService } from './SpeechRecognitionService.js'
 import { BaiduSpeechService } from './BaiduSpeechService.js'
 import { getBaiduNLPService } from './BaiduNLPService.js'
 
@@ -32,7 +31,6 @@ export class VideoProcessingService {
     this.currentStep = ''
 
     // 服务实例
-    this.speechService = getSpeechRecognitionService()
     this.baiduSpeechService = new BaiduSpeechService()
     this.nlpService = getBaiduNLPService()
   }
@@ -277,7 +275,7 @@ export class VideoProcessingService {
   }
 
   /**
-   * 语音识别（使用Web Speech API）
+   * 语音识别（使用百度语音识别API）
    * @param {Function} onProgress - 进度回调
    * @returns {Promise<Object>} 识别结果
    */
@@ -285,40 +283,50 @@ export class VideoProcessingService {
     this.currentStep = '语音识别'
     this.processingProgress = 60
 
-    return new Promise((resolve, reject) => {
-      const onResult = (result) => {
-        this.transcript = result.fullText
-        if (onProgress) {
-          onProgress({
-            text: result.fullText,
-            progress: 60 + (result.fullText.length / 1000) * 20
-          })
+    try {
+      if (!this.videoFile) {
+        throw new Error('未找到视频文件')
+      }
+
+      // 使用百度语音识别服务处理视频
+      const result = await this.baiduSpeechService.transcribeVideo(
+        this.videoFile,
+        (progress) => {
+          // 将百度服务的进度（0-100）映射到总进度的60-80区间
+          const mappedProgress = 60 + (progress.progress * 0.2)
+          this.processingProgress = mappedProgress
+
+          if (onProgress) {
+            onProgress({
+              text: progress.text || '',
+              progress: mappedProgress
+            })
+          }
+        }
+      )
+
+      this.transcript = result.text || ''
+      this.processingProgress = 80
+
+      // 如果有文本内容，提取关键词
+      if (this.transcript) {
+        try {
+          const keywords = await this.nlpService.extractKeywords(this.transcript)
+          this.keywords = keywords || []
+        } catch (error) {
+          console.warn('关键词提取失败:', error)
+          this.keywords = []
         }
       }
 
-      const onEnd = async (result) => {
-        this.transcript = result.text || ''
-        this.keywords = result.keywords || []
-        this.processingProgress = 80
-        resolve({
-          text: this.transcript,
-          keywords: this.keywords
-        })
+      return {
+        text: this.transcript,
+        keywords: this.keywords
       }
-
-      const started = this.speechService.start(onResult, onEnd)
-
-      if (!started) {
-        reject(new Error('语音识别启动失败'))
-      }
-    })
-  }
-
-  /**
-   * 停止语音识别
-   */
-  stopSpeechRecognition() {
-    this.speechService.stop()
+    } catch (error) {
+      console.error('语音识别失败:', error)
+      throw new Error(`语音识别失败: ${error.message}`)
+    }
   }
 
   /**

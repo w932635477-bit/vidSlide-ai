@@ -1,0 +1,29 @@
+/**
+ * 变量兼容层
+ * 确保新的CSS变量优先级更高
+ */
+
+/* 强制覆盖 - 使用!important确保优先级 */
+:root {
+  /* 主色调 - 强制使用新的剪映蓝 */
+  --primary-blue: var(--color-primary) !important;
+  --accent-blue: var(--color-primary) !important;
+
+  /* 背景色 */
+  --bg-dark-blue: var(--color-bg-darker) !important;
+  --bg-dark-blue-2: var(--color-bg-dark) !important;
+
+  /* 文字色 */
+  --text-white: var(--color-text-inverse) !important;
+  --text-gray: var(--color-text-secondary) !important;
+
+  /* 圆角 - 使用新的精致圆角 */
+  --radius-sm: var(--radius-sm) !important;
+  --radius-md: var(--radius-md) !important;
+  --radius-lg: var(--radius-lg) !important;
+
+  /* 阴影 - 使用新的柔和阴影 */
+  --shadow-sm: var(--shadow-sm) !important;
+  --shadow-md: var(--shadow-md) !important;
+  --shadow-lg: var(--shadow-lg) !important;
+}

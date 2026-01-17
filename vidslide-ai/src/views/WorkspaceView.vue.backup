@@ -1,0 +1,4286 @@
+<!--
+  VidSlide AI - 工作空间
+  Apple设计风格优化版本
+  核心原则：Clarity, Depth, Deference, Fluidity
+-->
+<template>
+  <div class="workspace">
+    <!-- 全局错误处理器 -->
+    <ErrorHandler ref="errorHandler" />
+
+    <!-- 进度指示器 -->
+    <ProgressIndicator
+      :visible="showProgress"
+      :current-stage-id="currentStage"
+      :progress="progressValue"
+      :estimated-time-remaining="estimatedTime"
+      :can-cancel="canCancelProgress"
+      @cancel="handleProgressCancel"
+    />
+
+    <!-- 素材授权对话框 -->
+    <AuthorizationDialog
+      :visible="showAuthDialog"
+      :searchKeywords="pendingSearchKeywords"
+      @authorize="handleMaterialAuthorize"
+      @cancel="handleAuthCancel"
+      @use-local-only="handleUseLocalOnly"
+    />
+
+    <!-- 素材选择对话框 -->
+    <MaterialSelectionDialog
+      :visible="showMaterialDialog"
+      :materials="searchResults"
+      :source="searchResultSource"
+      :platforms="searchResultPlatforms"
+      @close="handleMaterialDialogClose"
+      @confirm="handleMaterialConfirm"
+      @update:visible="showMaterialDialog = $event"
+    />
+
+    <!-- 头部工具栏 - 简洁毛玻璃效果 -->
+    <header class="workspace-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo-section">
+            <span class="logo-icon">🎬</span>
+            <h1 class="workspace-title">VidSlide AI</h1>
+          </div>
+          <div class="header-actions-left">
+            <button class="header-btn icon-btn" @click="newProject" :title="t('workspace.header.newProject')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+            <button class="header-btn icon-btn" @click="openProject" :title="t('workspace.header.openProject')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+            <button class="header-btn icon-btn" @click="saveProject" :title="t('workspace.header.save')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="header-right">
+          <LanguageSwitcher />
+          <ExportHandler
+            ref="exportHandler"
+            :can-export="canExport"
+            :is-premium="isPremium"
+            :duration="videoDuration"
+            @export-started="handleExportStarted"
+            @export-completed="handleExportCompleted"
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- 主工作区 - 全宽布局 -->
+    <main class="workspace-main">
+      <!-- 主编辑区 -->
+      <section class="main-editor">
+        <!-- 视频上传器 -->
+        <VideoUploader
+          v-if="!videoSrc"
+          @video-uploaded="handleVideoUploaded"
+        />
+
+        <!-- 编辑区域 - 视频和分析面板并排 -->
+        <div v-else class="editor-area">
+          <div class="editor-content-wrapper">
+            <!-- 左侧：视频预览区 -->
+            <div class="video-section" :class="{ 'vertical-video': isVerticalVideo }">
+              <div class="editor-canvas">
+                <video
+                  v-if="videoSrc"
+                  ref="videoElement"
+                  :src="videoSrc"
+                  class="preview-video"
+                  :class="{ 'vertical': isVerticalVideo }"
+                  controls
+                  @loadedmetadata="onVideoLoaded"
+                ></video>
+
+                <!-- 画中画预览 -->
+                <div v-if="pipEnabled && videoSrc" class="pip-overlay">
+                  <div class="pip-window" :style="pipStyle">
+                    <video
+                      :src="videoSrc"
+                      muted
+                      autoplay
+                      loop
+                      class="pip-video"
+                    ></video>
+                  </div>
+                </div>
+
+                <!-- 动画系统 -->
+                <AnimationSystem
+                  v-if="videoSrc && aiAnalysisComplete"
+                  :video-element="videoElement"
+                  :keywords="extractedKeywords"
+                  :current-time="currentTime"
+                  :is-playing="isPlaying"
+                  @animation-triggered="handleAnimationTriggered"
+                />
+
+                <!-- 视频控制覆盖层 -->
+                <div class="video-controls-overlay" v-if="videoSrc">
+                  <div class="video-info">
+                    <span class="video-time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
+                  </div>
+                </div>
+
+                <!-- 预览质量控制 -->
+                <div v-if="videoSrc && showQualityControl" class="quality-control-panel">
+                  <PreviewQualityControl
+                    @resolution-change="handleResolutionChange"
+                    @quality-change="handleQualityChange"
+                    @optimizations-change="handleOptimizationsChange"
+                  />
+                </div>
+              </div>
+
+              <!-- 预览质量控制切换按钮 -->
+              <button
+                v-if="videoSrc"
+                class="quality-toggle-btn"
+                @click="toggleQualityControl"
+                :title="showQualityControl ? '隐藏质量控制' : '显示质量控制'"
+              >
+                ⚙️ {{ showQualityControl ? '隐藏' : '质量' }}
+              </button>
+            </div>
+
+            <!-- 右侧：AI分析结果面板 -->
+            <div class="analysis-sidebar" :class="{ 'analyzing': isAIAnalyzing }">
+              <div class="sidebar-header">
+                <h3>🧠 AI内容分析</h3>
+                <button
+                  v-if="!isAIAnalyzing && !aiAnalysisComplete"
+                  class="start-analysis-btn"
+                  @click="startAIAnalysis"
+                >
+                  🚀 智能分析
+                </button>
+                <span v-else-if="isAIAnalyzing" class="analyzing-status">
+                  <span class="spinner">⟳</span> {{ currentAnalysisStep }}
+                </span>
+                <button v-else class="restart-analysis-btn" @click="restartAnalysis">
+                  🔄 重新分析
+                </button>
+              </div>
+
+              <!-- 可滚动的内容区域 -->
+              <div class="analysis-sidebar-content">
+                <!-- 分析进度 -->
+                <div v-if="isAIAnalyzing" class="analysis-progress-section">
+                  <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: aiAnalysisProgress + '%' }"></div>
+                  </div>
+                  <div class="progress-info">
+                    <span class="progress-percent">{{ aiAnalysisProgress }}%</span>
+                  </div>
+                  <div class="analysis-tip" v-if="isSpeechRecognizing">
+                    <span class="recording-indicator">🔴</span>
+                    正在识别语音，请等待视频播放完成...
+                  </div>
+                </div>
+
+                <!-- 关键帧提取结果 - 带缩略图 -->
+                <div v-if="extractedKeyframes.length > 0" class="keyframes-section compact">
+                  <div class="section-header">
+                    <h4>📸 关键帧</h4>
+                    <div class="section-actions">
+                      <span class="section-count">{{ extractedKeyframes.length }}帧</span>
+                      <button
+                        v-if="selectedKeyframes.length > 0"
+                        @click="exportSelectedKeyframes"
+                        class="export-btn"
+                        title="导出选中的关键帧"
+                      >
+                        导出 ({{ selectedKeyframes.length }})
+                      </button>
+                      <button
+                        v-if="selectedKeyframes.length > 0"
+                        @click="deleteSelectedKeyframes"
+                        class="delete-btn"
+                        title="删除选中的关键帧"
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </div>
+                  <div class="keyframes-grid">
+                    <div
+                      v-for="(frame, index) in extractedKeyframes"
+                      :key="index"
+                      class="keyframe-card"
+                      :class="{ 'selected': isKeyframeSelected(frame) }"
+                      @click.exact="seekToTime(frame.time)"
+                      @click.ctrl.exact="toggleKeyframeSelection(frame)"
+                      @click.meta.exact="toggleKeyframeSelection(frame)"
+                      :title="`跳转到 ${formatTime(frame.time)}`"
+                    >
+                      <div class="keyframe-thumbnail-wrapper">
+                        <img
+                          v-if="frame.thumbnail"
+                          :src="frame.thumbnail"
+                          :alt="`关键帧 ${index + 1}`"
+                          class="keyframe-thumbnail"
+                        />
+                        <div v-else class="keyframe-placeholder">
+                          <span class="frame-icon">🎬</span>
+                        </div>
+                        <div class="keyframe-overlay">
+                          <span class="frame-number">{{ index + 1 }}</span>
+                        </div>
+                        <div
+                          v-if="isKeyframeSelected(frame)"
+                          class="keyframe-selected-badge"
+                        >
+                          ✓
+                        </div>
+                      </div>
+                      <div class="keyframe-info">
+                        <span class="keyframe-time">{{ formatTime(frame.time) }}</span>
+                        <span v-if="frame.importance" class="keyframe-importance">
+                          {{ (frame.importance * 100).toFixed(0) }}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 语音识别结果 -->
+                <div v-if="transcriptText || aiAnalysisComplete" class="transcript-section">
+                  <div class="section-header">
+                    <h4>🎤 语音转文字</h4>
+                    <span class="section-status" v-if="isSpeechRecognizing">识别中...</span>
+                    <button v-else-if="aiAnalysisComplete" class="edit-transcript-btn" @click="toggleTranscriptEdit">
+                      {{ isEditingTranscript ? '完成' : '编辑' }}
+                    </button>
+                  </div>
+                  <div v-if="!isEditingTranscript" class="transcript-content" v-html="highlightedTranscript || '暂无识别结果'"></div>
+                  <div v-else class="transcript-edit-area">
+                    <textarea
+                      v-model="transcriptText"
+                      class="transcript-textarea"
+                      placeholder="请输入或粘贴视频文案内容..."
+                      @input="onTranscriptEdit"
+                    ></textarea>
+                    <div class="transcript-edit-tip">
+                      💡 提示：语音识别准确率受环境影响，您可以手动编辑或粘贴正确的文案
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 提取的关键词 -->
+                <div v-if="extractedKeywords.length > 0" class="keywords-section">
+                  <div class="section-header">
+                    <h4>🏷️ 关键词</h4>
+                    <span class="section-count">{{ extractedKeywords.length }}个</span>
+                  </div>
+                  <div class="keywords-list">
+                    <span
+                      v-for="keyword in extractedKeywords"
+                      :key="keyword.text"
+                      class="keyword-tag"
+                      :class="{ 'highlight': keyword.importance >= 0.8 }"
+                    >
+                      {{ keyword.text }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 场景检测结果 -->
+                <div v-if="detectedScenes.length > 0" class="scenes-section">
+                  <div class="section-header">
+                    <h4>🎞️ 场景</h4>
+                    <span class="section-count">{{ detectedScenes.length }}个</span>
+                  </div>
+                  <div class="scenes-list">
+                    <div
+                      v-for="(scene, index) in detectedScenes"
+                      :key="scene.id"
+                      class="scene-item"
+                      :class="{ 'active': isSceneActive(scene) }"
+                    >
+                      <div
+                        class="scene-content"
+                        @click="jumpToScene(scene)"
+                        @mouseenter="previewScene(scene)"
+                        @mouseleave="clearScenePreview"
+                      >
+                        <div class="scene-thumbnail-wrapper">
+                          <div class="scene-number">{{ index + 1 }}</div>
+                          <div v-if="scene.keyframes && scene.keyframes.length > 0" class="scene-preview">
+                            <img
+                              :src="scene.keyframes[0].thumbnail"
+                              :alt="`场景 ${index + 1}`"
+                              class="scene-thumbnail"
+                            />
+                          </div>
+                          <div v-else class="scene-preview-placeholder">
+                            <span class="scene-icon">🎬</span>
+                          </div>
+                        </div>
+                        <div class="scene-info">
+                          <div class="scene-title">{{ scene.title || `场景 ${index + 1}` }}</div>
+                          <div class="scene-time">
+                            {{ formatTime(scene.startTime) }} - {{ formatTime(scene.endTime) }}
+                          </div>
+                          <div class="scene-duration">
+                            时长: {{ formatTime(scene.endTime - scene.startTime) }}
+                          </div>
+                        </div>
+                        <div class="scene-action">
+                          <span class="play-icon">▶</span>
+                        </div>
+                      </div>
+                      <div class="scene-edit-actions">
+                        <button
+                          @click.stop="editSceneTitle(scene, index)"
+                          class="scene-edit-btn"
+                          title="编辑标题"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          v-if="index < detectedScenes.length - 1"
+                          @click.stop="mergeScenes(index)"
+                          class="scene-merge-btn"
+                          title="与下一场景合并"
+                        >
+                          🔗
+                        </button>
+                        <button
+                          @click.stop="deleteScene(index)"
+                          class="scene-delete-btn"
+                          title="删除场景"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 空状态 -->
+                <div v-if="!isAIAnalyzing && !aiAnalysisComplete" class="empty-analysis">
+                  <div class="empty-icon">🎬</div>
+                  <p>点击"智能分析"自动完成以下任务：</p>
+                  <ul class="feature-list">
+                    <li>📸 智能关键帧提取</li>
+                    <li>🎞️ 场景自动检测</li>
+                    <li>🎤 语音识别转文字</li>
+                    <li>🏷️ 关键词自动提取</li>
+                    <li>💡 重点内容高亮</li>
+                  </ul>
+                </div>
+              </div><!-- 关闭 analysis-sidebar-content -->
+            </div><!-- 关闭 analysis-sidebar -->
+          </div><!-- 关闭 editor-content-wrapper -->
+
+          <!-- 工作流程指示器 -->
+          <div class="workflow-indicator">
+            <div
+              v-for="(step, index) in workflowSteps"
+              :key="step.id"
+              class="workflow-step"
+              :class="{
+                active: currentWorkflowStep === step.id,
+                completed: isStepCompleted(step.id),
+                clickable: canNavigateToStep(step.id)
+              }"
+              @click="navigateToStep(step.id)"
+            >
+              <div class="step-icon">
+                <svg v-if="isStepCompleted(step.id)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <span class="step-label">{{ step.label }}</span>
+              <div v-if="index < workflowSteps.length - 1" class="step-connector"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 底部工具面板 - 标签页形式 -->
+      <section class="bottom-panel" :class="{ collapsed: isPanelCollapsed }">
+        <div class="panel-header">
+          <div class="panel-tabs">
+            <button
+              v-for="tab in panelTabs"
+              :key="tab.id"
+              class="panel-tab"
+              :class="{ active: activeTab === tab.id }"
+              @click="activeTab = tab.id"
+            >
+              <span class="tab-icon">{{ tab.icon }}</span>
+              <span class="tab-label">{{ tab.label }}</span>
+            </button>
+          </div>
+          <button class="panel-toggle" @click="isPanelCollapsed = !isPanelCollapsed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline :points="isPanelCollapsed ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-content" v-show="!isPanelCollapsed">
+          <!-- AI内容分析标签页 -->
+          <div v-if="activeTab === 'analysis'" class="tab-content analysis-tab">
+            <AIContentAnalyzer
+              ref="aiAnalyzerRef"
+              :video-src="videoSrc"
+              :video-duration="videoDuration"
+              @analysis-complete="handleAnalysisComplete"
+              @analysis-error="handleAnalysisError"
+              @analysis-progress="handleAnalysisProgress"
+            />
+          </div>
+
+          <!-- 素材需求分析标签页 -->
+          <div v-if="activeTab === 'materials'" class="tab-content materials-tab">
+            <MaterialRequirementAnalyzer
+              ref="materialAnalyzerRef"
+              :keywords="materialAnalyzerKeywords"
+              :keyframes="materialAnalyzerKeyframes"
+              :video-content="transcriptText"
+              :auto-analyze="false"
+              @requirement-selected="handleRequirementSelected"
+              @material-search-requested="handleMaterialSearchRequested"
+              @canvas-add-requested="handleCanvasAddRequested"
+              @analysis-started="handleMaterialAnalysisStarted"
+              @analysis-completed="handleMaterialAnalysisCompleted"
+            />
+          </div>
+
+          <!-- 智能工具标签页 -->
+          <div v-if="activeTab === 'smart-tools'" class="tab-content smart-tools-tab">
+            <div class="smart-tools-container">
+              <!-- 工具选择器 -->
+              <div class="tools-selector">
+                <button
+                  v-for="tool in smartTools"
+                  :key="tool.id"
+                  class="tool-selector-btn"
+                  :class="{ active: activeSmartTool === tool.id }"
+                  @click="activeSmartTool = tool.id"
+                >
+                  <span class="tool-icon">{{ tool.icon }}</span>
+                  <span class="tool-name">{{ tool.name }}</span>
+                </button>
+              </div>
+
+              <!-- 工具内容区域 -->
+              <div class="tool-content-area">
+                <!-- 智能裁切工具 -->
+                <div v-if="activeSmartTool === 'crop'" class="tool-panel">
+                  <SmartCropTool />
+                </div>
+
+                <!-- 背景移除工具 -->
+                <div v-if="activeSmartTool === 'background'" class="tool-panel">
+                  <BackgroundRemover />
+                </div>
+
+                <!-- 色彩匹配工具 -->
+                <div v-if="activeSmartTool === 'color'" class="tool-panel">
+                  <ColorMatcher />
+                </div>
+
+                <!-- 关键帧提取工具 -->
+                <div v-if="activeSmartTool === 'keyframe'" class="tool-panel">
+                  <KeyframeExtractor
+                    :video-src="videoSrc"
+                    :video-duration="videoDuration"
+                    @keyframes-extracted="handleKeyframesExtracted"
+                  />
+                </div>
+
+                <!-- PPT生成工具 -->
+                <div v-if="activeSmartTool === 'ppt'" class="tool-panel">
+                  <PptGenerator :content-analysis="getContentAnalysis()" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模板选择标签页 -->
+          <div v-if="activeTab === 'templates'" class="tab-content templates-tab">
+            <TemplateSelector
+              :content-type="contentType"
+              :video-duration="videoDuration"
+              @template-selected="handleTemplateSelected"
+            />
+          </div>
+
+          <!-- 画中画设置标签页 -->
+          <div v-if="activeTab === 'pip'" class="tab-content pip-tab">
+            <PictureInPicture
+              :pip-enabled="pipEnabled"
+              :pip-settings="pipSettings"
+              @settings-changed="handlePipSettingsChanged"
+            />
+          </div>
+
+          <!-- 动画效果标签页 -->
+          <div v-if="activeTab === 'animations'" class="tab-content animations-tab">
+            <div class="animations-grid">
+              <button class="animation-card" @click="addFadeEffect">
+                <span class="animation-icon">✨</span>
+                <span class="animation-name">{{ t('workspace.animations.fade') }}</span>
+              </button>
+              <button class="animation-card" @click="addSlideEffect">
+                <span class="animation-icon">➡️</span>
+                <span class="animation-name">{{ t('workspace.animations.slide') }}</span>
+              </button>
+              <button class="animation-card" @click="addZoomEffect">
+                <span class="animation-icon">🔍</span>
+                <span class="animation-name">{{ t('workspace.animations.zoom') }}</span>
+              </button>
+              <button class="animation-card danger" @click="clearAnimations">
+                <span class="animation-icon">🗑️</span>
+                <span class="animation-name">{{ t('workspace.animations.clear') }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- AI建议标签页 -->
+          <div v-if="activeTab === 'ai'" class="tab-content ai-tab">
+            <div class="ai-suggestions">
+              <div class="ai-suggestion-card" v-if="!selectedTemplate || selectedTemplate.id !== 'pip'">
+                <span class="suggestion-icon">💡</span>
+                <span class="suggestion-text">{{ t('workspace.ai.suggestions.pip') }}</span>
+                <button class="suggestion-action" @click="handleTemplateSelected(templates.find(t => t.id === 'pip'))">
+                  应用
+                </button>
+              </div>
+              <div class="ai-suggestion-card">
+                <span class="suggestion-icon">📊</span>
+                <span class="suggestion-text">{{ t('workspace.ai.suggestions.chart') }}</span>
+              </div>
+              <div class="ai-suggestion-card">
+                <span class="suggestion-icon">🎨</span>
+                <span class="suggestion-text">{{ t('workspace.ai.suggestions.color') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 用户调整标签页 -->
+          <div v-if="activeTab === 'adjust'" class="tab-content adjust-tab">
+            <UserAdjustmentPanel
+              v-if="selectedTemplate"
+              :template="selectedTemplate"
+              :content-data="contentData"
+              @content-updated="handleContentUpdated"
+            />
+            <div v-else class="empty-state">
+              <span class="empty-icon">📝</span>
+              <span class="empty-text">请先选择模板</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 时间轴组件 -->
+    <Timeline
+      :duration="videoDuration"
+      :current-time="currentTime"
+      :markers="timelineMarkers"
+      :selected-marker-id="selectedMarkerId"
+      @marker-added="handleMarkerAdded"
+      @marker-removed="handleMarkerRemoved"
+      @marker-selected="handleMarkerSelected"
+      @marker-moved="handleMarkerMoved"
+      @markers-cleared="handleMarkersCleared"
+    />
+  </div>
+</template>
+
+<script setup name="WorkspaceView">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+// 导入组件
+import VideoUploader from '../components/VideoUploader.vue'
+import Timeline from '../components/Timeline.vue'
+import ProgressIndicator from '../components/ProgressIndicator.vue'
+import PictureInPicture from '../components/PictureInPicture.vue'
+import UserAdjustmentPanel from '../components/UserAdjustmentPanel.vue'
+import ExportHandler from '../components/ExportHandler.vue'
+import ErrorHandler from '../components/ErrorHandler.vue'
+import LanguageSwitcher from '../components/LanguageSwitcher.vue'
+import AIContentAnalyzer from '../components/AIContentAnalyzer.vue'
+import MaterialRequirementAnalyzer from '../components/MaterialRequirementAnalyzer.vue'
+import SmartCropTool from '../components/SmartCropTool.vue'
+import BackgroundRemover from '../components/BackgroundRemover.vue'
+import ColorMatcher from '../components/ColorMatcher.vue'
+import PptGenerator from '../components/PptGenerator.vue'
+import AnimationSystem from '../components/AnimationSystem.vue'
+import PreviewQualityControl from '../components/PreviewQualityControl.vue'
+import TemplateSelector from '../components/TemplateSelector.vue'
+import AuthorizationDialog from '../components/AuthorizationDialog.vue'
+import KeyframeExtractor from '../components/KeyframeExtractor.vue'
+import MaterialSelectionDialog from '../components/MaterialSelectionDialog.vue'
+
+// 导入素材服务
+import MaterialService from '../services/MaterialService.js'
+
+// 导入语音识别服务
+import { getSpeechRecognitionService } from '../services/SpeechRecognitionService.js'
+import { getBaiduSpeechService } from '../services/BaiduSpeechService.js'
+
+// 导入视频处理服务
+import { getVideoProcessingService } from '../services/VideoProcessingService.js'
+
+// 响应式状态
+const videoSrc = ref('')
+const videoFile = ref(null) // 保存原始视频文件用于语音识别
+const selectedTemplate = ref(null)
+const pipEnabled = ref(false)
+const videoElement = ref(null)
+const videoDuration = ref(0)
+const currentTime = ref(0)
+const isPlaying = ref(false)
+const animations = ref([])
+const projectData = ref(null)
+
+// 预览质量控制状态
+const showQualityControl = ref(false)
+const previewResolution = ref('1080p')
+const previewQuality = ref(80)
+const previewOptimizations = ref({
+  hardwareAcceleration: true,
+  multithreaded: true,
+  memoryOptimization: true
+})
+
+// 视频尺寸相关状态
+const videoWidth = ref(0)
+const videoHeight = ref(0)
+const isVerticalVideo = computed(() => videoHeight.value > videoWidth.value)
+
+// 当检测到竖版视频时，自动折叠底部面板以腾出更多空间
+const autoCollapseForVerticalVideo = () => {
+  if (isVerticalVideo.value) {
+    isPanelCollapsed.value = true
+  }
+}
+
+// 使用vue-i18n
+const { t } = useI18n()
+
+// 新布局相关状态
+const isPanelCollapsed = ref(false)
+const activeTab = ref('analysis')
+const currentWorkflowStep = ref('upload')
+
+// 智能工具相关状态
+const activeSmartTool = ref('crop')
+const smartTools = computed(() => [
+  { id: 'crop', name: '智能裁切', icon: '✂️' },
+  { id: 'background', name: '背景移除', icon: '🎭' },
+  { id: 'color', name: '色彩匹配', icon: '🎨' },
+  { id: 'keyframe', name: '关键帧提取', icon: '🎬' },
+  { id: 'ppt', name: 'PPT生成', icon: '📊' }
+])
+
+// 工作流程步骤
+const workflowSteps = computed(() => [
+  { id: 'upload', label: '上传' },
+  { id: 'analyze', label: '分析' },
+  { id: 'template', label: '模板' },
+  { id: 'effect', label: '效果' },
+  { id: 'preview', label: '预览' },
+  { id: 'export', label: '导出' }
+])
+
+// 底部面板标签页
+const panelTabs = computed(() => [
+  { id: 'analysis', label: 'AI分析', icon: '🧠' },
+  { id: 'materials', label: '素材需求', icon: '📦' },
+  { id: 'smart-tools', label: '智能工具', icon: '🛠️' },
+  { id: 'templates', label: t('workspace.status.template'), icon: '📋' },
+  { id: 'pip', label: t('workspace.status.pip'), icon: '📺' },
+  { id: 'animations', label: t('workspace.animations.title'), icon: '✨' },
+  { id: 'ai', label: t('workspace.ai.title'), icon: '🤖' },
+  { id: 'adjust', label: '调整', icon: '⚙️' }
+])
+
+// 进度相关状态
+const showProgress = ref(false)
+const currentStage = ref('analyze')
+const progressValue = ref(0)
+const estimatedTime = ref(0)
+const canCancelProgress = ref(true)
+
+// 导出相关状态
+const canExport = ref(false)
+const isPremium = ref(false)
+
+// 内容数据
+const contentData = ref({
+  textContent: [],
+  imageUrls: [],
+  chartData: null
+})
+
+// AI分析相关状态
+const aiAnalyzerRef = ref(null)
+const materialAnalyzerRef = ref(null)
+const analysisResults = ref(null)
+const isAIAnalyzing = ref(false)
+const aiAnalysisComplete = ref(false)
+const aiAnalysisProgress = ref(0)
+const currentAnalysisStep = ref('')
+const extractedKeyframes = ref([])
+const selectedKeyframes = ref([])
+const transcriptText = ref('')
+const extractedKeywords = ref([])
+const contentType = ref('general') // 内容类型，用于模板推荐
+
+// 素材授权相关状态
+const showAuthDialog = ref(false)
+const pendingSearchKeywords = ref([])
+
+// 素材选择对话框相关状态
+const showMaterialDialog = ref(false)
+const searchResults = ref([])
+const searchResultSource = ref('')
+const searchResultPlatforms = ref([])
+
+// 语音识别相关状态
+const isSpeechRecognizing = ref(false)
+const speechService = ref(null)
+const isEditingTranscript = ref(false)
+
+// 视频处理服务
+const videoProcessingService = ref(null)
+const detectedScenes = ref([])
+const videoSegments = ref([])
+
+// 切换转录文本编辑模式
+const toggleTranscriptEdit = async () => {
+  isEditingTranscript.value = !isEditingTranscript.value
+  // 如果退出编辑模式，重新提取关键词
+  if (!isEditingTranscript.value && transcriptText.value) {
+    if (speechService.value) {
+      try {
+        const keywords = await speechService.value.extractKeywords(transcriptText.value)
+        extractedKeywords.value = Array.isArray(keywords) ? keywords : []
+      } catch (error) {
+        console.error('关键词提取失败:', error)
+      }
+    }
+  }
+}
+
+// 转录文本编辑时的处理
+const onTranscriptEdit = () => {
+  // 实时更新关键词（防抖处理）
+  if (transcriptEditTimer) {
+    clearTimeout(transcriptEditTimer)
+  }
+  transcriptEditTimer = setTimeout(async () => {
+    if (speechService.value && transcriptText.value) {
+      try {
+        const keywords = await speechService.value.extractKeywords(transcriptText.value)
+        extractedKeywords.value = Array.isArray(keywords) ? keywords : []
+      } catch (error) {
+        console.error('关键词提取失败:', error)
+      }
+    }
+  }, 500)
+}
+
+let transcriptEditTimer = null
+
+// 高亮关键词的转录文本（保留用于未来功能）
+const highlightedTranscript = computed(() => {
+  if (!transcriptText.value || extractedKeywords.value.length === 0) {
+    return transcriptText.value
+  }
+
+  let result = transcriptText.value
+  const sortedKeywords = [...extractedKeywords.value]
+    .filter(k => k.importance >= 0.7)
+    .sort((a, b) => b.importance - a.importance)
+
+  sortedKeywords.forEach(keyword => {
+    const regex = new RegExp(`(${keyword.text})`, 'gi')
+    result = result.replace(regex, '<mark class="keyword-highlight">$1</mark>')
+  })
+
+  return result
+})
+
+// 跳转到指定时间
+const seekToTime = (time) => {
+  if (videoElement.value) {
+    videoElement.value.currentTime = time
+  }
+}
+
+// 跳转到场景
+const jumpToScene = (scene) => {
+  if (videoElement.value) {
+    videoElement.value.currentTime = scene.startTime
+    // 如果视频暂停，自动播放
+    if (videoElement.value.paused) {
+      videoElement.value.play()
+    }
+  }
+}
+
+// 检查场景是否激活
+const isSceneActive = (scene) => {
+  if (!videoElement.value) return false
+  const currentTime = videoElement.value.currentTime
+  return currentTime >= scene.startTime && currentTime <= scene.endTime
+}
+
+// 预览场景
+const previewScene = (scene) => {
+  // 可以在这里添加场景预览逻辑，比如显示场景的关键帧
+  console.log('预览场景:', scene.title)
+}
+
+// 清除场景预览
+const clearScenePreview = () => {
+  // 清除预览状态
+}
+
+// 键盘快捷键处理
+const handleKeyboardShortcuts = (event) => {
+  // 如果正在输入文本，不处理快捷键
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+    return
+  }
+
+  if (!videoElement.value) return
+
+  switch (event.key) {
+    case ' ': // 空格键：播放/暂停
+      event.preventDefault()
+      if (videoElement.value.paused) {
+        videoElement.value.play()
+      } else {
+        videoElement.value.pause()
+      }
+      break
+
+    case 'ArrowLeft': // 左箭头：后退5秒
+      event.preventDefault()
+      videoElement.value.currentTime = Math.max(0, videoElement.value.currentTime - 5)
+      break
+
+    case 'ArrowRight': // 右箭头：前进5秒
+      event.preventDefault()
+      videoElement.value.currentTime = Math.min(
+        videoElement.value.duration,
+        videoElement.value.currentTime + 5
+      )
+      break
+
+    case 'ArrowUp': // 上箭头：增加音量
+      event.preventDefault()
+      videoElement.value.volume = Math.min(1, videoElement.value.volume + 0.1)
+      break
+
+    case 'ArrowDown': // 下箭头：减少音量
+      event.preventDefault()
+      videoElement.value.volume = Math.max(0, videoElement.value.volume - 0.1)
+      break
+
+    case 'f': // F键：全屏
+    case 'F':
+      event.preventDefault()
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+      } else if (videoElement.value.requestFullscreen) {
+        videoElement.value.requestFullscreen()
+      }
+      break
+
+    case 'm': // M键：静音/取消静音
+    case 'M':
+      event.preventDefault()
+      videoElement.value.muted = !videoElement.value.muted
+      break
+
+    case '0': // 0键：跳到开始
+      event.preventDefault()
+      videoElement.value.currentTime = 0
+      break
+
+    case '1': // 1-9键：跳到对应百分比位置
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      event.preventDefault()
+      const percent = parseInt(event.key) / 10
+      videoElement.value.currentTime = videoElement.value.duration * percent
+      break
+  }
+}
+
+// 关键帧管理功能
+const toggleKeyframeSelection = (frame) => {
+  const index = selectedKeyframes.value.findIndex(f => f.time === frame.time)
+  if (index > -1) {
+    selectedKeyframes.value.splice(index, 1)
+  } else {
+    selectedKeyframes.value.push(frame)
+  }
+}
+
+const isKeyframeSelected = (frame) => {
+  return selectedKeyframes.value.some(f => f.time === frame.time)
+}
+
+const exportSelectedKeyframes = () => {
+  if (selectedKeyframes.value.length === 0) return
+
+  // 创建一个zip文件或者逐个下载
+  selectedKeyframes.value.forEach((frame, index) => {
+    const link = document.createElement('a')
+    link.href = frame.thumbnail
+    link.download = `keyframe-${index + 1}-${formatTime(frame.time)}.jpg`
+    link.click()
+  })
+
+  ElMessage.success(`已导出 ${selectedKeyframes.value.length} 个关键帧`)
+  selectedKeyframes.value = []
+}
+
+const deleteSelectedKeyframes = () => {
+  if (selectedKeyframes.value.length === 0) return
+
+  // 从extractedKeyframes中删除选中的帧
+  extractedKeyframes.value = extractedKeyframes.value.filter(
+    frame => !selectedKeyframes.value.some(f => f.time === frame.time)
+  )
+
+  ElMessage.success(`已删除 ${selectedKeyframes.value.length} 个关键帧`)
+  selectedKeyframes.value = []
+}
+
+// 场景编辑功能
+const editSceneTitle = async (scene, index) => {
+  const { value: newTitle } = await ElMessageBox.prompt('请输入新的场景标题', '编辑场景', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: scene.title || `场景 ${index + 1}`,
+    inputPattern: /.+/,
+    inputErrorMessage: '标题不能为空'
+  })
+
+  if (newTitle) {
+    scene.title = newTitle
+    ElMessage.success('场景标题已更新')
+  }
+}
+
+const mergeScenes = (index) => {
+  if (index >= detectedScenes.value.length - 1) return
+
+  const currentScene = detectedScenes.value[index]
+  const nextScene = detectedScenes.value[index + 1]
+
+  // 合并场景
+  currentScene.endTime = nextScene.endTime
+  currentScene.title = `${currentScene.title || `场景 ${index + 1}`} + ${nextScene.title || `场景 ${index + 2}`}`
+
+  // 合并关键帧
+  if (currentScene.keyframes && nextScene.keyframes) {
+    currentScene.keyframes = [...currentScene.keyframes, ...nextScene.keyframes]
+  }
+
+  // 删除下一个场景
+  detectedScenes.value.splice(index + 1, 1)
+
+  ElMessage.success('场景已合并')
+}
+
+const deleteScene = (index) => {
+  ElMessageBox.confirm(
+    '确定要删除这个场景吗？',
+    '删除场景',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    detectedScenes.value.splice(index, 1)
+    ElMessage.success('场景已删除')
+  }).catch(() => {
+    // 用户取消
+  })
+}
+
+// 开始语音识别
+const startSpeechRecognition = () => {
+  if (!speechService.value) {
+    speechService.value = getSpeechRecognitionService()
+  }
+
+  if (!speechService.value.isSupported) {
+    ElMessage.error('您的浏览器不支持语音识别，请使用Chrome浏览器')
+    return
+  }
+
+  isSpeechRecognizing.value = true
+  ElMessage.info('语音识别已启动，请播放视频或对着麦克风说话')
+
+  speechService.value.start(
+    // 实时结果回调
+    (result) => {
+      transcriptText.value = result.fullText
+    },
+    // 结束回调
+    (result) => {
+      isSpeechRecognizing.value = false
+      if (result.error) {
+        ElMessage.error(`语音识别错误: ${result.error}`)
+      } else if (result.text) {
+        extractedKeywords.value = result.keywords || []
+        ElMessage.success('语音识别完成')
+      }
+    }
+  )
+}
+
+// 停止语音识别
+const stopSpeechRecognition = () => {
+  if (speechService.value) {
+    speechService.value.stop()
+  }
+  isSpeechRecognizing.value = false
+  ElMessage.info('语音识别已停止')
+}
+
+// 手动输入文字时的处理
+const onTranscriptInput = () => {
+  // 清空之前的关键词，等待用户点击提取
+  // extractedKeywords.value = []
+}
+
+// 从文本中提取关键词
+const extractKeywordsFromText = async () => {
+  if (!transcriptText.value || transcriptText.value.length < 10) {
+    ElMessage.warning('请先输入或识别足够的文字内容')
+    return
+  }
+
+  if (!speechService.value) {
+    speechService.value = getSpeechRecognitionService()
+  }
+
+  try {
+    const keywords = await speechService.value.extractKeywords(transcriptText.value)
+    extractedKeywords.value = Array.isArray(keywords) ? keywords : []
+
+    if (extractedKeywords.value.length > 0) {
+      ElMessage.success(`成功提取 ${extractedKeywords.value.length} 个关键词`)
+    } else {
+      ElMessage.warning('未能提取到有效关键词，请输入更多内容')
+    }
+  } catch (error) {
+    console.error('关键词提取失败:', error)
+    extractedKeywords.value = []
+    ElMessage.error('关键词提取失败')
+  }
+}
+
+// 重新开始分析
+const restartAnalysis = () => {
+  aiAnalysisComplete.value = false
+  transcriptText.value = ''
+  extractedKeywords.value = []
+  extractedKeyframes.value = []
+  startAIAnalysis()
+}
+
+// 开始AI分析 - 全自动流程
+const startAIAnalysis = async () => {
+  if (isAIAnalyzing.value || !videoSrc.value) return
+
+  isAIAnalyzing.value = true
+  aiAnalysisComplete.value = false
+  aiAnalysisProgress.value = 0
+  extractedKeyframes.value = []
+  transcriptText.value = ''
+  extractedKeywords.value = []
+  detectedScenes.value = []
+
+  try {
+    // 初始化视频处理服务
+    if (!videoProcessingService.value) {
+      videoProcessingService.value = getVideoProcessingService()
+    }
+
+    // 步骤1: 加载视频 (0-10%)
+    currentAnalysisStep.value = '加载视频...'
+    aiAnalysisProgress.value = 0
+
+    if (videoFile.value) {
+      await videoProcessingService.value.loadVideo(videoFile.value)
+      aiAnalysisProgress.value = 10
+    }
+
+    // 步骤2: 关键帧提取 (10-30%)
+    currentAnalysisStep.value = '提取关键帧...'
+
+    if (videoFile.value) {
+      const keyframes = await videoProcessingService.value.extractKeyframes({
+        interval: 2,
+        maxFrames: 30,
+        quality: 0.8
+      })
+
+      // 转换为现有格式
+      extractedKeyframes.value = keyframes.map(kf => ({
+        time: kf.timestamp,
+        thumbnail: kf.thumbnailUrl,
+        importance: kf.importance
+      }))
+
+      aiAnalysisProgress.value = 30
+      console.log(`✅ 提取了 ${keyframes.length} 个关键帧`)
+    } else {
+      // 如果没有文件，使用模拟数据
+      await simulateAnalysisStep(10, 30, 1500)
+      extractedKeyframes.value = generateMockKeyframes()
+    }
+
+    // 步骤3: 场景检测 (30-40%)
+    currentAnalysisStep.value = '检测场景...'
+
+    if (videoFile.value && extractedKeyframes.value.length > 0) {
+      const scenes = await videoProcessingService.value.detectScenes()
+      detectedScenes.value = scenes
+      aiAnalysisProgress.value = 40
+      console.log(`✅ 检测到 ${scenes.length} 个场景`)
+    } else {
+      await simulateAnalysisStep(30, 40, 1000)
+    }
+
+    // 步骤4: 语音识别 (40-80%)
+    currentAnalysisStep.value = '语音识别中...'
+    aiAnalysisProgress.value = 40
+    isSpeechRecognizing.value = true
+
+    // 尝试使用百度语音识别API（更准确）
+    const baiduService = getBaiduSpeechService()
+
+    if (baiduService.isSupported() && videoFile.value) {
+      // 使用百度语音识别API
+      currentAnalysisStep.value = '正在提取音频并识别...'
+
+      try {
+        const recognizedText = await baiduService.transcribeVideo(videoFile.value, (progress) => {
+          // 更新进度 (40-80%)
+          aiAnalysisProgress.value = 40 + Math.round(progress * 40)
+        })
+
+        if (recognizedText) {
+          transcriptText.value = recognizedText
+          // 初始化speechService用于关键词提取
+          if (!speechService.value) {
+            speechService.value = getSpeechRecognitionService()
+          }
+          try {
+            const keywords = await speechService.value.extractKeywords(recognizedText)
+            extractedKeywords.value = Array.isArray(keywords) ? keywords : []
+          } catch (error) {
+            console.error('关键词提取失败:', error)
+            extractedKeywords.value = []
+          }
+        } else {
+          transcriptText.value = '【提示】未能识别到语音内容，视频可能没有音频或音频质量较差。'
+        }
+      } catch (baiduError) {
+        console.warn('百度语音识别失败，尝试使用Web Speech API:', baiduError)
+        // 回退到Web Speech API
+        await fallbackToWebSpeechAPI()
+      }
+    } else if (!baiduService.isConfigured) {
+      // 百度API未配置，使用Web Speech API
+      console.log('百度语音API未配置，使用Web Speech API')
+      await fallbackToWebSpeechAPI()
+    } else {
+      // 没有视频文件，跳过语音识别
+      transcriptText.value = '【提示】无法进行语音识别，请重新上传视频。'
+      await simulateAnalysisStep(40, 80, 1000)
+    }
+
+    isSpeechRecognizing.value = false
+    aiAnalysisProgress.value = 80
+
+    // 步骤5: 提取关键词 (80-95%)
+    currentAnalysisStep.value = '提取关键词...'
+    await simulateAnalysisStep(80, 95, 800)
+
+    // 如果有转录文本但没有关键词，尝试提取
+    if (transcriptText.value && extractedKeywords.value.length === 0 && !transcriptText.value.startsWith('【')) {
+      if (!speechService.value) {
+        speechService.value = getSpeechRecognitionService()
+      }
+      try {
+        const keywords = await speechService.value.extractKeywords(transcriptText.value)
+        extractedKeywords.value = Array.isArray(keywords) ? keywords : []
+      } catch (error) {
+        console.error('关键词提取失败:', error)
+        extractedKeywords.value = []
+      }
+    }
+
+    // 步骤4: 完成 (95-100%)
+    currentAnalysisStep.value = '完成'
+    await simulateAnalysisStep(95, 100, 500)
+
+    aiAnalysisComplete.value = true
+    currentWorkflowStep.value = 'analyze'
+
+    if (transcriptText.value && !transcriptText.value.startsWith('【')) {
+      ElMessage.success('智能分析完成！')
+    } else {
+      ElMessage.warning('分析完成，语音识别可能不完整')
+    }
+
+  } catch (error) {
+    ElMessage.error('分析过程中发生错误: ' + error.message)
+    console.error('AI分析错误:', error)
+
+    // 停止语音识别
+    if (speechService.value) {
+      speechService.value.stop()
+    }
+    isSpeechRecognizing.value = false
+  } finally {
+    isAIAnalyzing.value = false
+  }
+}
+
+// 回退到Web Speech API（通过麦克风识别）
+const fallbackToWebSpeechAPI = async () => {
+  // 初始化语音识别服务
+  if (!speechService.value) {
+    speechService.value = getSpeechRecognitionService()
+  }
+
+  if (speechService.value.isSupported && videoElement.value) {
+    // 设置语音识别回调
+    speechService.value.start(
+      // 实时结果回调
+      (result) => {
+        transcriptText.value = result.fullText
+      },
+      // 结束回调
+      async (result) => {
+        if (result.text) {
+          transcriptText.value = result.text
+          try {
+            const keywords = await speechService.value.extractKeywords(result.text)
+            extractedKeywords.value = Array.isArray(keywords) ? keywords : []
+          } catch (error) {
+            console.error('关键词提取失败:', error)
+            extractedKeywords.value = []
+          }
+        }
+      }
+    )
+
+    // 播放视频
+    videoElement.value.currentTime = 0
+    videoElement.value.volume = 1
+    await videoElement.value.play()
+
+    // 等待视频播放完成或超时
+    const maxWaitTime = (videoDuration.value + 5) * 1000
+    const startTime = Date.now()
+
+    await new Promise((resolve) => {
+      const checkProgress = () => {
+        const elapsed = Date.now() - startTime
+        const videoProgress = videoElement.value ? videoElement.value.currentTime / videoDuration.value : 0
+
+        // 更新进度 (40-80%)
+        aiAnalysisProgress.value = 40 + Math.round(videoProgress * 40)
+
+        if (videoElement.value?.ended || elapsed > maxWaitTime) {
+          resolve()
+        } else {
+          requestAnimationFrame(checkProgress)
+        }
+      }
+      checkProgress()
+    })
+
+    // 停止语音识别
+    speechService.value.stop()
+
+    // 暂停视频
+    if (videoElement.value) {
+      videoElement.value.pause()
+      videoElement.value.currentTime = 0
+    }
+  } else {
+    // 浏览器不支持语音识别
+    transcriptText.value = '【提示】您的浏览器不支持语音识别功能，请使用Chrome浏览器获得最佳体验，或配置百度语音API。'
+    await simulateAnalysisStep(40, 80, 1000)
+  }
+}
+
+// 模拟分析步骤进度
+const simulateAnalysisStep = (startProgress, endProgress, duration) => {
+  return new Promise((resolve) => {
+    const startTime = Date.now()
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      aiAnalysisProgress.value = Math.round(startProgress + (endProgress - startProgress) * progress)
+
+      if (progress < 1) {
+        requestAnimationFrame(updateProgress)
+      } else {
+        resolve()
+      }
+    }
+    updateProgress()
+  })
+}
+
+// 生成模拟关键帧数据
+const generateMockKeyframes = () => {
+  const duration = videoDuration.value || 60
+  const frameCount = Math.min(Math.floor(duration / 10) + 1, 8)
+  const frames = []
+
+  for (let i = 0; i < frameCount; i++) {
+    frames.push({
+      time: (duration / frameCount) * i,
+      type: i === 0 ? '开场' : i === frameCount - 1 ? '结尾' : '内容'
+    })
+  }
+
+  return frames
+}
+
+// 生成模拟转录文本
+const generateMockTranscript = () => {
+  return '大家好，欢迎来到VidSlide AI的演示视频。在这个视频中，我们将展示如何使用人工智能技术将普通的视频内容自动转换为专业的演示文稿。这个过程非常简单，只需要几个步骤即可完成。首先上传您的视频文件，然后AI会自动分析视频内容，提取关键信息，最后生成结构化的演示文稿。整个过程完全在浏览器中完成，确保了数据的安全性和隐私性。我们的智能算法能够识别视频中的重要场景，提取语音内容，并自动生成关键词标签。'
+}
+
+// 生成模拟关键词数据
+const generateMockKeywords = () => {
+  return [
+    { text: '人工智能', importance: 0.95 },
+    { text: '演示文稿', importance: 0.88 },
+    { text: '视频转换', importance: 0.85 },
+    { text: '智能分析', importance: 0.82 },
+    { text: '关键信息', importance: 0.78 },
+    { text: '数据安全', importance: 0.75 },
+    { text: '浏览器', importance: 0.70 },
+    { text: '自动生成', importance: 0.68 },
+    { text: '语音内容', importance: 0.65 },
+    { text: '场景识别', importance: 0.62 }
+  ]
+}
+
+// AI分析事件处理
+const handleAnalysisComplete = (results) => {
+  analysisResults.value = results
+  currentWorkflowStep.value = 'template'
+  ElMessage.success('AI内容分析完成')
+}
+
+const handleAnalysisError = (error) => {
+  ElMessage.error(`分析失败: ${error}`)
+}
+
+const handleAnalysisProgress = ({ progress, step }) => {
+  console.log(`分析进度: ${progress}% - ${step}`)
+}
+
+// ============================================
+// 素材需求分析相关
+// ============================================
+
+// 转换关键词格式供MaterialRequirementAnalyzer使用
+const materialAnalyzerKeywords = computed(() => {
+  if (!extractedKeywords.value || !Array.isArray(extractedKeywords.value)) {
+    return []
+  }
+  return extractedKeywords.value.map(k => ({
+    text: k.text,
+    importance: k.importance
+  }))
+})
+
+// 转换关键帧格式供MaterialRequirementAnalyzer使用
+const materialAnalyzerKeyframes = computed(() => {
+  if (!extractedKeyframes.value || !Array.isArray(extractedKeyframes.value)) {
+    return []
+  }
+  return extractedKeyframes.value.map((frame, index) => ({
+    id: `frame-${index}`,
+    timestamp: frame.time,
+    importance: 0.7 + (index === 0 || index === extractedKeyframes.value.length - 1 ? 0.2 : 0)
+  }))
+})
+
+// 素材需求选择事件
+const handleRequirementSelected = (selectedRequirements) => {
+  console.log('选中的素材需求:', selectedRequirements)
+}
+
+// 素材搜索请求事件
+/**
+ * 处理素材搜索请求（外部优先策略）
+ */
+const handleMaterialSearchRequested = async (requirement) => {
+  try {
+    console.log('🔍 收到素材搜索请求:', requirement)
+
+    // 初始化素材服务
+    await MaterialService.initialize()
+
+    // 提取搜索关键词
+    const searchKeywords = requirement.relatedKeywords || [requirement.title]
+    if (searchKeywords.length === 0) {
+      ElMessage.warning('没有可用的搜索关键词')
+      return
+    }
+
+    const searchKeyword = searchKeywords.join(' ')
+    console.log(`🔍 搜索关键词: "${searchKeyword}"`)
+
+    // 显示加载状态
+    ElMessage.info('正在搜索素材...')
+
+    // 直接搜索（外部优先策略）
+    const results = await MaterialService.searchMaterials(searchKeyword, {
+      limit: 20,
+      context: {
+        type: requirement.type,
+        scene: requirement.scene || requirement.priority
+      }
+    })
+
+    console.log('✅ 搜索完成:', results)
+
+    // 显示搜索结果提示
+    if (results.source === 'external') {
+      ElMessage.success(
+        `找到 ${results.materials.length} 个素材（来自 ${results.platforms.join(', ')}）`
+      )
+    } else if (results.source === 'cache') {
+      ElMessage.info(`找到 ${results.materials.length} 个缓存素材`)
+    } else if (results.source === 'preset') {
+      ElMessage.warning(
+        `找到 ${results.materials.length} 个预置素材（建议联网获取更多）`
+      )
+    }
+
+    // 更新搜索结果并显示素材选择对话框
+    if (results.materials.length > 0) {
+      console.log('搜索结果:', results.materials)
+
+      // 更新状态
+      searchResults.value = results.materials
+      searchResultSource.value = results.source
+      searchResultPlatforms.value = results.platforms || []
+
+      // 显示素材选择弹窗
+      showMaterialDialog.value = true
+    } else {
+      ElMessage.warning('未找到相关素材')
+    }
+  } catch (error) {
+    console.error('❌ 素材搜索失败:', error)
+    ElMessage.error(`搜索失败: ${error.message}`)
+  }
+}
+
+// 素材授权处理
+const handleMaterialAuthorize = async (platforms) => {
+  console.log('用户授权平台:', platforms)
+
+  try {
+    // 使用授权的平台搜索素材
+    const searchKeyword = pendingSearchKeywords.value.join(' ')
+    const results = await MaterialService.searchMaterials(searchKeyword, {
+      limit: 20,
+      platforms: platforms // 只使用授权的平台
+    })
+
+    // 关闭授权对话框
+    showAuthDialog.value = false
+    pendingSearchKeywords.value = []
+
+    // 显示搜索结果
+    if (results.materials.length > 0) {
+      ElMessage.success(`找到 ${results.materials.length} 个素材`)
+      console.log('搜索结果:', results.materials)
+    } else {
+      ElMessage.warning('未找到相关素材')
+    }
+  } catch (error) {
+    console.error('授权搜索失败:', error)
+    ElMessage.error(`搜索失败: ${error.message}`)
+  }
+}
+
+// 取消授权
+const handleAuthCancel = () => {
+  console.log('用户取消授权')
+  showAuthDialog.value = false
+  pendingSearchKeywords.value = []
+  ElMessage.info('已取消素材搜索')
+}
+
+// 仅使用本地素材
+const handleUseLocalOnly = async () => {
+  console.log('用户选择仅使用本地素材')
+
+  try {
+    const searchKeyword = pendingSearchKeywords.value.join(' ')
+    const results = await MaterialService.searchMaterials(searchKeyword, {
+      limit: 20,
+      localOnly: true // 仅使用本地预置素材
+    })
+
+    // 关闭授权对话框
+    showAuthDialog.value = false
+    pendingSearchKeywords.value = []
+
+    // 显示搜索结果
+    if (results.materials.length > 0) {
+      ElMessage.success(`找到 ${results.materials.length} 个本地素材`)
+      console.log('本地素材:', results.materials)
+
+      // 显示素材选择弹窗
+      searchResults.value = results.materials
+      searchResultSource.value = results.source
+      searchResultPlatforms.value = []
+      showMaterialDialog.value = true
+    } else {
+      ElMessage.warning('本地素材库中未找到相关素材')
+    }
+  } catch (error) {
+    console.error('本地搜索失败:', error)
+    ElMessage.error(`搜索失败: ${error.message}`)
+  }
+}
+
+// 素材选择对话框关闭
+const handleMaterialDialogClose = () => {
+  console.log('关闭素材选择对话框')
+  showMaterialDialog.value = false
+  searchResults.value = []
+  searchResultSource.value = ''
+  searchResultPlatforms.value = []
+}
+
+// 素材选择确认
+const handleMaterialConfirm = (selectedMaterials) => {
+  console.log('用户选择的素材:', selectedMaterials)
+
+  if (selectedMaterials.length > 0) {
+    ElMessage.success(`已选择 ${selectedMaterials.length} 个素材`)
+
+    // TODO: 将选中的素材添加到画布或项目中
+    // 这里可以触发添加到画布的逻辑
+    selectedMaterials.forEach(material => {
+      console.log('添加素材到画布:', material)
+      // 实际的添加逻辑需要根据你的画布系统实现
+    })
+  }
+
+  // 关闭对话框
+  handleMaterialDialogClose()
+}
+
+// 关键帧提取完成处理
+const handleKeyframesExtracted = (keyframes) => {
+  console.log('关键帧提取完成:', keyframes)
+
+  // 更新提取的关键帧列表
+  extractedKeyframes.value = keyframes.map((kf, index) => ({
+    id: `keyframe-${index}`,
+    time: kf.time || kf.timestamp,
+    thumbnail: kf.thumbnail || kf.thumbnailUrl,
+    importance: kf.importance || 'medium'
+  }))
+
+  ElMessage.success(`成功提取 ${keyframes.length} 个关键帧`)
+
+  // 切换到AI分析标签页显示关键帧
+  activeTab.value = 'analysis'
+}
+
+// 添加到画布请求事件
+const handleCanvasAddRequested = (requirement) => {
+  console.log('添加到画布请求:', requirement)
+
+  try {
+    // 根据素材类型添加到对应的内容数据
+    if (requirement.type === 'image' || requirement.type === 'illustration' || requirement.type === 'background') {
+      // 添加图片素材
+      if (!contentData.value.imageUrls) {
+        contentData.value.imageUrls = []
+      }
+
+      // 检查是否已存在
+      const exists = contentData.value.imageUrls.some(img =>
+        img.id === requirement.id || img.title === requirement.title
+      )
+
+      if (!exists) {
+        contentData.value.imageUrls.push({
+          id: requirement.id,
+          title: requirement.title,
+          type: requirement.type,
+          url: requirement.previewUrl || '',
+          keywords: requirement.relatedKeywords || []
+        })
+        ElMessage.success(`图片素材"${requirement.title}"已添加到画布`)
+      } else {
+        ElMessage.warning(`素材"${requirement.title}"已在画布中`)
+      }
+    } else if (requirement.type === 'chart' || requirement.type === 'diagram') {
+      // 添加图表素材
+      if (!contentData.value.chartData) {
+        contentData.value.chartData = []
+      }
+
+      if (!Array.isArray(contentData.value.chartData)) {
+        contentData.value.chartData = []
+      }
+
+      const exists = contentData.value.chartData.some(chart =>
+        chart.id === requirement.id || chart.title === requirement.title
+      )
+
+      if (!exists) {
+        contentData.value.chartData.push({
+          id: requirement.id,
+          title: requirement.title,
+          type: requirement.type,
+          description: requirement.description,
+          keywords: requirement.relatedKeywords || []
+        })
+        ElMessage.success(`图表素材"${requirement.title}"已添加到画布`)
+      } else {
+        ElMessage.warning(`素材"${requirement.title}"已在画布中`)
+      }
+    } else {
+      // 其他类型素材添加到文本内容
+      if (!contentData.value.textContent) {
+        contentData.value.textContent = []
+      }
+
+      contentData.value.textContent.push({
+        id: requirement.id,
+        title: requirement.title,
+        type: requirement.type,
+        content: requirement.description || requirement.title
+      })
+      ElMessage.success(`素材"${requirement.title}"已添加到画布`)
+    }
+
+    // 更新画布状态
+    console.log('当前画布内容:', contentData.value)
+
+  } catch (error) {
+    console.error('添加到画布失败:', error)
+    ElMessage.error(`添加失败: ${error.message}`)
+  }
+}
+
+// 素材分析开始事件
+const handleMaterialAnalysisStarted = () => {
+  console.log('素材需求分析开始')
+}
+
+// 素材分析完成事件
+const handleMaterialAnalysisCompleted = (requirements) => {
+  console.log('素材需求分析完成:', requirements)
+  ElMessage.success(`分析完成，发现 ${requirements.length} 个素材需求`)
+}
+
+// 工作流程辅助方法
+const isStepCompleted = (stepId) => {
+  const stepOrder = ['upload', 'analyze', 'template', 'effect', 'preview', 'export']
+  const currentIndex = stepOrder.indexOf(currentWorkflowStep.value)
+  const stepIndex = stepOrder.indexOf(stepId)
+  return stepIndex < currentIndex
+}
+
+const canNavigateToStep = (stepId) => {
+  const stepOrder = ['upload', 'analyze', 'template', 'effect', 'preview', 'export']
+  const currentIndex = stepOrder.indexOf(currentWorkflowStep.value)
+  const stepIndex = stepOrder.indexOf(stepId)
+  return stepIndex <= currentIndex
+}
+
+const navigateToStep = (stepId) => {
+  if (canNavigateToStep(stepId)) {
+    currentWorkflowStep.value = stepId
+  }
+}
+
+// 时间格式化
+const formatTime = (seconds) => {
+  if (!seconds || isNaN(seconds)) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+// 事件处理函数
+const handleVideoUploaded = (file) => {
+  videoSrc.value = URL.createObjectURL(file)
+  videoFile.value = file // 保存原始文件用于语音识别
+  canExport.value = true
+  currentWorkflowStep.value = 'analyze'
+  ElMessage.success(t('workspace.upload.uploadSuccess'))
+}
+
+const handleTemplateSelected = (template) => {
+  selectedTemplate.value = template
+  pipEnabled.value = template.id === 'pip'
+  if (currentWorkflowStep.value === 'analyze' || currentWorkflowStep.value === 'template') {
+    currentWorkflowStep.value = 'effect'
+  }
+  ElMessage.info(`${t('workspace.status.selected')}: ${template.name}`)
+}
+
+const handlePipSettingsChanged = (settings) => {
+  pipSettings.value = { ...pipSettings.value, ...settings }
+}
+
+const handleContentUpdated = (data) => {
+  contentData.value = { ...contentData.value, ...data }
+}
+
+const handleMarkerAdded = (marker) => {
+  timelineMarkers.value.push(marker)
+  ElMessage.success(t('workspace.timeline.markerAdded'))
+}
+
+const handleMarkerRemoved = (markerId) => {
+  const index = timelineMarkers.value.findIndex(m => m.id === markerId)
+  if (index > -1) {
+    timelineMarkers.value.splice(index, 1)
+  }
+}
+
+const handleMarkerSelected = (markerId) => {
+  selectedMarkerId.value = markerId
+}
+
+const handleMarkerMoved = (data) => {
+  const marker = timelineMarkers.value.find(m => m.id === data.id)
+  if (marker) {
+    marker.time = data.newTime
+  }
+}
+
+const handleMarkersCleared = () => {
+  timelineMarkers.value = []
+  selectedMarkerId.value = null
+}
+
+const handleExportStarted = (exportData) => {
+  showProgress.value = true
+  currentStage.value = 'render'
+  progressValue.value = 0
+  estimatedTime.value = Math.ceil(videoDuration.value * 0.1)
+}
+
+const handleExportCompleted = (result) => {
+  showProgress.value = false
+  ElMessage.success(t('workspace.export.exportSuccess'))
+}
+
+const handleProgressCancel = () => {
+  showProgress.value = false
+  ElMessage.info(t('workspace.export.exportCancelled'))
+}
+
+// 生命周期钩子（vue-i18n自动处理语言变化）
+onMounted(() => {
+  // 初始化逻辑
+})
+
+onUnmounted(() => {
+  // 清理逻辑
+})
+
+// 模板数据 - 使用计算属性以便响应语言变化
+// 画中画设置
+const pipSettings = ref({
+  position: 'top-right',
+  size: 25,
+  style: 'professional'
+})
+
+// 时间线标记
+const timelineMarkers = ref([
+  { id: 1, position: 20 },
+  { id: 2, position: 45 },
+  { id: 3, position: 70 }
+])
+
+const selectedMarkerId = ref(null)
+const currentProgress = ref(30)
+
+// 计算属性
+const progressPercent = computed(() => currentProgress.value)
+
+const pipStyle = computed(() => {
+  const size = pipSettings.value.size
+  const position = pipSettings.value.position
+
+  let positionStyle = {}
+  switch (position) {
+    case 'top-left':
+      positionStyle = { top: '20px', left: '20px' }
+      break
+    case 'top-right':
+      positionStyle = { top: '20px', right: '20px' }
+      break
+    case 'bottom-left':
+      positionStyle = { bottom: '20px', left: '20px' }
+      break
+    case 'bottom-right':
+      positionStyle = { bottom: '20px', right: '20px' }
+      break
+  }
+
+  return {
+    width: `${size}%`,
+    height: `${size * 9 / 16}%`, // 保持16:9比例
+    ...positionStyle
+  }
+})
+
+// 智能工具方法
+const analyzeForTemplates = () => {
+  if (!transcriptText.value && !extractedKeywords.value.length) {
+    ElMessage.warning('请先进行AI分析以获取视频内容')
+    activeTab.value = 'analysis'
+    return
+  }
+
+  ElMessage.info('模板推荐功能开发中，敬请期待！')
+  // TODO: 集成 TemplateRecommender 服务
+  // const contentAnalysis = {
+  //   keywords: extractedKeywords.value,
+  //   transcript: transcriptText.value,
+  //   contentType: 'video',
+  //   dataMentions: 0,
+  //   sentiment: 'neutral'
+  // }
+  // const recommendations = await TemplateRecommender.generateRecommendations(contentAnalysis)
+}
+
+// 获取内容分析数据用于PPT生成
+const getContentAnalysis = () => {
+  if (!transcriptText.value && !extractedKeywords.value.length) {
+    return null
+  }
+
+  // 获取视频文件名（去除扩展名）
+  const fileName = videoFile.value?.name?.replace(/\.[^/.]+$/, '') || '视频内容演示'
+
+  return {
+    title: fileName,
+    subtitle: '',
+    keywords: extractedKeywords.value,
+    transcript: transcriptText.value,
+    scenes: detectedScenes.value,
+    duration: videoDuration.value,
+    contentType: 'video',
+    dataMentions: 0,
+    sentiment: 'neutral'
+  }
+}
+
+// 方法
+const newProject = () => {
+  ElMessageBox.confirm(
+    t('workspace.timeline.confirmNewProject'),
+    t('workspace.timeline.confirmTitle'),
+    {
+      confirmButtonText: t('workspace.timeline.confirm'),
+      cancelButtonText: t('workspace.timeline.cancel'),
+      type: 'warning'
+    }
+  ).then(() => {
+    resetWorkspace()
+    ElMessage.success(t('workspace.timeline.successNewProject'))
+  }).catch(() => {
+    // 用户取消
+  })
+}
+
+const openProject = () => {
+  // 创建文件输入元素
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.vsp,.json' // VidSlide Project 格式
+  input.onchange = async (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      try {
+        const text = await file.text()
+        const data = JSON.parse(text)
+
+        // 验证项目文件格式
+        if (!data.version || !data.type || data.type !== 'vidslide-project') {
+          throw new Error(t('workspace.timeline.errorInvalidFormat'))
+        }
+
+        // 加载项目数据
+        projectData.value = data
+        selectedTemplate.value = data.template || null
+        pipSettings.value = data.pipSettings || pipSettings.value
+        timelineMarkers.value = data.markers || []
+        animations.value = data.animations || []
+        pipEnabled.value = data.pipEnabled || false
+
+        const projectName = data.name || t('workspace.timeline.unnamed')
+        ElMessage.success(t('workspace.timeline.successLoadProject').replace('{name}', projectName))
+      } catch (error) {
+        ElMessage.error(t('workspace.timeline.errorLoadProject') + ': ' + error.message)
+      }
+    }
+  }
+  input.click()
+}
+
+const saveProject = () => {
+  // 构建项目数据
+  const data = {
+    version: '1.0',
+    type: 'vidslide-project',
+    name: projectData.value?.name || t('workspace.timeline.unnamed'),
+    createdAt: projectData.value?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    template: selectedTemplate.value,
+    pipSettings: pipSettings.value,
+    pipEnabled: pipEnabled.value,
+    markers: timelineMarkers.value,
+    animations: animations.value,
+    videoInfo: videoSrc.value ? {
+      duration: videoDuration.value,
+      hasVideo: true
+    } : null
+  }
+
+  // 创建下载链接
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${data.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}.vsp`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+
+  ElMessage.success(t('workspace.timeline.successSaveProject'))
+}
+
+const selectTemplate = (template) => {
+  selectedTemplate.value = template
+  pipEnabled.value = template.id === 'pip'
+  ElMessage.info(`${t('workspace.status.selected')}: ${template.name}`)
+}
+
+const handleVideoUpload = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+
+    // 验证文件类型
+    if (!file.type.startsWith('video/')) {
+      ElMessage.error('请选择有效的视频文件')
+      return
+    }
+
+    // 验证文件大小 (500MB)
+    if (file.size > 500 * 1024 * 1024) {
+      ElMessage.error('文件过大，请选择小于500MB的文件')
+      return
+    }
+
+    const url = URL.createObjectURL(file)
+    videoSrc.value = url
+    ElMessage.success('视频加载成功')
+  }
+}
+
+const onVideoLoaded = () => {
+  if (videoElement.value) {
+    videoDuration.value = videoElement.value.duration
+
+    // 获取视频原始尺寸
+    videoWidth.value = videoElement.value.videoWidth
+    videoHeight.value = videoElement.value.videoHeight
+
+    const aspectRatio = videoWidth.value / videoHeight.value
+    const orientation = isVerticalVideo.value ? '竖版' : '横版'
+    console.log(`视频加载完成 - 时长: ${videoDuration.value}秒, 尺寸: ${videoWidth.value}x${videoHeight.value}, 比例: ${aspectRatio.toFixed(2)}, 方向: ${orientation}`)
+
+    // 竖版视频自动折叠底部面板以获得更多显示空间
+    autoCollapseForVerticalVideo()
+
+    // 更新进度条
+    videoElement.value.addEventListener('timeupdate', () => {
+      if (videoElement.value) {
+        currentTime.value = videoElement.value.currentTime
+        currentProgress.value = (currentTime.value / videoDuration.value) * 100
+      }
+    })
+
+    videoElement.value.addEventListener('play', () => {
+      isPlaying.value = true
+    })
+
+    videoElement.value.addEventListener('pause', () => {
+      isPlaying.value = false
+    })
+  }
+}
+
+const previewVideo = () => {
+  if (!videoSrc.value) {
+    ElMessage.warning('请先上传视频')
+    return
+  }
+
+  if (!selectedTemplate.value) {
+    ElMessage.warning('请先选择模板')
+    return
+  }
+
+  // 打开预览模式
+  if (videoElement.value) {
+    if (isPlaying.value) {
+      videoElement.value.pause()
+      ElMessage.info('预览已暂停')
+    } else {
+      videoElement.value.play()
+      ElMessage.success('开始预览')
+    }
+  }
+}
+
+const exportVideo = async () => {
+  if (!videoSrc.value) {
+    ElMessage.warning('请先上传视频')
+    return
+  }
+
+  if (!selectedTemplate.value) {
+    ElMessage.warning('请先选择模板')
+    return
+  }
+
+  // 显示导出选项对话框
+  try {
+    const { value: format } = await ElMessageBox.prompt(
+      '请选择导出格式 (输入: mp4, pptx, html)',
+      '导出项目',
+      {
+        confirmButtonText: '导出',
+        cancelButtonText: '取消',
+        inputValue: 'mp4',
+        inputPattern: /^(mp4|pptx|html)$/,
+        inputErrorMessage: '请输入有效的格式: mp4, pptx, html'
+      }
+    )
+
+    ElMessage.info(`正在导出为 ${format.toUpperCase()} 格式...`)
+
+    // 模拟导出过程
+    setTimeout(() => {
+      ElMessage.success(`导出完成！格式: ${format.toUpperCase()}`)
+    }, 2000)
+
+  } catch {
+    // 用户取消
+  }
+}
+
+const togglePip = () => {
+  pipEnabled.value = !pipEnabled.value
+}
+
+const addFadeEffect = () => {
+  const effect = {
+    id: Date.now(),
+    type: 'fade',
+    name: '淡入效果',
+    duration: 1000,
+    startTime: currentTime.value
+  }
+  animations.value.push(effect)
+  ElMessage.success('已添加淡入效果')
+}
+
+const addSlideEffect = () => {
+  const effect = {
+    id: Date.now(),
+    type: 'slide',
+    name: '滑入效果',
+    duration: 800,
+    direction: 'left',
+    startTime: currentTime.value
+  }
+  animations.value.push(effect)
+  ElMessage.success('已添加滑入效果')
+}
+
+const addZoomEffect = () => {
+  const effect = {
+    id: Date.now(),
+    type: 'zoom',
+    name: '缩放效果',
+    duration: 600,
+    scale: 1.2,
+    startTime: currentTime.value
+  }
+  animations.value.push(effect)
+  ElMessage.success('已添加缩放效果')
+}
+
+const clearAnimations = () => {
+  if (animations.value.length === 0) {
+    ElMessage.info('当前没有动画效果')
+    return
+  }
+
+  ElMessageBox.confirm(
+    `确定要清除所有 ${animations.value.length} 个动画效果吗？`,
+    '清除动画',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    animations.value = []
+    ElMessage.success('已清除所有动画效果')
+  }).catch(() => {
+    // 用户取消
+  })
+}
+
+const addMarker = () => {
+  const newId = Math.max(0, ...timelineMarkers.value.map(m => m.id)) + 1
+  const position = currentProgress.value || Math.random() * 80 + 10
+  timelineMarkers.value.push({
+    id: newId,
+    position: position
+  })
+  ElMessage.success('已添加标记点')
+}
+
+const removeMarker = () => {
+  if (selectedMarkerId.value) {
+    const index = timelineMarkers.value.findIndex(m => m.id === selectedMarkerId.value)
+    if (index > -1) {
+      timelineMarkers.value.splice(index, 1)
+      selectedMarkerId.value = null
+      ElMessage.success('已删除标记点')
+    }
+  } else {
+    ElMessage.warning('请先选择要删除的标记点')
+  }
+}
+
+const selectMarker = (marker) => {
+  selectedMarkerId.value = marker.id
+  // 跳转到标记位置
+  if (videoElement.value && videoDuration.value) {
+    const targetTime = (marker.position / 100) * videoDuration.value
+    videoElement.value.currentTime = targetTime
+  }
+}
+
+// 处理动画触发事件
+const handleAnimationTriggered = (animationData) => {
+  console.log('动画触发:', animationData)
+  // 可以在这里添加额外的动画处理逻辑
+  // 例如：记录动画事件、更新UI状态等
+}
+
+// 预览质量控制相关方法
+const toggleQualityControl = () => {
+  showQualityControl.value = !showQualityControl.value
+}
+
+const handleResolutionChange = (resolution) => {
+  previewResolution.value = resolution
+  console.log('预览分辨率已更改:', resolution)
+  ElMessage.info(`预览分辨率已设置为 ${resolution}`)
+}
+
+const handleQualityChange = (quality) => {
+  previewQuality.value = quality
+  console.log('预览质量已更改:', quality)
+}
+
+const handleOptimizationsChange = (optimizations) => {
+  previewOptimizations.value = optimizations
+  console.log('优化设置已更改:', optimizations)
+}
+
+const resetWorkspace = () => {
+  // 释放视频资源
+  if (videoSrc.value) {
+    URL.revokeObjectURL(videoSrc.value)
+  }
+
+  videoSrc.value = ''
+  selectedTemplate.value = null
+  pipEnabled.value = false
+  timelineMarkers.value = [
+    { id: 1, position: 20 },
+    { id: 2, position: 45 },
+    { id: 3, position: 70 }
+  ]
+  selectedMarkerId.value = null
+  currentProgress.value = 30
+  animations.value = []
+  projectData.value = null
+  videoDuration.value = 0
+  currentTime.value = 0
+  isPlaying.value = false
+}
+
+// 生命周期
+onMounted(() => {
+  console.log('WorkspaceView mounted')
+
+  // 添加键盘快捷键监听
+  window.addEventListener('keydown', handleKeyboardShortcuts)
+})
+
+onUnmounted(() => {
+  // 清理资源
+  if (videoSrc.value) {
+    URL.revokeObjectURL(videoSrc.value)
+  }
+
+  // 移除键盘事件监听
+  window.removeEventListener('keydown', handleKeyboardShortcuts)
+})
+</script>
+
+<style scoped>
+/* ===========================================
+   VidSlide AI - 工作空间
+   Apple设计风格优化版本 v2.0
+   核心原则：Clarity, Depth, Deference, Fluidity
+   =========================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.workspace {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+  background: linear-gradient(180deg, #F5F5F7 0%, #FFFFFF 100%);
+  color: #1D1D1F;
+  overflow: hidden;
+}
+
+/* ==========================================
+   头部工具栏 - 毛玻璃效果
+   ========================================== */
+.workspace-header {
+  height: 56px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  height: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.workspace-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1D1D1F;
+  letter-spacing: -0.022em;
+}
+
+.header-actions-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #1D1D1F;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.header-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.header-btn:active {
+  background: rgba(0, 0, 0, 0.08);
+  transform: scale(0.98);
+}
+
+.header-btn.icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.header-btn.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  color: #636366;
+}
+
+.header-btn.icon-btn:hover svg {
+  color: #1D1D1F;
+}
+
+/* ==========================================
+   主工作区 - 全宽布局
+   ========================================== */
+.workspace-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* ==========================================
+   主编辑区
+   ========================================== */
+.main-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #F5F5F7;
+  position: relative;
+  min-height: 0;
+}
+
+.editor-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* 视频和分析面板并排布局 - 居中显示 */
+.editor-content-wrapper {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  min-height: 0;
+  overflow: hidden;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.video-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+.video-section.vertical-video {
+  flex: 0 0 auto;
+}
+
+.editor-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #E8E8ED 0%, #F5F5F7 100%);
+  position: relative;
+  padding: 16px;
+  border-radius: 12px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.preview-video {
+  max-width: 100%;
+  max-height: calc(100vh - 300px);
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 12px 28px rgba(0, 0, 0, 0.12),
+    0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  background: #000;
+  object-fit: contain;
+}
+
+/* 竖版视频专用样式 - 保持原始尺寸 */
+.editor-canvas.vertical-video {
+  padding: 8px;
+}
+
+.preview-video.vertical {
+  max-width: 100%;
+  max-height: calc(100vh - 300px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ==========================================
+   预览质量控制面板
+   ========================================== */
+.quality-control-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 50;
+  max-width: 320px;
+  max-height: 80%;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.quality-toggle-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 40;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quality-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.05);
+}
+
+/* ==========================================
+   右侧AI分析面板
+   ========================================== */
+.analysis-sidebar {
+  width: 360px;
+  max-height: calc(100vh - 200px);
+  flex-shrink: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 分析面板内容区域可滚动 */
+.analysis-sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+
+.analysis-sidebar.analyzing {
+  border: 2px solid #007AFF;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid #E5E5EA;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAFAFA;
+}
+
+.sidebar-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin: 0;
+}
+
+.start-analysis-btn {
+  padding: 8px 16px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.start-analysis-btn:hover {
+  background: #0056CC;
+  transform: translateY(-1px);
+}
+
+.analyzing-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #007AFF;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.analysis-complete-badge {
+  color: #34C759;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 分析进度 */
+.analysis-progress-section {
+  padding: 16px;
+  background: #F5F5F7;
+  border-bottom: 1px solid #E5E5EA;
+}
+
+.analysis-progress-section .progress-bar {
+  height: 6px;
+  background: #E5E5EA;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.analysis-progress-section .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007AFF, #5856D6);
+  border-radius: 3px;
+  transition: width 100ms ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.progress-step {
+  color: #636366;
+}
+
+.progress-percent {
+  color: #007AFF;
+  font-weight: 600;
+}
+
+/* 关键帧区域 */
+.keyframes-section,
+.transcript-section,
+.keywords-section {
+  padding: 16px;
+  border-bottom: 1px solid #E5E5EA;
+}
+
+.keyframes-section h4,
+.transcript-section h4,
+.keywords-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin: 0 0 12px 0;
+}
+
+.keyframes-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.keyframe-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform 200ms ease;
+}
+
+.keyframe-item:hover {
+  transform: scale(1.05);
+}
+
+.keyframe-thumbnail {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.frame-number {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.keyframe-time {
+  font-size: 10px;
+  color: #8E8E93;
+}
+
+/* 紧凑版关键帧样式 */
+.keyframes-section.compact {
+  padding: 12px 16px;
+}
+
+.keyframes-section.compact .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.keyframes-section.compact h4 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-header h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+}
+
+.section-count {
+  font-size: 11px;
+  color: #8E8E93;
+  background: #F2F2F7;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.section-status {
+  font-size: 11px;
+  color: #FF9500;
+  font-weight: 500;
+}
+
+.keyframes-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.keyframe-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.keyframe-item-compact:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.keyframe-item-compact .frame-number {
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: rgba(255,255,255,0.2);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyframe-item-compact .keyframe-time {
+  font-size: 11px;
+  color: rgba(255,255,255,0.9);
+}
+
+/* 关键帧网格样式 */
+.keyframes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  padding: 8px 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.keyframe-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 200ms ease;
+  border: 1px solid #E5E5EA;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.keyframe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.keyframe-card.selected {
+  border-color: #667eea;
+  border-width: 2px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.keyframe-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(102, 126, 234, 0.1);
+  pointer-events: none;
+}
+
+.keyframe-thumbnail-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 aspect ratio */
+  background: #F5F5F7;
+  overflow: hidden;
+}
+
+.keyframe-thumbnail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.keyframe-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.keyframe-placeholder .frame-icon {
+  font-size: 24px;
+  opacity: 0.8;
+}
+
+.keyframe-overlay {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.keyframe-overlay .frame-number {
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+}
+
+.keyframe-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  background: #F9F9FB;
+}
+
+.keyframe-info .keyframe-time {
+  font-size: 11px;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+.keyframe-info .keyframe-importance {
+  font-size: 10px;
+  font-weight: 600;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.keyframe-selected-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  z-index: 3;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-btn,
+.delete-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.export-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.export-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.delete-btn {
+  background: #FF3B30;
+  color: white;
+}
+
+.delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+
+/* 分析提示 */
+.analysis-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #FFF3CD;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #856404;
+  margin-top: 8px;
+}
+
+.recording-indicator {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 重新分析按钮 */
+.restart-analysis-btn {
+  padding: 6px 12px;
+  background: #F2F2F7;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #007AFF;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.restart-analysis-btn:hover {
+  background: #E5E5EA;
+}
+
+/* 转录文本区域 */
+.transcript-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.transcript-header h4 {
+  margin: 0;
+}
+
+.speech-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.speech-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.speech-btn.start {
+  background: #34C759;
+  color: white;
+}
+
+.speech-btn.start:hover {
+  background: #2DB84D;
+}
+
+.speech-btn.stop {
+  background: #FF3B30;
+  color: white;
+}
+
+.speech-btn.stop:hover {
+  background: #E6352B;
+}
+
+.speech-hint {
+  background: #F0F9FF;
+  border: 1px solid #BAE6FD;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.speech-hint p {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0369A1;
+  margin: 0 0 8px 0;
+}
+
+.speech-hint ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 12px;
+  color: #0C4A6E;
+  line-height: 1.6;
+}
+
+.speech-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #991B1B;
+}
+
+.recording-indicator {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.transcript-content-wrapper {
+  margin-bottom: 12px;
+}
+
+.transcript-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #E5E5EA;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1D1D1F;
+  background: #FAFAFA;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 200ms ease;
+}
+
+.transcript-input:focus {
+  outline: none;
+  border-color: #007AFF;
+  background: white;
+}
+
+.transcript-input::placeholder {
+  color: #8E8E93;
+}
+
+.extract-keywords-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.extract-keywords-btn:hover {
+  background: #0056CC;
+}
+
+.transcript-content {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1D1D1F;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 12px;
+  background: #F5F5F7;
+  border-radius: 8px;
+}
+
+.transcript-content :deep(.keyword-highlight) {
+  background: linear-gradient(120deg, #fff3cd 0%, #ffeeba 100%);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+  color: #856404;
+}
+
+/* 编辑转录文本按钮 */
+.edit-transcript-btn {
+  padding: 4px 10px;
+  background: #F2F2F7;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #007AFF;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.edit-transcript-btn:hover {
+  background: #E5E5EA;
+}
+
+/* 转录文本编辑区域 */
+.transcript-edit-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transcript-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 1px solid #E5E5EA;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1D1D1F;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 200ms ease;
+}
+
+.transcript-textarea:focus {
+  outline: none;
+  border-color: #007AFF;
+}
+
+.transcript-edit-tip {
+  font-size: 11px;
+  color: #8E8E93;
+  padding: 8px 12px;
+  background: #F5F5F7;
+  border-radius: 6px;
+}
+
+/* 关键词区域 */
+.keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: #F5F5F7;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #636366;
+  transition: all 200ms ease;
+}
+
+.keyword-tag.highlight {
+  background: linear-gradient(120deg, #fff3cd 0%, #ffeeba 100%);
+  color: #856404;
+  font-weight: 500;
+}
+
+.keyword-score {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* 场景列表样式 */
+.scenes-section {
+  padding: 12px 16px;
+  background: #F9F9FB;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.scenes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.scene-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  border: 1px solid #E5E5EA;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.scene-edit-actions {
+  display: flex;
+  gap: 6px;
+  padding: 0 4px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.scene-item:hover .scene-edit-actions {
+  opacity: 1;
+}
+
+.scene-edit-btn,
+.scene-merge-btn,
+.scene-delete-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  background: #F5F5F7;
+}
+
+.scene-edit-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.1);
+}
+
+.scene-merge-btn:hover {
+  background: rgba(52, 199, 89, 0.1);
+  transform: scale(1.1);
+}
+
+.scene-delete-btn:hover {
+  background: rgba(255, 59, 48, 0.1);
+  transform: scale(1.1);
+}
+
+.scene-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+}
+
+.scene-item.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.scene-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.scene-thumbnail-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.scene-number {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scene-preview {
+  width: 80px;
+  height: 45px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #F5F5F7;
+}
+
+.scene-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scene-preview-placeholder {
+  width: 80px;
+  height: 45px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-preview-placeholder .scene-icon {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+.scene-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.scene-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 4px;
+}
+
+.scene-time {
+  font-size: 11px;
+  color: #8E8E93;
+  margin-bottom: 2px;
+}
+
+.scene-duration {
+  font-size: 10px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.scene-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.1);
+  transition: all 200ms ease;
+  opacity: 0;
+}
+
+.scene-item:hover .scene-action {
+  opacity: 1;
+}
+
+.scene-action .play-icon {
+  font-size: 12px;
+  color: #667eea;
+}
+
+
+/* 空状态 */
+.empty-analysis {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.empty-analysis .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-analysis p {
+  color: #8E8E93;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.empty-analysis .feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.empty-analysis .feature-list li {
+  font-size: 13px;
+  color: #636366;
+  padding: 6px 0;
+}
+
+/* 视频控制覆盖层 */
+.video-controls-overlay {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 8px 16px;
+}
+
+.video-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.video-time {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 画中画预览 */
+.pip-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.pip-window {
+  position: absolute;
+  background: #000;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(255, 255, 255, 0.2);
+  pointer-events: auto;
+  transition: all 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  cursor: move;
+}
+
+.pip-window:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 0 0 0.5px rgba(255, 255, 255, 0.3);
+  border-color: rgba(102, 126, 234, 0.8);
+}
+
+.pip-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================
+   工作流程指示器 - 紧凑版
+   ========================================== */
+.workflow-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 24px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  cursor: default;
+  opacity: 0.4;
+  transition: all 200ms ease;
+}
+
+.workflow-step.clickable {
+  cursor: pointer;
+}
+
+.workflow-step.clickable:hover {
+  opacity: 0.7;
+}
+
+.workflow-step.active {
+  opacity: 1;
+}
+
+.workflow-step.completed {
+  opacity: 0.8;
+}
+
+.step-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E5E5EA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8E8E93;
+  transition: all 200ms ease;
+}
+
+.workflow-step.active .step-icon {
+  background: #007AFF;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+.workflow-step.completed .step-icon {
+  background: #34C759;
+  color: white;
+}
+
+.workflow-step.completed .step-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.step-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8E8E93;
+  transition: color 200ms ease;
+}
+
+.workflow-step.active .step-label {
+  color: #1D1D1F;
+}
+
+.workflow-step.completed .step-label {
+  color: #636366;
+}
+
+.step-connector {
+  width: 32px;
+  height: 2px;
+  background: #E5E5EA;
+  margin: 0 8px;
+  border-radius: 1px;
+}
+
+.workflow-step.completed + .workflow-step .step-connector,
+.workflow-step.completed .step-connector {
+  background: #34C759;
+}
+
+/* ==========================================
+   底部工具面板
+   ========================================== */
+.bottom-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+  transition: all 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  flex-shrink: 0;
+  min-height: 250px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bottom-panel.collapsed {
+  height: auto;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 40px;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.panel-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.panel-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #636366;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.panel-tab:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1D1D1F;
+}
+
+.panel-tab.active {
+  background: #007AFF;
+  color: white;
+}
+
+.tab-icon {
+  font-size: 14px;
+}
+
+.panel-toggle {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #8E8E93;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+}
+
+.panel-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1D1D1F;
+}
+
+.panel-toggle svg {
+  width: 16px;
+  height: 16px;
+}
+
+.panel-content {
+  padding: 12px 20px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* AI分析标签页 */
+.analysis-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.analysis-tab .ai-content-analyzer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 智能工具标签页 */
+.smart-tools-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.smart-tools-tab .smart-tools-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 素材需求标签页 */
+.materials-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.materials-tab .material-requirement-analyzer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 模板选择标签页 */
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.template-card {
+  background: #F5F5F7;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 200ms ease;
+  text-align: center;
+}
+
+.template-card:hover {
+  background: #EBEBF0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.template-card.selected {
+  border-color: #007AFF;
+  background: rgba(0, 122, 255, 0.08);
+}
+
+.template-preview {
+  margin-bottom: 8px;
+}
+
+.template-icon {
+  font-size: 32px;
+}
+
+.template-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1D1D1F;
+  margin-bottom: 4px;
+}
+
+.template-desc {
+  display: block;
+  font-size: 11px;
+  color: #8E8E93;
+  line-height: 1.3;
+}
+
+/* 动画效果标签页 */
+.animations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.animation-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: #F5F5F7;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.animation-card:hover {
+  background: #EBEBF0;
+  transform: translateY(-2px);
+}
+
+.animation-card:active {
+  transform: translateY(0);
+}
+
+.animation-card.danger {
+  background: #FFF2F2;
+}
+
+.animation-card.danger:hover {
+  background: #FFE5E5;
+}
+
+.animation-icon {
+  font-size: 24px;
+}
+
+.animation-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1D1D1F;
+}
+
+/* AI建议标签页 */
+.ai-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-suggestion-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(88, 86, 214, 0.08) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 122, 255, 0.1);
+}
+
+.suggestion-icon {
+  font-size: 20px;
+}
+
+.suggestion-text {
+  flex: 1;
+  font-size: 14px;
+  color: #1D1D1F;
+}
+
+.suggestion-action {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #007AFF;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.suggestion-action:hover {
+  background: #0056CC;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: #8E8E93;
+}
+
+.empty-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 14px;
+}
+
+/* ==========================================
+   响应式设计
+   ========================================== */
+@media (max-width: 768px) {
+  .workspace-header {
+    height: 48px;
+  }
+
+  .header-content {
+    padding: 0 12px;
+  }
+
+  .workspace-title {
+    font-size: 15px;
+  }
+
+  .workflow-indicator {
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+
+  .step-label {
+    display: none;
+  }
+
+  .step-connector {
+    width: 20px;
+  }
+
+  .panel-content {
+    max-height: 160px;
+  }
+
+  .templates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+
+  .template-card {
+    padding: 12px;
+  }
+
+  .template-icon {
+    font-size: 24px;
+  }
+
+  .template-name {
+    font-size: 12px;
+  }
+
+  .template-desc {
+    display: none;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .workspace {
+    background: #FFFFFF;
+  }
+
+  .workspace-header {
+    background: #FFFFFF;
+    border-bottom: 2px solid #000000;
+  }
+
+  .panel-tab.active {
+    background: #000000;
+  }
+
+  .template-card.selected {
+    border-width: 3px;
+  }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .workspace {
+    background: linear-gradient(180deg, #1C1C1E 0%, #000000 100%);
+    color: #F5F5F7;
+  }
+
+  .workspace-header {
+    background: rgba(28, 28, 30, 0.72);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .workspace-title {
+    color: #F5F5F7;
+  }
+
+  .header-btn {
+    color: #F5F5F7;
+  }
+
+  .header-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .header-btn.icon-btn svg {
+    color: #98989D;
+  }
+
+  .main-editor {
+    background: #1C1C1E;
+  }
+
+  .editor-canvas {
+    background: linear-gradient(180deg, #2C2C2E 0%, #1C1C1E 100%);
+  }
+
+  .workflow-indicator {
+    background: rgba(28, 28, 30, 0.8);
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .step-icon {
+    background: #3A3A3C;
+    color: #98989D;
+  }
+
+  .step-label {
+    color: #98989D;
+  }
+
+  .workflow-step.active .step-label {
+    color: #F5F5F7;
+  }
+
+  .step-connector {
+    background: #3A3A3C;
+  }
+
+  .bottom-panel {
+    background: rgba(28, 28, 30, 0.95);
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .panel-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .panel-tab {
+    color: #98989D;
+  }
+
+  .panel-tab:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #F5F5F7;
+  }
+
+  .template-card {
+    background: #2C2C2E;
+  }
+
+  .template-card:hover {
+    background: #3A3A3C;
+  }
+
+  .template-card.selected {
+    background: rgba(0, 122, 255, 0.2);
+  }
+
+  .template-name {
+    color: #F5F5F7;
+  }
+
+  .animation-card {
+    background: #2C2C2E;
+  }
+
+  .animation-card:hover {
+    background: #3A3A3C;
+  }
+
+  .animation-name {
+    color: #F5F5F7;
+  }
+
+  .ai-suggestion-card {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.15) 0%, rgba(88, 86, 214, 0.15) 100%);
+    border-color: rgba(0, 122, 255, 0.2);
+  }
+
+  .suggestion-text {
+    color: #F5F5F7;
+  }
+
+  .empty-state {
+    color: #98989D;
+  }
+}
+
+/* ========================================
+   智能工具标签页样式
+   ======================================== */
+
+.smart-tools-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+.tools-selector {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.tool-selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: #636366;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-selector-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #1D1D1F;
+}
+
+.tool-selector-btn.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-color: rgba(102, 126, 234, 0.4);
+  color: #007AFF;
+}
+
+.tool-icon {
+  font-size: 18px;
+}
+
+.tool-name {
+  font-size: 14px;
+}
+
+.tool-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.tool-panel {
+  height: 100%;
+}
+
+/* 模板推荐占位符 */
+.template-recommender-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 64px;
+  opacity: 0.6;
+}
+
+.template-recommender-placeholder h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.template-recommender-placeholder p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 400px;
+}
+
+.primary-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+</style>

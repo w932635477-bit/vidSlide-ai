@@ -1,0 +1,33 @@
+{
+  "name": "remotion-templates",
+  "version": "1.0.0",
+  "description": "VidSlide AI - Remotion Video Templates",
+  "type": "module",
+  "scripts": {
+    "start": "remotion studio src/index.jsx --port=3001",
+    "build": "remotion render",
+    "render": "remotion render Root out/video.mp4",
+    "server": "node server.js"
+  },
+  "keywords": [
+    "remotion",
+    "video",
+    "templates"
+  ],
+  "author": "VidSlide AI",
+  "license": "ISC",
+  "dependencies": {
+    "@remotion/bundler": "^4.0.407",
+    "@remotion/cli": "^4.0.407",
+    "@remotion/renderer": "^4.0.407",
+    "@remotion/three": "^4.0.407",
+    "@types/three": "^0.182.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "remotion": "^4.0.407",
+    "three": "^0.182.0",
+    "uuid": "^9.0.1"
+  }
+}
