@@ -16,6 +16,7 @@ import { getBaiduNLPService } from './BaiduNLPService.js'
 import TemplateArchitecture from '../utils/TemplateArchitecture.js'
 import MaterialService from './MaterialService.js'
 import remotionService from './RemotionService.js'
+import videoCompositionService from './VideoCompositionService.js'
 
 /**
  * 主自动化生成引擎类
@@ -254,7 +255,9 @@ export class MasterAutoGenerationAgent {
             materials: searchResult.results,
             source: searchResult.source || 'unknown'
           })
-          console.log(`✅ 找到 ${searchResult.results.length} 个素材 (来源: ${searchResult.source})`)
+          console.log(
+            `✅ 找到 ${searchResult.results.length} 个素材 (来源: ${searchResult.source})`
+          )
         } else {
           console.log(`⚠️ 未找到素材: ${keywordText}`)
           // 添加空占位符
@@ -362,78 +365,112 @@ export class MasterAutoGenerationAgent {
 
     onProgress(40)
 
-    // 尝试调用 Remotion 服务进行实际渲染
+    // 尝试调用视频合成服务进行完整合成
     try {
-      console.log('🎬 尝试调用 Remotion 服务渲染视频...')
+      console.log('🎬 开始完整视频合成流程...')
 
-      // 准备 Remotion 渲染参数
-      const remotionProps = {
-        videoUrl: renderData.video.url,
-        scenes: composition.scenes.map((scene, index) => ({
-          id: index + 1,
-          title: scene.title || `场景 ${index + 1}`,
-          content: scene.content || scene.text || '',
-          duration: scene.duration || 3,
-          materials: scene.materials || []
-        })),
-        template: composition.template.id,
-        metadata: {
-          title: composition.metadata.title || '生成的视频',
-          duration: composition.metadata.duration
-        }
-      }
-
-      onProgress(60)
-
-      // 调用 Remotion 渲染服务
-      const renderResult = await this.remotionService.renderVideo(
-        composition.template.id,
-        remotionProps,
-        {
-          width: composition.metadata.width || 1920,
-          height: composition.metadata.height || 1080,
-          fps: 30
+      // 调用VideoCompositionService进行完整合成
+      const compositionResult = await this.composeFullVideo(
+        videoFile,
+        { ...composition, template: composition.template, scenes: composition.scenes },
+        { platform: 'douyin' },
+        progress => {
+          // 将合成进度映射到40-100%
+          onProgress(40 + progress.progress * 0.6)
         }
       )
 
-      onProgress(90)
+      console.log('✅ 视频合成完成:', compositionResult)
 
-      console.log('✅ Remotion 渲染成功:', renderResult)
+      onProgress(100)
 
-      // 如果渲染成功，返回渲染后的视频URL
-      // 注意：Remotion 渲染是异步的，可能只返回 renderId
-      if (renderResult.videoUrl) {
-        // 渲染已完成，有视频URL
-        return {
-          ...renderData,
-          video: {
-            ...renderData.video,
-            url: renderResult.videoUrl, // 使用渲染后的视频URL
-            renderedUrl: renderResult.videoUrl
-          },
-          renderResult,
-          canExport: true,
-          previewReady: true,
-          isRendered: true
-        }
-      } else if (renderResult.renderId) {
-        // 渲染任务已创建，但还在处理中
-        console.log('⏳ 渲染任务已创建，ID:', renderResult.renderId)
-        console.log('💡 使用预览模式，渲染完成后可以查看最终视频')
-
-        return {
-          ...renderData,
-          renderResult,
-          canExport: true,
-          previewReady: true,
-          isRendered: false,
-          isRendering: true, // 标记正在渲染
-          previewMode: true
-        }
+      // 返回合成结果
+      return {
+        ...renderData,
+        video: {
+          ...renderData.video,
+          url: compositionResult.videoUrl,
+          composedUrl: compositionResult.videoUrl,
+          blob: compositionResult.videoBlob
+        },
+        compositionResult,
+        canExport: true,
+        canDownload: true,
+        previewReady: true,
+        isComposed: true,
+        fileSize: compositionResult.fileSize,
+        metadata: compositionResult.metadata
       }
     } catch (error) {
-      console.warn('⚠️ Remotion 渲染失败，使用预览模式:', error.message)
-      // 如果渲染失败，继续使用预览模式
+      console.warn('⚠️ 视频合成失败，尝试使用Remotion渲染:', error.message)
+
+      // 如果视频合成失败，回退到Remotion渲染
+      try {
+        console.log('🎬 尝试调用 Remotion 服务渲染视频...')
+
+        // 准备 Remotion 渲染参数
+        const remotionProps = {
+          videoUrl: renderData.video.url,
+          scenes: composition.scenes.map((scene, index) => ({
+            id: index + 1,
+            title: scene.title || `场景 ${index + 1}`,
+            content: scene.content || scene.text || '',
+            duration: scene.duration || 3,
+            materials: scene.materials || []
+          })),
+          template: composition.template.id,
+          metadata: {
+            title: composition.metadata.title || '生成的视频',
+            duration: composition.metadata.duration
+          }
+        }
+
+        onProgress(60)
+
+        // 调用 Remotion 渲染服务
+        const renderResult = await this.remotionService.renderVideo(
+          composition.template.id,
+          remotionProps,
+          {
+            width: composition.metadata.width || 1920,
+            height: composition.metadata.height || 1080,
+            fps: 30
+          }
+        )
+
+        onProgress(90)
+
+        console.log('✅ Remotion 渲染成功:', renderResult)
+
+        // 如果渲染成功，返回渲染后的视频URL
+        if (renderResult.videoUrl) {
+          return {
+            ...renderData,
+            video: {
+              ...renderData.video,
+              url: renderResult.videoUrl,
+              renderedUrl: renderResult.videoUrl
+            },
+            renderResult,
+            canExport: true,
+            previewReady: true,
+            isRendered: true
+          }
+        } else if (renderResult.renderId) {
+          console.log('⏳ 渲染任务已创建，ID:', renderResult.renderId)
+          return {
+            ...renderData,
+            renderResult,
+            canExport: true,
+            previewReady: true,
+            isRendered: false,
+            isRendering: true,
+            previewMode: true
+          }
+        }
+      } catch (remotionError) {
+        console.warn('⚠️ Remotion 渲染也失败，使用预览模式:', remotionError.message)
+      }
     }
 
     onProgress(100)
@@ -443,7 +480,7 @@ export class MasterAutoGenerationAgent {
       ...renderData,
       canExport: true,
       previewReady: true,
-      isRendered: false, // 标记为未渲染，仅预览
+      isRendered: false,
       previewMode: true
     }
   }
@@ -541,6 +578,88 @@ export class MasterAutoGenerationAgent {
         step: this.currentStep,
         progress: this.progress
       })
+    }
+  }
+
+  /**
+   * 完整视频合成
+   * 使用VideoCompositionService进行完整的视频合成流程
+   *
+   * @param {File} videoFile - 原始视频文件
+   * @param {Object} generationResult - 自动生成的结果
+   * @param {Object} options - 合成选项
+   * @param {Function} onProgress - 进度回调
+   * @returns {Promise<Object>} 合成结果
+   */
+  async composeFullVideo(videoFile, generationResult, options = {}, onProgress = null) {
+    try {
+      console.log('🎬 开始完整视频合成流程...')
+
+      // 准备场景数据
+      const scenes = generationResult.scenes.map((scene, index) => ({
+        id: index + 1,
+        title: scene.title || `场景 ${index + 1}`,
+        content: scene.content || scene.text || '',
+        subtitle: scene.subtitle || '',
+        duration: scene.duration || 5,
+        startTime: scene.startTime || index * 5,
+        endTime: scene.endTime || (index + 1) * 5,
+        materials: scene.materials || [],
+        keywords: scene.keywords || []
+      }))
+
+      // 准备模板配置
+      const template = {
+        id: generationResult.template?.id || 'modern-business',
+        name: generationResult.template?.name || 'Modern Business',
+        category: generationResult.template?.category || 'business'
+      }
+
+      // 合成选项
+      const compositionOptions = {
+        platform: options.platform || 'douyin',
+        pipConfig: {
+          position: 'bottom-right',
+          width: 480,
+          height: 270,
+          x: 1400,
+          y: 770,
+          borderRadius: 50,
+          borderWidth: 4,
+          borderColor: '#FFFFFF'
+        },
+        ...options
+      }
+
+      console.log('📋 合成配置:', {
+        scenes: scenes.length,
+        template: template.id,
+        platform: compositionOptions.platform
+      })
+
+      // 调用VideoCompositionService
+      const result = await videoCompositionService.composeVideo(
+        videoFile,
+        scenes,
+        template,
+        compositionOptions,
+        onProgress
+      )
+
+      console.log('✅ 视频合成完成:', result)
+
+      return {
+        success: true,
+        videoUrl: result.videoUrl,
+        videoBlob: result.videoBlob,
+        fileSize: result.fileSize,
+        duration: result.duration,
+        metadata: result.metadata,
+        canDownload: true
+      }
+    } catch (error) {
+      console.error('❌ 视频合成失败:', error)
+      throw error
     }
   }
 
