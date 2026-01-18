@@ -1,25 +1,15 @@
 <template>
   <header class="extractor-header" role="banner">
     <h2 id="keyframe-heading">🎬 关键帧提取</h2>
-    <p class="extractor-description">
-      智能检测视频中的重要帧，提取关键视觉内容用于PPT制作
-    </p>
+    <p class="extractor-description">智能检测视频中的重要帧，提取关键视觉内容用于PPT制作</p>
 
-    <div
-      v-if="isExtracting"
-      class="extraction-status"
-      role="status"
-      aria-live="polite"
-    >
+    <div v-if="isExtracting" class="extraction-status" role="status" aria-live="polite">
       <div class="status-indicator">
         <div class="loading-spinner"></div>
         <span>正在分析关键帧...</span>
       </div>
       <div class="progress-bar">
-        <div
-          class="progress-fill"
-          :style="{ width: extractionProgress + '%' }"
-        ></div>
+        <div class="progress-fill" :style="{ width: extractionProgress + '%' }"></div>
       </div>
       <div class="extraction-stats">
         <span>已检测: {{ detectedFramesCount }} 帧</span>
@@ -88,7 +78,9 @@ defineProps({
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .progress-bar {

@@ -224,7 +224,12 @@ export function createFadeAnimation(duration = 500, easing = 'easeOutQuad') {
  * @param {number} toScale - 结束缩放比例
  * @returns {Object} 动画配置
  */
-export function createScaleAnimation(duration = 500, easing = 'easeOutBack', fromScale = 0.8, toScale = 1.0) {
+export function createScaleAnimation(
+  duration = 500,
+  easing = 'easeOutBack',
+  fromScale = 0.8,
+  toScale = 1.0
+) {
   return {
     type: 'scale',
     duration,
@@ -242,7 +247,12 @@ export function createScaleAnimation(duration = 500, easing = 'easeOutBack', fro
  * @param {string} easing - 缓动函数名称
  * @returns {Object} 动画配置
  */
-export function createSlideAnimation(duration = 500, direction = 'left', distance = 50, easing = 'easeOutCubic') {
+export function createSlideAnimation(
+  duration = 500,
+  direction = 'left',
+  distance = 50,
+  easing = 'easeOutCubic'
+) {
   return {
     type: 'slide',
     duration,
@@ -348,8 +358,10 @@ export function applyCombinedEffects(ctx, progress, effects, drawCallback) {
         break
       case 'slide':
         const offset = effect.distance * (1 - progress)
-        const translateX = effect.direction === 'left' ? -offset : effect.direction === 'right' ? offset : 0
-        const translateY = effect.direction === 'top' ? -offset : effect.direction === 'bottom' ? offset : 0
+        const translateX =
+          effect.direction === 'left' ? -offset : effect.direction === 'right' ? offset : 0
+        const translateY =
+          effect.direction === 'top' ? -offset : effect.direction === 'bottom' ? offset : 0
         ctx.translate(translateX, translateY)
         break
     }

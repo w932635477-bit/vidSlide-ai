@@ -202,9 +202,12 @@ export default {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -222,7 +225,7 @@ export default {
 .bg-layer {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(0,123,255,0.03) 0%, rgba(52,199,89,0.03) 100%);
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(52, 199, 89, 0.03) 100%);
   backdrop-filter: blur(20px);
 }
 
@@ -251,7 +254,8 @@ export default {
 }
 
 @keyframes subtle-bg-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) scale(1);
   }
   50% {

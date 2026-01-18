@@ -5,33 +5,28 @@
       <button
         v-for="bg in backgroundPresets"
         :key="bg.id"
-        @click="$emit('select-background', bg)"
         class="bg-preset-btn"
         :class="{ active: selectedBackground.id === bg.id }"
         :aria-label="`设置为${bg.name}背景`"
+        @click="$emit('select-background', bg)"
       >
         <div class="bg-content">
-          <div
-            class="bg-preview"
-            :style="{ background: bg.style }"
-          ></div>
+          <div class="bg-preview" :style="{ background: bg.style }"></div>
           <span>{{ bg.name }}</span>
         </div>
       </button>
     </div>
 
     <div class="custom-background">
-      <label for="custom-bg-color" class="control-label">
-        自定义背景色:
-      </label>
+      <label for="custom-bg-color" class="control-label"> 自定义背景色: </label>
       <input
         id="custom-bg-color"
         :value="customBgColor"
-        @input="$emit('update:customBgColor', $event.target.value)"
-        @change="$emit('set-custom-background')"
         type="color"
         class="color-picker small"
         aria-label="选择自定义背景颜色"
+        @input="$emit('update:customBgColor', $event.target.value)"
+        @change="$emit('set-custom-background')"
       />
       <span class="color-value">{{ customBgColor.toUpperCase() }}</span>
     </div>
@@ -42,7 +37,10 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  selectedBackground: { type: Object, default: () => ({ id: 'transparent', name: '透明', style: 'transparent' }) },
+  selectedBackground: {
+    type: Object,
+    default: () => ({ id: 'transparent', name: '透明', style: 'transparent' })
+  },
   customBgColor: { type: String, default: '#ffffff' }
 })
 

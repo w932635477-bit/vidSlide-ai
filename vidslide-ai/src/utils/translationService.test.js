@@ -180,9 +180,10 @@ describe('TranslationService', () => {
       for (const lang of languages) {
         global.fetch.mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            trans_result: [{ src: '测试', dst: `translated-${lang}` }]
-          })
+          json: () =>
+            Promise.resolve({
+              trans_result: [{ src: '测试', dst: `translated-${lang}` }]
+            })
         })
 
         const result = await translationService.translate('测试', { to: lang })
@@ -213,11 +214,18 @@ describe('TranslationService', () => {
 
     it('应该处理超时错误', async () => {
       global.fetch.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({
-          ok: false,
-          status: 408,
-          statusText: 'Request Timeout'
-        }), 100))
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: false,
+                  status: 408,
+                  statusText: 'Request Timeout'
+                }),
+              100
+            )
+          )
       )
 
       await expect(translationService.translate('test')).rejects.toThrow()
@@ -252,9 +260,10 @@ describe('TranslationService', () => {
       // Mock concurrent responses
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          trans_result: [{ src: 'text', dst: '翻译' }]
-        })
+        json: () =>
+          Promise.resolve({
+            trans_result: [{ src: 'text', dst: '翻译' }]
+          })
       })
 
       const startTime = Date.now()
@@ -270,9 +279,10 @@ describe('TranslationService', () => {
     it('应该跟踪翻译统计', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          trans_result: [{ src: 'test', dst: '测试' }]
-        })
+        json: () =>
+          Promise.resolve({
+            trans_result: [{ src: 'test', dst: '测试' }]
+          })
       })
 
       await translationService.translate('test')
@@ -288,9 +298,10 @@ describe('TranslationService', () => {
     it('应该监控响应时间', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          trans_result: [{ src: 'test', dst: '测试' }]
-        })
+        json: () =>
+          Promise.resolve({
+            trans_result: [{ src: 'test', dst: '测试' }]
+          })
       })
 
       await translationService.translate('performance test')

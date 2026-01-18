@@ -6,9 +6,9 @@
       'medium-priority': requirement.priority === 'medium',
       'low-priority': requirement.priority === 'low'
     }"
-    @click="$emit('select', requirement)"
     role="button"
     tabindex="0"
+    @click="$emit('select', requirement)"
   >
     <!-- 需求图标 -->
     <div class="requirement-icon">
@@ -52,10 +52,7 @@
           >
             {{ keyword }}
           </span>
-          <span
-            v-if="requirement.relatedKeywords.length > 3"
-            class="keyword-more"
-          >
+          <span v-if="requirement.relatedKeywords.length > 3" class="keyword-more">
             +{{ requirement.relatedKeywords.length - 3 }}
           </span>
         </div>
@@ -72,37 +69,23 @@
     <div class="requirement-actions">
       <button
         class="action-btn search-btn"
-        @click.stop="$emit('search', requirement)"
         title="搜索相关素材"
+        @click.stop="$emit('search', requirement)"
       >
         🔍
       </button>
 
-      <button
-        class="action-btn add-btn"
-        @click.stop="$emit('add', requirement)"
-        title="添加到画布"
-      >
+      <button class="action-btn add-btn" title="添加到画布" @click.stop="$emit('add', requirement)">
         ➕
       </button>
 
-      <button
-        class="action-btn info-btn"
-        @click.stop="$emit('info', requirement)"
-        title="查看详情"
-      >
+      <button class="action-btn info-btn" title="查看详情" @click.stop="$emit('info', requirement)">
         ℹ️
       </button>
     </div>
 
     <!-- 选中状态指示器 -->
-    <div
-      v-if="isSelected"
-      class="selection-indicator"
-      aria-hidden="true"
-    >
-      ✓
-    </div>
+    <div v-if="isSelected" class="selection-indicator" aria-hidden="true">✓</div>
   </div>
 </template>
 
@@ -120,7 +103,7 @@ defineProps({
 
 defineEmits(['select', 'search', 'add', 'info'])
 
-const getTypeIcon = (type) => {
+const getTypeIcon = type => {
   const icons = {
     image: '🖼️',
     video: '🎬',
@@ -134,7 +117,7 @@ const getTypeIcon = (type) => {
   return icons[type] || '📄'
 }
 
-const getTypeDisplayName = (type) => {
+const getTypeDisplayName = type => {
   const names = {
     image: '图片',
     video: '视频',
@@ -148,7 +131,7 @@ const getTypeDisplayName = (type) => {
   return names[type] || type
 }
 
-const getPriorityDisplayName = (priority) => {
+const getPriorityDisplayName = priority => {
   const names = {
     high: '高优先级',
     medium: '中优先级',

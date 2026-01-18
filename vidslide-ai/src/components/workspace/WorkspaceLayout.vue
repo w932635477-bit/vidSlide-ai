@@ -40,9 +40,9 @@
     <!-- 底部时间轴 -->
     <div
       v-if="!hideTimeline"
+      ref="timelineContainer"
       class="jianying-timeline"
       :style="{ height: timelineHeight }"
-      ref="timelineContainer"
     >
       <slot name="timeline"></slot>
     </div>
@@ -142,7 +142,7 @@ const closeMobilePanels = () => {
 }
 
 // 时间轴拖拽调整
-const startResizeTimeline = (event) => {
+const startResizeTimeline = event => {
   if (!props.resizableTimeline) return
 
   isResizingTimeline.value = true
@@ -156,7 +156,7 @@ const startResizeTimeline = (event) => {
   document.body.style.userSelect = 'none'
 }
 
-const handleResizeTimeline = (event) => {
+const handleResizeTimeline = event => {
   if (!isResizingTimeline.value) return
 
   const deltaY = timelineStartY.value - event.clientY
@@ -177,7 +177,7 @@ const stopResizeTimeline = () => {
 }
 
 // 键盘快捷键
-const handleKeydown = (event) => {
+const handleKeydown = event => {
   // Alt + 1: 切换素材库
   if (event.altKey && event.key === '1') {
     event.preventDefault()
@@ -334,8 +334,9 @@ defineExpose({
 /* 平滑过渡 */
 .jianying-asset-panel,
 .jianying-property-panel {
-  transition: width var(--duration-base) var(--ease-out),
-              transform var(--duration-base) var(--ease-out);
+  transition:
+    width var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
 /* 折叠状态 */

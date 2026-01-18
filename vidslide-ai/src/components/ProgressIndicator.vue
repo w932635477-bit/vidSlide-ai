@@ -1,5 +1,5 @@
 <template>
-  <div class="progress-indicator" v-if="visible">
+  <div v-if="visible" class="progress-indicator">
     <!-- 进度模态框 -->
     <div class="progress-overlay" @click.self="handleCancel">
       <div class="progress-modal">
@@ -13,8 +13,8 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <circle cx="12" cy="12" r="10"/>
-              <polygon points="10,8 16,12 10,16 10,8"/>
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10,8 16,12 10,16 10,8" />
             </svg>
             <svg
               v-else-if="currentStage.icon === 'template'"
@@ -23,10 +23,10 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="9" y1="9" x2="15" y2="9"/>
-              <line x1="9" y1="12" x2="15" y2="12"/>
-              <line x1="9" y1="15" x2="15" y2="15"/>
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="9" y1="9" x2="15" y2="9" />
+              <line x1="9" y1="12" x2="15" y2="12" />
+              <line x1="9" y1="15" x2="15" y2="15" />
             </svg>
             <svg
               v-else-if="currentStage.icon === 'render'"
@@ -35,18 +35,24 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
-            <svg
-              v-else
-              class="animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
-              <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <svg v-else class="animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+                class="opacity-25"
+              />
+              <path
+                fill="currentColor"
+                class="opacity-75"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
           </div>
 
@@ -59,10 +65,7 @@
         <!-- 进度条 -->
         <div class="progress-bar-container">
           <div class="progress-bar">
-            <div
-              class="progress-fill"
-              :style="{ width: progressPercent + '%' }"
-            ></div>
+            <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
           </div>
           <div class="progress-text">
             <span class="progress-percent">{{ progressPercent }}%</span>
@@ -90,7 +93,7 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <polyline points="20,6 9,17 4,12"/>
+                <polyline points="20,6 9,17 4,12" />
               </svg>
               <span v-else-if="stage.status === 'active'">{{ index + 1 }}</span>
               <span v-else class="pending-dot"></span>
@@ -100,7 +103,7 @@
         </div>
 
         <!-- 详细信息 -->
-        <div class="progress-details" v-if="showDetails">
+        <div v-if="showDetails" class="progress-details">
           <div class="detail-item">
             <span class="detail-label">{{ t('workspace.progress.processedFrames') }}:</span>
             <span class="detail-value">{{ processedFrames }}/{{ totalFrames }}</span>
@@ -117,26 +120,19 @@
 
         <!-- 操作按钮 -->
         <div class="progress-actions">
-          <button
-            v-if="canCancel"
-            class="action-btn secondary"
-            @click="handleCancel"
-          >
+          <button v-if="canCancel" class="action-btn secondary" @click="handleCancel">
             {{ t('workspace.progress.cancel') }}
           </button>
 
-          <button
-            class="action-btn primary"
-            @click="toggleDetails"
-          >
-            {{ showDetails ? t('workspace.progress.hideDetails') : t('workspace.progress.showDetails') }}
+          <button class="action-btn primary" @click="toggleDetails">
+            {{
+              showDetails
+                ? t('workspace.progress.hideDetails')
+                : t('workspace.progress.showDetails')
+            }}
           </button>
 
-          <button
-            v-if="canMinimize"
-            class="action-btn secondary"
-            @click="handleMinimize"
-          >
+          <button v-if="canMinimize" class="action-btn secondary" @click="handleMinimize">
             {{ t('workspace.progress.minimize') }}
           </button>
         </div>
@@ -145,9 +141,9 @@
         <div v-if="hasError" class="error-state">
           <div class="error-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15"/>
-              <line x1="9" y1="9" x2="15" y2="15"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
           </div>
           <h4 class="error-title">{{ t('workspace.progress.errorTitle') }}</h4>
@@ -164,25 +160,33 @@
       <div class="mini-content">
         <div class="mini-icon">
           <svg class="animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
-            <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+              class="opacity-25"
+            />
+            <path
+              fill="currentColor"
+              class="opacity-75"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
         </div>
         <div class="mini-info">
           <div class="mini-title">{{ currentStage.title }}</div>
           <div class="mini-progress-bar">
-            <div
-              class="mini-progress-fill"
-              :style="{ width: progressPercent + '%' }"
-            ></div>
+            <div class="mini-progress-fill" :style="{ width: progressPercent + '%' }"></div>
           </div>
         </div>
         <button class="mini-restore-btn" @click="handleRestore">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15,3 21,3 21,9"/>
-            <polyline points="9,21 3,21 3,15"/>
-            <line x1="21" y1="3" x2="14" y2="10"/>
-            <line x1="3" y1="21" x2="10" y2="14"/>
+            <polyline points="15,3 21,3 21,9" />
+            <polyline points="9,21 3,21 3,15" />
+            <line x1="21" y1="3" x2="14" y2="10" />
+            <line x1="3" y1="21" x2="10" y2="14" />
           </svg>
         </button>
       </div>
@@ -260,12 +264,7 @@ const props = defineProps({
 })
 
 // 定义组件事件
-const emit = defineEmits([
-  'cancel',
-  'minimize',
-  'restore',
-  'retry'
-])
+const emit = defineEmits(['cancel', 'minimize', 'restore', 'retry'])
 
 // 响应式数据
 const showDetails = ref(false)
@@ -309,20 +308,27 @@ const progressPercent = computed(() => {
 })
 
 // 更新阶段状态
-watch(() => props.currentStageId, (newStageId) => {
-  stages.value.forEach(stage => {
-    if (stage.id === newStageId) {
-      stage.status = 'active'
-    } else if (stages.value.findIndex(s => s.id === stage.id) < stages.value.findIndex(s => s.id === newStageId)) {
-      stage.status = 'completed'
-    } else {
-      stage.status = 'pending'
-    }
-  })
-}, { immediate: true })
+watch(
+  () => props.currentStageId,
+  newStageId => {
+    stages.value.forEach(stage => {
+      if (stage.id === newStageId) {
+        stage.status = 'active'
+      } else if (
+        stages.value.findIndex(s => s.id === stage.id) <
+        stages.value.findIndex(s => s.id === newStageId)
+      ) {
+        stage.status = 'completed'
+      } else {
+        stage.status = 'pending'
+      }
+    })
+  },
+  { immediate: true }
+)
 
 // 工具函数
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   if (seconds <= 0) return t('workspace.progress.timeUnknown')
 
   const mins = Math.floor(seconds / 60)
@@ -360,8 +366,8 @@ const toggleDetails = () => {
 
 // 暴露方法给父组件
 defineExpose({
-  showDetails: () => showDetails.value = true,
-  hideDetails: () => showDetails.value = false,
+  showDetails: () => (showDetails.value = true),
+  hideDetails: () => (showDetails.value = false),
   minimize: () => handleMinimize(),
   restore: () => handleRestore()
 })

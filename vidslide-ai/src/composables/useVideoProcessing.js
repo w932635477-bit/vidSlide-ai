@@ -20,7 +20,7 @@ export function useVideoProcessing() {
   }
 
   // 处理视频上传
-  const handleVideoUpload = async (file) => {
+  const handleVideoUpload = async file => {
     try {
       console.log('📹 开始处理视频:', file.name)
 
@@ -46,7 +46,7 @@ export function useVideoProcessing() {
   }
 
   // 加载视频元数据
-  const loadVideoMetadata = (videoUrl) => {
+  const loadVideoMetadata = videoUrl => {
     return new Promise((resolve, reject) => {
       const video = document.createElement('video')
       video.src = videoUrl
@@ -67,7 +67,7 @@ export function useVideoProcessing() {
         resolve()
       }
 
-      video.onerror = (error) => {
+      video.onerror = error => {
         reject(new Error('视频元数据加载失败'))
       }
     })
@@ -93,7 +93,7 @@ export function useVideoProcessing() {
       // 提取关键帧
       console.log('🎬 提取关键帧...')
       const keyframes = await service.extractKeyframes({
-        onProgress: (progress) => {
+        onProgress: progress => {
           store.updateProgress(10 + progress * 0.3)
         }
       })
@@ -103,7 +103,7 @@ export function useVideoProcessing() {
       // 场景检测
       console.log('🎭 检测场景...')
       const scenes = await service.detectScenes({
-        onProgress: (progress) => {
+        onProgress: progress => {
           store.updateProgress(40 + progress * 0.2)
         }
       })
@@ -112,7 +112,7 @@ export function useVideoProcessing() {
       // 语音识别
       console.log('🎤 语音识别...')
       const transcript = await service.recognizeSpeech({
-        onProgress: (progress) => {
+        onProgress: progress => {
           store.updateProgress(60 + progress * 0.2)
         }
       })
@@ -122,7 +122,7 @@ export function useVideoProcessing() {
       // 关键词提取
       console.log('🔑 提取关键词...')
       const keywords = await service.extractKeywords(transcript, {
-        onProgress: (progress) => {
+        onProgress: progress => {
           store.updateProgress(80 + progress * 0.2)
         }
       })
@@ -154,7 +154,7 @@ export function useVideoProcessing() {
   }
 
   // 更新视频时间
-  const updateVideoTime = (time) => {
+  const updateVideoTime = time => {
     store.updateVideoTime(time)
   }
 

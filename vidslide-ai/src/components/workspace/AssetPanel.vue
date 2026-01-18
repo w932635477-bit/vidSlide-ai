@@ -7,9 +7,15 @@
     <!-- 搜索框 -->
     <div class="asset-search">
       <div class="search-input-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.35-4.35"/>
+        <svg
+          class="search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
         </svg>
         <input
           v-model="searchQuery"
@@ -18,14 +24,10 @@
           placeholder="搜索素材..."
           @input="handleSearch"
         />
-        <button
-          v-if="searchQuery"
-          class="clear-btn"
-          @click="clearSearch"
-        >
+        <button v-if="searchQuery" class="clear-btn" @click="clearSearch">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -46,14 +48,16 @@
     </div>
 
     <!-- 素材列表 -->
-    <div class="asset-list" ref="assetListRef">
+    <div ref="assetListRef" class="asset-list">
       <!-- 项目列表 -->
       <div v-if="activeTab === 'project'" class="asset-category">
         <div class="category-header">
           <h3 class="category-title">最近项目</h3>
-          <button class="jianying-btn-icon" @click="refreshProjects" title="刷新">
+          <button class="jianying-btn-icon" title="刷新" @click="refreshProjects">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+              <path
+                d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"
+              />
             </svg>
           </button>
         </div>
@@ -68,7 +72,9 @@
               <img v-if="project.thumbnail" :src="project.thumbnail" alt="" />
               <div v-else class="project-placeholder">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                  <path
+                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                  />
                 </svg>
               </div>
             </div>
@@ -84,9 +90,9 @@
       <div v-if="activeTab === 'video'" class="asset-category">
         <div class="category-header">
           <h3 class="category-title">视频素材</h3>
-          <button class="jianying-btn-icon" @click="uploadVideo" title="上传">
+          <button class="jianying-btn-icon" title="上传" @click="uploadVideo">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
           </button>
         </div>
@@ -112,9 +118,9 @@
       <div v-if="activeTab === 'image'" class="asset-category">
         <div class="category-header">
           <h3 class="category-title">图片素材</h3>
-          <button class="jianying-btn-icon" @click="uploadImage" title="上传">
+          <button class="jianying-btn-icon" title="上传" @click="uploadImage">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
           </button>
         </div>
@@ -136,9 +142,9 @@
       <div v-if="activeTab === 'audio'" class="asset-category">
         <div class="category-header">
           <h3 class="category-title">音频素材</h3>
-          <button class="jianying-btn-icon" @click="uploadAudio" title="上传">
+          <button class="jianying-btn-icon" title="上传" @click="uploadAudio">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
             </svg>
           </button>
         </div>
@@ -153,7 +159,9 @@
           >
             <div class="audio-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 18V5l12-2v13M9 13c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/>
+                <path
+                  d="M9 18V5l12-2v13M9 13c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"
+                />
               </svg>
             </div>
             <div class="audio-info">
@@ -168,9 +176,9 @@
       <div v-if="activeTab === 'text'" class="asset-category">
         <div class="category-header">
           <h3 class="category-title">文本样式</h3>
-          <button class="jianying-btn-icon" @click="addText" title="添加文本">
+          <button class="jianying-btn-icon" title="添加文本" @click="addText">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 5v14M5 12h14"/>
+              <path d="M12 5v14M5 12h14" />
             </svg>
           </button>
         </div>
@@ -234,13 +242,15 @@
 
     <!-- 底部一键生成按钮 -->
     <div class="asset-footer">
-      <button
-        class="auto-generate-btn"
-        :disabled="!canGenerate"
-        @click="handleAutoGenerate"
-      >
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      <button class="auto-generate-btn" :disabled="!canGenerate" @click="handleAutoGenerate">
+        <svg
+          class="btn-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
         </svg>
         <span class="btn-text">一键自动生成</span>
       </button>
@@ -331,30 +341,22 @@ const animations = [
 // 过滤后的列表
 const filteredProjects = computed(() => {
   if (!searchQuery.value) return props.projects
-  return props.projects.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return props.projects.filter(p => p.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
 
 const filteredVideos = computed(() => {
   if (!searchQuery.value) return props.videos
-  return props.videos.filter(v =>
-    v.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return props.videos.filter(v => v.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
 
 const filteredImages = computed(() => {
   if (!searchQuery.value) return props.images
-  return props.images.filter(i =>
-    i.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return props.images.filter(i => i.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
 
 const filteredAudios = computed(() => {
   if (!searchQuery.value) return props.audios
-  return props.audios.filter(a =>
-    a.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return props.audios.filter(a => a.name.toLowerCase().includes(searchQuery.value.toLowerCase()))
 })
 
 // 方法
@@ -370,7 +372,7 @@ const handleAutoGenerate = () => {
   emit('auto-generate')
 }
 
-const openProject = (project) => {
+const openProject = project => {
   emit('open-project', project)
 }
 
@@ -390,7 +392,7 @@ const addText = () => {
   emit('add-text')
 }
 
-const selectAsset = (asset) => {
+const selectAsset = asset => {
   emit('select-asset', asset)
 }
 
@@ -403,7 +405,7 @@ const handleDragStart = (event, asset) => {
   event.dataTransfer.setData('application/json', JSON.stringify(asset))
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   const d = new Date(date)
   const now = new Date()
   const diff = now - d
@@ -415,7 +417,7 @@ const formatDate = (date) => {
   return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
 
-const formatDuration = (seconds) => {
+const formatDuration = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`

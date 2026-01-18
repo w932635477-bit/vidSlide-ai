@@ -17,13 +17,13 @@
     <div
       class="playhead"
       :style="{ left: playheadPosition + 'px' }"
-      @mousedown="handlePlayheadDragStart"
       role="slider"
       :aria-valuenow="currentTime"
       :aria-valuemin="0"
       :aria-valuemax="duration"
       aria-label="播放头位置"
       tabindex="0"
+      @mousedown="handlePlayheadDragStart"
     >
       <div class="playhead-handle"></div>
       <div class="playhead-line"></div>
@@ -35,8 +35,8 @@
       :key="index"
       class="keyframe-mark"
       :style="{ left: timeToPosition(keyframe.time) + 'px' }"
-      @click="$emit('keyframe-click', keyframe)"
       :title="`关键帧 ${formatTime(keyframe.time)}s`"
+      @click="$emit('keyframe-click', keyframe)"
     >
       <div class="keyframe-diamond"></div>
     </div>
@@ -69,11 +69,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
-  'update:currentTime',
-  'playhead-drag-start',
-  'keyframe-click'
-])
+const emit = defineEmits(['update:currentTime', 'playhead-drag-start', 'keyframe-click'])
 
 // 计算标尺宽度
 const rulerWidth = computed(() => {
@@ -103,17 +99,17 @@ const timeMarks = computed(() => {
 })
 
 // 时间转换为位置
-const timeToPosition = (time) => {
+const timeToPosition = time => {
   return time * props.pixelsPerSecond * props.zoom
 }
 
 // 格式化时间显示
-const formatTime = (time) => {
+const formatTime = time => {
   return time.toFixed(1)
 }
 
 // 处理播放头拖拽
-const handlePlayheadDragStart = (event) => {
+const handlePlayheadDragStart = event => {
   emit('playhead-drag-start', event)
 }
 </script>

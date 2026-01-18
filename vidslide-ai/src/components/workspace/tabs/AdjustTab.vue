@@ -18,7 +18,7 @@ const store = useWorkspaceStore()
 const selectedTemplate = computed(() => store.template.selected)
 
 // 事件处理
-const handleSettingsUpdated = (settings) => {
+const handleSettingsUpdated = settings => {
   console.log('调整设置更新:', settings)
   store.updateTemplateSettings(settings)
 }

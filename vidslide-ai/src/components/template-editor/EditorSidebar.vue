@@ -27,8 +27,8 @@
           <input
             type="color"
             :value="theme.primaryColor"
-            @input="$emit('update-theme', 'primaryColor', $event.target.value)"
             class="color-input"
+            @input="$emit('update-theme', 'primaryColor', $event.target.value)"
           />
         </div>
         <div class="style-group">
@@ -36,13 +36,16 @@
           <input
             type="color"
             :value="theme.backgroundColor"
-            @input="$emit('update-theme', 'backgroundColor', $event.target.value)"
             class="color-input"
+            @input="$emit('update-theme', 'backgroundColor', $event.target.value)"
           />
         </div>
         <div class="style-group">
           <label class="style-label">字体</label>
-          <select :value="theme.fontFamily" @change="$emit('update-theme', 'fontFamily', $event.target.value)">
+          <select
+            :value="theme.fontFamily"
+            @change="$emit('update-theme', 'fontFamily', $event.target.value)"
+          >
             <option value="PingFang SC, -apple-system">苹方</option>
             <option value="Helvetica Neue, Arial">Helvetica</option>
             <option value="Microsoft YaHei">微软雅黑</option>
@@ -56,8 +59,8 @@
             min="0"
             max="20"
             :value="theme.borderRadius"
-            @input="$emit('update-theme', 'borderRadius', Number($event.target.value))"
             class="range-input"
+            @input="$emit('update-theme', 'borderRadius', Number($event.target.value))"
           />
           <span class="range-value">{{ theme.borderRadius }}px</span>
         </div>

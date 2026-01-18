@@ -4,51 +4,54 @@
 <!-- InfoCardTemplate 组件模板 -->
 <template>
   <div role="region" :aria-label="templateDescription">
-  <div class="info-card-template" :style="{ width: slideWidth + 'px', height: slideHeight + 'px' }">
-    <!-- 背景装饰 -->
-    <div class="background-decoration">
-      <div class="bg-shape shape-1"></div>
-      <div class="bg-shape shape-2"></div>
-      <div class="bg-shape shape-3"></div>
-    </div>
+    <div
+      class="info-card-template"
+      :style="{ width: slideWidth + 'px', height: slideHeight + 'px' }"
+    >
+      <!-- 背景装饰 -->
+      <div class="background-decoration">
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+        <div class="bg-shape shape-3"></div>
+      </div>
 
-    <!-- 标题区域 -->
-    <div class="title-section">
-      <h1 class="main-title">{{ title || '信息卡片展示' }}</h1>
-      <p class="subtitle">{{ subtitle || '清晰的数据呈现方式' }}</p>
-    </div>
+      <!-- 标题区域 -->
+      <div class="title-section">
+        <h1 class="main-title">{{ title || '信息卡片展示' }}</h1>
+        <p class="subtitle">{{ subtitle || '清晰的数据呈现方式' }}</p>
+      </div>
 
-    <!-- 卡片网格 -->
-    <div class="cards-grid" :class="`grid-${cardsPerRow}`">
-      <div
-        v-for="(card, index) in cards"
-        :key="card.id"
-        class="info-card"
-        :class="`card-${index + 1}`"
-        :style="getCardStyle(card)"
-      >
-        <!-- 卡片图标 -->
-        <div class="card-icon" :style="{ background: card.color }">
-          <component :is="getIconComponent(card.icon)" class="icon-svg" />
+      <!-- 卡片网格 -->
+      <div class="cards-grid" :class="`grid-${cardsPerRow}`">
+        <div
+          v-for="(card, index) in cards"
+          :key="card.id"
+          class="info-card"
+          :class="`card-${index + 1}`"
+          :style="getCardStyle(card)"
+        >
+          <!-- 卡片图标 -->
+          <div class="card-icon" :style="{ background: card.color }">
+            <component :is="getIconComponent(card.icon)" class="icon-svg" />
+          </div>
+
+          <!-- 卡片内容 -->
+          <div class="card-content">
+            <h3 class="card-title">{{ card.title }}</h3>
+            <div class="card-value">{{ card.value }}</div>
+            <p class="card-description">{{ card.description }}</p>
+          </div>
+
+          <!-- 卡片装饰 -->
+          <div class="card-decoration" :style="{ background: card.color }"></div>
         </div>
+      </div>
 
-        <!-- 卡片内容 -->
-        <div class="card-content">
-          <h3 class="card-title">{{ card.title }}</h3>
-          <div class="card-value">{{ card.value }}</div>
-          <p class="card-description">{{ card.description }}</p>
-        </div>
-
-        <!-- 卡片装饰 -->
-        <div class="card-decoration" :style="{ background: card.color }"></div>
+      <!-- 数据来源标注 -->
+      <div v-if="showSource" class="data-source">
+        <span>数据来源: {{ dataSource || 'VidSlide AI 分析' }}</span>
       </div>
     </div>
-
-    <!-- 数据来源标注 -->
-    <div v-if="showSource" class="data-source">
-      <span>数据来源: {{ dataSource || 'VidSlide AI 分析' }}</span>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -154,14 +157,22 @@ export default {
     },
     lightenColor(color, percent) {
       // 简单的颜色变亮函数
-      const num = parseInt(color.replace("#", ""), 16);
-      const amt = Math.round(2.55 * percent * 100);
-      const R = (num >> 16) + amt;
-      const G = (num >> 8 & 0x00FF) + amt;
-      const B = (num & 0x0000FF) + amt;
-      return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-        (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+      const num = parseInt(color.replace('#', ''), 16)
+      const amt = Math.round(2.55 * percent * 100)
+      const R = (num >> 16) + amt
+      const G = ((num >> 8) & 0x00ff) + amt
+      const B = (num & 0x0000ff) + amt
+      return (
+        '#' +
+        (
+          0x1000000 +
+          (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+          (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+          (B < 255 ? (B < 1 ? 0 : B) : 255)
+        )
+          .toString(16)
+          .slice(1)
+      )
     },
     getIconComponent(iconName) {
       // 返回对应的图标组件，这里暂时用简单的SVG
@@ -183,11 +194,14 @@ export default {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
   padding: 48px;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -206,7 +220,7 @@ export default {
 .bg-shape {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(0,123,255,0.04) 0%, rgba(0,123,255,0.02) 100%);
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.04) 0%, rgba(0, 123, 255, 0.02) 100%);
   backdrop-filter: blur(40px);
 }
 
@@ -235,7 +249,8 @@ export default {
 }
 
 @keyframes subtle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) scale(1);
   }
   50% {
@@ -301,7 +316,9 @@ export default {
   background: #ffffff;
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -310,7 +327,9 @@ export default {
 
 .info-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .card-icon {

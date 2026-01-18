@@ -30,7 +30,9 @@ export class BaiduSpeechService {
    */
   checkConfiguration() {
     if (!this.isConfigured) {
-      throw new Error('百度语音识别API未配置，请在 src/config/api-keys.js 中填入 apiKey 和 secretKey')
+      throw new Error(
+        '百度语音识别API未配置，请在 src/config/api-keys.js 中填入 apiKey 和 secretKey'
+      )
     }
   }
 
@@ -107,7 +109,7 @@ export class BaiduSpeechService {
           })
 
           const chunks = []
-          mediaRecorder.ondataavailable = (e) => {
+          mediaRecorder.ondataavailable = e => {
             if (e.data.size > 0) {
               chunks.push(e.data)
             }
@@ -131,13 +133,15 @@ export class BaiduSpeechService {
           }
 
           // 超时保护
-          setTimeout(() => {
-            if (mediaRecorder.state === 'recording') {
-              mediaRecorder.stop()
-              video.pause()
-            }
-          }, (video.duration + 5) * 1000)
-
+          setTimeout(
+            () => {
+              if (mediaRecorder.state === 'recording') {
+                mediaRecorder.stop()
+                video.pause()
+              }
+            },
+            (video.duration + 5) * 1000
+          )
         } catch (error) {
           URL.revokeObjectURL(video.src)
           reject(error)
@@ -175,7 +179,12 @@ export class BaiduSpeechService {
 
       try {
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-        console.log('Web Audio API 解码成功，采样率:', audioBuffer.sampleRate, '时长:', audioBuffer.duration)
+        console.log(
+          'Web Audio API 解码成功，采样率:',
+          audioBuffer.sampleRate,
+          '时长:',
+          audioBuffer.duration
+        )
 
         if (onProgress) onProgress(0.5)
 
@@ -210,7 +219,6 @@ export class BaiduSpeechService {
         if (onProgress) onProgress(1.0)
 
         return pcmData
-
       } catch (decodeError) {
         console.warn('Web Audio API 解码失败，尝试备用方法:', decodeError.message)
         await audioContext.close()
@@ -263,14 +271,13 @@ export class BaiduSpeechService {
 
           cleanup()
           reject(new Error('无法从视频中提取音频，请确保视频包含音频轨道'))
-
         } catch (error) {
           cleanup()
           reject(error)
         }
       }
 
-      video.onerror = (e) => {
+      video.onerror = e => {
         console.error('视频加载错误:', e)
         cleanup()
         reject(new Error('无法加载视频文件'))
@@ -313,13 +320,11 @@ export class BaiduSpeechService {
       const bufferSize = 4096
       const processor = audioContext.createScriptProcessor(bufferSize, 2, 2)
 
-      processor.onaudioprocess = (e) => {
+      processor.onaudioprocess = e => {
         if (!isRecording) return
 
         const left = e.inputBuffer.getChannelData(0)
-        const right = e.inputBuffer.numberOfChannels > 1
-          ? e.inputBuffer.getChannelData(1)
-          : left
+        const right = e.inputBuffer.numberOfChannels > 1 ? e.inputBuffer.getChannelData(1) : left
 
         // 检查是否有实际音频数据
         let hasAudio = false
@@ -421,7 +426,6 @@ export class BaiduSpeechService {
 
           console.log('音频提取完成，PCM数据大小:', pcmData.byteLength)
           resolve(pcmData)
-
         } catch (error) {
           reject(error)
         }
@@ -497,7 +501,7 @@ export class BaiduSpeechService {
 
       const chunks = []
 
-      mediaRecorder.ondataavailable = (e) => {
+      mediaRecorder.ondataavailable = e => {
         if (e.data.size > 0) {
           chunks.push(e.data)
         }
@@ -545,14 +549,13 @@ export class BaiduSpeechService {
 
           console.log('音频提取完成，PCM数据大小:', pcmData.byteLength)
           resolve(pcmData)
-
         } catch (error) {
           console.error('音频处理失败:', error)
           reject(error)
         }
       }
 
-      mediaRecorder.onerror = (e) => {
+      mediaRecorder.onerror = e => {
         reject(new Error('录制出错: ' + e.error))
       }
 
@@ -789,14 +792,20 @@ export class BaiduSpeechService {
     this.checkConfiguration()
 
     console.log('开始视频语音识别...')
-    console.log('视频文件:', videoFile.name, '大小:', (videoFile.size / 1024 / 1024).toFixed(2), 'MB')
+    console.log(
+      '视频文件:',
+      videoFile.name,
+      '大小:',
+      (videoFile.size / 1024 / 1024).toFixed(2),
+      'MB'
+    )
 
     try {
       // 步骤1: 提取音频 (0-40%)
       if (onProgress) onProgress(0.05)
       console.log('步骤1: 开始提取音频...')
 
-      const pcmData = await this.extractAudioAsPCM(videoFile, (p) => {
+      const pcmData = await this.extractAudioAsPCM(videoFile, p => {
         if (onProgress) onProgress(p * 0.4)
       })
 
@@ -810,7 +819,7 @@ export class BaiduSpeechService {
 
       // 步骤2: 语音识别 (40-100%)
       console.log('步骤2: 开始调用百度语音识别API...')
-      const text = await this.recognizeLongAudio(pcmData, (p) => {
+      const text = await this.recognizeLongAudio(pcmData, p => {
         if (onProgress) onProgress(0.4 + p * 0.6)
       })
 
@@ -838,9 +847,7 @@ export class BaiduSpeechService {
    * 检查是否支持
    */
   isSupported() {
-    return this.isConfigured &&
-           typeof AudioContext !== 'undefined' &&
-           typeof fetch !== 'undefined'
+    return this.isConfigured && typeof AudioContext !== 'undefined' && typeof fetch !== 'undefined'
   }
 
   /**

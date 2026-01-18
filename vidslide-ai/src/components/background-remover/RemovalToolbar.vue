@@ -4,18 +4,18 @@
     <div class="mode-controls">
       <div class="mode-toggle">
         <button
-          @click="$emit('update:useAIMode', true)"
           :class="{ active: useAIMode }"
           class="mode-btn ai-mode"
           aria-label="切换到AI自动模式"
+          @click="$emit('update:useAIMode', true)"
         >
           🤖 AI自动
         </button>
         <button
-          @click="$emit('update:useAIMode', false)"
           :class="{ active: !useAIMode }"
           class="mode-btn manual-mode"
           aria-label="切换到手动模式"
+          @click="$emit('update:useAIMode', false)"
         >
           🎨 手动调整
         </button>
@@ -25,11 +25,18 @@
       <div
         v-if="aiServiceStatus"
         class="service-status"
-        :class="{ available: aiServiceStatus.hasAvailableService, unavailable: !aiServiceStatus.hasAvailableService }"
+        :class="{
+          available: aiServiceStatus.hasAvailableService,
+          unavailable: !aiServiceStatus.hasAvailableService
+        }"
       >
         <span class="status-icon">{{ aiServiceStatus.hasAvailableService ? '🟢' : '🔴' }}</span>
         <span class="status-text">
-          {{ aiServiceStatus.hasAvailableService ? `可用服务: ${aiServiceStatus.availableServices.join(', ')}` : 'AI服务不可用' }}
+          {{
+            aiServiceStatus.hasAvailableService
+              ? `可用服务: ${aiServiceStatus.availableServices.join(', ')}`
+              : 'AI服务不可用'
+          }}
         </span>
       </div>
     </div>
@@ -37,43 +44,39 @@
     <!-- 手动模式控制 -->
     <div v-if="!useAIMode" class="manual-controls">
       <div class="background-controls">
-        <label for="bg-color-picker" class="control-label">
-          背景色选择:
-        </label>
+        <label for="bg-color-picker" class="control-label"> 背景色选择: </label>
         <input
           id="bg-color-picker"
           :value="selectedBgColor"
-          @input="$emit('update:selectedBgColor', $event.target.value)"
           type="color"
           class="color-picker"
           aria-label="选择要移除的背景颜色"
+          @input="$emit('update:selectedBgColor', $event.target.value)"
         />
         <span class="color-value">{{ selectedBgColor.toUpperCase() }}</span>
       </div>
 
       <div class="tolerance-controls">
-        <label for="tolerance-slider" class="control-label">
-          容差范围: {{ tolerance }}
-        </label>
+        <label for="tolerance-slider" class="control-label"> 容差范围: {{ tolerance }} </label>
         <input
           id="tolerance-slider"
           :value="tolerance"
-          @input="$emit('update:tolerance', Number($event.target.value))"
           type="range"
           min="0"
           max="255"
           step="5"
           class="tolerance-slider"
           aria-label="调整颜色匹配容差"
+          @input="$emit('update:tolerance', Number($event.target.value))"
         />
         <div class="tolerance-presets">
           <button
             v-for="preset in tolerancePresets"
             :key="preset.value"
-            @click="$emit('update:tolerance', preset.value)"
             class="preset-btn"
             :class="{ active: tolerance === preset.value }"
             :aria-label="`设置容差为${preset.label}`"
+            @click="$emit('update:tolerance', preset.value)"
           >
             {{ preset.label }}
           </button>
@@ -85,9 +88,9 @@
       <button
         v-if="useAIMode"
         class="tool-btn ai-btn"
-        @click="$emit('ai-remove')"
         :disabled="isProcessing || !aiServiceStatus?.hasAvailableService"
         aria-label="AI智能背景移除"
+        @click="$emit('ai-remove')"
       >
         AI智能移除
       </button>
@@ -95,27 +98,27 @@
       <button
         v-if="!useAIMode"
         class="tool-btn"
-        @click="$emit('manual-remove')"
         :disabled="isProcessing"
         aria-label="手动背景移除"
+        @click="$emit('manual-remove')"
       >
         手动移除
       </button>
 
       <button
         class="tool-btn"
-        @click="$emit('refine-edges')"
         :disabled="isProcessing || !hasProcessedImage"
         aria-label="优化边缘"
+        @click="$emit('refine-edges')"
       >
         优化边缘
       </button>
 
       <button
         class="tool-btn primary"
-        @click="$emit('apply')"
         :disabled="isProcessing || !hasProcessedImage"
         aria-label="应用背景移除"
+        @click="$emit('apply')"
       >
         应用移除
       </button>

@@ -1,87 +1,68 @@
 <template>
-  <div
-    class="smart-crop-tool"
-    role="region"
-    aria-labelledby="crop-tool-heading"
-  >
+  <div class="smart-crop-tool" role="region" aria-labelledby="crop-tool-heading">
     <!-- 智能裁切工具标题区域 -->
-    <header
-      class="tool-header"
-      role="banner"
-    >
+    <header class="tool-header" role="banner">
       <h2 id="crop-tool-heading">✂️ 智能裁切工具</h2>
-      <p class="tool-description">
-        AI智能分析图片构图，推荐最佳裁切比例和位置
-      </p>
+      <p class="tool-description">AI智能分析图片构图，推荐最佳裁切比例和位置</p>
 
       <!-- 工具状态显示 -->
-      <div
-        v-if="isProcessing"
-        class="processing-status"
-        role="status"
-        aria-live="polite"
-      >
+      <div v-if="isProcessing" class="processing-status" role="status" aria-live="polite">
         <div class="status-indicator">
           <div class="loading-spinner"></div>
           <span>{{ processingMessage }}</span>
         </div>
         <div class="progress-bar">
-          <div
-            class="progress-fill"
-            :style="{ width: processingProgress + '%' }"
-          ></div>
+          <div class="progress-fill" :style="{ width: processingProgress + '%' }"></div>
         </div>
       </div>
     </header>
 
     <!-- 图片上传区域 -->
-    <section
-      class="upload-section"
-      role="main"
-      aria-labelledby="upload-heading"
-    >
+    <section class="upload-section" role="main" aria-labelledby="upload-heading">
       <h3 id="upload-heading" class="sr-only">图片上传</h3>
 
       <div
         v-if="!currentImage"
         class="upload-area"
+        role="button"
+        tabindex="0"
+        aria-label="点击或拖拽上传图片"
         @dragover.prevent
         @drop.prevent="handleDrop"
         @click="$refs.fileInput.click()"
-        role="button"
-        tabindex="0"
         @keydown.enter="$refs.fileInput.click()"
         @keydown.space="$refs.fileInput.click()"
-        aria-label="点击或拖拽上传图片"
       >
         <div class="upload-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="9" cy="9" r="2"/>
-            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
           </svg>
         </div>
         <h3>上传图片开始智能裁切</h3>
         <p>支持 JPG、PNG 格式，最大 10MB</p>
-        <button class="upload-btn primary">
-          选择图片
-        </button>
+        <button class="upload-btn primary">选择图片</button>
 
         <input
           ref="fileInput"
           type="file"
           accept="image/*"
-          @change="handleFileSelect"
           class="file-input"
           aria-label="选择图片文件"
+          @change="handleFileSelect"
         />
       </div>
 
       <!-- 图片预览和裁切区域 -->
-      <div
-        v-else
-        class="crop-workspace"
-      >
+      <div v-else class="crop-workspace">
         <!-- 工具栏 -->
         <div class="crop-toolbar">
           <div class="aspect-controls">
@@ -89,8 +70,8 @@
             <select
               id="aspect-select"
               v-model="selectedAspectRatio"
-              @change="applyAspectRatio"
               class="aspect-select"
+              @change="applyAspectRatio"
             >
               <option value="free">自由裁切</option>
               <option value="1:1">1:1 (正方形)</option>
@@ -104,39 +85,62 @@
           <div class="tool-actions">
             <button
               class="tool-btn"
-              @click="autoCrop"
               :disabled="isProcessing"
               aria-label="AI智能裁切"
+              @click="autoCrop"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l4 4a1 1 0 0 0 1.4-1.4L11.42 11H19a1 1 0 0 0 0-2h-7.58l3.3-3.3a1 1 0 0 0 0-1.4Z"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M14.7 6.3a1 1 0 0 0-1.4 0l-4 4a1 1 0 0 0 0 1.4l4 4a1 1 0 0 0 1.4-1.4L11.42 11H19a1 1 0 0 0 0-2h-7.58l3.3-3.3a1 1 0 0 0 0-1.4Z"
+                />
               </svg>
               智能裁切
             </button>
 
             <button
               class="tool-btn"
-              @click="resetCrop"
               :disabled="!cropArea"
               aria-label="重置裁切区域"
+              @click="resetCrop"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                <path d="M21 3v5h-5"/>
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
-                <path d="M8 16H3v5"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M8 16H3v5" />
               </svg>
               重置
             </button>
 
             <button
               class="tool-btn primary"
-              @click="applyCrop"
               :disabled="!cropArea"
               aria-label="应用裁切"
+              @click="applyCrop"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12" />
               </svg>
               应用裁切
             </button>
@@ -150,28 +154,22 @@
             :width="canvasSize.width"
             :height="canvasSize.height"
             class="crop-canvas"
+            tabindex="0"
+            role="img"
+            :aria-label="`图片裁切画布，尺寸 ${canvasSize.width}x${canvasSize.height}`"
             @mousedown="startCrop"
             @mousemove="updateCrop"
             @mouseup="endCrop"
             @mouseleave="endCrop"
-            tabindex="0"
-            role="img"
-            :aria-label="`图片裁切画布，尺寸 ${canvasSize.width}x${canvasSize.height}`"
           ></canvas>
 
           <!-- 裁切遮罩 -->
-          <div
-            v-if="cropArea"
-            class="crop-overlay"
-          >
+          <div v-if="cropArea" class="crop-overlay">
             <!-- 遮罩区域 -->
-            <div
-              class="crop-mask top"
-              :style="{ height: cropArea.y + 'px' }"
-            ></div>
+            <div class="crop-mask top" :style="{ height: cropArea.y + 'px' }"></div>
             <div
               class="crop-mask bottom"
-              :style="{ height: (canvasSize.height - cropArea.y - cropArea.height) + 'px' }"
+              :style="{ height: canvasSize.height - cropArea.y - cropArea.height + 'px' }"
             ></div>
             <div
               class="crop-mask left"
@@ -184,10 +182,10 @@
             <div
               class="crop-mask right"
               :style="{
-                width: (canvasSize.width - cropArea.x - cropArea.width) + 'px',
+                width: canvasSize.width - cropArea.x - cropArea.width + 'px',
                 height: cropArea.height + 'px',
                 top: cropArea.y + 'px',
-                left: (cropArea.x + cropArea.width) + 'px'
+                left: cropArea.x + cropArea.width + 'px'
               }"
             ></div>
 
@@ -214,10 +212,7 @@
           </div>
 
           <!-- 裁切信息显示 -->
-          <div
-            v-if="cropArea"
-            class="crop-info"
-          >
+          <div v-if="cropArea" class="crop-info">
             <span>{{ cropArea.width }} × {{ cropArea.height }} 像素</span>
             <span>{{ selectedAspectRatio }}</span>
           </div>
@@ -225,19 +220,15 @@
 
         <!-- 操作按钮 -->
         <div class="workspace-actions">
-          <button
-            class="action-btn secondary"
-            @click="clearImage"
-            aria-label="清除图片重新上传"
-          >
+          <button class="action-btn secondary" aria-label="清除图片重新上传" @click="clearImage">
             🗑️ 清除图片
           </button>
 
           <button
             class="action-btn primary"
-            @click="downloadCroppedImage"
             :disabled="!croppedImageUrl"
             aria-label="下载裁切后的图片"
+            @click="downloadCroppedImage"
           >
             💾 下载图片
           </button>
@@ -298,11 +289,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits([
-  'image-loaded',
-  'crop-applied',
-  'image-cleared'
-])
+const emit = defineEmits(['image-loaded', 'crop-applied', 'image-cleared'])
 
 // Reactive data
 const currentImage = ref(null)
@@ -326,30 +313,30 @@ const imageOptimizer = ref(null)
 
 // Computed properties
 const aspectRatioMap = computed(() => ({
-  'free': null,
+  free: null,
   '1:1': 1,
-  '4:3': 4/3,
-  '16:9': 16/9,
-  '3:4': 3/4,
-  '9:16': 9/16
+  '4:3': 4 / 3,
+  '16:9': 16 / 9,
+  '3:4': 3 / 4,
+  '9:16': 9 / 16
 }))
 
 // Methods
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const file = event.target.files[0]
   if (file) {
     processImageFile(file)
   }
 }
 
-const handleDrop = (event) => {
+const handleDrop = event => {
   const file = event.dataTransfer.files[0]
   if (file) {
     processImageFile(file)
   }
 }
 
-const processImageFile = async (file) => {
+const processImageFile = async file => {
   // 验证文件
   if (!props.supportedFormats.includes(file.type)) {
     alert('不支持的文件格式，请选择 JPG、PNG 或 WebP 格式的图片')
@@ -376,7 +363,7 @@ const processImageFile = async (file) => {
   }
 }
 
-const loadImage = (imageUrl) => {
+const loadImage = imageUrl => {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -456,7 +443,7 @@ const autoCrop = async () => {
   }
 }
 
-const startCrop = (event) => {
+const startCrop = event => {
   if (isProcessing.value) return
 
   const rect = imageCanvas.value.getBoundingClientRect()
@@ -477,7 +464,7 @@ const startCrop = (event) => {
   }
 }
 
-const updateCrop = (event) => {
+const updateCrop = event => {
   if (!isDragging.value || !cropArea.value) return
 
   const rect = imageCanvas.value.getBoundingClientRect()
@@ -496,8 +483,14 @@ const updateCrop = (event) => {
     cropArea.value.y += deltaY
 
     // 限制在canvas范围内
-    cropArea.value.x = Math.max(0, Math.min(cropArea.value.x, canvasSize.value.width - cropArea.value.width))
-    cropArea.value.y = Math.max(0, Math.min(cropArea.value.y, canvasSize.value.height - cropArea.value.height))
+    cropArea.value.x = Math.max(
+      0,
+      Math.min(cropArea.value.x, canvasSize.value.width - cropArea.value.width)
+    )
+    cropArea.value.y = Math.max(
+      0,
+      Math.min(cropArea.value.y, canvasSize.value.height - cropArea.value.height)
+    )
   }
 
   dragStart.value = { x, y }
@@ -508,7 +501,7 @@ const endCrop = () => {
   resizeHandle.value = null
 }
 
-const startResize = (handle) => {
+const startResize = handle => {
   resizeHandle.value = handle
   isDragging.value = true
 }
@@ -591,8 +584,14 @@ const applyAspectRatio = () => {
     cropArea.value.y = centerY - cropArea.value.height / 2
 
     // 限制在canvas范围内
-    cropArea.value.x = Math.max(0, Math.min(cropArea.value.x, canvasSize.value.width - cropArea.value.width))
-    cropArea.value.y = Math.max(0, Math.min(cropArea.value.y, canvasSize.value.height - cropArea.value.height))
+    cropArea.value.x = Math.max(
+      0,
+      Math.min(cropArea.value.x, canvasSize.value.width - cropArea.value.width)
+    )
+    cropArea.value.y = Math.max(
+      0,
+      Math.min(cropArea.value.y, canvasSize.value.height - cropArea.value.height)
+    )
   }
 }
 
@@ -617,8 +616,14 @@ const applyCrop = () => {
 
     ctx.drawImage(
       currentImage.value,
-      sourceX, sourceY, sourceWidth, sourceHeight,
-      0, 0, sourceWidth, sourceHeight
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      sourceWidth,
+      sourceHeight
     )
 
     croppedImageUrl.value = canvas.toDataURL('image/jpeg', 0.9)
@@ -628,7 +633,6 @@ const applyCrop = () => {
       originalSize: originalSize.value,
       croppedSize: { width: sourceWidth, height: sourceHeight }
     })
-
   } catch (error) {
     console.error('应用裁切失败:', error)
     alert('裁切失败，请重试')
@@ -700,7 +704,7 @@ onMounted(async () => {
 })
 
 // 智能裁剪分析
-const performSmartCropAnalysis = async (file) => {
+const performSmartCropAnalysis = async file => {
   if (!aiServicesReady.value || !smartCropService.value) {
     console.log('AI服务未就绪，跳过智能分析')
     return
@@ -768,7 +772,6 @@ const performSmartCropAnalysis = async (file) => {
       cropArea: cropArea.value,
       aiAnalysis: true
     })
-
   } catch (error) {
     console.error('智能裁剪分析失败:', error)
     processingMessage.value = '智能分析失败，使用手动模式'
@@ -782,7 +785,6 @@ const performSmartCropAnalysis = async (file) => {
       confidence: 0.5
     }
     cropArea.value = defaultCropArea
-
   } finally {
     isProcessing.value = false
   }
@@ -802,7 +804,7 @@ const triggerSmartCrop = async () => {
   canvas.height = currentImage.value.height
   ctx.drawImage(currentImage.value, 0, 0)
 
-  canvas.toBlob(async (blob) => {
+  canvas.toBlob(async blob => {
     const mockFile = new File([blob], 'smart-crop-analysis.png', { type: 'image/png' })
     await performSmartCropAnalysis(mockFile)
   })
@@ -887,8 +889,12 @@ defineExpose({
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .progress-bar {
@@ -1125,14 +1131,50 @@ defineExpose({
   pointer-events: auto;
 }
 
-.crop-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
-.crop-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
-.crop-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
-.crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
-.crop-handle.n { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
-.crop-handle.s { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
-.crop-handle.w { top: 50%; left: -6px; transform: translateY(-50%); cursor: w-resize; }
-.crop-handle.e { top: 50%; right: -6px; transform: translateY(-50%); cursor: e-resize; }
+.crop-handle.nw {
+  top: -6px;
+  left: -6px;
+  cursor: nw-resize;
+}
+.crop-handle.ne {
+  top: -6px;
+  right: -6px;
+  cursor: ne-resize;
+}
+.crop-handle.sw {
+  bottom: -6px;
+  left: -6px;
+  cursor: sw-resize;
+}
+.crop-handle.se {
+  bottom: -6px;
+  right: -6px;
+  cursor: se-resize;
+}
+.crop-handle.n {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: n-resize;
+}
+.crop-handle.s {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: s-resize;
+}
+.crop-handle.w {
+  top: 50%;
+  left: -6px;
+  transform: translateY(-50%);
+  cursor: w-resize;
+}
+.crop-handle.e {
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  cursor: e-resize;
+}
 
 /* 裁切信息 */
 .crop-info {

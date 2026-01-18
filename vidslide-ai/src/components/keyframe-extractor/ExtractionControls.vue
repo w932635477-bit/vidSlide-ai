@@ -1,34 +1,16 @@
 <template>
   <div class="extraction-controls">
-    <button
-      v-if="!isExtracting"
-      class="control-btn primary"
-      @click="$emit('start-extraction')"
-    >
+    <button v-if="!isExtracting" class="control-btn primary" @click="$emit('start-extraction')">
       🎬 开始提取
     </button>
 
-    <button
-      v-else
-      class="control-btn danger"
-      @click="$emit('stop-extraction')"
-    >
-      ⏸️ 停止提取
-    </button>
+    <button v-else class="control-btn danger" @click="$emit('stop-extraction')">⏸️ 停止提取</button>
 
-    <button
-      class="control-btn"
-      :disabled="!hasKeyframes"
-      @click="$emit('export-keyframes')"
-    >
+    <button class="control-btn" :disabled="!hasKeyframes" @click="$emit('export-keyframes')">
       💾 导出关键帧
     </button>
 
-    <button
-      class="control-btn danger"
-      :disabled="!hasKeyframes"
-      @click="$emit('clear-all')"
-    >
+    <button class="control-btn danger" :disabled="!hasKeyframes" @click="$emit('clear-all')">
       🗑️ 清除全部
     </button>
   </div>

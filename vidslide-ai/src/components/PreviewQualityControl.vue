@@ -18,8 +18,8 @@
             :key="option.value"
             class="resolution-btn"
             :class="{ active: currentResolution === option.value }"
-            @click="setResolution(option.value)"
             :disabled="!option.available"
+            @click="setResolution(option.value)"
           >
             {{ option.label }}
             <span v-if="!option.available" class="unavailable-hint">(不可用)</span>
@@ -35,14 +35,14 @@
         </label>
         <div class="quality-slider">
           <input
+            v-model="currentQuality"
             type="range"
             min="10"
             max="100"
             step="10"
-            v-model="currentQuality"
-            @input="updateQuality"
             class="quality-range"
             aria-label="渲染质量调节滑块"
+            @input="updateQuality"
           />
           <div class="quality-marks">
             <span>低</span>
@@ -79,29 +79,29 @@
         <label class="section-label">优化设置</label>
         <div class="optimization-options">
           <label class="option-item">
-          <input
-            type="checkbox"
-            v-model="optimizations.hardwareAcceleration"
-            @change="updateOptimizations"
-            aria-label="硬件加速"
-          />
+            <input
+              v-model="optimizations.hardwareAcceleration"
+              type="checkbox"
+              aria-label="硬件加速"
+              @change="updateOptimizations"
+            />
             <span class="option-label">硬件加速</span>
           </label>
           <label class="option-item">
             <input
-              type="checkbox"
               v-model="optimizations.multithreaded"
-              @change="updateOptimizations"
+              type="checkbox"
               aria-label="多线程渲染"
+              @change="updateOptimizations"
             />
             <span class="option-label">多线程渲染</span>
           </label>
           <label class="option-item">
             <input
-              type="checkbox"
               v-model="optimizations.memoryOptimization"
-              @change="updateOptimizations"
+              type="checkbox"
               aria-label="内存优化"
+              @change="updateOptimizations"
             />
             <span class="option-label">内存优化</span>
           </label>
@@ -134,7 +134,11 @@
         <div class="advanced-settings">
           <div class="setting-item">
             <label class="setting-label">缓存大小:</label>
-            <select v-model="advancedSettings.cacheSize" @change="updateAdvancedSettings" aria-label="缓存大小设置">
+            <select
+              v-model="advancedSettings.cacheSize"
+              aria-label="缓存大小设置"
+              @change="updateAdvancedSettings"
+            >
               <option value="64">64MB</option>
               <option value="128">128MB</option>
               <option value="256">256MB</option>
@@ -143,7 +147,11 @@
           </div>
           <div class="setting-item">
             <label class="setting-label">渲染线程数:</label>
-            <select v-model="advancedSettings.renderThreads" @change="updateAdvancedSettings" aria-label="渲染线程数设置">
+            <select
+              v-model="advancedSettings.renderThreads"
+              aria-label="渲染线程数设置"
+              @change="updateAdvancedSettings"
+            >
               <option value="1">1个</option>
               <option value="2">2个</option>
               <option value="4">4个</option>
@@ -156,12 +164,8 @@
 
     <!-- 重置按钮 -->
     <div class="control-footer">
-      <button class="reset-btn" @click="resetToDefaults">
-        重置为默认设置
-      </button>
-      <button class="apply-btn" @click="applySettings" :disabled="!hasChanges">
-        应用设置
-      </button>
+      <button class="reset-btn" @click="resetToDefaults">重置为默认设置</button>
+      <button class="apply-btn" :disabled="!hasChanges" @click="applySettings">应用设置</button>
     </div>
   </div>
 </template>
@@ -191,21 +195,33 @@ const qualityPresets = ref([
     name: '性能优先',
     description: '流畅播放，较低质量',
     icon: '⚡',
-    settings: { resolution: '720p', quality: 60, optimizations: { hardwareAcceleration: true, multithreaded: false, memoryOptimization: true } }
+    settings: {
+      resolution: '720p',
+      quality: 60,
+      optimizations: { hardwareAcceleration: true, multithreaded: false, memoryOptimization: true }
+    }
   },
   {
     id: 'balanced',
     name: '平衡模式',
     description: '质量与性能平衡',
     icon: '⚖️',
-    settings: { resolution: '1080p', quality: 80, optimizations: { hardwareAcceleration: true, multithreaded: true, memoryOptimization: true } }
+    settings: {
+      resolution: '1080p',
+      quality: 80,
+      optimizations: { hardwareAcceleration: true, multithreaded: true, memoryOptimization: true }
+    }
   },
   {
     id: 'quality',
     name: '质量优先',
     description: '最佳画质，高性能需求',
     icon: '🎯',
-    settings: { resolution: '1440p', quality: 100, optimizations: { hardwareAcceleration: true, multithreaded: true, memoryOptimization: false } }
+    settings: {
+      resolution: '1440p',
+      quality: 100,
+      optimizations: { hardwareAcceleration: true, multithreaded: true, memoryOptimization: false }
+    }
   }
 ])
 
@@ -269,7 +285,7 @@ const cpuClass = computed(() => {
 })
 
 // 方法
-const setResolution = (resolution) => {
+const setResolution = resolution => {
   if (currentResolution.value !== resolution) {
     currentResolution.value = resolution
     hasChanges.value = true
@@ -292,7 +308,7 @@ const updateAdvancedSettings = () => {
   emit('advanced-settings-change', { ...advancedSettings.value })
 }
 
-const applyPreset = (preset) => {
+const applyPreset = preset => {
   currentPreset.value = preset.id
   currentResolution.value = preset.settings.resolution
   currentQuality.value = preset.settings.quality
@@ -354,9 +370,13 @@ const stopPerformanceMonitoring = () => {
 }
 
 // 监听变化
-watch([currentResolution, currentQuality, optimizations, advancedSettings], () => {
-  hasChanges.value = true
-}, { deep: true })
+watch(
+  [currentResolution, currentQuality, optimizations, advancedSettings],
+  () => {
+    hasChanges.value = true
+  },
+  { deep: true }
+)
 
 // 生命周期
 onMounted(() => {
@@ -599,7 +619,7 @@ const emit = defineEmits([
   gap: 12px;
 }
 
-.option-item input[type="checkbox"] {
+.option-item input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: #007aff;

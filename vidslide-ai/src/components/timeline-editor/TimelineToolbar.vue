@@ -5,14 +5,12 @@
       <el-button-group>
         <el-button
           :icon="isPlaying ? 'VideoPause' : 'VideoPlay'"
-          @click="$emit('toggle-play')"
           :aria-label="isPlaying ? '暂停' : '播放'"
+          @click="$emit('toggle-play')"
         >
           {{ isPlaying ? '暂停' : '播放' }}
         </el-button>
-        <el-button icon="RefreshLeft" @click="$emit('reset')" aria-label="重置">
-          重置
-        </el-button>
+        <el-button icon="RefreshLeft" aria-label="重置" @click="$emit('reset')"> 重置 </el-button>
       </el-button-group>
     </div>
 
@@ -22,13 +20,13 @@
       <el-input-number
         id="current-time-input"
         :model-value="currentTime"
-        @update:model-value="$emit('update:currentTime', $event)"
         :min="0"
         :max="duration"
         :step="0.1"
         :precision="2"
         size="small"
         style="width: 120px"
+        @update:model-value="$emit('update:currentTime', $event)"
       />
       <span class="time-separator">/</span>
       <span class="duration-display">{{ formatTime(duration) }}s</span>
@@ -40,31 +38,26 @@
       <el-slider
         id="zoom-slider"
         :model-value="zoom"
-        @update:model-value="$emit('update:zoom', $event)"
         :min="0.5"
         :max="3"
         :step="0.1"
         style="width: 150px"
+        @update:model-value="$emit('update:zoom', $event)"
       />
       <span class="zoom-value">{{ Math.round(zoom * 100) }}%</span>
     </div>
 
     <!-- 轨道控制 -->
     <div class="toolbar-section track-controls">
-      <el-button
-        type="primary"
-        icon="Plus"
-        @click="$emit('add-track')"
-        size="small"
-      >
+      <el-button type="primary" icon="Plus" size="small" @click="$emit('add-track')">
         添加轨道
       </el-button>
       <el-button
         :disabled="!canDeleteTrack"
         type="danger"
         icon="Delete"
-        @click="$emit('delete-track')"
         size="small"
+        @click="$emit('delete-track')"
       >
         删除轨道
       </el-button>
@@ -81,13 +74,13 @@
       <el-input-number
         v-if="snapEnabled"
         :model-value="snapInterval"
-        @update:model-value="$emit('update:snapInterval', $event)"
         :min="0.1"
         :max="1"
         :step="0.1"
         :precision="1"
         size="small"
         style="width: 100px"
+        @update:model-value="$emit('update:snapInterval', $event)"
       >
         <template #suffix>s</template>
       </el-input-number>
@@ -138,7 +131,7 @@ defineEmits([
   'update:snapInterval'
 ])
 
-const formatTime = (time) => {
+const formatTime = time => {
   return time.toFixed(2)
 }
 </script>

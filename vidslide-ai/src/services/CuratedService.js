@@ -181,8 +181,10 @@ class CuratedService {
   getStats() {
     return {
       ...this.stats,
-      cacheHitRate: this.stats.curatedRequests > 0 ? this.stats.cacheHits / this.stats.curatedRequests : 0,
-      apiCallRate: this.stats.curatedRequests > 0 ? this.stats.apiCalls / this.stats.curatedRequests : 0
+      cacheHitRate:
+        this.stats.curatedRequests > 0 ? this.stats.cacheHits / this.stats.curatedRequests : 0,
+      apiCallRate:
+        this.stats.curatedRequests > 0 ? this.stats.apiCalls / this.stats.curatedRequests : 0
     }
   }
 }

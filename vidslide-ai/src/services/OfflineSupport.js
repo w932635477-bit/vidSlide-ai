@@ -177,9 +177,7 @@ class OfflineSupport {
     return {
       isOnline: this.isOnline,
       offlineStartTime: this.offlineStartTime,
-      currentOfflineDuration: this.offlineStartTime
-        ? Date.now() - this.offlineStartTime
-        : 0
+      currentOfflineDuration: this.offlineStartTime ? Date.now() - this.offlineStartTime : 0
     }
   }
 

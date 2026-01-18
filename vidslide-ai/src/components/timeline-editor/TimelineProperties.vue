@@ -1,26 +1,21 @@
 <template>
-  <div class="timeline-properties" v-if="selectedItem">
+  <div v-if="selectedItem" class="timeline-properties">
     <div class="properties-header">
       <h3>{{ getItemTitle() }}</h3>
-      <el-button
-        size="small"
-        icon="Close"
-        @click="$emit('close')"
-        title="关闭属性面板"
-      />
+      <el-button size="small" icon="Close" title="关闭属性面板" @click="$emit('close')" />
     </div>
 
     <el-scrollbar class="properties-content">
       <!-- 片段属性 -->
       <div v-if="selectedItem.type === 'clip'" class="property-section">
         <h4>基本信息</h4>
-        
+
         <div class="property-field">
           <label>名称</label>
           <el-input
             :model-value="selectedItem.data.name"
-            @update:model-value="updateProperty('name', $event)"
             size="small"
+            @update:model-value="updateProperty('name', $event)"
           />
         </div>
 
@@ -33,11 +28,11 @@
           <label>开始时间 (秒)</label>
           <el-input-number
             :model-value="selectedItem.data.startTime"
-            @update:model-value="updateProperty('startTime', $event)"
             :min="0"
             :step="0.1"
             :precision="2"
             size="small"
+            @update:model-value="updateProperty('startTime', $event)"
           />
         </div>
 
@@ -45,11 +40,11 @@
           <label>结束时间 (秒)</label>
           <el-input-number
             :model-value="selectedItem.data.endTime"
-            @update:model-value="updateProperty('endTime', $event)"
             :min="selectedItem.data.startTime + 0.1"
             :step="0.1"
             :precision="2"
             size="small"
+            @update:model-value="updateProperty('endTime', $event)"
           />
         </div>
 
@@ -69,11 +64,11 @@
           <label>时间 (秒)</label>
           <el-input-number
             :model-value="selectedItem.data.time"
-            @update:model-value="updateProperty('time', $event)"
             :min="0"
             :step="0.1"
             :precision="2"
             size="small"
+            @update:model-value="updateProperty('time', $event)"
           />
         </div>
 
@@ -81,8 +76,8 @@
           <label>属性</label>
           <el-select
             :model-value="selectedItem.data.property"
-            @update:model-value="updateProperty('property', $event)"
             size="small"
+            @update:model-value="updateProperty('property', $event)"
           >
             <el-option label="位置 X" value="x" />
             <el-option label="位置 Y" value="y" />
@@ -96,10 +91,10 @@
           <label>值</label>
           <el-input-number
             :model-value="selectedItem.data.value"
-            @update:model-value="updateProperty('value', $event)"
             :step="0.1"
             :precision="2"
             size="small"
+            @update:model-value="updateProperty('value', $event)"
           />
         </div>
 
@@ -107,8 +102,8 @@
           <label>缓动函数</label>
           <el-select
             :model-value="selectedItem.data.easing || 'linear'"
-            @update:model-value="updateProperty('easing', $event)"
             size="small"
+            @update:model-value="updateProperty('easing', $event)"
           >
             <el-option label="线性" value="linear" />
             <el-option label="缓入" value="ease-in" />
@@ -128,10 +123,10 @@
           <label>位置 X</label>
           <el-slider
             :model-value="selectedItem.data.transform.x || 0"
-            @update:model-value="updateTransform('x', $event)"
             :min="-1000"
             :max="1000"
             :step="1"
+            @update:model-value="updateTransform('x', $event)"
           />
         </div>
 
@@ -139,10 +134,10 @@
           <label>位置 Y</label>
           <el-slider
             :model-value="selectedItem.data.transform.y || 0"
-            @update:model-value="updateTransform('y', $event)"
             :min="-1000"
             :max="1000"
             :step="1"
+            @update:model-value="updateTransform('y', $event)"
           />
         </div>
 
@@ -150,10 +145,10 @@
           <label>缩放</label>
           <el-slider
             :model-value="selectedItem.data.transform.scale || 1"
-            @update:model-value="updateTransform('scale', $event)"
             :min="0.1"
             :max="3"
             :step="0.1"
+            @update:model-value="updateTransform('scale', $event)"
           />
         </div>
 
@@ -161,10 +156,10 @@
           <label>旋转 (度)</label>
           <el-slider
             :model-value="selectedItem.data.transform.rotation || 0"
-            @update:model-value="updateTransform('rotation', $event)"
             :min="-180"
             :max="180"
             :step="1"
+            @update:model-value="updateTransform('rotation', $event)"
           />
         </div>
 
@@ -172,10 +167,10 @@
           <label>不透明度</label>
           <el-slider
             :model-value="selectedItem.data.transform.opacity || 1"
-            @update:model-value="updateTransform('opacity', $event)"
             :min="0"
             :max="1"
             :step="0.01"
+            @update:model-value="updateTransform('opacity', $event)"
           />
         </div>
       </div>
@@ -183,29 +178,28 @@
       <!-- 关键帧管理 -->
       <div class="property-section">
         <h4>关键帧</h4>
-        
+
         <el-button
           type="primary"
           size="small"
           icon="Plus"
-          @click="$emit('add-keyframe')"
           style="width: 100%"
+          @click="$emit('add-keyframe')"
         >
           在当前时间添加关键帧
         </el-button>
 
-        <div v-if="selectedItem.data.keyframes && selectedItem.data.keyframes.length > 0" class="keyframe-list">
+        <div
+          v-if="selectedItem.data.keyframes && selectedItem.data.keyframes.length > 0"
+          class="keyframe-list"
+        >
           <div
             v-for="(kf, index) in selectedItem.data.keyframes"
             :key="index"
             class="keyframe-item"
           >
             <span>{{ kf.property }} @ {{ kf.time.toFixed(2) }}s</span>
-            <el-button
-              size="small"
-              icon="Delete"
-              @click="$emit('delete-keyframe', index)"
-            />
+            <el-button size="small" icon="Delete" @click="$emit('delete-keyframe', index)" />
           </div>
         </div>
       </div>
@@ -229,12 +223,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits([
-  'update-property',
-  'close',
-  'add-keyframe',
-  'delete-keyframe'
-])
+const emit = defineEmits(['update-property', 'close', 'add-keyframe', 'delete-keyframe'])
 
 const getItemTitle = () => {
   if (!props.selectedItem) return ''
@@ -247,7 +236,7 @@ const getItemTitle = () => {
   return '属性'
 }
 
-const getClipTypeLabel = (type) => {
+const getClipTypeLabel = type => {
   const labels = {
     video: '视频',
     audio: '音频',
@@ -263,8 +252,8 @@ const updateProperty = (key, value) => {
 }
 
 const updateTransform = (key, value) => {
-  emit('update-property', { 
-    key: 'transform', 
+  emit('update-property', {
+    key: 'transform',
     value: {
       ...props.selectedItem.data.transform,
       [key]: value

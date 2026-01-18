@@ -187,7 +187,11 @@ export class TextValidator extends BaseValidator {
       }
     }
 
-    if (!inRecommendedRange && fontSize >= fontSizeConstraints.min && fontSize <= fontSizeConstraints.max) {
+    if (
+      !inRecommendedRange &&
+      fontSize >= fontSizeConstraints.min &&
+      fontSize <= fontSizeConstraints.max
+    ) {
       this.addWarning(warnings, {
         type: 'FONT_SIZE_NOT_RECOMMENDED',
         field: 'fontSize',

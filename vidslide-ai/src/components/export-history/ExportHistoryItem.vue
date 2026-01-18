@@ -1,11 +1,7 @@
 <template>
   <div class="history-item" :class="{ selected: isSelected }">
     <div class="item-checkbox">
-      <input
-        type="checkbox"
-        :checked="isSelected"
-        @change="$emit('toggle-select', item.id)"
-      />
+      <input type="checkbox" :checked="isSelected" @change="$emit('toggle-select', item.id)" />
     </div>
 
     <div class="item-info">
@@ -41,36 +37,32 @@
         </div>
       </div>
 
-      <div class="item-details" v-if="item.errorMessage">
-        <div class="error-message">
-          <strong>错误信息:</strong> {{ item.errorMessage }}
-        </div>
+      <div v-if="item.errorMessage" class="item-details">
+        <div class="error-message"><strong>错误信息:</strong> {{ item.errorMessage }}</div>
       </div>
     </div>
 
     <div class="item-actions">
-      <button class="view-details-btn" @click="$emit('view-details', item)" title="查看详情">
+      <button class="view-details-btn" title="查看详情" @click="$emit('view-details', item)">
         📋
       </button>
       <button
         class="download-btn"
-        @click="$emit('download', item)"
         :disabled="item.status !== 'success'"
         title="下载"
+        @click="$emit('download', item)"
       >
         📥
       </button>
       <button
         class="retry-btn"
-        @click="$emit('retry', item)"
         :disabled="item.status === 'processing'"
         title="重新导出"
+        @click="$emit('retry', item)"
       >
         🔄
       </button>
-      <button class="delete-btn" @click="$emit('delete', item)" title="删除">
-        🗑️
-      </button>
+      <button class="delete-btn" title="删除" @click="$emit('delete', item)">🗑️</button>
     </div>
   </div>
 </template>
@@ -161,7 +153,7 @@ const formattedDuration = computed(() => {
   margin-right: 16px;
 }
 
-.item-checkbox input[type="checkbox"] {
+.item-checkbox input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: #007aff;

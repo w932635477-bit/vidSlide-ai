@@ -105,12 +105,20 @@ class StatsService {
     return {
       overall: {
         totalSearches: this.stats.totalSearches,
-        localHitRate: this.stats.totalSearches > 0 ? this.stats.localHits / this.stats.totalSearches : 0,
-        externalCallRate: this.stats.totalSearches > 0 ? this.stats.externalCalls / this.stats.totalSearches : 0,
-        cacheHitRate: this.stats.totalSearches > 0 ? this.stats.cacheHits / this.stats.totalSearches : 0,
-        dispatcherCallRate: this.stats.totalSearches > 0 ? this.stats.dispatcherCalls / this.stats.totalSearches : 0,
-        dispatcherCacheHitRate: this.stats.dispatcherCalls > 0 ? this.stats.dispatcherCacheHits / this.stats.dispatcherCalls : 0,
-        avgLocalHitsPerSearch: this.stats.totalSearches > 0 ? this.stats.localHits / this.stats.totalSearches : 0
+        localHitRate:
+          this.stats.totalSearches > 0 ? this.stats.localHits / this.stats.totalSearches : 0,
+        externalCallRate:
+          this.stats.totalSearches > 0 ? this.stats.externalCalls / this.stats.totalSearches : 0,
+        cacheHitRate:
+          this.stats.totalSearches > 0 ? this.stats.cacheHits / this.stats.totalSearches : 0,
+        dispatcherCallRate:
+          this.stats.totalSearches > 0 ? this.stats.dispatcherCalls / this.stats.totalSearches : 0,
+        dispatcherCacheHitRate:
+          this.stats.dispatcherCalls > 0
+            ? this.stats.dispatcherCacheHits / this.stats.dispatcherCalls
+            : 0,
+        avgLocalHitsPerSearch:
+          this.stats.totalSearches > 0 ? this.stats.localHits / this.stats.totalSearches : 0
       },
       local: localStats,
       external: externalStats,
@@ -182,13 +190,18 @@ class StatsService {
         externalCallRate: total > 0 ? this.stats.externalCalls / total : 0
       },
       quality: {
-        dispatcherCacheHitRate: this.stats.dispatcherCalls > 0 ? this.stats.dispatcherCacheHits / this.stats.dispatcherCalls : 0,
-        externalCacheHitRate: this.stats.externalCalls > 0 ? this.stats.externalCacheHits / this.stats.externalCalls : 0
+        dispatcherCacheHitRate:
+          this.stats.dispatcherCalls > 0
+            ? this.stats.dispatcherCacheHits / this.stats.dispatcherCalls
+            : 0,
+        externalCacheHitRate:
+          this.stats.externalCalls > 0 ? this.stats.externalCacheHits / this.stats.externalCalls : 0
       },
       usage: {
         totalSearches: this.stats.totalSearches,
         chineseQueryRate: total > 0 ? this.stats.chineseQueries / total : 0,
-        baiduUsageRate: this.stats.externalCalls > 0 ? this.stats.baiduCalls / this.stats.externalCalls : 0
+        baiduUsageRate:
+          this.stats.externalCalls > 0 ? this.stats.baiduCalls / this.stats.externalCalls : 0
       }
     }
   }

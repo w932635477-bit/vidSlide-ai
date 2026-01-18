@@ -57,9 +57,7 @@
           {{ formatFileSize(asset.fileSize) }}
         </span>
       </div>
-      <div v-if="asset.author" class="asset-author">
-        by {{ asset.author.name }}
-      </div>
+      <div v-if="asset.author" class="asset-author">by {{ asset.author.name }}</div>
     </div>
 
     <!-- 操作按钮 -->
@@ -88,11 +86,7 @@
               <el-icon><InfoFilled /></el-icon>
               详细信息
             </el-dropdown-item>
-            <el-dropdown-item
-              v-if="asset.isDownloaded"
-              command="delete"
-              divided
-            >
+            <el-dropdown-item v-if="asset.isDownloaded" command="delete" divided>
               <el-icon><Delete /></el-icon>
               删除
             </el-dropdown-item>
@@ -133,11 +127,11 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'preview', 'download', 'action'])
 
-const handleCommand = (command) => {
+const handleCommand = command => {
   emit('action', { action: command, asset: props.asset })
 }
 
-const getSourceDisplayName = (source) => {
+const getSourceDisplayName = source => {
   const sourceNames = {
     unsplash: 'Unsplash',
     pexels: 'Pexels',
@@ -147,7 +141,7 @@ const getSourceDisplayName = (source) => {
   return sourceNames[source] || source || '未知'
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes) return ''
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   if (bytes === 0) return '0 Bytes'
@@ -155,13 +149,13 @@ const formatFileSize = (bytes) => {
   return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
-const getCopyrightClass = (copyrightInfo) => {
+const getCopyrightClass = copyrightInfo => {
   if (copyrightInfo.isSafe) return 'safe'
   if (copyrightInfo.status === 'unknown') return 'unknown'
   return 'unsafe'
 }
 
-const handleImageError = (event) => {
+const handleImageError = event => {
   const img = event.target
   img.style.display = 'none'
   const placeholder = img.parentElement.querySelector('.thumbnail-placeholder')

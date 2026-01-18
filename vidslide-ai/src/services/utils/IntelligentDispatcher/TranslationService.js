@@ -156,10 +156,11 @@ class TranslationService {
 
     // 在开发环境下使用代理路径，生产环境和测试环境使用直接路径
     // 检测是否在浏览器开发环境中（非测试）
-    const isBrowserDev = typeof window !== 'undefined' &&
-                  window.location &&
-                  window.location.hostname === 'localhost' &&
-                  typeof process === 'undefined'
+    const isBrowserDev =
+      typeof window !== 'undefined' &&
+      window.location &&
+      window.location.hostname === 'localhost' &&
+      typeof process === 'undefined'
     const baseUrl = isBrowserDev ? '/api/translate' : 'https://fanyi-api.baidu.com'
     const url = `${baseUrl}/api/trans/vip/translate?q=${encodeURIComponent(text)}&from=zh&to=en&appid=${this.appId}&salt=${salt}&sign=${sign}`
 

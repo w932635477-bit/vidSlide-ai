@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="background-remover"
-    role="region"
-    aria-labelledby="bg-remover-heading"
-  >
+  <div class="background-remover" role="region" aria-labelledby="bg-remover-heading">
     <!-- 头部 -->
     <RemoverHeader
       :is-processing="isProcessing"
@@ -15,11 +11,7 @@
     <section class="upload-section" role="main" aria-labelledby="upload-heading">
       <h3 id="upload-heading" class="sr-only">图片上传</h3>
 
-      <ImageUploadArea
-        v-if="!currentImage"
-        @drop="handleDrop"
-        @file-select="handleFileSelect"
-      />
+      <ImageUploadArea v-if="!currentImage" @drop="handleDrop" @file-select="handleFileSelect" />
 
       <!-- 背景移除工作区 -->
       <div v-else class="removal-workspace">
@@ -43,22 +35,22 @@
         />
 
         <BackgroundOptions
-          :selected-background="selectedBackground"
           v-model:custom-bg-color="customBgColor"
+          :selected-background="selectedBackground"
           @select-background="setBackground"
           @set-custom-background="setCustomBackground"
         />
 
         <!-- 操作按钮 -->
         <div class="workspace-actions">
-          <button class="action-btn secondary" @click="clearImage" aria-label="清除图片重新上传">
+          <button class="action-btn secondary" aria-label="清除图片重新上传" @click="clearImage">
             🗑️ 清除图片
           </button>
           <button
             class="action-btn primary"
-            @click="downloadProcessedImage"
             :disabled="!processedImageUrl"
             aria-label="下载处理后的图片"
+            @click="downloadProcessedImage"
           >
             💾 下载图片
           </button>
@@ -142,17 +134,17 @@ const aiServiceStatus = ref(null)
 const useAIMode = ref(true)
 
 // 方法
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const file = event.target.files[0]
   if (file) processImageFile(file)
 }
 
-const handleDrop = (event) => {
+const handleDrop = event => {
   const file = event.dataTransfer.files[0]
   if (file) processImageFile(file)
 }
 
-const processImageFile = async (file) => {
+const processImageFile = async file => {
   if (!props.supportedFormats.includes(file.type)) {
     alert('不支持的文件格式，请选择 JPG、PNG 或 WebP 格式的图片')
     return
@@ -173,7 +165,7 @@ const processImageFile = async (file) => {
   }
 }
 
-const loadImage = (imageUrl) => {
+const loadImage = imageUrl => {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
@@ -237,7 +229,6 @@ const autoRemoveBackground = async () => {
 
     processingProgress.value = 100
     removalMethod.value = `AI智能识别 (${result.service})`
-
   } catch (error) {
     console.error('AI背景移除失败:', error)
     const useManual = confirm(`AI背景移除失败: ${error.message}\n\n是否要使用手动背景移除模式？`)
@@ -272,7 +263,7 @@ const manualRemoveBackground = async () => {
 }
 
 const applySimpleBackgroundRemoval = async () => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     nextTick(() => {
       const originalCanvas = imageComparisonRef.value?.originalCanvas
       const processedCanvas = imageComparisonRef.value?.processedCanvas
@@ -285,7 +276,12 @@ const applySimpleBackgroundRemoval = async () => {
       const originalCtx = originalCanvas.getContext('2d')
       const processedCtx = processedCanvas.getContext('2d')
 
-      const imageData = originalCtx.getImageData(0, 0, canvasSize.value.width, canvasSize.value.height)
+      const imageData = originalCtx.getImageData(
+        0,
+        0,
+        canvasSize.value.width,
+        canvasSize.value.height
+      )
       const data = imageData.data
 
       const bgColor = hexToRgb(selectedBgColor.value)
@@ -297,9 +293,7 @@ const applySimpleBackgroundRemoval = async () => {
         const b = data[i + 2]
 
         const diff = Math.sqrt(
-          Math.pow(r - bgColor.r, 2) +
-          Math.pow(g - bgColor.g, 2) +
-          Math.pow(b - bgColor.b, 2)
+          Math.pow(r - bgColor.r, 2) + Math.pow(g - bgColor.g, 2) + Math.pow(b - bgColor.b, 2)
         )
 
         if (diff <= tol) {
@@ -310,7 +304,7 @@ const applySimpleBackgroundRemoval = async () => {
       const newImageData = new ImageData(data, canvasSize.value.width, canvasSize.value.height)
       processedCtx.putImageData(newImageData, 0, 0)
 
-      processedCanvas.toBlob((blob) => {
+      processedCanvas.toBlob(blob => {
         processedImageUrl.value = URL.createObjectURL(blob)
         resolve()
       }, 'image/png')
@@ -349,7 +343,7 @@ const applyBackgroundRemoval = () => {
   })
 }
 
-const setBackground = (background) => {
+const setBackground = background => {
   selectedBackground.value = background
 }
 
@@ -361,13 +355,15 @@ const setCustomBackground = () => {
   }
 }
 
-const hexToRgb = (hex) => {
+const hexToRgb = hex => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : { r: 255, g: 255, b: 255 }
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      }
+    : { r: 255, g: 255, b: 255 }
 }
 
 const clearImage = () => {
@@ -379,14 +375,14 @@ const clearImage = () => {
   emit('image-cleared')
 }
 
-const canvasToBlob = (canvas) => {
-  return new Promise((resolve) => {
+const canvasToBlob = canvas => {
+  return new Promise(resolve => {
     canvas.toBlob(resolve, 'image/png')
   })
 }
 
-const displayProcessedImage = (imageBlob) => {
-  return new Promise((resolve) => {
+const displayProcessedImage = imageBlob => {
+  return new Promise(resolve => {
     const img = new Image()
     img.onload = () => {
       nextTick(() => {

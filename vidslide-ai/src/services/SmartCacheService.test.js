@@ -128,9 +128,9 @@ describe('SmartCacheService', () => {
     it('应该基于使用频率选择话题', () => {
       // 模拟使用频率
       cacheService.topicUsage = {
-        'AI': 100,
-        'Technology': 50,
-        'Business': 25
+        AI: 100,
+        Technology: 50,
+        Business: 25
       }
 
       const selectedTopics = cacheService.selectTopicsForCaching()

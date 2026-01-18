@@ -1,5 +1,5 @@
 <template>
-  <div class="auto-generation-overlay" v-if="visible">
+  <div v-if="visible" class="auto-generation-overlay">
     <div class="progress-modal">
       <!-- 动画图标 -->
       <div class="loading-icon">
@@ -26,13 +26,13 @@
           :key="index"
           class="step-item"
           :class="{
-            'completed': step.completed,
-            'current': step.current
+            completed: step.completed,
+            current: step.current
           }"
         >
           <div class="step-icon">
             <svg v-if="step.completed" viewBox="0 0 24 24">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
             <div v-else-if="step.current" class="dot"></div>
             <div v-else class="dot inactive"></div>
@@ -42,9 +42,7 @@
       </div>
 
       <!-- 取消按钮 -->
-      <button class="cancel-btn" @click="onCancel" v-if="canCancel">
-        取消
-      </button>
+      <button v-if="canCancel" class="cancel-btn" @click="onCancel">取消</button>
     </div>
   </div>
 </template>
@@ -166,7 +164,7 @@ const onCancel = () => {
 }
 
 .spinner .path {
-  stroke: #0071E3;
+  stroke: #0071e3;
   stroke-linecap: round;
   animation: dash 1.5s ease-in-out infinite;
 }
@@ -195,7 +193,7 @@ const onCancel = () => {
 .step-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1D1D1F;
+  color: #1d1d1f;
   margin: 0 0 24px;
   min-height: 32px;
 }
@@ -203,7 +201,7 @@ const onCancel = () => {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #E8E8ED;
+  background: #e8e8ed;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -211,7 +209,7 @@ const onCancel = () => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #0071E3, #00A0FF);
+  background: linear-gradient(90deg, #0071e3, #00a0ff);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -219,7 +217,7 @@ const onCancel = () => {
 .progress-text {
   font-size: 18px;
   font-weight: 600;
-  color: #0071E3;
+  color: #0071e3;
   margin: 0 0 32px;
 }
 
@@ -248,7 +246,7 @@ const onCancel = () => {
 .step-icon svg {
   width: 24px;
   height: 24px;
-  fill: #34C759;
+  fill: #34c759;
   animation: checkmark 0.3s ease;
 }
 
@@ -265,12 +263,13 @@ const onCancel = () => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #0071E3;
+  background: #0071e3;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -281,31 +280,31 @@ const onCancel = () => {
 }
 
 .step-icon .dot.inactive {
-  background: #C7C7CC;
+  background: #c7c7cc;
   animation: none;
 }
 
 .step-name {
   font-size: 16px;
-  color: #1D1D1F;
+  color: #1d1d1f;
   transition: all 0.3s ease;
 }
 
 .step-item.completed .step-name {
-  color: #86868B;
+  color: #86868b;
 }
 
 .step-item.current .step-name {
   font-weight: 600;
-  color: #0071E3;
+  color: #0071e3;
 }
 
 .cancel-btn {
   padding: 12px 32px;
   background: transparent;
-  border: 1px solid #D2D2D7;
+  border: 1px solid #d2d2d7;
   border-radius: 20px;
-  color: #1D1D1F;
+  color: #1d1d1f;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
@@ -313,8 +312,8 @@ const onCancel = () => {
 }
 
 .cancel-btn:hover {
-  background: #F5F5F7;
-  border-color: #B0B0B5;
+  background: #f5f5f7;
+  border-color: #b0b0b5;
 }
 
 .cancel-btn:active {

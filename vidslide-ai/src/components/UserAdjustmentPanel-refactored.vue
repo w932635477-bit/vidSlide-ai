@@ -2,11 +2,7 @@
   <div class="user-adjustment-panel">
     <AdjustmentHeader :active-tab="activeTab" @change-tab="activeTab = $event" />
 
-    <component
-      :is="currentTabComponent"
-      :settings="settings"
-      @update="updateSettings"
-    />
+    <component :is="currentTabComponent" :settings="settings" @update="updateSettings" />
 
     <AdjustmentActions
       :has-changes="hasChanges"
@@ -49,7 +45,7 @@ const currentTabComponent = computed(() => {
   return components[activeTab.value]
 })
 
-const updateSettings = (updates) => {
+const updateSettings = updates => {
   settings.value[activeTab.value] = { ...settings.value[activeTab.value], ...updates }
   hasChanges.value = true
 }

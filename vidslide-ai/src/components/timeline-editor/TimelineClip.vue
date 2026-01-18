@@ -1,15 +1,15 @@
 <template>
   <div
     class="timeline-clip"
-    :class="{ 
+    :class="{
       selected: isSelected,
       locked: isLocked,
       dragging: isDragging
     }"
     :style="clipStyle"
+    draggable="true"
     @click.stop="handleClick"
     @mousedown="handleMouseDown"
-    draggable="true"
     @dragstart="handleDragStart"
   >
     <!-- 片段内容 -->
@@ -17,7 +17,9 @@
       <div class="clip-icon">{{ getClipIcon(clip.type) }}</div>
       <div class="clip-info">
         <div class="clip-name">{{ clip.name }}</div>
-        <div class="clip-time">{{ formatTime(clip.startTime) }}s - {{ formatTime(clip.endTime) }}s</div>
+        <div class="clip-time">
+          {{ formatTime(clip.startTime) }}s - {{ formatTime(clip.endTime) }}s
+        </div>
       </div>
     </div>
 
@@ -38,14 +40,14 @@
     <div
       v-if="!isLocked"
       class="resize-handle resize-left"
-      @mousedown.stop="handleResizeStart('left', $event)"
       title="调整开始时间"
+      @mousedown.stop="handleResizeStart('left', $event)"
     ></div>
     <div
       v-if="!isLocked"
       class="resize-handle resize-right"
-      @mousedown.stop="handleResizeStart('right', $event)"
       title="调整结束时间"
+      @mousedown.stop="handleResizeStart('right', $event)"
     ></div>
 
     <!-- 删除按钮 -->
@@ -56,8 +58,8 @@
       size="small"
       icon="Delete"
       circle
-      @click.stop="$emit('delete')"
       title="删除片段"
+      @click.stop="$emit('delete')"
     />
   </div>
 </template>
@@ -106,7 +108,7 @@ const clipStyle = computed(() => {
 })
 
 // 获取片段颜色
-const getClipColor = (type) => {
+const getClipColor = type => {
   const colors = {
     video: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.8))',
     audio: 'linear-gradient(135deg, rgba(16, 185, 129, 0.8), rgba(5, 150, 105, 0.8))',
@@ -118,7 +120,7 @@ const getClipColor = (type) => {
 }
 
 // 获取片段图标
-const getClipIcon = (type) => {
+const getClipIcon = type => {
   const icons = {
     video: '🎬',
     audio: '🎵',
@@ -130,12 +132,12 @@ const getClipIcon = (type) => {
 }
 
 // 格式化时间
-const formatTime = (time) => {
+const formatTime = time => {
   return time.toFixed(2)
 }
 
 // 获取关键帧位置百分比
-const getKeyframePosition = (time) => {
+const getKeyframePosition = time => {
   const clipDuration = props.clip.endTime - props.clip.startTime
   const relativeTime = time - props.clip.startTime
   return (relativeTime / clipDuration) * 100
@@ -149,14 +151,14 @@ const handleClick = () => {
 }
 
 // 处理鼠标按下
-const handleMouseDown = (event) => {
+const handleMouseDown = event => {
   if (props.isLocked) {
     event.preventDefault()
   }
 }
 
 // 处理拖拽开始
-const handleDragStart = (event) => {
+const handleDragStart = event => {
   if (props.isLocked) {
     event.preventDefault()
     return
@@ -165,7 +167,7 @@ const handleDragStart = (event) => {
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('clipId', props.clip.id)
   emit('drag-start', event)
-  
+
   // 拖拽结束后重置状态
   setTimeout(() => {
     isDragging.value = false

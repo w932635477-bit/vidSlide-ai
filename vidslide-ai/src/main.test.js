@@ -156,11 +156,13 @@ describe('main.js', () => {
     })
 
     it('应该处理ElementPlus安装失败', () => {
-      mockApp.use.mockImplementationOnce(() => {
-        // First call succeeds (router), second fails (ElementPlus)
-      }).mockImplementationOnce(() => {
-        throw new Error('ElementPlus installation failed')
-      })
+      mockApp.use
+        .mockImplementationOnce(() => {
+          // First call succeeds (router), second fails (ElementPlus)
+        })
+        .mockImplementationOnce(() => {
+          throw new Error('ElementPlus installation failed')
+        })
 
       expect(() => require('./main.js')).toThrow('ElementPlus installation failed')
     })

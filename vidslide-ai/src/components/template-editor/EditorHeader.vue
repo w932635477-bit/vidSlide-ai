@@ -2,18 +2,12 @@
   <div class="editor-header">
     <h3>模板自定义编辑器</h3>
     <div class="header-actions">
-      <button class="preview-btn" @click="$emit('toggle-preview')" :class="{ active: showPreview }">
+      <button class="preview-btn" :class="{ active: showPreview }" @click="$emit('toggle-preview')">
         {{ showPreview ? '编辑模式' : '预览模式' }}
       </button>
-      <button class="save-btn" @click="$emit('save')" :disabled="!hasChanges">
-        保存模板
-      </button>
-      <button class="load-btn" @click="$emit('show-load')">
-        加载模板
-      </button>
-      <button class="export-btn" @click="$emit('export')">
-        导出模板
-      </button>
+      <button class="save-btn" :disabled="!hasChanges" @click="$emit('save')">保存模板</button>
+      <button class="load-btn" @click="$emit('show-load')">加载模板</button>
+      <button class="export-btn" @click="$emit('export')">导出模板</button>
     </div>
   </div>
 </template>

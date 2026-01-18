@@ -6,27 +6,27 @@
       :controls="showControls"
       :autoplay="autoplay"
       :muted="muted"
+      class="video-element"
       @loadeddata="onLoadedData"
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
-      class="video-element"
     >
-      <track v-if="subtitleSrc" :src="subtitleSrc" kind="subtitles" srclang="zh-CN" label="中文">
+      <track v-if="subtitleSrc" :src="subtitleSrc" kind="subtitles" srclang="zh-CN" label="中文" />
     </video>
     <div v-if="showCustomControls" class="custom-controls">
-      <button @click="playPause" :aria-label="isPlaying ? '暂停' : '播放'">
+      <button :aria-label="isPlaying ? '暂停' : '播放'" @click="playPause">
         {{ isPlaying ? '⏸️' : '▶️' }}
       </button>
       <input
-        type="range"
         v-model="currentTime"
+        type="range"
         :max="duration"
-        @input="seekToTime"
         class="progress-bar"
         aria-label="视频进度"
-      >
+        @input="seekToTime"
+      />
       <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
-      <button @click="toggleMute" :aria-label="isMuted ? '取消静音' : '静音'">
+      <button :aria-label="isMuted ? '取消静音' : '静音'" @click="toggleMute">
         {{ isMuted ? '🔇' : '🔊' }}
       </button>
     </div>
@@ -68,53 +68,53 @@ export default {
       currentTime: 0,
       duration: 0,
       isMuted: false
-    };
-  },
-  methods: {
-    playPause() {
-      const video = this.$refs.videoElement;
-      if (this.isPlaying) {
-        video.pause();
-      } else {
-        video.play();
-      }
-    },
-    seekToTime() {
-      const video = this.$refs.videoElement;
-      video.currentTime = this.currentTime;
-    },
-    toggleMute() {
-      const video = this.$refs.videoElement;
-      video.muted = !video.muted;
-      this.isMuted = video.muted;
-    },
-    onLoadedData() {
-      this.duration = this.$refs.videoElement.duration;
-      this.$emit('loaded', { duration: this.duration });
-    },
-    onTimeUpdate() {
-      this.currentTime = this.$refs.videoElement.currentTime;
-      this.$emit('timeupdate', { currentTime: this.currentTime });
-    },
-    onEnded() {
-      this.isPlaying = false;
-      this.$emit('ended');
-    },
-    formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
   },
   watch: {
     videoSrc() {
       // 视频源变化时重置状态
-      this.isPlaying = false;
-      this.currentTime = 0;
-      this.duration = 0;
+      this.isPlaying = false
+      this.currentTime = 0
+      this.duration = 0
+    }
+  },
+  methods: {
+    playPause() {
+      const video = this.$refs.videoElement
+      if (this.isPlaying) {
+        video.pause()
+      } else {
+        video.play()
+      }
+    },
+    seekToTime() {
+      const video = this.$refs.videoElement
+      video.currentTime = this.currentTime
+    },
+    toggleMute() {
+      const video = this.$refs.videoElement
+      video.muted = !video.muted
+      this.isMuted = video.muted
+    },
+    onLoadedData() {
+      this.duration = this.$refs.videoElement.duration
+      this.$emit('loaded', { duration: this.duration })
+    },
+    onTimeUpdate() {
+      this.currentTime = this.$refs.videoElement.currentTime
+      this.$emit('timeupdate', { currentTime: this.currentTime })
+    },
+    onEnded() {
+      this.isPlaying = false
+      this.$emit('ended')
+    },
+    formatTime(seconds) {
+      const mins = Math.floor(seconds / 60)
+      const secs = Math.floor(seconds % 60)
+      return `${mins}:${secs.toString().padStart(2, '0')}`
     }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -180,7 +180,10 @@ export default {
 .time-display {
   color: white;
   font-size: 14px;
-  font-family: 'SF Pro Text', -apple-system, sans-serif;
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    sans-serif;
   min-width: 80px;
   text-align: center;
 }

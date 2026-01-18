@@ -90,10 +90,22 @@ export class EmphasisFocusRenderer extends BaseRenderer {
     if (visual.background) {
       if (visual.background.type === 'radial') {
         // 径向渐变背景
-        this.visualEffects.drawGradientBackground(position.x, position.y, size.width, size.height, visual.background)
+        this.visualEffects.drawGradientBackground(
+          position.x,
+          position.y,
+          size.width,
+          size.height,
+          visual.background
+        )
       } else if (visual.background.type === 'linear') {
         // 线性渐变背景
-        this.visualEffects.drawGradientBackground(position.x, position.y, size.width, size.height, visual.background)
+        this.visualEffects.drawGradientBackground(
+          position.x,
+          position.y,
+          size.width,
+          size.height,
+          visual.background
+        )
       } else {
         // 纯色背景
         this.ctx.save()

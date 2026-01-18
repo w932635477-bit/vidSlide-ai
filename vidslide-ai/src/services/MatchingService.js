@@ -74,7 +74,9 @@ class MatchingService {
       .map(material => {
         const nameMatch = (material.name || '').toLowerCase().includes(queryLower) ? 1 : 0
         const descMatch = (material.description || '').toLowerCase().includes(queryLower) ? 0.8 : 0
-        const tagMatch = (material.tags || []).some(tag => tag.toLowerCase().includes(queryLower)) ? 0.6 : 0
+        const tagMatch = (material.tags || []).some(tag => tag.toLowerCase().includes(queryLower))
+          ? 0.6
+          : 0
 
         const score = Math.max(nameMatch, descMatch, tagMatch)
 
@@ -129,10 +131,15 @@ class MatchingService {
       }
 
       // 评估每个素材的匹配质量
-      const evaluatedMaterials = await this.evaluateMaterialsQuality(keywordArray, localResults.materials)
+      const evaluatedMaterials = await this.evaluateMaterialsQuality(
+        keywordArray,
+        localResults.materials
+      )
 
       // 计算平均置信度
-      const avgConfidence = evaluatedMaterials.reduce((sum, m) => sum + (m.confidence || 0), 0) / evaluatedMaterials.length
+      const avgConfidence =
+        evaluatedMaterials.reduce((sum, m) => sum + (m.confidence || 0), 0) /
+        evaluatedMaterials.length
 
       // 计算关键词覆盖率
       const coveredKeywords = new Set()
@@ -162,7 +169,9 @@ class MatchingService {
 
       console.log(`📊 本地匹配度: ${(matchRate * 100).toFixed(1)}%`)
       console.log(`   - 平均置信度: ${(avgConfidence * 100).toFixed(1)}%`)
-      console.log(`   - 关键词覆盖率: ${(coverageRate * 100).toFixed(1)}% (${coveredKeywords.size}/${keywordArray.length})`)
+      console.log(
+        `   - 关键词覆盖率: ${(coverageRate * 100).toFixed(1)}% (${coveredKeywords.size}/${keywordArray.length})`
+      )
       console.log(`   - 匹配素材数: ${evaluatedMaterials.length}`)
 
       return {
@@ -319,8 +328,10 @@ class MatchingService {
   getStats() {
     return {
       ...this.stats,
-      clipSuccessRate: this.stats.totalMatches > 0 ? this.stats.clipMatches / this.stats.totalMatches : 0,
-      fallbackRate: this.stats.totalMatches > 0 ? this.stats.fallbackMatches / this.stats.totalMatches : 0
+      clipSuccessRate:
+        this.stats.totalMatches > 0 ? this.stats.clipMatches / this.stats.totalMatches : 0,
+      fallbackRate:
+        this.stats.totalMatches > 0 ? this.stats.fallbackMatches / this.stats.totalMatches : 0
     }
   }
 }

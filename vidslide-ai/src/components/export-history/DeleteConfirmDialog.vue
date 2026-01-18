@@ -6,17 +6,13 @@
       </div>
 
       <div class="modal-body">
-        <p>
-          确定要删除{{ isBulkDelete ? `选中的 ${selectedCount} 个记录` : '这个导出记录' }}吗？
-        </p>
+        <p>确定要删除{{ isBulkDelete ? `选中的 ${selectedCount} 个记录` : '这个导出记录' }}吗？</p>
         <p class="warning-text">此操作不可撤销，已导出的文件不会被删除。</p>
       </div>
 
       <div class="modal-actions">
         <button class="cancel-btn" @click="$emit('close')">取消</button>
-        <button class="delete-confirm-btn" @click="$emit('confirm')">
-          确认删除
-        </button>
+        <button class="delete-confirm-btn" @click="$emit('confirm')">确认删除</button>
       </div>
     </div>
   </div>

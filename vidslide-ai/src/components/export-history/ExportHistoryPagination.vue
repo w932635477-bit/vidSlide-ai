@@ -1,24 +1,38 @@
 <template>
-  <div class="pagination" v-if="totalPages > 1">
-    <button class="page-btn" @click="$emit('go-to-page', 1)" :disabled="currentPage === 1">
+  <div v-if="totalPages > 1" class="pagination">
+    <button class="page-btn" :disabled="currentPage === 1" @click="$emit('go-to-page', 1)">
       首页
     </button>
-    <button class="page-btn" @click="$emit('go-to-page', currentPage - 1)" :disabled="currentPage === 1">
+    <button
+      class="page-btn"
+      :disabled="currentPage === 1"
+      @click="$emit('go-to-page', currentPage - 1)"
+    >
       上一页
     </button>
 
-    <span class="page-info">
-      第 {{ currentPage }} 页，共 {{ totalPages }} 页
-    </span>
+    <span class="page-info"> 第 {{ currentPage }} 页，共 {{ totalPages }} 页 </span>
 
-    <button class="page-btn" @click="$emit('go-to-page', currentPage + 1)" :disabled="currentPage === totalPages">
+    <button
+      class="page-btn"
+      :disabled="currentPage === totalPages"
+      @click="$emit('go-to-page', currentPage + 1)"
+    >
       下一页
     </button>
-    <button class="page-btn" @click="$emit('go-to-page', totalPages)" :disabled="currentPage === totalPages">
+    <button
+      class="page-btn"
+      :disabled="currentPage === totalPages"
+      @click="$emit('go-to-page', totalPages)"
+    >
       末页
     </button>
 
-    <select :value="pageSize" @change="$emit('change-page-size', Number($event.target.value))" class="page-size-select">
+    <select
+      :value="pageSize"
+      class="page-size-select"
+      @change="$emit('change-page-size', Number($event.target.value))"
+    >
       <option :value="10">10条/页</option>
       <option :value="20">20条/页</option>
       <option :value="50">50条/页</option>

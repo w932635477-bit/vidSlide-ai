@@ -199,8 +199,8 @@ export class ChartAnalysisRenderer extends BaseRenderer {
 
     // 计算最大值
     const maxValue = Math.max(...chartData.map(d => d.value))
-    const barWidth = area.width / chartData.length * 0.7
-    const barSpacing = area.width / chartData.length * 0.3
+    const barWidth = (area.width / chartData.length) * 0.7
+    const barSpacing = (area.width / chartData.length) * 0.3
 
     // 绘制Y轴网格线
     this.drawGridLines(area, maxValue)

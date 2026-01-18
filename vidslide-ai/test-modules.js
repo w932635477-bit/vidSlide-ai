@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 console.log('🎬 VidSlide AI 模块集成测试\n')
-console.log('=' .repeat(50))
+console.log('='.repeat(50))
 
 let passed = 0
 let failed = 0
@@ -132,7 +132,7 @@ console.log('\n🖼️ PictureInPicture 组件集成测试')
 console.log('-'.repeat(50))
 
 test('PictureInPicture 导入 UnifiedFaceTracker', () => {
-  assertContains('src/components/PictureInPicture.vue', "import UnifiedFaceTracker")
+  assertContains('src/components/PictureInPicture.vue', 'import UnifiedFaceTracker')
 })
 
 test('PictureInPicture 导入 TrackerEngine', () => {
@@ -156,7 +156,7 @@ console.log('\n⚙️ FaceTrackingSettings 组件集成测试')
 console.log('-'.repeat(50))
 
 test('FaceTrackingSettings 导入 UnifiedFaceTracker', () => {
-  assertContains('src/components/FaceTrackingSettings.vue', "import UnifiedFaceTracker")
+  assertContains('src/components/FaceTrackingSettings.vue', 'import UnifiedFaceTracker')
 })
 
 test('FaceTrackingSettings 有预览功能', () => {
@@ -176,11 +176,11 @@ console.log('\n🎥 VideoEditorView 集成测试')
 console.log('-'.repeat(50))
 
 test('VideoEditorView 导入 UnifiedFaceTracker', () => {
-  assertContains('src/views/VideoEditorView.vue', "import UnifiedFaceTracker")
+  assertContains('src/views/VideoEditorView.vue', 'import UnifiedFaceTracker')
 })
 
 test('VideoEditorView 导入 SceneDetection', () => {
-  assertContains('src/views/VideoEditorView.vue', "import { SceneDetection }")
+  assertContains('src/views/VideoEditorView.vue', 'import { SceneDetection }')
 })
 
 test('VideoEditorView 有场景检测器状态', () => {

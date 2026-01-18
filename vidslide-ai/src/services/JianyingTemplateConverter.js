@@ -121,9 +121,7 @@ class JianyingTemplateConverter {
       // 画中画 -> 剪映"演讲者"风格
       'picture-in-picture': {
         jianyingStyle: 'speaker',
-        textPresets: [
-          { position: 'bottom', fontSize: 36, color: '#FFFFFF' }
-        ],
+        textPresets: [{ position: 'bottom', fontSize: 36, color: '#FFFFFF' }],
         animations: ['pip-slide', 'fade-in'],
         filters: ['natural'],
         music: 'background'
@@ -142,7 +140,7 @@ class JianyingTemplateConverter {
       },
 
       // 时间线 -> 剪映"历程展示"风格
-      'timeline': {
+      timeline: {
         jianyingStyle: 'timeline',
         textPresets: [
           { position: 'left', fontSize: 64, color: '#FFD700', bold: true },
@@ -357,11 +355,11 @@ class JianyingTemplateConverter {
    */
   positionToX(position) {
     const map = {
-      'left': 0.2,
-      'center': 0.5,
-      'right': 0.8,
-      'top': 0.5,
-      'bottom': 0.5,
+      left: 0.2,
+      center: 0.5,
+      right: 0.8,
+      top: 0.5,
+      bottom: 0.5,
       'top-left': 0.2,
       'top-right': 0.8,
       'bottom-left': 0.2,
@@ -379,11 +377,11 @@ class JianyingTemplateConverter {
    */
   positionToY(position) {
     const map = {
-      'top': 0.15,
-      'center': 0.5,
-      'bottom': 0.85,
-      'left': 0.5,
-      'right': 0.5,
+      top: 0.15,
+      center: 0.5,
+      bottom: 0.85,
+      left: 0.5,
+      right: 0.5,
       'top-left': 0.15,
       'top-right': 0.15,
       'bottom-left': 0.85,

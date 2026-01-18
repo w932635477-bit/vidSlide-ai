@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一键生成按钮测试 - 剪映风格</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .video-section {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 16px;
+      background: #1a1a1a;
+    }
+
+    .editor-canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2a2a2a;
+      border-radius: 8px;
+    }
+
+    .preview-video {
+      max-width: 80%;
+      max-height: 80%;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 一键生成按钮（剪映风格） */
+    .auto-generate-btn {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 24px;
+      border: none;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+      border-radius: 24px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(255, 71, 87, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 15;
+      user-select: none;
+    }
+
+    .auto-generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 71, 87, 0.5);
+      background: linear-gradient(135deg, #ff7b7b 0%, #ff5767 100%);
+    }
+
+    .auto-generate-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+    }
+
+    .auto-generate-btn .btn-icon {
+      font-size: 16px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    .auto-generate-btn .btn-text {
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes sparkle {
+      0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.8;
+      }
+    }
+
+    /* 时间轴 */
+    .timeline {
+      height: 150px;
+      background: #2a2a2a;
+      border-top: 1px solid #3a3a3a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #8a8a8a;
+      font-size: 14px;
+    }
+
+    .info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #d4d4d4;
+      z-index: 10;
+    }
+
+    .info h3 {
+      margin-bottom: 8px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .info ul {
+      list-style: none;
+      line-height: 1.6;
+    }
+
+    .info li::before {
+      content: "✓ ";
+      color: #4ade80;
+      margin-right: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .auto-generate-btn {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 20px;
+        font-size: 13px;
+      }
+
+      .auto-generate-btn .btn-icon {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="workspace">
+    <div class="video-section">
+      <div class="editor-canvas">
+        <video class="preview-video" controls>
+          <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        </video>
+
+        <!-- 一键生成按钮 -->
+        <button class="auto-generate-btn" onclick="handleGenerate()">
+          <span class="btn-icon">✨</span>
+          <span class="btn-text">一键生成</span>
+        </button>
+
+        <!-- 信息面板 -->
+        <div class="info">
+          <h3>按钮特性</h3>
+          <ul>
+            <li>位于视频区域右下角</li>
+            <li>不遮挡时间轴</li>
+            <li>剪映风格渐变色</li>
+            <li>悬停动画效果</li>
+            <li>闪烁图标动画</li>
+            <li>响应式设计</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      时间轴区域（150px 高度）
+    </div>
+  </div>
+
+  <script>
+    function handleGenerate() {
+      alert('开始一键生成视频！');
+    }
+  </script>
+</body>
+</html>

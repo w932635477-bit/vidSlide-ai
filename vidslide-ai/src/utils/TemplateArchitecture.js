@@ -4,7 +4,12 @@
  * 模板定义已拆分到独立文件
  */
 
-import { templateRegistry, getAllTemplates, getTemplateById, getTemplatesByCategory } from './templates/index.js'
+import {
+  templateRegistry,
+  getAllTemplates,
+  getTemplateById,
+  getTemplatesByCategory
+} from './templates/index.js'
 
 class TemplateArchitecture {
   constructor() {

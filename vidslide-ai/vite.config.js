@@ -12,12 +12,7 @@ export default defineConfig({
   },
   // 优化依赖扫描
   optimizeDeps: {
-    include: [
-      'vue',
-      'vue-router',
-      'element-plus',
-      'vue-i18n'
-    ]
+    include: ['vue', 'vue-router', 'element-plus', 'vue-i18n']
   },
   server: {
     port: 5173, // 使用Vite默认端口

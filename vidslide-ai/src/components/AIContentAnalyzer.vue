@@ -1,23 +1,14 @@
 <template>
-  <div
-class="ai-content-analyzer" role="region"
-aria-labelledby="analyzer-heading"
->
+  <div class="ai-content-analyzer" role="region" aria-labelledby="analyzer-heading">
     <!-- AI内容分析界面 -->
-    <header
-class="analyzer-header" role="banner"
->
+    <header class="analyzer-header" role="banner">
       <h2 id="analyzer-heading">🧠 AI内容分析</h2>
       <p class="analyzer-description">智能分析视频内容，提取关键信息和结构化数据</p>
     </header>
 
     <!-- 分析控制区域 -->
-    <section
-class="analysis-controls" role="region"
-aria-labelledby="controls-heading"
->
-      <h3
-id="controls-heading" class="sr-only">分析控制</h3>
+    <section class="analysis-controls" role="region" aria-labelledby="controls-heading">
+      <h3 id="controls-heading" class="sr-only">分析控制</h3>
 
       <div class="control-buttons">
         <button
@@ -26,26 +17,16 @@ id="controls-heading" class="sr-only">分析控制</h3>
           :aria-describedby="isAnalyzing ? 'analyzing-status' : undefined"
           @click="startAnalysis"
         >
-          <span v-if="isAnalyzing"
-class="loading-spinner">⟳</span>
+          <span v-if="isAnalyzing" class="loading-spinner">⟳</span>
           <span v-else>🎯 开始分析</span>
         </button>
 
-        <button class="btn-stop"
-:disabled="!isAnalyzing" @click="stopAnalysis"
->
-🛑 停止分析
-</button>
+        <button class="btn-stop" :disabled="!isAnalyzing" @click="stopAnalysis">🛑 停止分析</button>
 
-        <button class="btn-reset"
-:disabled="isAnalyzing" @click="resetAnalysis"
->
-🔄 重置
-</button>
+        <button class="btn-reset" :disabled="isAnalyzing" @click="resetAnalysis">🔄 重置</button>
       </div>
 
-      <div v-if="isAnalyzing"
-id="analyzing-status" class="sr-only">
+      <div v-if="isAnalyzing" id="analyzing-status" class="sr-only">
         正在分析视频内容，请稍候...
       </div>
     </section>
@@ -58,8 +39,7 @@ id="analyzing-status" class="sr-only">
       aria-labelledby="progress-heading"
       aria-live="polite"
     >
-      <h3
-id="progress-heading" class="sr-only">分析进度</h3>
+      <h3 id="progress-heading" class="sr-only">分析进度</h3>
 
       <div class="progress-container">
         <div class="progress-bar">
@@ -73,14 +53,8 @@ id="progress-heading" class="sr-only">分析进度</h3>
             :aria-label="`分析进度: ${progress}%`"
           />
         </div>
-        <div class="progress-text">
-{{ progress }}% - {{ currentStep }}
-</div>
-        <div v-if="estimatedTime"
-class="estimated-time"
->
-预计剩余: {{ estimatedTime }}
-</div>
+        <div class="progress-text">{{ progress }}% - {{ currentStep }}</div>
+        <div v-if="estimatedTime" class="estimated-time">预计剩余: {{ estimatedTime }}</div>
       </div>
     </section>
 
@@ -91,8 +65,7 @@ class="estimated-time"
       role="region"
       aria-labelledby="results-heading"
     >
-      <h3
-id="results-heading" class="sr-only">分析结果</h3>
+      <h3 id="results-heading" class="sr-only">分析结果</h3>
 
       <!-- 语音识别结果 -->
       <div class="result-card transcript-card">
@@ -107,16 +80,10 @@ id="results-heading" class="sr-only">分析结果</h3>
         </header>
 
         <div class="card-content">
-          <div
-v-if="analysisResults.transcript" class="transcript-text"
->
+          <div v-if="analysisResults.transcript" class="transcript-text">
             {{ analysisResults.transcript }}
           </div>
-          <div v-else
-class="no-data"
->
-未检测到语音内容
-</div>
+          <div v-else class="no-data">未检测到语音内容</div>
         </div>
       </div>
 
@@ -146,8 +113,7 @@ class="no-data"
           </div>
 
           <!-- 主题分类 -->
-          <div v-if="analysisResults.topics"
-class="analysis-item">
+          <div v-if="analysisResults.topics" class="analysis-item">
             <h5>主题分类</h5>
             <div class="topics-list">
               <span v-for="topic in analysisResults.topics" :key="topic" class="topic-tag">
@@ -157,8 +123,7 @@ class="analysis-item">
           </div>
 
           <!-- 情感分析 -->
-          <div v-if="analysisResults.sentiment"
-class="analysis-item">
+          <div v-if="analysisResults.sentiment" class="analysis-item">
             <h5>情感倾向</h5>
             <div class="sentiment-indicator">
               <span class="sentiment-label">{{ analysisResults.sentiment.label }}</span>
@@ -176,8 +141,7 @@ class="analysis-item">
       </div>
 
       <!-- 视频结构分析 -->
-      <div v-if="analysisResults.videoStructure"
-class="result-card structure-card">
+      <div v-if="analysisResults.videoStructure" class="result-card structure-card">
         <header class="card-header">
           <h4>🎬 视频结构分析</h4>
         </header>
@@ -193,7 +157,7 @@ class="result-card structure-card">
                 width:
                   ((segment.endTime - segment.startTime) /
                     analysisResults.videoStructure.duration) *
-                  100 +
+                    100 +
                   '%'
               }"
             >
@@ -227,20 +191,13 @@ class="result-card structure-card">
     </section>
 
     <!-- 错误状态显示 -->
-    <section
-v-if="error" class="error-section"
-role="alert" aria-live="assertive"
->
+    <section v-if="error" class="error-section" role="alert" aria-live="assertive">
       <div class="error-card">
         <div class="error-icon">⚠️</div>
         <div class="error-content">
           <h4>分析失败</h4>
           <p>{{ error }}</p>
-          <button class="btn-retry"
-@click="retryAnalysis"
->
-重试分析
-</button>
+          <button class="btn-retry" @click="retryAnalysis">重试分析</button>
         </div>
       </div>
     </section>
@@ -252,8 +209,7 @@ role="alert" aria-live="assertive"
       role="region"
       aria-labelledby="empty-heading"
     >
-      <h3
-id="empty-heading" class="sr-only">等待分析</h3>
+      <h3 id="empty-heading" class="sr-only">等待分析</h3>
 
       <div class="empty-content">
         <div class="empty-icon">🎬</div>

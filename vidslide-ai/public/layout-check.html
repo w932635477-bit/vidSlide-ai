@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>布局检查</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+        .info { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 VidSlide AI 布局检查</h1>
+    
+    <div class="info">
+        <h2>✅ 当前布局结构</h2>
+        <pre>
+┌─────────────────────────────────────────┐
+│  Header (60px) - 剪映风格顶部工具栏      │
+├─────────────────────────────────────────┤
+│  ┌────┬──────────────────────┬────────┐ │
+│  │左侧│  视频预览区 (flex:1) │ 右侧   │ │
+│  │素材│  - padding: 12px     │ 属性   │ │
+│  │库  │  - 视频 padding: 16px│ 面板   │ │
+│  │280 │  - 一键生成按钮      │ 320px  │ │
+│  │px  ├──────────────────────┤        │ │
+│  │    │  时间轴 (240px)      │        │ │
+│  │    │  - 编辑轨道          │        │ │
+│  └────┴──────────────────────┴────────┘ │
+└─────────────────────────────────────────┘
+        </pre>
+    </div>
+
+    <div class="info">
+        <h2>📋 布局组件清单</h2>
+        <ul>
+            <li class="success">✅ Header - 剪映风格顶部工具栏</li>
+            <li class="success">✅ Left Sidebar - 左侧素材库 (280px)</li>
+            <li class="success">✅ Workspace Main Area - 中间视频预览区</li>
+            <li class="success">✅ Timeline Container - 底部时间轴 (240px)</li>
+            <li class="success">✅ Right Panel - 右侧属性面板 (320px)</li>
+            <li class="success">✅ 一键生成按钮 - 右下角紫色渐变按钮</li>
+            <li class="success">✅ 工作流监控 - 右侧监控标签页</li>
+        </ul>
+    </div>
+
+    <div class="info">
+        <h2>🗑️ 已删除的组件</h2>
+        <ul>
+            <li class="error">❌ ProgressIndicator - 进度指示器</li>
+            <li class="error">❌ AutoGenerationProgress - 工作流自动运行</li>
+            <li class="error">❌ 闪电占位符 ⚡</li>
+            <li class="error">❌ 紫色 AI 内容分析大面板</li>
+        </ul>
+    </div>
+
+    <div class="info">
+        <h2>🔄 如何查看正确的布局</h2>
+        <ol>
+            <li>访问主页面: <a href="/">http://localhost:5176/</a></li>
+            <li>强制刷新浏览器: <strong>Cmd + Shift + R</strong> (Mac) 或 <strong>Ctrl + Shift + R</strong> (Windows)</li>
+            <li>如果还是看到旧界面，请清空缓存并硬性重新加载</li>
+        </ol>
+    </div>
+
+    <div class="info">
+        <h2>⏰ 更新时间</h2>
+        <p><script>document.write(new Date().toLocaleString('zh-CN'))</script></p>
+    </div>
+</body>
+</html>

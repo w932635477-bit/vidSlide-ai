@@ -286,7 +286,8 @@ class LocalSearchService {
       ...this.stats,
       library: localStats,
       hitRate: this.stats.totalSearches > 0 ? this.stats.localHits / this.stats.totalSearches : 0,
-      cacheHitRate: this.stats.totalSearches > 0 ? this.stats.cacheHits / this.stats.totalSearches : 0
+      cacheHitRate:
+        this.stats.totalSearches > 0 ? this.stats.cacheHits / this.stats.totalSearches : 0
     }
   }
 }

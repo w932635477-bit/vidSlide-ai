@@ -4,44 +4,44 @@
 <!-- PipTemplate 组件模板 -->
 <template>
   <div role="region" :aria-label="templateDescription">
-  <div class="pip-template" :style="{ width: slideWidth + 'px', height: slideHeight + 'px' }">
-    <!-- 主内容区域 (右侧大图) -->
-    <div class="main-content" :style="mainContentStyle">
-      <div class="content-placeholder">
-        <h2>{{ title || 'PPT标题内容' }}</h2>
-        <p>{{ content || '这里是PPT的主要内容区域，支持多行文字显示和图表展示。' }}</p>
-        <div class="content-bullets">
-          <div v-for="bullet in bullets" :key="bullet.id" class="bullet-item">
-            <span class="bullet-dot">•</span>
-            <span>{{ bullet.text }}</span>
+    <div class="pip-template" :style="{ width: slideWidth + 'px', height: slideHeight + 'px' }">
+      <!-- 主内容区域 (右侧大图) -->
+      <div class="main-content" :style="mainContentStyle">
+        <div class="content-placeholder">
+          <h2>{{ title || 'PPT标题内容' }}</h2>
+          <p>{{ content || '这里是PPT的主要内容区域，支持多行文字显示和图表展示。' }}</p>
+          <div class="content-bullets">
+            <div v-for="bullet in bullets" :key="bullet.id" class="bullet-item">
+              <span class="bullet-dot">•</span>
+              <span>{{ bullet.text }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 画中画视频区域 (左侧小窗) -->
-    <div class="pip-window" :style="pipWindowStyle">
-      <div class="video-placeholder">
-        <div class="play-button">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
+      <!-- 画中画视频区域 (左侧小窗) -->
+      <div class="pip-window" :style="pipWindowStyle">
+        <div class="video-placeholder">
+          <div class="play-button">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <div class="video-overlay">
+            <span>视频预览</span>
+          </div>
         </div>
-        <div class="video-overlay">
-          <span>视频预览</span>
+        <!-- 人脸跟踪指示器 -->
+        <div v-if="faceTracking" class="face-tracking-indicator">
+          <div class="tracking-dot"></div>
         </div>
       </div>
-      <!-- 人脸跟踪指示器 -->
-      <div v-if="faceTracking" class="face-tracking-indicator">
-        <div class="tracking-dot"></div>
+
+      <!-- 装饰元素 -->
+      <div class="template-decoration">
+        <div class="decoration-line" :style="decorationStyle"></div>
       </div>
     </div>
-
-    <!-- 装饰元素 -->
-    <div class="template-decoration">
-      <div class="decoration-line" :style="decorationStyle"></div>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -197,9 +197,12 @@ export default {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -219,7 +222,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0,123,255,0.02) 0%, rgba(0,123,255,0.01) 100%);
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.02) 0%, rgba(0, 123, 255, 0.01) 100%);
   border-radius: inherit;
 }
 
@@ -274,7 +277,9 @@ export default {
   background: #1d1d1f;
   border-radius: 12px;
   position: relative;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .video-placeholder {
@@ -340,7 +345,8 @@ export default {
 }
 
 @keyframes tracking-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4);
   }
   50% {

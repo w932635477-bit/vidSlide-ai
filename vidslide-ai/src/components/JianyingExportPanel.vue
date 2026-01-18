@@ -1,21 +1,21 @@
 <template>
   <div class="jianying-export-panel">
     <!-- 导出按钮 -->
-    <button
-      class="export-btn"
-      @click="showExportDialog = true"
-      :disabled="!selectedTemplate"
-    >
+    <button class="export-btn" :disabled="!selectedTemplate" @click="showExportDialog = true">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
       导出到剪映
     </button>
 
     <!-- 导出对话框 -->
-    <div v-if="showExportDialog" class="export-dialog-overlay" @click.self="showExportDialog = false">
+    <div
+      v-if="showExportDialog"
+      class="export-dialog-overlay"
+      @click.self="showExportDialog = false"
+    >
       <div class="export-dialog">
         <div class="dialog-header">
           <h3>导出到剪映</h3>
@@ -106,8 +106,8 @@
           <button class="btn-secondary" @click="showExportDialog = false">取消</button>
           <button
             class="btn-primary"
-            @click="handleExport"
             :disabled="!selectedTemplateId || isExporting"
+            @click="handleExport"
           >
             <span v-if="isExporting">导出中...</span>
             <span v-else>下载草稿文件</span>
@@ -117,7 +117,11 @@
     </div>
 
     <!-- 导出成功提示 -->
-    <div v-if="showSuccessDialog" class="success-dialog-overlay" @click.self="showSuccessDialog = false">
+    <div
+      v-if="showSuccessDialog"
+      class="success-dialog-overlay"
+      @click.self="showSuccessDialog = false"
+    >
       <div class="success-dialog">
         <div class="success-icon">✓</div>
         <h3>导出成功！</h3>
@@ -227,7 +231,6 @@ export default {
         // 显示成功对话框
         showExportDialog.value = false
         showSuccessDialog.value = true
-
       } catch (error) {
         console.error('导出失败:', error)
         alert('导出失败: ' + error.message)
@@ -271,7 +274,7 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #FF0050 0%, #FF4081 100%);
+  background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -386,7 +389,7 @@ export default {
 .template-select:focus,
 .duration-select:focus,
 .text-input:focus {
-  border-color: #FF0050;
+  border-color: #ff0050;
 }
 
 .text-input::placeholder {
@@ -404,7 +407,7 @@ export default {
 .preview-header {
   font-size: 14px;
   font-weight: 600;
-  color: #FF0050;
+  color: #ff0050;
   margin-bottom: 12px;
 }
 
@@ -455,7 +458,7 @@ export default {
 
 .btn-primary {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #FF0050 0%, #FF4081 100%);
+  background: linear-gradient(135deg, #ff0050 0%, #ff4081 100%);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -488,7 +491,7 @@ export default {
 .success-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+  background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -540,7 +543,7 @@ export default {
 }
 
 .tips-header {
-  color: #FFD700;
+  color: #ffd700;
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 8px;

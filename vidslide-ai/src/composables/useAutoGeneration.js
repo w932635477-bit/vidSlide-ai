@@ -28,7 +28,7 @@ export function useAutoGeneration() {
    * @param {File} videoFile - 视频文件
    * @returns {Promise<Object>} 生成结果
    */
-  const autoGenerate = async (videoFile) => {
+  const autoGenerate = async videoFile => {
     if (!videoFile) {
       ElMessage.error('请先上传视频!')
       return
@@ -75,7 +75,7 @@ export function useAutoGeneration() {
    * @param {File} videoFile - 视频文件
    * @returns {Promise<Object>} 生成结果
    */
-  const regenerate = async (videoFile) => {
+  const regenerate = async videoFile => {
     autoGenStore.reset()
     return await autoGenerate(videoFile)
   }

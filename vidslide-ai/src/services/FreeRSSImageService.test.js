@@ -11,18 +11,20 @@ global.fetch = vi.fn()
 
 // Mock DOMParser for XML parsing
 global.DOMParser = vi.fn().mockImplementation(() => ({
-  parseFromString: vi.fn((xmlString) => {
+  parseFromString: vi.fn(xmlString => {
     // Mock XML parsing - return a simple object
     const mockDoc = {
-      querySelectorAll: vi.fn((selector) => {
+      querySelectorAll: vi.fn(selector => {
         if (selector === 'item') {
           return [
             {
-              querySelector: vi.fn((subSelector) => {
+              querySelector: vi.fn(subSelector => {
                 const mockElements = {
                   title: { textContent: 'Test Article' },
                   link: { textContent: 'https://example.com/article' },
-                  description: { textContent: 'Test description with <img src="test.jpg" alt="test">' },
+                  description: {
+                    textContent: 'Test description with <img src="test.jpg" alt="test">'
+                  },
                   pubDate: { textContent: 'Wed, 01 Jan 2024 00:00:00 GMT' }
                 }
                 return mockElements[subSelector] || null
@@ -85,7 +87,8 @@ describe('FreeRSSImageService', () => {
     it('应该搜索指定类别的RSS源', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
       })
 
       const results = await rssService.searchRSSImages('tech', { limit: 5 })
@@ -105,7 +108,8 @@ describe('FreeRSSImageService', () => {
     it('应该限制搜索结果数量', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
       })
 
       const results = await rssService.searchRSSImages('tech', { limit: 3 })
@@ -116,7 +120,8 @@ describe('FreeRSSImageService', () => {
     it('应该支持多类别搜索', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
       })
 
       const results = await rssService.searchRSSImages(['tech', 'business'])
@@ -181,7 +186,8 @@ describe('FreeRSSImageService', () => {
 
       global.fetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
       })
 
       // 第一次搜索
@@ -230,7 +236,8 @@ describe('FreeRSSImageService', () => {
     it('应该支持并发搜索多个RSS源', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
       })
 
       const categories = ['tech', 'business', 'general']
@@ -245,12 +252,11 @@ describe('FreeRSSImageService', () => {
     })
 
     it('应该处理部分RSS源失败的情况', async () => {
-      global.fetch
-        .mockRejectedValueOnce(new Error('Source 1 failed'))
-        .mockResolvedValue({
-          ok: true,
-          text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
-        })
+      global.fetch.mockRejectedValueOnce(new Error('Source 1 failed')).mockResolvedValue({
+        ok: true,
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+      })
 
       const results = await rssService.searchRSSImages(['tech', 'business'])
 
@@ -324,11 +330,18 @@ describe('FreeRSSImageService', () => {
 
     it('应该处理网络超时', async () => {
       global.fetch.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({
-          ok: false,
-          status: 408,
-          statusText: 'Request Timeout'
-        }), 100))
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: false,
+                  status: 408,
+                  statusText: 'Request Timeout'
+                }),
+              100
+            )
+          )
       )
 
       const results = await rssService.searchRSSImages('tech')
@@ -358,7 +371,8 @@ describe('FreeRSSImageService', () => {
     it('应该跟踪搜索统计', async () => {
       global.fetch.mockResolvedValue({
         ok: true,
-        text: () => Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
+        text: () =>
+          Promise.resolve('<rss><channel><item><title>Test</title></item></channel></rss>')
       })
 
       await rssService.searchRSSImages('tech')
@@ -394,9 +408,7 @@ describe('FreeRSSImageService', () => {
   describe('配置管理', () => {
     it('应该支持自定义新闻源', () => {
       const customSources = {
-        custom: [
-          { name: 'Custom News', rss: 'https://custom.com/rss', category: 'custom' }
-        ]
+        custom: [{ name: 'Custom News', rss: 'https://custom.com/rss', category: 'custom' }]
       }
 
       rssService.addCustomSources(customSources)
@@ -406,16 +418,9 @@ describe('FreeRSSImageService', () => {
     })
 
     it('应该验证新闻源URL', () => {
-      const validUrls = [
-        'https://example.com/rss',
-        'http://example.com/feed.xml'
-      ]
+      const validUrls = ['https://example.com/rss', 'http://example.com/feed.xml']
 
-      const invalidUrls = [
-        'not-a-url',
-        '',
-        'ftp://example.com'
-      ]
+      const invalidUrls = ['not-a-url', '', 'ftp://example.com']
 
       validUrls.forEach(url => {
         expect(rssService.isValidRSSUrl(url)).toBe(true)

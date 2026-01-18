@@ -3,9 +3,7 @@
     <div class="canvas-header">
       <h4>模板结构</h4>
       <div class="canvas-actions">
-        <button class="add-slide-btn" @click="$emit('add-slide')">
-          添加幻灯片
-        </button>
+        <button class="add-slide-btn" @click="$emit('add-slide')">添加幻灯片</button>
       </div>
     </div>
 
@@ -20,13 +18,25 @@
         <div class="slide-header">
           <span class="slide-title">幻灯片 {{ slideIndex + 1 }}</span>
           <div class="slide-actions">
-            <button class="move-up-btn" @click.stop="$emit('move-slide-up', slideIndex)" :disabled="slideIndex === 0">
+            <button
+              class="move-up-btn"
+              :disabled="slideIndex === 0"
+              @click.stop="$emit('move-slide-up', slideIndex)"
+            >
               ↑
             </button>
-            <button class="move-down-btn" @click.stop="$emit('move-slide-down', slideIndex)" :disabled="slideIndex === slides.length - 1">
+            <button
+              class="move-down-btn"
+              :disabled="slideIndex === slides.length - 1"
+              @click.stop="$emit('move-slide-down', slideIndex)"
+            >
               ↓
             </button>
-            <button class="delete-slide-btn" @click.stop="$emit('delete-slide', slideIndex)" :disabled="slides.length <= 1">
+            <button
+              class="delete-slide-btn"
+              :disabled="slides.length <= 1"
+              @click.stop="$emit('delete-slide', slideIndex)"
+            >
               ✕
             </button>
           </div>
@@ -38,25 +48,44 @@
             :key="elementIndex"
             class="canvas-element"
             :class="{ selected: isElementSelected(slideIndex, elementIndex) }"
-            @click.stop="$emit('select-element', slideIndex, elementIndex)"
             :style="getElementStyles(element)"
+            @click.stop="$emit('select-element', slideIndex, elementIndex)"
           >
             <div class="element-content" v-html="renderElementContent(element)"></div>
-            <div class="element-overlay" v-if="isElementSelected(slideIndex, elementIndex)">
+            <div v-if="isElementSelected(slideIndex, elementIndex)" class="element-overlay">
               <div class="element-actions">
-                <button class="edit-element-btn" @click.stop="$emit('edit-element', element)">编辑</button>
-                <button class="delete-element-btn" @click.stop="$emit('delete-element', slideIndex, elementIndex)">删除</button>
+                <button class="edit-element-btn" @click.stop="$emit('edit-element', element)">
+                  编辑
+                </button>
+                <button
+                  class="delete-element-btn"
+                  @click.stop="$emit('delete-element', slideIndex, elementIndex)"
+                >
+                  删除
+                </button>
               </div>
               <div class="resize-handles">
-                <div class="resize-handle nw" @mousedown="$emit('start-resize', $event, element, 'nw')"></div>
-                <div class="resize-handle ne" @mousedown="$emit('start-resize', $event, element, 'ne')"></div>
-                <div class="resize-handle sw" @mousedown="$emit('start-resize', $event, element, 'sw')"></div>
-                <div class="resize-handle se" @mousedown="$emit('start-resize', $event, element, 'se')"></div>
+                <div
+                  class="resize-handle nw"
+                  @mousedown="$emit('start-resize', $event, element, 'nw')"
+                ></div>
+                <div
+                  class="resize-handle ne"
+                  @mousedown="$emit('start-resize', $event, element, 'ne')"
+                ></div>
+                <div
+                  class="resize-handle sw"
+                  @mousedown="$emit('start-resize', $event, element, 'sw')"
+                ></div>
+                <div
+                  class="resize-handle se"
+                  @mousedown="$emit('start-resize', $event, element, 'se')"
+                ></div>
               </div>
             </div>
           </div>
 
-          <div class="drop-zone" v-if="slide.elements.length === 0">
+          <div v-if="slide.elements.length === 0" class="drop-zone">
             <div class="drop-zone-text">拖拽元素到此处</div>
           </div>
         </div>
@@ -86,11 +115,13 @@ defineEmits([
 ])
 
 const isElementSelected = (slideIndex, elementIndex) => {
-  return props.selectedElement?.slideIndex === slideIndex &&
-         props.selectedElement?.elementIndex === elementIndex
+  return (
+    props.selectedElement?.slideIndex === slideIndex &&
+    props.selectedElement?.elementIndex === elementIndex
+  )
 }
 
-const getElementStyles = (element) => {
+const getElementStyles = element => {
   return {
     position: 'absolute',
     left: `${element.x}%`,
@@ -108,12 +139,14 @@ const getElementStyles = (element) => {
   }
 }
 
-const renderElementContent = (element) => {
+const renderElementContent = element => {
   switch (element.type) {
     case 'text':
       return element.content || '文本内容'
     case 'image':
-      return element.src ? `<img src="${element.src}" alt="${element.alt || '图片'}" style="width: 100%; height: 100%; object-fit: ${element.objectFit || 'cover'};">` : '📷 图片占位符'
+      return element.src
+        ? `<img src="${element.src}" alt="${element.alt || '图片'}" style="width: 100%; height: 100%; object-fit: ${element.objectFit || 'cover'};">`
+        : '📷 图片占位符'
     case 'shape':
       return getShapeSVG(element)
     case 'chart':
@@ -123,7 +156,7 @@ const renderElementContent = (element) => {
   }
 }
 
-const getShapeSVG = (element) => {
+const getShapeSVG = element => {
   const fill = element.fill || '#007aff'
   const stroke = element.stroke || '#007aff'
   const strokeWidth = element.strokeWidth || 2
@@ -349,10 +382,26 @@ const getShapeSVG = (element) => {
   cursor: pointer;
 }
 
-.resize-handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
-.resize-handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
-.resize-handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
-.resize-handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+.resize-handle.nw {
+  top: -4px;
+  left: -4px;
+  cursor: nw-resize;
+}
+.resize-handle.ne {
+  top: -4px;
+  right: -4px;
+  cursor: ne-resize;
+}
+.resize-handle.sw {
+  bottom: -4px;
+  left: -4px;
+  cursor: sw-resize;
+}
+.resize-handle.se {
+  bottom: -4px;
+  right: -4px;
+  cursor: se-resize;
+}
 
 .drop-zone {
   position: absolute;

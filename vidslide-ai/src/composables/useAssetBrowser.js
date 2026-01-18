@@ -390,7 +390,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 处理调度策略变更
    */
-  const handleStrategyChanged = (strategy) => {
+  const handleStrategyChanged = strategy => {
     console.log('调度策略变更为:', strategy)
 
     // 保存用户偏好设置
@@ -407,7 +407,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 获取策略显示名称
    */
-  const getStrategyDisplayName = (strategy) => {
+  const getStrategyDisplayName = strategy => {
     const names = {
       speed: '速度优先',
       quality: '质量优先',
@@ -422,7 +422,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 选择素材
    */
-  const selectAsset = (asset) => {
+  const selectAsset = asset => {
     if (props.multiSelect) {
       const index = selectedAssets.value.indexOf(asset.id)
       if (index > -1) {
@@ -440,7 +440,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 下载素材
    */
-  const downloadAsset = async (asset) => {
+  const downloadAsset = async asset => {
     if (downloadingAssets.value.includes(asset.id)) return
 
     downloadingAssets.value.push(asset.id)
@@ -470,7 +470,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 处理素材操作
    */
-  const handleAssetAction = async (command) => {
+  const handleAssetAction = async command => {
     const { action, asset } = command
 
     switch (action) {
@@ -506,7 +506,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 处理下载完成事件
    */
-  const handleDownloadCompleted = (data) => {
+  const handleDownloadCompleted = data => {
     const { asset } = data
     ElMessage.success(`素材"${asset.name}"下载完成`)
 
@@ -520,7 +520,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 处理下载失败事件
    */
-  const handleDownloadFailed = (data) => {
+  const handleDownloadFailed = data => {
     const { asset, error } = data
     ElMessage.error(`素材"${asset.name}"下载失败: ${error.message}`)
 
@@ -536,7 +536,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 处理每页大小变更
    */
-  const handleSizeChange = (newSize) => {
+  const handleSizeChange = newSize => {
     pageSize.value = newSize
     currentPage.value = 1
     loadAssets()
@@ -545,7 +545,7 @@ export function useAssetBrowser(props, emit) {
   /**
    * 处理当前页变更
    */
-  const handleCurrentChange = (newPage) => {
+  const handleCurrentChange = newPage => {
     currentPage.value = newPage
     loadAssets()
   }
@@ -562,14 +562,14 @@ export function useAssetBrowser(props, emit) {
   // 监听外部属性变化
   watch(
     () => props.selectedAssets,
-    (newSelected) => {
+    newSelected => {
       selectedAssets.value = [...newSelected]
     }
   )
 
   watch(
     () => props.filterByDownloaded,
-    (newValue) => {
+    newValue => {
       showDownloadedOnly.value = newValue
       if (newValue) {
         applyFilters()

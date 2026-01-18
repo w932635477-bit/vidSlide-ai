@@ -11,7 +11,7 @@
     />
 
     <!-- 编辑模式 -->
-    <div class="editor-content" v-if="!showPreview">
+    <div v-if="!showPreview" class="editor-content">
       <EditorSidebar
         :elements="availableElements"
         :theme="templateData.theme"
@@ -93,9 +93,7 @@ const templateData = ref({
     fontFamily: 'PingFang SC, -apple-system',
     borderRadius: 8
   },
-  slides: [
-    { background: '#ffffff', transition: 'fade', elements: [] }
-  ]
+  slides: [{ background: '#ffffff', transition: 'fade', elements: [] }]
 })
 
 const showPreview = ref(false)
@@ -177,12 +175,12 @@ const addNewSlide = () => {
   hasChanges.value = true
 }
 
-const setActiveSlide = (index) => {
+const setActiveSlide = index => {
   activeSlideIndex.value = index
   selectedElement.value = null
 }
 
-const deleteSlide = (index) => {
+const deleteSlide = index => {
   if (templateData.value.slides.length > 1) {
     templateData.value.slides.splice(index, 1)
     if (activeSlideIndex.value >= templateData.value.slides.length) {
@@ -192,7 +190,7 @@ const deleteSlide = (index) => {
   }
 }
 
-const moveSlideUp = (index) => {
+const moveSlideUp = index => {
   if (index > 0) {
     const temp = templateData.value.slides[index]
     templateData.value.slides[index] = templateData.value.slides[index - 1]
@@ -202,7 +200,7 @@ const moveSlideUp = (index) => {
   }
 }
 
-const moveSlideDown = (index) => {
+const moveSlideDown = index => {
   if (index < templateData.value.slides.length - 1) {
     const temp = templateData.value.slides[index]
     templateData.value.slides[index] = templateData.value.slides[index + 1]
@@ -255,7 +253,7 @@ const deleteElement = (slideIndex, elementIndex) => {
   hasChanges.value = true
 }
 
-const editElement = (element) => {
+const editElement = element => {
   console.log('Edit element:', element)
 }
 
@@ -277,7 +275,7 @@ const startResize = (event, element, handle) => {
   event.preventDefault()
 }
 
-const handleResize = (event) => {
+const handleResize = event => {
   if (!isResizing.value || !resizeData.value) return
 
   const deltaX = event.clientX - resizeData.value.startX
@@ -291,24 +289,24 @@ const handleResize = (event) => {
 
   switch (resizeData.value.handle) {
     case 'se':
-      newWidth = Math.max(10, resizeData.value.startWidth + (deltaX / 4))
-      newHeight = Math.max(10, resizeData.value.startHeight + (deltaY / 3))
+      newWidth = Math.max(10, resizeData.value.startWidth + deltaX / 4)
+      newHeight = Math.max(10, resizeData.value.startHeight + deltaY / 3)
       break
     case 'sw':
-      newWidth = Math.max(10, resizeData.value.startWidth - (deltaX / 4))
-      newHeight = Math.max(10, resizeData.value.startHeight + (deltaY / 3))
-      newX = resizeData.value.startElemX + (deltaX / 4)
+      newWidth = Math.max(10, resizeData.value.startWidth - deltaX / 4)
+      newHeight = Math.max(10, resizeData.value.startHeight + deltaY / 3)
+      newX = resizeData.value.startElemX + deltaX / 4
       break
     case 'ne':
-      newWidth = Math.max(10, resizeData.value.startWidth + (deltaX / 4))
-      newHeight = Math.max(10, resizeData.value.startHeight - (deltaY / 3))
-      newY = resizeData.value.startElemY + (deltaY / 3)
+      newWidth = Math.max(10, resizeData.value.startWidth + deltaX / 4)
+      newHeight = Math.max(10, resizeData.value.startHeight - deltaY / 3)
+      newY = resizeData.value.startElemY + deltaY / 3
       break
     case 'nw':
-      newWidth = Math.max(10, resizeData.value.startWidth - (deltaX / 4))
-      newHeight = Math.max(10, resizeData.value.startHeight - (deltaY / 3))
-      newX = resizeData.value.startElemX + (deltaX / 4)
-      newY = resizeData.value.startElemY + (deltaY / 3)
+      newWidth = Math.max(10, resizeData.value.startWidth - deltaX / 4)
+      newHeight = Math.max(10, resizeData.value.startHeight - deltaY / 3)
+      newX = resizeData.value.startElemX + deltaX / 4
+      newY = resizeData.value.startElemY + deltaY / 3
       break
   }
 
@@ -379,7 +377,7 @@ const saveTemplate = () => {
   emit('template-saved', templateToSave)
 }
 
-const loadTemplate = (template) => {
+const loadTemplate = template => {
   templateData.value = { ...template }
   showLoadDialog.value = false
   activeSlideIndex.value = 0
@@ -415,7 +413,7 @@ const loadSavedTemplates = () => {
   }
 }
 
-const handleKeydown = (event) => {
+const handleKeydown = event => {
   if (selectedElement.value && !showPreview.value) {
     const element = selectedElement.value.element
     const step = event.shiftKey ? 10 : 1
@@ -452,9 +450,13 @@ const handleKeydown = (event) => {
   }
 }
 
-watch(templateData, () => {
-  hasChanges.value = true
-}, { deep: true })
+watch(
+  templateData,
+  () => {
+    hasChanges.value = true
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   loadSavedTemplates()

@@ -1,13 +1,13 @@
 <template>
   <div class="export-handler">
     <!-- 导出选项面板 -->
-    <div class="export-panel" v-if="showPanel">
+    <div v-if="showPanel" class="export-panel">
       <div class="panel-header">
         <h3 class="panel-title">{{ t('workspace.export.title') }}</h3>
-        <button class="close-btn" @click="closePanel" aria-label="关闭导出面板">
+        <button class="close-btn" aria-label="关闭导出面板" @click="closePanel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -29,11 +29,11 @@
             <div class="format-info">
               <h5 class="format-name">{{ format.name }}</h5>
               <p class="format-desc">{{ format.description }}</p>
-              <div class="format-limits" v-if="format.limits">
+              <div v-if="format.limits" class="format-limits">
                 <small>{{ format.limits }}</small>
               </div>
             </div>
-            <div class="format-badge" v-if="format.badge">
+            <div v-if="format.badge" class="format-badge">
               <span class="badge" :class="format.badge.type">{{ format.badge.text }}</span>
             </div>
           </div>
@@ -45,23 +45,19 @@
         <h4 class="section-title">{{ t('workspace.export.settings') }}</h4>
         <div class="settings-grid">
           <!-- 视频质量设置 -->
-          <div class="setting-item" v-if="isVideoFormat">
+          <div v-if="isVideoFormat" class="setting-item">
             <label class="setting-label">{{ t('workspace.export.quality') }}</label>
             <select v-model="exportSettings.quality" class="setting-select">
               <option value="720p">{{ t('workspace.export.quality720p') }}</option>
               <option value="1080p">{{ t('workspace.export.quality1080p') }}</option>
-              <option value="4k" v-if="isPremium">{{ t('workspace.export.quality4k') }}</option>
+              <option v-if="isPremium" value="4k">{{ t('workspace.export.quality4k') }}</option>
             </select>
           </div>
 
           <!-- 包含音频 -->
-          <div class="setting-item" v-if="isVideoFormat">
+          <div v-if="isVideoFormat" class="setting-item">
             <label class="setting-toggle">
-              <input
-                type="checkbox"
-                v-model="exportSettings.includeAudio"
-                class="toggle-input"
-              />
+              <input v-model="exportSettings.includeAudio" type="checkbox" class="toggle-input" />
               <span class="toggle-slider"></span>
               <span class="toggle-label">{{ t('workspace.export.includeAudio') }}</span>
             </label>
@@ -72,8 +68,12 @@
             <label class="setting-label">{{ t('workspace.export.watermark') }}</label>
             <select v-model="exportSettings.watermark" class="setting-select">
               <option value="none">{{ t('workspace.export.watermarkNone') }}</option>
-              <option value="light" v-if="!isPremium">{{ t('workspace.export.watermarkLight') }}</option>
-              <option value="premium" v-if="isPremium">{{ t('workspace.export.watermarkPremium') }}</option>
+              <option v-if="!isPremium" value="light">
+                {{ t('workspace.export.watermarkLight') }}
+              </option>
+              <option v-if="isPremium" value="premium">
+                {{ t('workspace.export.watermarkPremium') }}
+              </option>
             </select>
           </div>
 
@@ -81,8 +81,8 @@
           <div class="setting-item">
             <label class="setting-label">{{ t('workspace.export.filename') }}</label>
             <input
-              type="text"
               v-model="exportSettings.filename"
+              type="text"
               class="setting-input"
               :placeholder="t('workspace.export.filenamePlaceholder')"
             />
@@ -91,10 +91,10 @@
       </div>
 
       <!-- 导出预览 -->
-      <div class="preview-section" v-if="showPreview">
+      <div v-if="showPreview" class="preview-section">
         <h4 class="section-title">{{ t('workspace.export.preview') }}</h4>
         <div class="preview-content">
-          <div class="preview-video" v-if="isVideoFormat">
+          <div v-if="isVideoFormat" class="preview-video">
             <video
               ref="previewVideo"
               :src="previewSrc"
@@ -125,14 +125,21 @@
         <button class="action-btn secondary" @click="closePanel">
           {{ t('workspace.export.cancel') }}
         </button>
-        <button
-          class="action-btn primary"
-          @click="startExport"
-          :disabled="isExporting"
-        >
+        <button class="action-btn primary" :disabled="isExporting" @click="startExport">
           <svg v-if="isExporting" class="animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
-            <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+              class="opacity-25"
+            />
+            <path
+              fill="currentColor"
+              class="opacity-75"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           {{ isExporting ? t('workspace.export.exporting') : t('workspace.export.startExport') }}
         </button>
@@ -140,20 +147,17 @@
     </div>
 
     <!-- 导出触发按钮 -->
-    <button
-      v-else
-      class="export-trigger"
-      @click="openPanel"
-      :disabled="!canExport"
-    >
+    <button v-else class="export-trigger" :disabled="!canExport" @click="openPanel">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        <path
+          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        />
       </svg>
       {{ t('workspace.export.export') }}
     </button>
 
     <!-- 导出进度覆盖层 -->
-    <div class="export-progress" v-if="isExporting">
+    <div v-if="isExporting" class="export-progress">
       <div class="progress-modal">
         <div class="progress-header">
           <h3>{{ t('workspace.export.exporting') }}</h3>
@@ -163,7 +167,9 @@
           <div class="progress-fill" :style="{ width: exportProgress + '%' }"></div>
         </div>
         <div class="progress-status">{{ currentExportStep }}</div>
-        <div class="progress-time">{{ t('workspace.export.remaining') }}: {{ formatTime(estimatedTimeRemaining) }}</div>
+        <div class="progress-time">
+          {{ t('workspace.export.remaining') }}: {{ formatTime(estimatedTimeRemaining) }}
+        </div>
       </div>
     </div>
   </div>
@@ -201,12 +207,7 @@ const props = defineProps({
 })
 
 // 定义组件事件
-const emit = defineEmits([
-  'export-started',
-  'export-completed',
-  'export-cancelled',
-  'panel-closed'
-])
+const emit = defineEmits(['export-started', 'export-completed', 'export-cancelled', 'panel-closed'])
 
 // 响应式数据
 const showPanel = ref(false)
@@ -279,13 +280,13 @@ const getSelectedFormatName = () => {
 }
 
 // 工具函数
-const formatDuration = (seconds) => {
+const formatDuration = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -293,7 +294,7 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   if (seconds <= 0) return '0s'
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
@@ -315,7 +316,7 @@ const closePanel = () => {
   emit('panel-closed')
 }
 
-const selectFormat = (formatId) => {
+const selectFormat = formatId => {
   selectedFormat.value = formatId
   // 根据格式调整默认设置
   if (formatId === 'html') {
@@ -368,7 +369,6 @@ const startExport = async () => {
 
     ElMessage.success(t('workspace.export.exportSuccess'))
     closePanel()
-
   } catch (error) {
     ElMessage.error(t('workspace.export.exportFailed'))
     emit('export-failed', error)
@@ -380,12 +380,15 @@ const startExport = async () => {
 }
 
 // 监听visible属性变化
-watch(() => props.visible, (newValue) => {
-  showPanel.value = newValue
-})
+watch(
+  () => props.visible,
+  newValue => {
+    showPanel.value = newValue
+  }
+)
 
 // 监听面板关闭事件
-watch(showPanel, (newValue) => {
+watch(showPanel, newValue => {
   if (!newValue) {
     emit('panel-closed')
   }

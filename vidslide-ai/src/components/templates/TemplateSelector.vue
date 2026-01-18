@@ -13,22 +13,16 @@
         :class="{ active: selectedTemplate === template.id }"
         @click="selectTemplate(template.id)"
       >
-        <component
-:is="template.component" :width="320"
-:height="180" class="template-preview"
-/>
+        <component :is="template.component" :width="320" :height="180" class="template-preview" />
         <div class="template-info">
           <h4>{{ template.name }}</h4>
           <p>{{ template.description }}</p>
         </div>
       </div>
     </div>
-    <div
-v-if="selectedTemplate" class="selected-template"
->
+    <div v-if="selectedTemplate" class="selected-template">
       <p>已选择: {{ getSelectedTemplateName() }}</p>
-      <button
-class="confirm-btn" @click="confirmSelection">确认使用</button>
+      <button class="confirm-btn" @click="confirmSelection">确认使用</button>
     </div>
   </div>
 </template>

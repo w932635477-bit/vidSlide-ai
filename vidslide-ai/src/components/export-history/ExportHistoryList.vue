@@ -5,19 +5,15 @@
         <input
           type="checkbox"
           :checked="selectAll"
-          @change="$emit('toggle-select-all')"
           :indeterminate="isIndeterminate"
+          @change="$emit('toggle-select-all')"
         />
         <span>全选</span>
       </label>
-      <div class="selected-count" v-if="selectedCount > 0">
-        已选择 {{ selectedCount }} 项
-      </div>
-      <div class="bulk-actions" v-if="selectedCount > 0">
-        <button class="bulk-delete-btn" @click="$emit('bulk-delete')">
-          批量删除
-        </button>
-        <button class="bulk-retry-btn" @click="$emit('bulk-retry')" :disabled="!hasFailedItems">
+      <div v-if="selectedCount > 0" class="selected-count">已选择 {{ selectedCount }} 项</div>
+      <div v-if="selectedCount > 0" class="bulk-actions">
+        <button class="bulk-delete-btn" @click="$emit('bulk-delete')">批量删除</button>
+        <button class="bulk-retry-btn" :disabled="!hasFailedItems" @click="$emit('bulk-retry')">
           重试失败项
         </button>
       </div>
@@ -100,7 +96,7 @@ defineEmits([
   color: #1d1d1f;
 }
 
-.select-all input[type="checkbox"] {
+.select-all input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: #007aff;

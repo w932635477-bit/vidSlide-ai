@@ -4,37 +4,45 @@
       <input
         type="text"
         :value="searchQuery"
-        @input="$emit('update:searchQuery', $event.target.value)"
         placeholder="搜索导出记录..."
         class="search-input"
+        @input="$emit('update:searchQuery', $event.target.value)"
       />
-      <select :value="filterStatus" @change="$emit('update:filterStatus', $event.target.value)" class="filter-select">
+      <select
+        :value="filterStatus"
+        class="filter-select"
+        @change="$emit('update:filterStatus', $event.target.value)"
+      >
         <option value="all">全部状态</option>
         <option value="success">成功</option>
         <option value="failed">失败</option>
         <option value="processing">处理中</option>
       </select>
-      <select :value="filterType" @change="$emit('update:filterType', $event.target.value)" class="filter-select">
+      <select
+        :value="filterType"
+        class="filter-select"
+        @change="$emit('update:filterType', $event.target.value)"
+      >
         <option value="all">全部类型</option>
         <option value="video">视频</option>
         <option value="presentation">演示文稿</option>
         <option value="template">模板</option>
       </select>
-      <button class="clear-filters-btn" @click="$emit('clear-filters')" :disabled="!hasActiveFilters">
+      <button
+        class="clear-filters-btn"
+        :disabled="!hasActiveFilters"
+        @click="$emit('clear-filters')"
+      >
         清空筛选
       </button>
     </div>
 
     <div class="action-buttons">
-      <button class="refresh-btn" @click="$emit('refresh')">
-        刷新
-      </button>
-      <button class="cleanup-btn" @click="$emit('show-cleanup')" :disabled="totalExports === 0">
+      <button class="refresh-btn" @click="$emit('refresh')">刷新</button>
+      <button class="cleanup-btn" :disabled="totalExports === 0" @click="$emit('show-cleanup')">
         清理历史
       </button>
-      <button class="export-history-btn" @click="$emit('export-data')">
-        导出历史数据
-      </button>
+      <button class="export-history-btn" @click="$emit('export-data')">导出历史数据</button>
     </div>
   </div>
 </template>

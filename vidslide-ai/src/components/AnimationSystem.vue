@@ -20,10 +20,7 @@
       :pool-max="animationPool.maxPoolSize"
     />
 
-    <AnimationPreview
-      v-if="animationsEnabled"
-      ref="previewRef"
-    />
+    <AnimationPreview v-if="animationsEnabled" ref="previewRef" />
   </div>
 </template>
 
@@ -123,7 +120,7 @@ const updatePerformanceStats = () => {
     performanceStats.memoryUsage = performance.memory.usedJSHeapSize
   }
 
-  performanceStats.averageFPS = Math.min(60, performanceStats.frameCount % 60 + 50)
+  performanceStats.averageFPS = Math.min(60, (performanceStats.frameCount % 60) + 50)
 }
 
 const checkFeatureSupport = () => {

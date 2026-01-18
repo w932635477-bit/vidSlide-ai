@@ -45,7 +45,12 @@ export class TemplateParser {
       const defaultTemplate = this.getDefaultTemplate()
       return {
         template: defaultTemplate,
-        data: { originalContent: '', processedContent: '', metadata: {}, content: { title: '', text: '' } },
+        data: {
+          originalContent: '',
+          processedContent: '',
+          metadata: {},
+          content: { title: '', text: '' }
+        },
         confidence: defaultTemplate.confidence || 0.5,
         alternatives: []
       }
@@ -178,7 +183,9 @@ export class TemplateParser {
       [TEMPLATE_TYPES.SPLIT_SCREEN]: () => {
         // 检测对比模式
         const contrastWords = ['对比', '比较', '差异', '不同', '变化', '前后', 'vs', 'VS']
-        const contrastMatches = contrastWords.filter(word => content.toLowerCase().includes(word.toLowerCase())).length
+        const contrastMatches = contrastWords.filter(word =>
+          content.toLowerCase().includes(word.toLowerCase())
+        ).length
         return Math.min(contrastMatches * 0.3, 1.0)
       },
 

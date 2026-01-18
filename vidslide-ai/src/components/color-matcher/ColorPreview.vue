@@ -12,7 +12,7 @@
             @click="handleCanvasClick"
             @mousemove="handleCanvasMove"
           ></canvas>
-          
+
           <!-- 取色器指示器 -->
           <div
             v-if="showPicker"
@@ -74,7 +74,7 @@ const pickedColor = ref('')
 // 绘制图片到canvas
 const drawImage = () => {
   if (!props.image || !originalCanvas.value) return
-  
+
   nextTick(() => {
     const ctx = originalCanvas.value.getContext('2d')
     ctx.drawImage(props.image, 0, 0, props.canvasSize.width, props.canvasSize.height)
@@ -86,21 +86,21 @@ watch(() => props.image, drawImage, { immediate: true })
 watch(() => props.canvasSize, drawImage)
 
 // 处理canvas点击取色
-const handleCanvasClick = (event) => {
+const handleCanvasClick = event => {
   if (!originalCanvas.value) return
-  
+
   const rect = originalCanvas.value.getBoundingClientRect()
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
-  
+
   const ctx = originalCanvas.value.getContext('2d')
   const pixel = ctx.getImageData(x, y, 1, 1).data
-  
+
   const hex = rgbToHex(pixel[0], pixel[1], pixel[2])
   pickedColor.value = hex
   pickerPosition.value = { x, y }
   showPicker.value = true
-  
+
   emit('color-picked', {
     hex,
     rgb: { r: pixel[0], g: pixel[1], b: pixel[2] },
@@ -109,28 +109,33 @@ const handleCanvasClick = (event) => {
 }
 
 // 处理鼠标移动
-const handleCanvasMove = (event) => {
+const handleCanvasMove = event => {
   if (!showPicker.value) return
-  
+
   const rect = originalCanvas.value.getBoundingClientRect()
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
-  
+
   pickerPosition.value = { x, y }
 }
 
 // RGB转HEX
 const rgbToHex = (r, g, b) => {
-  return '#' + [r, g, b].map(x => {
-    const hex = x.toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-  }).join('')
+  return (
+    '#' +
+    [r, g, b]
+      .map(x => {
+        const hex = x.toString(16)
+        return hex.length === 1 ? '0' + hex : hex
+      })
+      .join('')
+  )
 }
 
 // 复制颜色
 const copyPickedColor = async () => {
   if (!pickedColor.value) return
-  
+
   try {
     await navigator.clipboard.writeText(pickedColor.value)
     ElMessage.success(`已复制颜色 ${pickedColor.value}`)

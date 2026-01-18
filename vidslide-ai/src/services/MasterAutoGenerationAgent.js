@@ -56,8 +56,8 @@ export class MasterAutoGenerationAgent {
       // === 步骤2: 智能推荐 (40% - 50%) ===
       this.updateProgress('正在推荐最佳模板...', 40, onProgress)
 
-      const template = await this.recommendTemplate(analysisResult, (progress) => {
-        this.updateProgress('推荐模板中...', 40 + progress * 0.10, onProgress)
+      const template = await this.recommendTemplate(analysisResult, progress => {
+        this.updateProgress('推荐模板中...', 40 + progress * 0.1, onProgress)
       })
 
       console.log('✅ 模板推荐完成:', template)
@@ -65,8 +65,8 @@ export class MasterAutoGenerationAgent {
       // === 步骤3: 素材匹配 (50% - 70%) ===
       this.updateProgress('正在搜索匹配素材...', 50, onProgress)
 
-      const materials = await this.matchMaterials(analysisResult, (progress) => {
-        this.updateProgress('搜索素材中...', 50 + progress * 0.20, onProgress)
+      const materials = await this.matchMaterials(analysisResult, progress => {
+        this.updateProgress('搜索素材中...', 50 + progress * 0.2, onProgress)
       })
 
       console.log('✅ 素材匹配完成:', materials.length, '个素材')
@@ -78,7 +78,7 @@ export class MasterAutoGenerationAgent {
         analysisResult,
         template,
         materials,
-        (progress) => {
+        progress => {
           this.updateProgress('组合内容中...', 70 + progress * 0.15, onProgress)
         }
       )
@@ -88,7 +88,7 @@ export class MasterAutoGenerationAgent {
       // === 步骤5: 渲染合成 (85% - 100%) ===
       this.updateProgress('正在渲染最终视频...', 85, onProgress)
 
-      const finalResult = await this.renderFinal(composition, videoFile, (progress) => {
+      const finalResult = await this.renderFinal(composition, videoFile, progress => {
         this.updateProgress('渲染中...', 85 + progress * 0.15, onProgress)
       })
 
@@ -99,7 +99,6 @@ export class MasterAutoGenerationAgent {
       this.result = finalResult
 
       return finalResult
-
     } catch (error) {
       console.error('❌ 自动生成失败:', error)
       this.isProcessing = false
@@ -120,7 +119,7 @@ export class MasterAutoGenerationAgent {
     const keyframes = await this.videoService.extractKeyframes({
       interval: 2,
       maxFrames: 50,
-      onProgress: (p) => onProgress('提取关键帧', 20 + p * 0.2)
+      onProgress: p => onProgress('提取关键帧', 20 + p * 0.2)
     })
 
     // 1.3 场景检测
@@ -129,7 +128,7 @@ export class MasterAutoGenerationAgent {
 
     // 1.4 语音识别
     onProgress('语音识别', 60)
-    const transcript = await this.videoService.recognizeSpeech((p) => {
+    const transcript = await this.videoService.recognizeSpeech(p => {
       onProgress('语音识别', 60 + p.progress * 0.002) // 60-80映射到60-64
     })
 
@@ -206,7 +205,13 @@ export class MasterAutoGenerationAgent {
       selectedTemplate = templates[0]
       console.log('⚠️ 未找到匹配模板，使用默认模板:', selectedTemplate.name || selectedTemplate.id)
     } else {
-      console.log('✅ 自动选择模板:', selectedTemplate.name || selectedTemplate.id, '(类型:', analysisResult.contentType, ')')
+      console.log(
+        '✅ 自动选择模板:',
+        selectedTemplate.name || selectedTemplate.id,
+        '(类型:',
+        analysisResult.contentType,
+        ')'
+      )
     }
 
     onProgress(100)
@@ -278,10 +283,7 @@ export class MasterAutoGenerationAgent {
     onProgress(80)
 
     // 优化时长分配
-    const optimizedScenes = this.optimizeSceneTiming(
-      scenes,
-      analysisResult.metadata.duration
-    )
+    const optimizedScenes = this.optimizeSceneTiming(scenes, analysisResult.metadata.duration)
 
     onProgress(100)
 
@@ -377,9 +379,7 @@ export class MasterAutoGenerationAgent {
       const content = sceneSentences.join('。') + '。'
 
       // 提取这段内容的关键词
-      const sceneKeywords = keywords.filter(k =>
-        content.includes(k.text || k)
-      ).slice(0, 3)
+      const sceneKeywords = keywords.filter(k => content.includes(k.text || k)).slice(0, 3)
 
       // 生成标题（使用第一个关键词或前几个字）
       const title = sceneKeywords[0]?.text || content.substring(0, 10) + '...'

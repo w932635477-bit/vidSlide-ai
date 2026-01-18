@@ -70,11 +70,7 @@
       </div>
       <template #footer>
         <el-button @click="cancelApiConfig">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="configuringApis"
-          @click="confirmApiConfig"
-        >
+        <el-button type="primary" :loading="configuringApis" @click="confirmApiConfig">
           确认配置
         </el-button>
       </template>
@@ -307,7 +303,7 @@ const clearSearch = () => {
   loadAssets()
 }
 
-const handleStrategyChanged = (strategy) => {
+const handleStrategyChanged = strategy => {
   console.log('调度策略变更为:', strategy)
   localStorage.setItem('vidslide_dispatcher_strategy', strategy)
   if (searchQuery.value.trim()) {
@@ -316,7 +312,7 @@ const handleStrategyChanged = (strategy) => {
   ElMessage.success(`已切换到${getStrategyDisplayName(strategy)}模式`)
 }
 
-const getStrategyDisplayName = (strategy) => {
+const getStrategyDisplayName = strategy => {
   const names = {
     speed: '速度优先',
     quality: '质量优先',
@@ -335,7 +331,7 @@ const applySorting = () => {
   loadAssets()
 }
 
-const selectAsset = (asset) => {
+const selectAsset = asset => {
   if (props.multiSelect) {
     const index = selectedAssets.value.indexOf(asset.id)
     if (index > -1) {
@@ -349,7 +345,7 @@ const selectAsset = (asset) => {
   emit('asset-selected', asset)
 }
 
-const previewAsset = (asset) => {
+const previewAsset = asset => {
   previewAssetData.value = asset
   previewDialogVisible.value = true
   emit('asset-previewed', asset)
@@ -360,7 +356,7 @@ const closePreview = () => {
   previewAssetData.value = null
 }
 
-const downloadAsset = async (asset) => {
+const downloadAsset = async asset => {
   if (downloadingAssets.value.includes(asset.id)) return
   downloadingAssets.value.push(asset.id)
   try {
@@ -382,7 +378,7 @@ const downloadAsset = async (asset) => {
   }
 }
 
-const handleAssetAction = async (command) => {
+const handleAssetAction = async command => {
   const { action, asset } = command
   switch (action) {
     case 'preview':
@@ -415,7 +411,7 @@ const handleAssetAction = async (command) => {
   }
 }
 
-const handleDownloadCompleted = (data) => {
+const handleDownloadCompleted = data => {
   const { asset } = data
   ElMessage.success(`素材"${asset.name}"下载完成`)
   const index = downloadingAssets.value.indexOf(asset.id)
@@ -424,7 +420,7 @@ const handleDownloadCompleted = (data) => {
   }
 }
 
-const handleDownloadFailed = (data) => {
+const handleDownloadFailed = data => {
   const { asset, error } = data
   ElMessage.error(`素材"${asset.name}"下载失败: ${error.message}`)
   const index = downloadingAssets.value.indexOf(asset.id)
@@ -433,13 +429,13 @@ const handleDownloadFailed = (data) => {
   }
 }
 
-const handleSizeChange = (newSize) => {
+const handleSizeChange = newSize => {
   pageSize.value = newSize
   currentPage.value = 1
   loadAssets()
 }
 
-const handleCurrentChange = (newPage) => {
+const handleCurrentChange = newPage => {
   currentPage.value = newPage
   loadAssets()
 }

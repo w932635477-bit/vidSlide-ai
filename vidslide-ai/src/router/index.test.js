@@ -12,7 +12,9 @@ vi.mock('../views/HomeView.vue', () => ({ default: { name: 'HomeView' } }))
 vi.mock('../views/VideoEditorView.vue', () => ({ default: { name: 'VideoEditorView' } }))
 vi.mock('../views/WorkspaceView.vue', () => ({ default: { name: 'WorkspaceView' } }))
 vi.mock('../views/HelpView.vue', () => ({ default: { name: 'HelpView' } }))
-vi.mock('../components/WegicDesignShowcase.vue', () => ({ default: { name: 'WegicDesignShowcase' } }))
+vi.mock('../components/WegicDesignShowcase.vue', () => ({
+  default: { name: 'WegicDesignShowcase' }
+}))
 
 describe('Router Configuration', () => {
   it('should export a router instance', () => {
@@ -61,15 +63,15 @@ describe('Router Configuration', () => {
     expect(router.options.history.location).toBe('/')
   })
 
-    it('should have lazy-loaded components', () => {
-      const routes = router.options.routes
+  it('should have lazy-loaded components', () => {
+    const routes = router.options.routes
 
-      routes.forEach(route => {
-        expect(typeof route.component).toBe('function')
-        // Dynamic import functions may or may not have a name property
-        expect(route.component).toBeDefined()
-      })
+    routes.forEach(route => {
+      expect(typeof route.component).toBe('function')
+      // Dynamic import functions may or may not have a name property
+      expect(route.component).toBeDefined()
     })
+  })
 
   it('should have unique route names', () => {
     const routes = router.options.routes

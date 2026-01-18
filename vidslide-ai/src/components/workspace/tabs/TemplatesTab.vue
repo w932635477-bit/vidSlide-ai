@@ -22,11 +22,11 @@ const contentType = computed(() => store.template.contentType)
 const videoDuration = computed(() => store.video.duration)
 
 // 事件处理
-const handleTemplateSelected = (template) => {
+const handleTemplateSelected = template => {
   console.log('选择模板:', template)
 }
 
-const handleTemplateConfirmed = (template) => {
+const handleTemplateConfirmed = template => {
   console.log('确认使用模板:', template)
   store.setTemplate(template)
   ElMessage.success(`已选择模板: ${template.name}`)

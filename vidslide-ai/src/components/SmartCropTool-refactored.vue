@@ -2,17 +2,10 @@
   <div class="smart-crop-tool">
     <CropToolHeader />
 
-    <ImageUploader
-      v-if="!currentImage"
-      @image-uploaded="handleImageUpload"
-    />
+    <ImageUploader v-if="!currentImage" @image-uploaded="handleImageUpload" />
 
     <div v-else class="crop-workspace">
-      <CropCanvas
-        :image="currentImage"
-        :crop-area="cropArea"
-        @update-crop="updateCropArea"
-      />
+      <CropCanvas :image="currentImage" :crop-area="cropArea" @update-crop="updateCropArea" />
 
       <CropControls
         :aspect-ratio="aspectRatio"
@@ -46,12 +39,12 @@ const cropArea = ref({ x: 0, y: 0, width: 100, height: 100 })
 const aspectRatio = ref('16:9')
 const detectionMethod = ref('auto')
 
-const handleImageUpload = (imageUrl) => {
+const handleImageUpload = imageUrl => {
   currentImage.value = imageUrl
   emit('image-uploaded', imageUrl)
 }
 
-const updateCropArea = (area) => {
+const updateCropArea = area => {
   cropArea.value = area
 }
 

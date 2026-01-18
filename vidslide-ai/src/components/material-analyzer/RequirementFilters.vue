@@ -9,11 +9,7 @@
         @change="$emit('update:selectedType', $event.target.value)"
       >
         <option value="all">全部类型</option>
-        <option
-          v-for="type in uniqueTypes"
-          :key="type"
-          :value="type"
-        >
+        <option v-for="type in uniqueTypes" :key="type" :value="type">
           {{ getTypeDisplayName(type) }}
         </option>
       </select>
@@ -34,8 +30,8 @@
 
     <button
       class="analyze-btn primary"
-      @click="$emit('analyze')"
       :disabled="isAnalyzing || !hasInputData"
+      @click="$emit('analyze')"
     >
       <span v-if="isAnalyzing" class="loading-spinner small"></span>
       {{ isAnalyzing ? '分析中...' : '重新分析' }}
@@ -69,7 +65,7 @@ defineProps({
 
 defineEmits(['update:selectedType', 'update:selectedPriority', 'analyze'])
 
-const getTypeDisplayName = (type) => {
+const getTypeDisplayName = type => {
   const names = {
     image: '图片',
     video: '视频',
@@ -149,8 +145,12 @@ const getTypeDisplayName = (type) => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .sr-only {

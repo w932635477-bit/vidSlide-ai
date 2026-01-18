@@ -1,10 +1,7 @@
 <template>
   <div class="material-requirement-analyzer" role="region">
     <!-- 分析器头部 -->
-    <AnalyzerHeader
-      :is-analyzing="isAnalyzing"
-      :analysis-progress="analysisProgress"
-    />
+    <AnalyzerHeader :is-analyzing="isAnalyzing" :analysis-progress="analysisProgress" />
 
     <!-- 需求概览 -->
     <RequirementOverview
@@ -14,11 +11,7 @@
     />
 
     <!-- 精选素材推荐 -->
-    <section
-      v-if="recommendedRecipes.length > 0"
-      class="curated-section"
-      role="complementary"
-    >
+    <section v-if="recommendedRecipes.length > 0" class="curated-section" role="complementary">
       <h3 class="section-title">💎 精选素材推荐</h3>
       <p class="section-hint">基于您的内容，我们推荐以下精选素材</p>
 
@@ -27,25 +20,19 @@
           v-for="recipe in recommendedRecipes"
           :key="recipe.id"
           class="recipe-card"
-          @click="useCuratedMaterial(recipe)"
           role="button"
           tabindex="0"
+          @click="useCuratedMaterial(recipe)"
         >
           <div class="recipe-icon">🎨</div>
           <div class="recipe-name">{{ recipe.name }}</div>
           <div class="recipe-desc">{{ recipe.description }}</div>
           <div class="recipe-tags">
-            <span
-              v-for="tag in recipe.tags.slice(0, 3)"
-              :key="tag"
-              class="tag"
-            >
+            <span v-for="tag in recipe.tags.slice(0, 3)" :key="tag" class="tag">
               {{ tag }}
             </span>
           </div>
-          <button class="use-btn" @click.stop="useCuratedMaterial(recipe)">
-            使用此素材
-          </button>
+          <button class="use-btn" @click.stop="useCuratedMaterial(recipe)">使用此素材</button>
         </div>
       </div>
     </section>
@@ -86,46 +73,28 @@
         <p>
           {{ hasInputData ? '调整筛选条件或重新分析' : '请先提供关键词或关键帧数据进行分析' }}
         </p>
-        <button
-          v-if="hasInputData"
-          class="analyze-btn primary"
-          @click="startAnalysis"
-        >
+        <button v-if="hasInputData" class="analyze-btn primary" @click="startAnalysis">
           开始分析
         </button>
       </div>
     </section>
 
     <!-- 选中需求操作面板 -->
-    <section
-      v-if="selectedRequirements.length > 0"
-      class="selected-requirements-panel"
-    >
+    <section v-if="selectedRequirements.length > 0" class="selected-requirements-panel">
       <div class="selected-summary">
         <span class="summary-label">已选择 {{ selectedRequirements.length }} 个素材需求</span>
       </div>
 
       <div class="bulk-actions">
-        <button
-          class="bulk-action-btn primary"
-          @click="searchSelectedMaterials"
-        >
+        <button class="bulk-action-btn primary" @click="searchSelectedMaterials">
           🔍 批量搜索素材
         </button>
 
-        <button
-          class="bulk-action-btn secondary"
-          @click="addSelectedToCanvas"
-        >
+        <button class="bulk-action-btn secondary" @click="addSelectedToCanvas">
           ➕ 批量添加到画布
         </button>
 
-        <button
-          class="bulk-action-btn danger"
-          @click="clearSelection"
-        >
-          🗑️ 清空选择
-        </button>
+        <button class="bulk-action-btn danger" @click="clearSelection">🗑️ 清空选择</button>
       </div>
     </section>
   </div>
@@ -332,16 +301,16 @@ const generateRecommendations = async () => {
   })
 }
 
-const inferMaterialType = (keyword) => {
+const inferMaterialType = keyword => {
   const lowerKeyword = keyword.toLowerCase()
   const typeMappings = {
-    'chart': 'chart',
-    'diagram': 'diagram',
-    'graph': 'chart',
-    'image': 'image',
-    'photo': 'image',
-    'icon': 'icon',
-    'background': 'background'
+    chart: 'chart',
+    diagram: 'diagram',
+    graph: 'chart',
+    image: 'image',
+    photo: 'image',
+    icon: 'icon',
+    background: 'background'
   }
 
   for (const [key, type] of Object.entries(typeMappings)) {
@@ -353,7 +322,7 @@ const inferMaterialType = (keyword) => {
   return 'image'
 }
 
-const selectRequirement = (requirement) => {
+const selectRequirement = requirement => {
   const index = selectedRequirements.value.findIndex(r => r.id === requirement.id)
   if (index === -1) {
     selectedRequirements.value.push(requirement)
@@ -363,15 +332,15 @@ const selectRequirement = (requirement) => {
   emit('requirement-selected', selectedRequirements.value)
 }
 
-const searchMaterial = (requirement) => {
+const searchMaterial = requirement => {
   emit('material-search-requested', requirement)
 }
 
-const addToCanvas = (requirement) => {
+const addToCanvas = requirement => {
   emit('canvas-add-requested', requirement)
 }
 
-const showRequirementDetails = (requirement) => {
+const showRequirementDetails = requirement => {
   console.log('显示详情:', requirement)
 }
 
@@ -391,7 +360,7 @@ const updateRecommendedRecipes = () => {
   recommendedRecipes.value = recipes.slice(0, 6)
 }
 
-const useCuratedMaterial = async (recipe) => {
+const useCuratedMaterial = async recipe => {
   try {
     await MaterialService.initialize()
     const material = await MaterialService.getCuratedMaterial(recipe.id)
@@ -429,18 +398,26 @@ const clearSelection = () => {
 }
 
 // Watchers
-watch(() => props.keywords, (newKeywords) => {
-  if (newKeywords.length > 0 && props.autoAnalyze) {
-    startAnalysis()
-  }
-  updateRecommendedRecipes()
-}, { deep: true, immediate: true })
+watch(
+  () => props.keywords,
+  newKeywords => {
+    if (newKeywords.length > 0 && props.autoAnalyze) {
+      startAnalysis()
+    }
+    updateRecommendedRecipes()
+  },
+  { deep: true, immediate: true }
+)
 
-watch(() => props.keyframes, (newKeyframes) => {
-  if (newKeyframes.length > 0 && props.autoAnalyze) {
-    startAnalysis()
-  }
-}, { deep: true })
+watch(
+  () => props.keyframes,
+  newKeyframes => {
+    if (newKeyframes.length > 0 && props.autoAnalyze) {
+      startAnalysis()
+    }
+  },
+  { deep: true }
+)
 
 // Lifecycle
 onMounted(() => {
@@ -453,7 +430,9 @@ onMounted(() => {
 // Expose methods
 defineExpose({
   startAnalysis,
-  clearRequirements: () => { materialRequirements.value = [] },
+  clearRequirements: () => {
+    materialRequirements.value = []
+  },
   getSelectedRequirements: () => selectedRequirements.value,
   getAllRequirements: () => materialRequirements.value
 })

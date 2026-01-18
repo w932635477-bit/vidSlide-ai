@@ -66,7 +66,7 @@ export class VideoProcessingService {
         resolve(this.videoMetadata)
       }
 
-      video.onerror = (error) => {
+      video.onerror = error => {
         reject(new Error('视频加载失败: ' + error.message))
       }
 
@@ -158,7 +158,7 @@ export class VideoProcessingService {
         resolve()
       }
 
-      const onError = (error) => {
+      const onError = error => {
         video.removeEventListener('seeked', onSeeked)
         video.removeEventListener('error', onError)
         reject(error)
@@ -208,7 +208,7 @@ export class VideoProcessingService {
     const contrastScore = Math.min(avgContrast / 255, 1)
 
     // 综合评分
-    return (brightnessScore * 0.3 + contrastScore * 0.7)
+    return brightnessScore * 0.3 + contrastScore * 0.7
   }
 
   /**
@@ -289,21 +289,18 @@ export class VideoProcessingService {
       }
 
       // 使用百度语音识别服务处理视频
-      const result = await this.baiduSpeechService.transcribeVideo(
-        this.videoFile,
-        (progress) => {
-          // 将百度服务的进度（0-100）映射到总进度的60-80区间
-          const mappedProgress = 60 + (progress.progress * 0.2)
-          this.processingProgress = mappedProgress
+      const result = await this.baiduSpeechService.transcribeVideo(this.videoFile, progress => {
+        // 将百度服务的进度（0-100）映射到总进度的60-80区间
+        const mappedProgress = 60 + progress.progress * 0.2
+        this.processingProgress = mappedProgress
 
-          if (onProgress) {
-            onProgress({
-              text: progress.text || '',
-              progress: mappedProgress
-            })
-          }
+        if (onProgress) {
+          onProgress({
+            text: progress.text || '',
+            progress: mappedProgress
+          })
         }
-      )
+      })
 
       this.transcript = result.text || ''
       this.processingProgress = 80
@@ -509,7 +506,9 @@ export class VideoProcessingService {
               endTime,
               title: `${scene.title} - 第${i + 1}部分`,
               scenes: [scene],
-              keyframes: scene.keyframes.filter(kf => kf.timestamp >= startTime && kf.timestamp <= endTime),
+              keyframes: scene.keyframes.filter(
+                kf => kf.timestamp >= startTime && kf.timestamp <= endTime
+              ),
               keywords: []
             })
           }
@@ -542,7 +541,9 @@ export class VideoProcessingService {
           endTime,
           title: `第${i + 1}部分`,
           scenes: [],
-          keyframes: this.keyframes.filter(kf => kf.timestamp >= startTime && kf.timestamp <= endTime),
+          keyframes: this.keyframes.filter(
+            kf => kf.timestamp >= startTime && kf.timestamp <= endTime
+          ),
           keywords: []
         })
       }

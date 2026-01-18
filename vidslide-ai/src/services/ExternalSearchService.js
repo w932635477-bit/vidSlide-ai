@@ -314,8 +314,12 @@ class ExternalSearchService {
       ...this.stats,
       api: apiStats,
       dispatcher: dispatcherStats,
-      externalCacheHitRate: this.stats.externalCalls > 0 ? this.stats.externalCacheHits / this.stats.externalCalls : 0,
-      dispatcherCacheHitRate: this.stats.dispatcherCalls > 0 ? this.stats.dispatcherCacheHits / this.stats.dispatcherCalls : 0
+      externalCacheHitRate:
+        this.stats.externalCalls > 0 ? this.stats.externalCacheHits / this.stats.externalCalls : 0,
+      dispatcherCacheHitRate:
+        this.stats.dispatcherCalls > 0
+          ? this.stats.dispatcherCacheHits / this.stats.dispatcherCalls
+          : 0
     }
   }
 }

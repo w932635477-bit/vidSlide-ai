@@ -10,10 +10,10 @@
         v-for="template in templates"
         :key="template.id"
         class="template-card"
-        @click="selectTemplate(template)"
         :class="{ selected: selectedTemplate?.id === template.id }"
         tabindex="0"
         :aria-label="`${template.name} - ${template.description}`"
+        @click="selectTemplate(template)"
         @keydown.enter="selectTemplate(template)"
         @keydown.space.prevent="selectTemplate(template)"
       >
@@ -22,7 +22,7 @@
             <div class="preview-icon">{{ template.icon }}</div>
             <div class="preview-layout" :class="`layout-${template.layout}`">
               <div class="layout-element main"></div>
-              <div class="layout-element secondary" v-if="template.hasSecondary"></div>
+              <div v-if="template.hasSecondary" class="layout-element secondary"></div>
             </div>
           </div>
         </div>
@@ -31,17 +31,11 @@
           <h4 class="template-name">{{ template.name }}</h4>
           <p class="template-description">{{ template.description }}</p>
           <div class="template-tags">
-            <span
-              v-for="tag in template.tags"
-              :key="tag"
-              class="template-tag"
-            >
+            <span v-for="tag in template.tags" :key="tag" class="template-tag">
               {{ tag }}
             </span>
           </div>
-          <div v-if="template.recommended" class="recommended-badge">
-            🎯 推荐
-          </div>
+          <div v-if="template.recommended" class="recommended-badge">🎯 推荐</div>
         </div>
       </div>
     </div>
@@ -49,9 +43,7 @@
     <div v-if="selectedTemplate" class="selected-info">
       <div class="selected-header">
         <h4>已选择: {{ selectedTemplate.name }}</h4>
-        <button @click="confirmSelection" class="confirm-btn">
-          确认使用
-        </button>
+        <button class="confirm-btn" @click="confirmSelection">确认使用</button>
       </div>
       <div class="template-details">
         <div class="detail-item">
@@ -61,7 +53,8 @@
           <strong>特点:</strong> {{ selectedTemplate.features.join('、') }}
         </div>
         <div class="detail-item">
-          <strong>调整范围:</strong> {{ selectedTemplate.adjustable ? '可调整文字和素材' : '预设样式' }}
+          <strong>调整范围:</strong>
+          {{ selectedTemplate.adjustable ? '可调整文字和素材' : '预设样式' }}
         </div>
       </div>
     </div>
@@ -88,19 +81,27 @@ export default {
       selectedTemplate: null,
       templates: [],
       loading: true
-    };
+    }
+  },
+  watch: {
+    contentType() {
+      this.updateRecommendations()
+    },
+    videoDuration() {
+      this.updateRecommendations()
+    }
   },
   async created() {
-    await this.loadTemplates();
+    await this.loadTemplates()
   },
   methods: {
     async loadTemplates() {
       try {
         // 初始化TemplateArchitecture
-        await TemplateArchitecture.initialize();
+        await TemplateArchitecture.initialize()
 
         // 获取所有模板
-        const allTemplates = TemplateArchitecture.getAllTemplates();
+        const allTemplates = TemplateArchitecture.getAllTemplates()
         console.log(`✅ TemplateSelector: 加载了 ${allTemplates.length} 个模板`)
 
         // 转换为UI需要的格式
@@ -116,111 +117,103 @@ export default {
           features: this.getTemplateFeatures(template),
           adjustable: template.layers.adjustable && template.layers.adjustable.length > 0,
           recommended: false
-        }));
+        }))
 
         console.log(`✅ TemplateSelector: 转换后有 ${this.templates.length} 个模板可显示`)
 
         // 更新推荐
-        this.updateRecommendations();
-        this.loading = false;
+        this.updateRecommendations()
+        this.loading = false
       } catch (error) {
-        console.error('加载模板失败:', error);
-        this.loading = false;
+        console.error('加载模板失败:', error)
+        this.loading = false
       }
     },
 
     getTemplateIcon(category) {
       const iconMap = {
-        'overlay': '📺',
-        'split': '📊',
-        'fullscreen': '🎯',
-        'grid': '📋',
-        'timeline': '⏱️',
-        'comparison': '⚖️',
-        'data': '📈',
-        'marketing': '🎬',
-        'educational': '📚',
-        'default': '📄'
-      };
-      return iconMap[category] || iconMap['default'];
+        overlay: '📺',
+        split: '📊',
+        fullscreen: '🎯',
+        grid: '📋',
+        timeline: '⏱️',
+        comparison: '⚖️',
+        data: '📈',
+        marketing: '🎬',
+        educational: '📚',
+        default: '📄'
+      }
+      return iconMap[category] || iconMap['default']
     },
 
     getTemplateTags(template) {
       // 根据模板类别生成标签
-      const tags = [template.category];
-      if (template.name.includes('画中画')) tags.push('视频', '讲解');
-      if (template.name.includes('信息')) tags.push('数据', '列表');
-      if (template.name.includes('关键词')) tags.push('关键词', '强调');
-      if (template.name.includes('文档')) tags.push('文档', '资料');
-      if (template.name.includes('标题')) tags.push('标题', '章节');
-      return tags.slice(0, 3);
+      const tags = [template.category]
+      if (template.name.includes('画中画')) tags.push('视频', '讲解')
+      if (template.name.includes('信息')) tags.push('数据', '列表')
+      if (template.name.includes('关键词')) tags.push('关键词', '强调')
+      if (template.name.includes('文档')) tags.push('文档', '资料')
+      if (template.name.includes('标题')) tags.push('标题', '章节')
+      return tags.slice(0, 3)
     },
 
     getTemplateScenes(template) {
       // 根据模板类型生成适用场景
-      const scenes = [];
-      if (template.name.includes('画中画')) scenes.push('产品介绍', '课程讲解', '功能演示');
-      else if (template.name.includes('信息')) scenes.push('数据分析', '功能对比', '要点总结');
-      else if (template.name.includes('关键词')) scenes.push('演讲稿', '要点强调', '术语解释');
-      else if (template.name.includes('文档')) scenes.push('资料分享', '文件展示', '内容预览');
-      else if (template.name.includes('标题')) scenes.push('章节标题', '主题介绍', '内容开始');
-      else scenes.push('通用场景', '内容展示', '信息传达');
-      return scenes;
+      const scenes = []
+      if (template.name.includes('画中画')) scenes.push('产品介绍', '课程讲解', '功能演示')
+      else if (template.name.includes('信息')) scenes.push('数据分析', '功能对比', '要点总结')
+      else if (template.name.includes('关键词')) scenes.push('演讲稿', '要点强调', '术语解释')
+      else if (template.name.includes('文档')) scenes.push('资料分享', '文件展示', '内容预览')
+      else if (template.name.includes('标题')) scenes.push('章节标题', '主题介绍', '内容开始')
+      else scenes.push('通用场景', '内容展示', '信息传达')
+      return scenes
     },
 
     getTemplateFeatures(template) {
       // 根据模板层级生成特性列表
-      const features = [];
-      if (template.layers.fixed) features.push('预设布局');
-      if (template.layers.dynamic) features.push('AI生成');
-      if (template.layers.adjustable) features.push('可调整');
-      return features;
+      const features = []
+      if (template.layers.fixed) features.push('预设布局')
+      if (template.layers.dynamic) features.push('AI生成')
+      if (template.layers.adjustable) features.push('可调整')
+      return features
     },
 
     updateRecommendations() {
       // 基于内容类型和视频时长更新推荐
       this.templates.forEach(template => {
-        template.recommended = this.isRecommended(template);
-      });
+        template.recommended = this.isRecommended(template)
+      })
     },
 
     isRecommended(template) {
       // 简单的推荐逻辑
       if (this.contentType === 'presentation' && template.id === 'picture-in-picture') {
-        return true;
+        return true
       }
       if (this.contentType === 'data' && template.id === 'info-card') {
-        return true;
+        return true
       }
       if (this.contentType === 'educational' && template.id === 'keyword-highlight') {
-        return true;
+        return true
       }
       if (this.videoDuration > 300 && template.id === 'document-display') {
-        return true;
+        return true
       }
-      return false;
+      return false
     },
 
     selectTemplate(template) {
-      this.selectedTemplate = template;
-      this.$emit('template-selected', template);
+      this.selectedTemplate = template
+      this.$emit('template-selected', template)
     },
 
     confirmSelection() {
       if (this.selectedTemplate) {
-        this.$emit('template-confirmed', this.selectedTemplate);
+        this.$emit('template-confirmed', this.selectedTemplate)
       }
     }
-  },
-  watch: {
-    contentType() {
-      this.updateRecommendations();
-    },
-    videoDuration() {
-      this.updateRecommendations();
-    }
   }
-};
+}
 </script>
 
 <style scoped>

@@ -68,7 +68,9 @@ class MaterialServiceTester {
   async testPresetSearch() {
     console.log('\n=== 测试3: 预置素材搜索 ===')
     try {
-      const result = await MaterialService.localSearch.searchPresetMaterials('technology', { limit: 5 })
+      const result = await MaterialService.localSearch.searchPresetMaterials('technology', {
+        limit: 5
+      })
       this.recordTest(
         '预置素材搜索',
         result && result.materials && result.materials.length > 0,
@@ -161,11 +163,7 @@ class MaterialServiceTester {
     console.log('\n=== 测试8: 精选素材服务 ===')
     try {
       const library = MaterialService.browseCuratedLibrary()
-      this.recordTest(
-        '精选素材库',
-        library && library.length > 0,
-        `配方总数: ${library.length}`
-      )
+      this.recordTest('精选素材库', library && library.length > 0, `配方总数: ${library.length}`)
 
       const stats = MaterialService.getCuratedLibraryStats()
       this.recordTest(
@@ -192,11 +190,7 @@ class MaterialServiceTester {
       )
 
       const cacheStats = await MaterialService.getCacheStats()
-      this.recordTest(
-        '缓存统计',
-        cacheStats !== null,
-        '缓存统计获取成功'
-      )
+      this.recordTest('缓存统计', cacheStats !== null, '缓存统计获取成功')
     } catch (error) {
       this.recordTest('统计服务', false, error.message)
     }
@@ -238,20 +232,12 @@ class MaterialServiceTester {
       const { isChineseQuery } = await import('./materialConverters.js')
       const isChinese1 = isChineseQuery('科技')
       const isChinese2 = isChineseQuery('technology')
-      this.recordTest(
-        '中文检测',
-        isChinese1 === true && isChinese2 === false,
-        '中文检测正常'
-      )
+      this.recordTest('中文检测', isChinese1 === true && isChinese2 === false, '中文检测正常')
 
       // 测试图片分类
       const { categorizeImage } = await import('./materialConverters.js')
       const category = categorizeImage({ title: 'technology background', description: '' })
-      this.recordTest(
-        '图片分类',
-        category === '科技',
-        `分类结果: ${category}`
-      )
+      this.recordTest('图片分类', category === '科技', `分类结果: ${category}`)
     } catch (error) {
       this.recordTest('工具函数', false, error.message)
     }
@@ -302,7 +288,7 @@ class MaterialServiceTester {
    */
   async runAllTests() {
     console.log('🧪 开始MaterialService重构验证测试...\n')
-    console.log('=' .repeat(60))
+    console.log('='.repeat(60))
 
     const startTime = Date.now()
 

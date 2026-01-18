@@ -42,14 +42,14 @@ export const templateRegistry = {
   'picture-in-picture': pictureInPictureTemplate,
   'info-card': infoCardTemplate,
   'keyword-highlight': keywordHighlightTemplate,
-  'timeline': timelineTemplate,
+  timeline: timelineTemplate,
   'split-screen': splitScreenTemplate,
   'dialog-popup': dialogPopupTemplate,
   'chart-analysis': chartAnalysisTemplate,
   'document-display': documentDisplayTemplate,
-  'minimalist': minimalistTemplate,
+  minimalist: minimalistTemplate,
   'speaker-focus': speakerFocusTemplate,
-  'educational': educationalTemplate,
+  educational: educationalTemplate,
   'product-showcase': productShowcaseTemplate,
 
   // 短视频模板 (8个)
@@ -88,9 +88,7 @@ export function getTemplateById(id) {
  * 根据类别获取模板
  */
 export function getTemplatesByCategory(category) {
-  return Object.values(templateRegistry).filter(
-    template => template.category === category
-  )
+  return Object.values(templateRegistry).filter(template => template.category === category)
 }
 
 /**

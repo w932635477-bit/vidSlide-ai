@@ -18,12 +18,12 @@
       :can-delete-track="selectedTrackId !== null"
       @toggle-play="togglePlay"
       @reset="stop"
-      @update:currentTime="updateCurrentTime"
+      @update:current-time="updateCurrentTime"
       @update:zoom="updateZoom"
       @add-track="addTrack"
       @delete-track="deleteSelectedTrack"
-      @update:snapEnabled="snapEnabled = $event"
-      @update:snapInterval="snapInterval = $event"
+      @update:snap-enabled="snapEnabled = $event"
+      @update:snap-interval="snapInterval = $event"
     />
 
     <!-- 时间轴主体区域 -->
@@ -37,7 +37,7 @@
             :zoom="zoomLevel"
             :pixels-per-second="pixelsPerSecond"
             :keyframes="allKeyframes"
-            @update:currentTime="updateCurrentTime"
+            @update:current-time="updateCurrentTime"
             @playhead-drag-start="handlePlayheadDragStart"
             @keyframe-click="handleKeyframeClick"
           />
@@ -71,9 +71,7 @@
               <template #image>
                 <div style="font-size: 48px">🎬</div>
               </template>
-              <el-button type="primary" @click="addTrack">
-                添加第一个轨道
-              </el-button>
+              <el-button type="primary" @click="addTrack"> 添加第一个轨道 </el-button>
             </el-empty>
           </div>
         </div>
@@ -223,10 +221,10 @@ const togglePlay = () => {
 
 const play = () => {
   if (isPlaying.value) return
-  
+
   isPlaying.value = true
   emit('play-started')
-  
+
   playInterval.value = setInterval(() => {
     currentTime.value += 1 / props.frameRate
     if (currentTime.value >= props.totalTime) {
@@ -238,7 +236,7 @@ const play = () => {
 
 const pause = () => {
   if (!isPlaying.value) return
-  
+
   isPlaying.value = false
   clearInterval(playInterval.value)
   emit('play-paused')
@@ -252,15 +250,15 @@ const stop = () => {
   emit('play-stopped')
 }
 
-const updateCurrentTime = (time) => {
-  currentTime.value = snapEnabled.value 
-    ? Math.round(time / snapInterval.value) * snapInterval.value 
+const updateCurrentTime = time => {
+  currentTime.value = snapEnabled.value
+    ? Math.round(time / snapInterval.value) * snapInterval.value
     : time
   emit('time-changed', currentTime.value)
 }
 
 // 缩放控制
-const updateZoom = (newZoom) => {
+const updateZoom = newZoom => {
   zoomLevel.value = Math.max(0.5, Math.min(3, newZoom))
 }
 
@@ -275,14 +273,14 @@ const addTrack = () => {
     locked: false,
     clips: []
   }
-  
+
   tracks.value.push(newTrack)
   emit('track-added', newTrack)
 }
 
 const deleteSelectedTrack = () => {
   if (!selectedTrackId.value) return
-  
+
   const index = tracks.value.findIndex(t => t.id === selectedTrackId.value)
   if (index !== -1) {
     const track = tracks.value[index]
@@ -293,7 +291,7 @@ const deleteSelectedTrack = () => {
   }
 }
 
-const selectTrack = (trackId) => {
+const selectTrack = trackId => {
   selectedTrackId.value = trackId
 }
 
@@ -304,14 +302,14 @@ const updateTrackName = (trackId, name) => {
   }
 }
 
-const toggleTrackVisibility = (trackId) => {
+const toggleTrackVisibility = trackId => {
   const track = tracks.value.find(t => t.id === trackId)
   if (track) {
     track.visible = !track.visible
   }
 }
 
-const toggleTrackLock = (trackId) => {
+const toggleTrackLock = trackId => {
   const track = tracks.value.find(t => t.id === trackId)
   if (track) {
     track.locked = !track.locked
@@ -319,13 +317,13 @@ const toggleTrackLock = (trackId) => {
 }
 
 // 片段管理方法
-const selectClip = (clip) => {
+const selectClip = clip => {
   selectedClipId.value = clip.id
   selectedKeyframeId.value = null
   emit('clip-selected', clip)
 }
 
-const deleteClip = (clipId) => {
+const deleteClip = clipId => {
   tracks.value.forEach(track => {
     const index = track.clips.findIndex(c => c.id === clipId)
     if (index !== -1) {
@@ -363,62 +361,64 @@ const handleClipResizeStart = ({ clip, event, trackId }) => {
 
 const handleDropClip = ({ trackId, time }) => {
   if (!dragData.value) return
-  
+
   const track = tracks.value.find(t => t.id === trackId)
   if (!track) return
-  
+
   // 移动片段到新位置
   if (dragData.value.type === 'clip') {
     const clip = dragData.value.clip
     const duration = clip.endTime - clip.startTime
-    clip.startTime = snapEnabled.value 
-      ? Math.round(time / snapInterval.value) * snapInterval.value 
+    clip.startTime = snapEnabled.value
+      ? Math.round(time / snapInterval.value) * snapInterval.value
       : time
     clip.endTime = clip.startTime + duration
     emit('clip-updated', clip)
   }
-  
+
   isDragging.value = false
   dragData.value = null
 }
 
 // 播放头拖拽
-const handlePlayheadDragStart = (event) => {
-  const handleMouseMove = (e) => {
+const handlePlayheadDragStart = event => {
+  const handleMouseMove = e => {
     const rect = event.target.closest('.timeline-ruler').getBoundingClientRect()
     const offsetX = e.clientX - rect.left
-    const time = Math.max(0, Math.min(props.totalTime, 
-      offsetX / (pixelsPerSecond.value * zoomLevel.value)))
+    const time = Math.max(
+      0,
+      Math.min(props.totalTime, offsetX / (pixelsPerSecond.value * zoomLevel.value))
+    )
     updateCurrentTime(time)
   }
-  
+
   const handleMouseUp = () => {
     document.removeEventListener('mousemove', handleMouseMove)
     document.removeEventListener('mouseup', handleMouseUp)
   }
-  
+
   document.addEventListener('mousemove', handleMouseMove)
   document.addEventListener('mouseup', handleMouseUp)
 }
 
 // 关键帧管理
-const handleKeyframeClick = (keyframe) => {
+const handleKeyframeClick = keyframe => {
   selectedKeyframeId.value = keyframe.id
   emit('keyframe-selected', keyframe)
 }
 
 const addKeyframeAtCurrentTime = () => {
   if (!selectedClip.value) return
-  
+
   const track = tracks.value.find(t => t.id === selectedClip.value.trackId)
   const clip = track?.clips.find(c => c.id === selectedClip.value.id)
-  
+
   if (!clip) return
-  
+
   if (!clip.keyframes) {
     clip.keyframes = []
   }
-  
+
   const newKeyframe = {
     id: `keyframe-${Date.now()}`,
     time: currentTime.value,
@@ -426,17 +426,17 @@ const addKeyframeAtCurrentTime = () => {
     value: 1,
     easing: 'linear'
   }
-  
+
   clip.keyframes.push(newKeyframe)
   emit('keyframe-updated', newKeyframe)
 }
 
-const deleteKeyframe = (index) => {
+const deleteKeyframe = index => {
   if (!selectedClip.value) return
-  
+
   const track = tracks.value.find(t => t.id === selectedClip.value.trackId)
   const clip = track?.clips.find(c => c.id === selectedClip.value.id)
-  
+
   if (clip?.keyframes) {
     clip.keyframes.splice(index, 1)
   }
@@ -477,11 +477,14 @@ onUnmounted(() => {
 })
 
 // 监听props变化
-watch(() => props.initialTracks, (newTracks) => {
-  if (newTracks.length > 0) {
-    tracks.value = newTracks
+watch(
+  () => props.initialTracks,
+  newTracks => {
+    if (newTracks.length > 0) {
+      tracks.value = newTracks
+    }
   }
-})
+)
 </script>
 
 <style scoped>

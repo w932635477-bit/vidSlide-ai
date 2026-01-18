@@ -10,19 +10,10 @@
   - 支持策略切换
 -->
 <template>
-  <div
-class="dispatcher-status" role="region"
-aria-label="智能调度器状态"
->
+  <div class="dispatcher-status" role="region" aria-label="智能调度器状态">
     <!-- 调度状态指示器 -->
-    <div
-v-if="lastDecision" class="status-indicator"
-role="status" aria-live="polite"
->
-      <el-tag
-:type="getDecisionType(lastDecision)" size="small"
-class="decision-tag"
->
+    <div v-if="lastDecision" class="status-indicator" role="status" aria-live="polite">
+      <el-tag :type="getDecisionType(lastDecision)" size="small" class="decision-tag">
         <el-icon class="tag-icon">
           <component :is="getDecisionIcon(lastDecision)" />
         </el-icon>
@@ -35,9 +26,7 @@ class="decision-tag"
     </div>
 
     <!-- 平台选择状态 -->
-    <div
-v-if="lastDecision && lastDecision.platforms.length > 0" class="platform-status"
->
+    <div v-if="lastDecision && lastDecision.platforms.length > 0" class="platform-status">
       <span class="platform-label">推荐平台:</span>
       <el-tag
         v-for="platform in lastDecision.platforms"
@@ -52,25 +41,16 @@ v-if="lastDecision && lastDecision.platforms.length > 0" class="platform-status"
     </div>
 
     <!-- 翻译状态 -->
-    <div
-v-if="lastDecision && lastDecision.translation" class="translation-status"
->
-      <el-tooltip
-:content="`原文: ${lastDecision.translation.original}`" placement="top"
->
+    <div v-if="lastDecision && lastDecision.translation" class="translation-status">
+      <el-tooltip :content="`原文: ${lastDecision.translation.original}`" placement="top">
         <span class="translation-text"> 🌐 {{ lastDecision.translation.translated }} </span>
       </el-tooltip>
     </div>
 
     <!-- 用户控制面板 -->
     <div class="control-panel">
-      <el-dropdown
-trigger="click" @command="handleStrategyChange"
->
-        <el-button
-size="small" type="link"
-class="control-button" aria-label="调度策略设置"
->
+      <el-dropdown trigger="click" @command="handleStrategyChange">
+        <el-button size="small" type="link" class="control-button" aria-label="调度策略设置">
           <el-icon>
             <Setting />
           </el-icon>
@@ -127,7 +107,9 @@ class="control-button" aria-label="调度策略设置"
             </div>
             <div class="stat-item">
               <span class="stat-label">平均响应时间</span>
-              <span class="stat-value">{{ (performanceStats.totalTime?.avg || 0).toFixed(1) }}ms</span>
+              <span class="stat-value"
+                >{{ (performanceStats.totalTime?.avg || 0).toFixed(1) }}ms</span
+              >
             </div>
             <div class="stat-item">
               <span class="stat-label">缓存大小</span>
@@ -135,7 +117,9 @@ class="control-button" aria-label="调度策略设置"
             </div>
             <div class="stat-item">
               <span class="stat-label">缓存命中率</span>
-              <span class="stat-value">{{ ((performanceStats.cacheHitRate || 0) * 100).toFixed(1) }}%</span>
+              <span class="stat-value"
+                >{{ ((performanceStats.cacheHitRate || 0) * 100).toFixed(1) }}%</span
+              >
             </div>
           </div>
         </div>
@@ -182,8 +166,7 @@ class="control-button" aria-label="调度策略设置"
 
       <template #footer>
         <el-button @click="clearPerformanceData"> 清空统计 </el-button>
-        <el-button
-type="primary" @click="showPerformanceModal = false"> 确定 </el-button>
+        <el-button type="primary" @click="showPerformanceModal = false"> 确定 </el-button>
       </template>
     </el-dialog>
   </div>

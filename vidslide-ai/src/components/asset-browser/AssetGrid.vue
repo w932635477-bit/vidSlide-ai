@@ -21,9 +21,7 @@
         <el-button v-if="hasSearch" type="primary" @click="$emit('clear-search')">
           清除搜索
         </el-button>
-        <el-button v-else type="primary" @click="$emit('load-popular')">
-          浏览热门素材
-        </el-button>
+        <el-button v-else type="primary" @click="$emit('load-popular')"> 浏览热门素材 </el-button>
       </el-empty>
     </div>
 

@@ -198,9 +198,9 @@ export class SceneDetector {
 
     // 统计RGB直方图
     for (let i = 0; i < data.length; i += 4) {
-      const r = Math.floor(data[i] / 256 * bins)
-      const g = Math.floor(data[i + 1] / 256 * bins)
-      const b = Math.floor(data[i + 2] / 256 * bins)
+      const r = Math.floor((data[i] / 256) * bins)
+      const g = Math.floor((data[i + 1] / 256) * bins)
+      const b = Math.floor((data[i + 2] / 256) * bins)
 
       histogram[r]++
       histogram[bins + g]++
@@ -383,7 +383,7 @@ export class SceneDetector {
         resolve()
       }
 
-      const onError = (error) => {
+      const onError = error => {
         video.removeEventListener('seeked', onSeeked)
         video.removeEventListener('error', onError)
         reject(error)

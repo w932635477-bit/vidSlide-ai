@@ -1,26 +1,16 @@
 <template>
   <header class="tool-header" role="banner">
     <h2 id="color-matcher-heading">🎨 色彩匹配工具</h2>
-    <p class="tool-description">
-      智能分析图片色彩，生成协调的配色方案和调色建议
-    </p>
+    <p class="tool-description">智能分析图片色彩，生成协调的配色方案和调色建议</p>
 
     <!-- 处理状态显示 -->
-    <div
-      v-if="isProcessing"
-      class="processing-status"
-      role="status"
-      aria-live="polite"
-    >
+    <div v-if="isProcessing" class="processing-status" role="status" aria-live="polite">
       <div class="status-indicator">
         <div class="loading-spinner"></div>
         <span>{{ processingMessage }}</span>
       </div>
       <div class="progress-bar">
-        <div
-          class="progress-fill"
-          :style="{ width: processingProgress + '%' }"
-        ></div>
+        <div class="progress-fill" :style="{ width: processingProgress + '%' }"></div>
       </div>
     </div>
   </header>
@@ -93,8 +83,12 @@ defineProps({
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .progress-bar {

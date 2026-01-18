@@ -1,9 +1,5 @@
 <template>
-  <section
-    class="requirements-overview"
-    role="complementary"
-    aria-labelledby="overview-heading"
-  >
+  <section class="requirements-overview" role="complementary" aria-labelledby="overview-heading">
     <h3 id="overview-heading" class="sr-only">素材需求概览</h3>
 
     <div class="overview-stats">

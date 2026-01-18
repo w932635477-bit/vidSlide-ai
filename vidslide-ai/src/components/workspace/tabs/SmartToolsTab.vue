@@ -13,10 +13,7 @@
     </div>
 
     <div class="tool-content">
-      <component
-        :is="currentToolComponent"
-        v-if="currentToolComponent"
-      />
+      <component :is="currentToolComponent" v-if="currentToolComponent" />
     </div>
   </div>
 </template>
@@ -41,11 +38,11 @@ const tools = [
 
 // 工具组件映射
 const toolComponents = {
-  'crop': defineAsyncComponent(() => import('@/components/SmartCropTool.vue')),
-  'background': defineAsyncComponent(() => import('@/components/BackgroundRemover.vue')),
-  'color': defineAsyncComponent(() => import('@/components/ColorMatcher.vue')),
-  'keyframe': defineAsyncComponent(() => import('@/components/KeyframeExtractor.vue')),
-  'ppt': defineAsyncComponent(() => import('@/components/PptGenerator.vue'))
+  crop: defineAsyncComponent(() => import('@/components/SmartCropTool.vue')),
+  background: defineAsyncComponent(() => import('@/components/BackgroundRemover.vue')),
+  color: defineAsyncComponent(() => import('@/components/ColorMatcher.vue')),
+  keyframe: defineAsyncComponent(() => import('@/components/KeyframeExtractor.vue')),
+  ppt: defineAsyncComponent(() => import('@/components/PptGenerator.vue'))
 }
 
 // 当前工具组件
@@ -54,7 +51,7 @@ const currentToolComponent = computed(() => {
 })
 
 // 选择工具
-const selectTool = (toolId) => {
+const selectTool = toolId => {
   store.setActiveSmartTool(toolId)
 }
 </script>

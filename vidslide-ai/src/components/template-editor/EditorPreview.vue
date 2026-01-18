@@ -1,22 +1,30 @@
 <template>
   <div class="preview-content">
     <div class="preview-controls">
-      <button class="prev-slide-btn" @click="$emit('prev-slide')" :disabled="currentSlideIndex === 0">
+      <button
+        class="prev-slide-btn"
+        :disabled="currentSlideIndex === 0"
+        @click="$emit('prev-slide')"
+      >
         ← 上一页
       </button>
       <span class="slide-counter">{{ currentSlideIndex + 1 }} / {{ slides.length }}</span>
-      <button class="next-slide-btn" @click="$emit('next-slide')" :disabled="currentSlideIndex === slides.length - 1">
+      <button
+        class="next-slide-btn"
+        :disabled="currentSlideIndex === slides.length - 1"
+        @click="$emit('next-slide')"
+      >
         下一页 →
       </button>
     </div>
 
     <div class="preview-canvas">
       <div
-        class="preview-slide"
         v-for="(slide, index) in slides"
-        :key="index"
-        :style="{ background: slide.background }"
         v-show="index === currentSlideIndex"
+        :key="index"
+        class="preview-slide"
+        :style="{ background: slide.background }"
       >
         <div
           v-for="(element, elementIndex) in slide.elements"
@@ -39,7 +47,7 @@ defineProps({
 
 defineEmits(['prev-slide', 'next-slide'])
 
-const getElementStyles = (element) => {
+const getElementStyles = element => {
   return {
     position: 'absolute',
     left: `${element.x}%`,
@@ -57,12 +65,14 @@ const getElementStyles = (element) => {
   }
 }
 
-const renderElementContent = (element) => {
+const renderElementContent = element => {
   switch (element.type) {
     case 'text':
       return element.content || '文本内容'
     case 'image':
-      return element.src ? `<img src="${element.src}" alt="${element.alt || '图片'}" style="width: 100%; height: 100%; object-fit: ${element.objectFit || 'cover'};">` : '📷 图片占位符'
+      return element.src
+        ? `<img src="${element.src}" alt="${element.alt || '图片'}" style="width: 100%; height: 100%; object-fit: ${element.objectFit || 'cover'};">`
+        : '📷 图片占位符'
     case 'shape':
       return getShapeSVG(element)
     case 'chart':
@@ -72,7 +82,7 @@ const renderElementContent = (element) => {
   }
 }
 
-const getShapeSVG = (element) => {
+const getShapeSVG = element => {
   const fill = element.fill || '#007aff'
   const stroke = element.stroke || '#007aff'
   const strokeWidth = element.strokeWidth || 2

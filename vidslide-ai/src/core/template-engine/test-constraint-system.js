@@ -39,10 +39,7 @@ function testTextValidation() {
   const system = new ConstraintSystem()
 
   // 测试1: 文字长度过长
-  const result1 = system.validateAdjustments(
-    { text: 'a'.repeat(300) },
-    TEMPLATE_TYPES.DIALOG_POPUP
-  )
+  const result1 = system.validateAdjustments({ text: 'a'.repeat(300) }, TEMPLATE_TYPES.DIALOG_POPUP)
   assert(
     result1.violations.some(v => v.type === 'TEXT_LENGTH'),
     '文字长度过长应产生违规'
@@ -53,26 +50,17 @@ function testTextValidation() {
     { text: '这是一段正常的文字内容' },
     TEMPLATE_TYPES.DIALOG_POPUP
   )
-  assert(
-    !result2.violations.some(v => v.type === 'TEXT_LENGTH'),
-    '正常文字长度不应产生违规'
-  )
+  assert(!result2.violations.some(v => v.type === 'TEXT_LENGTH'), '正常文字长度不应产生违规')
 
   // 测试3: 字体大小验证
-  const result3 = system.validateAdjustments(
-    { fontSize: 8 },
-    TEMPLATE_TYPES.DIALOG_POPUP
-  )
+  const result3 = system.validateAdjustments({ fontSize: 8 }, TEMPLATE_TYPES.DIALOG_POPUP)
   assert(
     result3.violations.some(v => v.type === 'FONT_SIZE_OUT_OF_RANGE'),
     '字体过小应产生违规'
   )
 
   // 测试4: 字体大小正常
-  const result4 = system.validateAdjustments(
-    { fontSize: 16 },
-    TEMPLATE_TYPES.DIALOG_POPUP
-  )
+  const result4 = system.validateAdjustments({ fontSize: 16 }, TEMPLATE_TYPES.DIALOG_POPUP)
   assert(
     !result4.violations.some(v => v.type === 'FONT_SIZE_OUT_OF_RANGE'),
     '正常字体大小不应产生违规'
@@ -111,10 +99,7 @@ function testColorValidation() {
     },
     TEMPLATE_TYPES.DIALOG_POPUP
   )
-  assert(
-    !result2.violations.some(v => v.type === 'CONTRAST_RATIO'),
-    '正常对比度不应产生违规'
-  )
+  assert(!result2.violations.some(v => v.type === 'CONTRAST_RATIO'), '正常对比度不应产生违规')
 
   // 测试3: 避免的颜色组合
   const result3 = system.validateAdjustments(
@@ -164,10 +149,7 @@ function testSizeValidation() {
     },
     TEMPLATE_TYPES.DIALOG_POPUP
   )
-  assert(
-    !result2.violations.some(v => v.type === 'SIZE_TOO_SMALL'),
-    '正常尺寸不应产生违规'
-  )
+  assert(!result2.violations.some(v => v.type === 'SIZE_TOO_SMALL'), '正常尺寸不应产生违规')
 
   // 测试3: 位置无效
   const result3 = system.validateAdjustments(
@@ -188,10 +170,7 @@ function testSizeValidation() {
     },
     TEMPLATE_TYPES.DIALOG_POPUP
   )
-  assert(
-    !result4.violations.some(v => v.type === 'POSITION_INVALID'),
-    '有效位置不应产生违规'
-  )
+  assert(!result4.violations.some(v => v.type === 'POSITION_INVALID'), '有效位置不应产生违规')
 }
 
 /**
@@ -304,7 +283,11 @@ function testComplianceReport() {
     fontSize: 8
   }
   const validationResult = system.validateAdjustments(adjustments, TEMPLATE_TYPES.DIALOG_POPUP)
-  const report = system.generateComplianceReport(adjustments, TEMPLATE_TYPES.DIALOG_POPUP, validationResult)
+  const report = system.generateComplianceReport(
+    adjustments,
+    TEMPLATE_TYPES.DIALOG_POPUP,
+    validationResult
+  )
 
   assert(report.timestamp !== undefined, '报告应包含时间戳')
   assert(report.templateType === TEMPLATE_TYPES.DIALOG_POPUP, '报告应包含模板类型')
@@ -374,7 +357,13 @@ function runAllTests() {
 }
 
 // 导出测试函数
-export { runAllTests, testTextValidation, testColorValidation, testSizeValidation, testUXValidation }
+export {
+  runAllTests,
+  testTextValidation,
+  testColorValidation,
+  testSizeValidation,
+  testUXValidation
+}
 
 // 如果直接运行此文件，执行所有测试
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -10,7 +10,9 @@ const backupFile = path.join(__dirname, '../TemplateArchitecture.js.backup')
 const content = fs.readFileSync(backupFile, 'utf-8')
 
 // 提取所有模板定义
-const templateMatches = content.matchAll(/this\.templates\.set\('([^']+)',\s*(\{[\s\S]*?\n\s{4}\})\)/g)
+const templateMatches = content.matchAll(
+  /this\.templates\.set\('([^']+)',\s*(\{[\s\S]*?\n\s{4}\})\)/g
+)
 
 const templates = []
 for (const match of templateMatches) {
@@ -22,11 +24,30 @@ console.log(`找到 ${templates.length} 个模板`)
 
 // 模板分类
 const categories = {
-  basic: ['picture-in-picture', 'info-card', 'keyword-highlight', 'timeline', 'split-screen', 
-          'dialog-popup', 'chart-analysis', 'document-display', 'minimalist', 'speaker-focus', 
-          'educational', 'product-showcase'],
-  'short-video': ['douyin-marketing', 'traffic-acquisition', 'ad-performance', 'personal-ip', 
-                  'fan-engagement', 'knowledge-sharing', 'comparison-review', 'data-storytelling'],
+  basic: [
+    'picture-in-picture',
+    'info-card',
+    'keyword-highlight',
+    'timeline',
+    'split-screen',
+    'dialog-popup',
+    'chart-analysis',
+    'document-display',
+    'minimalist',
+    'speaker-focus',
+    'educational',
+    'product-showcase'
+  ],
+  'short-video': [
+    'douyin-marketing',
+    'traffic-acquisition',
+    'ad-performance',
+    'personal-ip',
+    'fan-engagement',
+    'knowledge-sharing',
+    'comparison-review',
+    'data-storytelling'
+  ],
   ppt: ['ppt-title-slide', 'ppt-bullet-points', 'ppt-big-number', 'ppt-comparison', 'ppt-quote']
 }
 
@@ -42,7 +63,7 @@ templates.forEach(({ id, definition }) => {
   }
 
   // 转换为驼峰命名
-  const fileName = id.replace(/-([a-z])/g, (g) => g[1].toUpperCase()) + 'Template.js'
+  const fileName = id.replace(/-([a-z])/g, g => g[1].toUpperCase()) + 'Template.js'
   const filePath = path.join(__dirname, category, fileName)
 
   // 生成文件内容

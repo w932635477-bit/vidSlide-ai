@@ -35,11 +35,7 @@
           </div>
         </div>
         <div class="chat-input">
-          <input
-            type="text"
-            placeholder="输入您的问题..."
-            @keyup.enter="sendMessage"
-          />
+          <input type="text" placeholder="输入您的问题..." @keyup.enter="sendMessage" />
           <button class="send-btn">发送</button>
         </div>
       </div>
@@ -80,13 +76,13 @@ const suggestions = ref([
 ])
 
 // 应用建议
-const applySuggestion = (suggestion) => {
+const applySuggestion = suggestion => {
   ElMessage.info(`正在应用: ${suggestion.title}`)
   console.log('应用建议:', suggestion)
 }
 
 // 发送消息
-const sendMessage = (event) => {
+const sendMessage = event => {
   const message = event.target.value.trim()
   if (message) {
     console.log('发送消息:', message)

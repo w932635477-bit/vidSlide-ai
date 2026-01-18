@@ -14,15 +14,11 @@ export function useProjectManagement() {
     try {
       // 如果当前项目有未保存的更改，提示用户
       if (store.project.isDirty) {
-        await ElMessageBox.confirm(
-          '当前项目有未保存的更改，是否继续？',
-          '提示',
-          {
-            confirmButtonText: '继续',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
+        await ElMessageBox.confirm('当前项目有未保存的更改，是否继续？', '提示', {
+          confirmButtonText: '继续',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
       }
 
       // 重置工作区
@@ -46,7 +42,7 @@ export function useProjectManagement() {
       input.type = 'file'
       input.accept = '.vidslide,.json'
 
-      input.onchange = async (e) => {
+      input.onchange = async e => {
         const file = e.target.files[0]
         if (!file) return
 

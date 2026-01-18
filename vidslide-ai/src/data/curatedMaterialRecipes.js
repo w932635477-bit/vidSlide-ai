@@ -413,15 +413,31 @@ export function getRecommendedRecipes(context) {
   // 根据关键词判断类别
   const keywordStr = keywords.join(' ').toLowerCase()
 
-  if (keywordStr.includes('商务') || keywordStr.includes('business') || keywordStr.includes('会议')) {
+  if (
+    keywordStr.includes('商务') ||
+    keywordStr.includes('business') ||
+    keywordStr.includes('会议')
+  ) {
     category = 'business'
-  } else if (keywordStr.includes('数据') || keywordStr.includes('data') || keywordStr.includes('图表')) {
+  } else if (
+    keywordStr.includes('数据') ||
+    keywordStr.includes('data') ||
+    keywordStr.includes('图表')
+  ) {
     category = 'dataVisualization'
-  } else if (keywordStr.includes('教育') || keywordStr.includes('education') || keywordStr.includes('学习')) {
+  } else if (
+    keywordStr.includes('教育') ||
+    keywordStr.includes('education') ||
+    keywordStr.includes('学习')
+  ) {
     category = 'education'
   } else if (keywordStr.includes('背景') || keywordStr.includes('background')) {
     category = 'backgrounds'
-  } else if (keywordStr.includes('科技') || keywordStr.includes('technology') || keywordStr.includes('ai')) {
+  } else if (
+    keywordStr.includes('科技') ||
+    keywordStr.includes('technology') ||
+    keywordStr.includes('ai')
+  ) {
     category = 'technology'
   }
 

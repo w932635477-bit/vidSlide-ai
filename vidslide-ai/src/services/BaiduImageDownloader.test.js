@@ -74,7 +74,7 @@ describe('BaiduImageDownloader', () => {
         { images: [{ url: 'image2.jpg', title: 'Landscape 1' }] }
       ]
 
-      mockBaiduService.searchImages.mockImplementation((keyword) => {
+      mockBaiduService.searchImages.mockImplementation(keyword => {
         const index = keywords.indexOf(keyword)
         return Promise.resolve(mockResults[index] || { images: [] })
       })
@@ -104,7 +104,7 @@ describe('BaiduImageDownloader', () => {
 
       // Mock Promise.allSettled to control concurrency
       const originalPromiseAllSettled = Promise.allSettled
-      Promise.allSettled = vi.fn().mockImplementation((promises) => {
+      Promise.allSettled = vi.fn().mockImplementation(promises => {
         expect(promises.length).toBeLessThanOrEqual(downloader.config.maxConcurrentDownloads)
         return originalPromiseAllSettled(promises)
       })

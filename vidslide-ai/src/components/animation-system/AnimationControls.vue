@@ -5,7 +5,11 @@
     <!-- 动画开关 -->
     <div class="control-group">
       <label>
-        <input v-model="localEnabled" type="checkbox" @change="$emit('update:enabled', localEnabled)" />
+        <input
+          v-model="localEnabled"
+          type="checkbox"
+          @change="$emit('update:enabled', localEnabled)"
+        />
         启用动画效果
       </label>
     </div>
@@ -23,7 +27,11 @@
     <!-- 时序同步控制 -->
     <div v-if="enabled" class="control-group">
       <label>
-        <input :checked="syncEnabled" type="checkbox" @change="$emit('update:syncEnabled', $event.target.checked)" />
+        <input
+          :checked="syncEnabled"
+          type="checkbox"
+          @change="$emit('update:syncEnabled', $event.target.checked)"
+        />
         启用时序同步
       </label>
     </div>
@@ -45,13 +53,22 @@ const props = defineProps({
   syncEnabled: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:enabled', 'update:speed', 'update:syncEnabled', 'test-text', 'test-pip'])
+const emit = defineEmits([
+  'update:enabled',
+  'update:speed',
+  'update:syncEnabled',
+  'test-text',
+  'test-pip'
+])
 
 const localEnabled = ref(props.enabled)
 
-watch(() => props.enabled, (newVal) => {
-  localEnabled.value = newVal
-})
+watch(
+  () => props.enabled,
+  newVal => {
+    localEnabled.value = newVal
+  }
+)
 </script>
 
 <style scoped>

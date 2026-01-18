@@ -117,7 +117,10 @@ export class ColorValidator extends BaseValidator {
     const colorConstraints = this.constraints
     const brightness = this.calculateBrightness(color)
 
-    if (brightness < colorConstraints.brightness.min || brightness > colorConstraints.brightness.max) {
+    if (
+      brightness < colorConstraints.brightness.min ||
+      brightness > colorConstraints.brightness.max
+    ) {
       this.addSuggestion(suggestions, {
         type: 'BRIGHTNESS',
         field: fieldName,
@@ -229,10 +232,15 @@ export class ColorValidator extends BaseValidator {
    * @returns {string} HEX颜色值
    */
   rgbToHex(r, g, b) {
-    return '#' + [r, g, b].map(x => {
-      const hex = x.toString(16)
-      return hex.length === 1 ? '0' + hex : hex
-    }).join('')
+    return (
+      '#' +
+      [r, g, b]
+        .map(x => {
+          const hex = x.toString(16)
+          return hex.length === 1 ? '0' + hex : hex
+        })
+        .join('')
+    )
   }
 
   /**
@@ -257,8 +265,8 @@ export class ColorValidator extends BaseValidator {
     const rgb = this.hexToRgb(color)
     if (!rgb) return color
 
-    const adjust = (value) => {
-      const adjusted = value + (amount * 255)
+    const adjust = value => {
+      const adjusted = value + amount * 255
       return Math.max(0, Math.min(255, Math.round(adjusted)))
     }
 

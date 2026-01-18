@@ -14,43 +14,43 @@
       @update:property-panel-collapsed="propertyPanelCollapsed = $event"
       @update:timeline-height="timelineHeight = $event"
     >
-    <!-- Header Slot -->
-    <template #header>
-      <WorkspaceHeader />
-    </template>
+      <!-- Header Slot -->
+      <template #header>
+        <WorkspaceHeader />
+      </template>
 
-    <!-- Asset Panel Slot -->
-    <template #asset-panel>
-      <AssetPanel
-        :projects="testProjects"
-        :videos="testVideos"
-        :images="testImages"
-        :audios="testAudios"
-        :can-generate="canGenerate"
-        @auto-generate="handleAutoGenerate"
-        @open-project="handleOpenProject"
-        @upload-video="handleUploadVideo"
-        @upload-image="handleUploadImage"
-        @upload-audio="handleUploadAudio"
-        @select-asset="handleSelectAsset"
-      />
-    </template>
+      <!-- Asset Panel Slot -->
+      <template #asset-panel>
+        <AssetPanel
+          :projects="testProjects"
+          :videos="testVideos"
+          :images="testImages"
+          :audios="testAudios"
+          :can-generate="canGenerate"
+          @auto-generate="handleAutoGenerate"
+          @open-project="handleOpenProject"
+          @upload-video="handleUploadVideo"
+          @upload-image="handleUploadImage"
+          @upload-audio="handleUploadAudio"
+          @select-asset="handleSelectAsset"
+        />
+      </template>
 
-    <!-- Preview Canvas Slot -->
-    <template #preview-canvas>
-      <PreviewCanvas />
-    </template>
+      <!-- Preview Canvas Slot -->
+      <template #preview-canvas>
+        <PreviewCanvas />
+      </template>
 
-    <!-- Property Panel Slot -->
-    <template #property-panel>
-      <PropertyPanel />
-    </template>
+      <!-- Property Panel Slot -->
+      <template #property-panel>
+        <PropertyPanel />
+      </template>
 
-    <!-- Timeline Slot -->
-    <template #timeline>
-      <TimelinePanel />
-    </template>
-  </WorkspaceLayout>
+      <!-- Timeline Slot -->
+      <template #timeline>
+        <TimelinePanel />
+      </template>
+    </WorkspaceLayout>
   </div>
 </template>
 
@@ -151,7 +151,7 @@ const handleAutoGenerate = () => {
   console.log('一键自动生成')
 }
 
-const handleOpenProject = (project) => {
+const handleOpenProject = project => {
   ElMessage.info(`打开项目: ${project.name}`)
   console.log('打开项目:', project)
 }
@@ -171,7 +171,7 @@ const handleUploadAudio = () => {
   console.log('上传音频')
 }
 
-const handleSelectAsset = (asset) => {
+const handleSelectAsset = asset => {
   ElMessage.success(`选中素材: ${asset.name}`)
   console.log('选中素材:', asset)
 }

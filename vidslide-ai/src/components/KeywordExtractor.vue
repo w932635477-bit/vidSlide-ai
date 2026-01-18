@@ -1,45 +1,24 @@
 <template>
-  <div
-    class="keyword-extractor"
-    role="region"
-    aria-labelledby="keyword-heading"
-  >
+  <div class="keyword-extractor" role="region" aria-labelledby="keyword-heading">
     <!-- 关键词提取标题区域 -->
-    <header
-      class="extractor-header"
-      role="banner"
-    >
+    <header class="extractor-header" role="banner">
       <h2 id="keyword-heading">🔍 关键词提取</h2>
-      <p class="extractor-description">
-        智能分析视频内容，提取关键主题词和概念
-      </p>
+      <p class="extractor-description">智能分析视频内容，提取关键主题词和概念</p>
 
       <!-- 提取状态显示 -->
-      <div
-        v-if="isExtracting"
-        class="extraction-status"
-        role="status"
-        aria-live="polite"
-      >
+      <div v-if="isExtracting" class="extraction-status" role="status" aria-live="polite">
         <div class="status-indicator">
           <div class="loading-spinner"></div>
           <span>正在分析关键词...</span>
         </div>
         <div class="progress-bar">
-          <div
-            class="progress-fill"
-            :style="{ width: extractionProgress + '%' }"
-          ></div>
+          <div class="progress-fill" :style="{ width: extractionProgress + '%' }"></div>
         </div>
       </div>
     </header>
 
     <!-- 关键词展示区域 -->
-    <section
-      class="keywords-section"
-      role="main"
-      aria-labelledby="keywords-list-heading"
-    >
+    <section class="keywords-section" role="main" aria-labelledby="keywords-list-heading">
       <h3 id="keywords-list-heading" class="sr-only">关键词列表</h3>
 
       <!-- 关键词统计信息 -->
@@ -69,12 +48,12 @@
             'medium-importance': keyword.importance >= 0.5 && keyword.importance < 0.8,
             'low-importance': keyword.importance < 0.5
           }"
-          @click="selectKeyword(keyword)"
-          @keydown.enter="selectKeyword(keyword)"
-          @keydown.space="selectKeyword(keyword)"
           role="button"
           tabindex="0"
           :aria-label="`选择关键词 ${keyword.text}，重要性 ${(keyword.importance * 100).toFixed(1)}%`"
+          @click="selectKeyword(keyword)"
+          @keydown.enter="selectKeyword(keyword)"
+          @keydown.space="selectKeyword(keyword)"
         >
           <!-- 关键词文本 -->
           <span class="keyword-text">{{ keyword.text }}</span>
@@ -82,52 +61,68 @@
           <!-- 重要性指示器 -->
           <div class="importance-indicator">
             <div class="importance-bar">
-              <div
-                class="importance-fill"
-                :style="{ width: (keyword.importance * 100) + '%' }"
-              ></div>
+              <div class="importance-fill" :style="{ width: keyword.importance * 100 + '%' }"></div>
             </div>
-            <span class="importance-value">
-              {{ (keyword.importance * 100).toFixed(1) }}%
-            </span>
+            <span class="importance-value"> {{ (keyword.importance * 100).toFixed(1) }}% </span>
           </div>
 
           <!-- 关键词操作按钮 -->
           <div class="keyword-actions">
             <button
               class="action-btn search-btn"
-              @click.stop="searchWithKeyword(keyword)"
               :aria-label="`使用关键词 ${keyword.text} 搜索素材`"
               title="搜索相关素材"
+              @click.stop="searchWithKeyword(keyword)"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
               </svg>
             </button>
 
             <button
               class="action-btn edit-btn"
-              @click.stop="editKeyword(keyword)"
               :aria-label="`编辑关键词 ${keyword.text}`"
               title="编辑关键词"
+              @click.stop="editKeyword(keyword)"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5Z"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5Z" />
               </svg>
             </button>
 
             <button
               class="action-btn delete-btn"
-              @click.stop="removeKeyword(keyword)"
               :aria-label="`删除关键词 ${keyword.text}`"
               title="删除关键词"
+              @click.stop="removeKeyword(keyword)"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18"/>
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
               </svg>
             </button>
           </div>
@@ -144,15 +139,18 @@
       </div>
 
       <!-- 空状态 -->
-      <div
-        v-if="keywords.length === 0 && !isExtracting"
-        class="empty-state"
-        role="status"
-      >
+      <div v-if="keywords.length === 0 && !isExtracting" class="empty-state" role="status">
         <div class="empty-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
           </svg>
         </div>
         <h3>暂无关键词</h3>
@@ -179,9 +177,9 @@
           >
             {{ keyword.text }}
             <button
-              @click="deselectKeyword(keyword)"
               :aria-label="`取消选择关键词 ${keyword.text}`"
               class="tag-remove-btn"
+              @click="deselectKeyword(keyword)"
             >
               ×
             </button>
@@ -192,26 +190,21 @@
       <div class="bulk-actions">
         <button
           class="bulk-action-btn primary"
-          @click="searchSelectedKeywords"
           :disabled="selectedKeywords.length === 0"
+          @click="searchSelectedKeywords"
         >
           🔍 批量搜索素材
         </button>
 
         <button
           class="bulk-action-btn secondary"
-          @click="exportKeywords"
           :disabled="selectedKeywords.length === 0"
+          @click="exportKeywords"
         >
           📤 导出关键词
         </button>
 
-        <button
-          class="bulk-action-btn danger"
-          @click="clearSelection"
-        >
-          🗑️ 清空选择
-        </button>
+        <button class="bulk-action-btn danger" @click="clearSelection">🗑️ 清空选择</button>
       </div>
     </section>
   </div>
@@ -305,7 +298,6 @@ const startKeywordExtraction = async () => {
     extractionProgress.value = 100
 
     emit('extraction-completed', mockKeywords)
-
   } catch (error) {
     console.error('关键词提取失败:', error)
     // 处理错误状态
@@ -315,7 +307,7 @@ const startKeywordExtraction = async () => {
   }
 }
 
-const selectKeyword = (keyword) => {
+const selectKeyword = keyword => {
   const index = selectedKeywords.value.findIndex(k => k.text === keyword.text)
   if (index === -1) {
     selectedKeywords.value.push(keyword)
@@ -325,7 +317,7 @@ const selectKeyword = (keyword) => {
   emit('keyword-selected', selectedKeywords.value)
 }
 
-const deselectKeyword = (keyword) => {
+const deselectKeyword = keyword => {
   const index = selectedKeywords.value.findIndex(k => k.text === keyword.text)
   if (index !== -1) {
     selectedKeywords.value.splice(index, 1)
@@ -333,7 +325,7 @@ const deselectKeyword = (keyword) => {
   }
 }
 
-const searchWithKeyword = (keyword) => {
+const searchWithKeyword = keyword => {
   emit('search-requested', [keyword])
 }
 
@@ -341,7 +333,7 @@ const searchSelectedKeywords = () => {
   emit('search-requested', selectedKeywords.value)
 }
 
-const editKeyword = (keyword) => {
+const editKeyword = keyword => {
   // 实现关键词编辑功能
   const newText = prompt('编辑关键词:', keyword.text)
   if (newText && newText.trim() !== keyword.text) {
@@ -349,7 +341,7 @@ const editKeyword = (keyword) => {
   }
 }
 
-const removeKeyword = (keyword) => {
+const removeKeyword = keyword => {
   const index = keywords.value.findIndex(k => k.text === keyword.text)
   if (index !== -1) {
     keywords.value.splice(index, 1)
@@ -367,7 +359,7 @@ const removeKeyword = (keyword) => {
 
 const exportKeywords = () => {
   const dataStr = JSON.stringify(selectedKeywords.value, null, 2)
-  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
+  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
 
   const exportFileDefaultName = `keywords-${new Date().toISOString().split('T')[0]}.json`
 
@@ -383,17 +375,23 @@ const clearSelection = () => {
 }
 
 // Watchers
-watch(() => props.videoSrc, (newSrc) => {
-  if (newSrc && props.autoExtract) {
-    startKeywordExtraction()
+watch(
+  () => props.videoSrc,
+  newSrc => {
+    if (newSrc && props.autoExtract) {
+      startKeywordExtraction()
+    }
   }
-})
+)
 
-watch(() => props.textContent, (newContent) => {
-  if (newContent && props.autoExtract) {
-    startKeywordExtraction()
+watch(
+  () => props.textContent,
+  newContent => {
+    if (newContent && props.autoExtract) {
+      startKeywordExtraction()
+    }
   }
-})
+)
 
 // Lifecycle
 onMounted(() => {
@@ -405,7 +403,9 @@ onMounted(() => {
 // Expose methods for parent component
 defineExpose({
   startKeywordExtraction,
-  clearKeywords: () => { keywords.value = [] },
+  clearKeywords: () => {
+    keywords.value = []
+  },
   getSelectedKeywords: () => selectedKeywords.value,
   getAllKeywords: () => keywords.value
 })
@@ -477,8 +477,12 @@ defineExpose({
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .progress-bar {

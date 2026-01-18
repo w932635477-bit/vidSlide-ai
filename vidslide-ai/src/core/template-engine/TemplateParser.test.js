@@ -108,7 +108,9 @@ describe('TemplateParser', () => {
         const result = parser.parseContent(content)
         expect(result.template).toBeDefined()
         // 模板可能不是精确匹配，但应该是一个有效的模板
-        expect(Object.values(TEMPLATE_TYPES)).toContain(result.template.type || result.template.name)
+        expect(Object.values(TEMPLATE_TYPES)).toContain(
+          result.template.type || result.template.name
+        )
       })
     })
 
@@ -189,7 +191,9 @@ describe('TemplateParser', () => {
 
       // 如果有限制，应该只返回允许的模板类型
       if (result.validation && result.validation.allowedTypes) {
-        expect(result.validation.allowedTypes).toContain(result.template.type || result.template.name)
+        expect(result.validation.allowedTypes).toContain(
+          result.template.type || result.template.name
+        )
       }
     })
   })
@@ -210,7 +214,9 @@ describe('TemplateParser', () => {
       if (result.alternatives.length > 1) {
         // 检查是否按置信度降序排序
         for (let i = 1; i < result.alternatives.length; i++) {
-          expect(result.alternatives[i - 1].confidence).toBeGreaterThanOrEqual(result.alternatives[i].confidence)
+          expect(result.alternatives[i - 1].confidence).toBeGreaterThanOrEqual(
+            result.alternatives[i].confidence
+          )
         }
       }
     })

@@ -38,12 +38,7 @@ const REQUIRED_MODULES = {
     {
       path: 'src/services/IntelligentDispatcher.js',
       description: '智能素材调度器',
-      interfaces: [
-        'async initialize(',
-        'async dispatch(',
-        'selectStrategy(',
-        'selectPlatforms('
-      ]
+      interfaces: ['async initialize(', 'async dispatch(', 'selectStrategy(', 'selectPlatforms(']
     },
     {
       path: 'src/services/TemplateRecommender.js',
@@ -71,12 +66,7 @@ const REQUIRED_MODULES = {
     {
       path: 'src/services/utils/IntelligentDispatcher/KeywordAnalyzer.js',
       description: '关键词分析器',
-      interfaces: [
-        'analyze(',
-        'countChineseChars(',
-        'countEnglishChars(',
-        'matchPatterns('
-      ]
+      interfaces: ['analyze(', 'countChineseChars(', 'countEnglishChars(', 'matchPatterns(']
     },
     {
       path: 'src/services/utils/IntelligentDispatcher/PlatformEvaluator.js',
@@ -111,12 +101,7 @@ const REQUIRED_MODULES = {
       path: 'src/components/MaterialRequirementAnalyzer.vue',
       description: '素材需求分析组件',
       mustImport: ['MaterialService', 'IntelligentDispatcher'],
-      mustHave: [
-        'analyzeRequirements',
-        'searchMaterial',
-        'materialRequirements',
-        'handleSearch'
-      ]
+      mustHave: ['analyzeRequirements', 'searchMaterial', 'materialRequirements', 'handleSearch']
     },
     {
       path: 'src/components/DispatcherStatus.vue',
@@ -331,10 +316,7 @@ class WorkflowValidator {
     console.log('\n🔗 组件集成检查')
     console.log('-'.repeat(60))
 
-    const componentsAndViews = [
-      ...REQUIRED_MODULES.components,
-      ...REQUIRED_MODULES.views
-    ]
+    const componentsAndViews = [...REQUIRED_MODULES.components, ...REQUIRED_MODULES.views]
 
     for (const component of componentsAndViews) {
       const fullPath = join(this.projectRoot, component.path)

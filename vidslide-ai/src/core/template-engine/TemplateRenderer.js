@@ -64,11 +64,31 @@ export class TemplateRenderer {
    */
   initializeRenderers() {
     return {
-      [TEMPLATE_TYPES.DIALOG_POPUP]: new DialogPopupRenderer(this.canvas, this.ctx, this.visualEffects),
-      [TEMPLATE_TYPES.TIMELINE_DISPLAY]: new TimelineDisplayRenderer(this.canvas, this.ctx, this.visualEffects),
-      [TEMPLATE_TYPES.SPLIT_SCREEN]: new SplitScreenRenderer(this.canvas, this.ctx, this.visualEffects),
-      [TEMPLATE_TYPES.CHART_ANALYSIS]: new ChartAnalysisRenderer(this.canvas, this.ctx, this.visualEffects),
-      [TEMPLATE_TYPES.EMPHASIS_FOCUS]: new EmphasisFocusRenderer(this.canvas, this.ctx, this.visualEffects)
+      [TEMPLATE_TYPES.DIALOG_POPUP]: new DialogPopupRenderer(
+        this.canvas,
+        this.ctx,
+        this.visualEffects
+      ),
+      [TEMPLATE_TYPES.TIMELINE_DISPLAY]: new TimelineDisplayRenderer(
+        this.canvas,
+        this.ctx,
+        this.visualEffects
+      ),
+      [TEMPLATE_TYPES.SPLIT_SCREEN]: new SplitScreenRenderer(
+        this.canvas,
+        this.ctx,
+        this.visualEffects
+      ),
+      [TEMPLATE_TYPES.CHART_ANALYSIS]: new ChartAnalysisRenderer(
+        this.canvas,
+        this.ctx,
+        this.visualEffects
+      ),
+      [TEMPLATE_TYPES.EMPHASIS_FOCUS]: new EmphasisFocusRenderer(
+        this.canvas,
+        this.ctx,
+        this.visualEffects
+      )
     }
   }
 
@@ -279,7 +299,8 @@ export class TemplateRenderer {
     this.renderStats.lastRenderTime = renderTime
     this.renderStats.totalRenders++
 
-    const totalTime = this.renderStats.averageRenderTime * (this.renderStats.totalRenders - 1) + renderTime
+    const totalTime =
+      this.renderStats.averageRenderTime * (this.renderStats.totalRenders - 1) + renderTime
     this.renderStats.averageRenderTime = totalTime / this.renderStats.totalRenders
 
     this.performanceMonitor.recordRenderTime(renderTime)

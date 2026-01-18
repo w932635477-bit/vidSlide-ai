@@ -6,12 +6,76 @@
 class QualityEvaluator {
   constructor() {
     this.industryMap = {
-      科技: ['technology', 'tech', 'digital', 'innovation', 'ai', 'software', 'hardware', '数字', '创新', '智能'],
-      教育: ['education', 'learning', 'teaching', 'school', 'university', 'student', '学习', '教学', '学校', '大学'],
-      金融: ['finance', 'money', 'banking', 'investment', 'stock', 'economy', '金融', '投资', '银行', '经济'],
-      医疗: ['medical', 'health', 'healthcare', 'hospital', 'doctor', 'medicine', '医疗', '健康', '医院', '医生'],
-      商务: ['business', 'office', 'meeting', 'corporate', 'professional', '商务', '办公', '会议', '企业'],
-      旅游: ['travel', 'tourism', 'vacation', 'destination', 'hotel', '旅游', '度假', '酒店', '景点'],
+      科技: [
+        'technology',
+        'tech',
+        'digital',
+        'innovation',
+        'ai',
+        'software',
+        'hardware',
+        '数字',
+        '创新',
+        '智能'
+      ],
+      教育: [
+        'education',
+        'learning',
+        'teaching',
+        'school',
+        'university',
+        'student',
+        '学习',
+        '教学',
+        '学校',
+        '大学'
+      ],
+      金融: [
+        'finance',
+        'money',
+        'banking',
+        'investment',
+        'stock',
+        'economy',
+        '金融',
+        '投资',
+        '银行',
+        '经济'
+      ],
+      医疗: [
+        'medical',
+        'health',
+        'healthcare',
+        'hospital',
+        'doctor',
+        'medicine',
+        '医疗',
+        '健康',
+        '医院',
+        '医生'
+      ],
+      商务: [
+        'business',
+        'office',
+        'meeting',
+        'corporate',
+        'professional',
+        '商务',
+        '办公',
+        '会议',
+        '企业'
+      ],
+      旅游: [
+        'travel',
+        'tourism',
+        'vacation',
+        'destination',
+        'hotel',
+        '旅游',
+        '度假',
+        '酒店',
+        '景点'
+      ],
       美食: ['food', 'restaurant', 'cuisine', 'cooking', 'dining', '美食', '餐厅', '烹饪', '饮食'],
       时尚: ['fashion', 'style', 'clothing', 'design', 'trend', '时尚', '服装', '设计', '潮流'],
       体育: ['sports', 'fitness', 'exercise', 'athlete', 'game', '体育', '健身', '运动', '比赛'],
@@ -19,10 +83,27 @@ class QualityEvaluator {
     }
 
     this.specializedTerms = [
-      'elon', 'musk', 'tesla', 'spacex', '马斯克', '特斯拉', 'SpaceX',
-      '华为', '小米', '腾讯', '阿里巴巴', '字节跳动',
-      'trump', 'biden', 'putin', 'zelenskyy',
-      '奥运', '世锦赛', '欧冠', 'NBA', 'CBA'
+      'elon',
+      'musk',
+      'tesla',
+      'spacex',
+      '马斯克',
+      '特斯拉',
+      'SpaceX',
+      '华为',
+      '小米',
+      '腾讯',
+      '阿里巴巴',
+      '字节跳动',
+      'trump',
+      'biden',
+      'putin',
+      'zelenskyy',
+      '奥运',
+      '世锦赛',
+      '欧冠',
+      'NBA',
+      'CBA'
     ]
   }
 
@@ -47,7 +128,8 @@ class QualityEvaluator {
     }
 
     // 规则2: 平均匹配质量太低
-    const avgScore = materials.reduce((sum, m) => sum + (m.relevanceScore || 0), 0) / materials.length
+    const avgScore =
+      materials.reduce((sum, m) => sum + (m.relevanceScore || 0), 0) / materials.length
     if (avgScore < 0.3) {
       return {
         shouldFetchExternal: true,
@@ -125,7 +207,8 @@ class QualityEvaluator {
 
     // 如果调度器置信度很高，遵循调度器推荐
     if (dispatchDecision.confidence > 0.8) {
-      const hasGoodLocalResults = materials.length >= 3 && materials.some(m => (m.relevanceScore || 0) > 0.7)
+      const hasGoodLocalResults =
+        materials.length >= 3 && materials.some(m => (m.relevanceScore || 0) > 0.7)
 
       if (!hasGoodLocalResults) {
         return {
@@ -300,7 +383,7 @@ class QualityEvaluator {
     const commonIndustries = [...keywordIndustries].filter(ind => materialIndustries.has(ind))
 
     const isMatch = commonIndustries.length > 0
-    const confidence = isMatch ? 0.6 + (commonIndustries.length * 0.1) : 0
+    const confidence = isMatch ? 0.6 + commonIndustries.length * 0.1 : 0
 
     return {
       isMatch,

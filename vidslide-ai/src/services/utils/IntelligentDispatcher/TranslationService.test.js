@@ -12,10 +12,11 @@ describe('TranslationService', () => {
     // 默认 mock fetch 返回成功响应
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        trans_result: [{ dst: 'translated text' }],
-        error_code: 0
-      })
+      json: () =>
+        Promise.resolve({
+          trans_result: [{ dst: 'translated text' }],
+          error_code: 0
+        })
     })
   })
 

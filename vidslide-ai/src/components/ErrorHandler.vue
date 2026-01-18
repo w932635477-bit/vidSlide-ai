@@ -1,14 +1,14 @@
 <template>
   <div class="error-handler">
     <!-- 全局错误覆盖层 -->
-    <div class="error-overlay" v-if="hasGlobalError" @click.self="clearGlobalError">
+    <div v-if="hasGlobalError" class="error-overlay" @click.self="clearGlobalError">
       <div class="error-modal">
         <div class="error-header">
           <div class="error-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15"/>
-              <line x1="9" y1="9" x2="15" y2="15"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
           </div>
           <div class="error-info">
@@ -17,7 +17,7 @@
           </div>
         </div>
 
-        <div class="error-details" v-if="globalError.details">
+        <div v-if="globalError.details" class="error-details">
           <details>
             <summary>{{ t('workspace.error.showDetails') }}</summary>
             <pre class="error-stack">{{ globalError.details }}</pre>
@@ -28,18 +28,10 @@
           <button class="action-btn secondary" @click="clearGlobalError">
             {{ t('workspace.error.close') }}
           </button>
-          <button
-            v-if="globalError.canRetry"
-            class="action-btn primary"
-            @click="retryLastAction"
-          >
+          <button v-if="globalError.canRetry" class="action-btn primary" @click="retryLastAction">
             {{ t('workspace.error.retry') }}
           </button>
-          <button
-            v-if="globalError.showReport"
-            class="action-btn secondary"
-            @click="reportError"
-          >
+          <button v-if="globalError.showReport" class="action-btn secondary" @click="reportError">
             {{ t('workspace.error.report') }}
           </button>
         </div>
@@ -59,22 +51,30 @@
         :class="`severity-${error.severity || 'error'}`"
       >
         <div class="error-icon">
-          <svg v-if="error.severity === 'warning'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-            <line x1="12" y1="9" x2="12" y2="13"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          <svg
+            v-if="error.severity === 'warning'"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+            />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
         </div>
 
         <div class="error-content">
           <div class="error-title">{{ error.title || getErrorTitle(error.type) }}</div>
           <div class="error-message">{{ error.message }}</div>
-          <div class="error-actions" v-if="error.actions">
+          <div v-if="error.actions" class="error-actions">
             <button
               v-for="action in error.actions"
               :key="action.id"
@@ -87,14 +87,10 @@
           </div>
         </div>
 
-        <button
-          class="dismiss-btn"
-          @click="dismissError(error)"
-          aria-label="关闭错误提示"
-        >
+        <button class="dismiss-btn" aria-label="关闭错误提示" @click="dismissError(error)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -106,8 +102,8 @@
         <h4>{{ t('workspace.error.history') }}</h4>
         <button class="close-history" @click="showErrorHistory = false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -137,8 +133,8 @@
         <h4>{{ t('workspace.error.stats') }}</h4>
         <button class="close-stats" @click="showStats = false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
@@ -189,12 +185,7 @@ const props = defineProps({
 })
 
 // 定义组件事件
-const emit = defineEmits([
-  'error-added',
-  'error-resolved',
-  'error-retried',
-  'stats-requested'
-])
+const emit = defineEmits(['error-added', 'error-resolved', 'error-retried', 'stats-requested'])
 
 // 响应式数据
 const globalError = ref(null)
@@ -249,11 +240,11 @@ const errorTypes = {
 }
 
 // 工具函数
-const getErrorTitle = (type) => {
+const getErrorTitle = type => {
   return errorTypes[type]?.title || t('workspace.error.unknown.title')
 }
 
-const formatTime = (timestamp) => {
+const formatTime = timestamp => {
   const date = new Date(timestamp)
   return date.toLocaleString()
 }
@@ -263,7 +254,7 @@ const generateErrorId = () => {
 }
 
 // 主要方法
-const addError = (errorConfig) => {
+const addError = errorConfig => {
   const error = {
     id: generateErrorId(),
     timestamp: Date.now(),
@@ -272,7 +263,10 @@ const addError = (errorConfig) => {
     message: errorConfig.message,
     details: errorConfig.details,
     severity: errorConfig.severity || errorTypes[errorConfig.type]?.severity || 'error',
-    canRetry: errorConfig.canRetry !== undefined ? errorConfig.canRetry : errorTypes[errorConfig.type]?.canRetry,
+    canRetry:
+      errorConfig.canRetry !== undefined
+        ? errorConfig.canRetry
+        : errorTypes[errorConfig.type]?.canRetry,
     actions: errorConfig.actions,
     autoHide: errorConfig.autoHide !== undefined ? errorConfig.autoHide : props.autoHide,
     showReport: errorConfig.showReport || false
@@ -324,7 +318,7 @@ const clearGlobalError = () => {
   }
 }
 
-const dismissError = (error) => {
+const dismissError = error => {
   const index = inlineErrors.value.findIndex(e => e.id === error.id)
   if (index > -1) {
     inlineErrors.value.splice(index, 1)
@@ -340,7 +334,7 @@ const retryLastAction = () => {
   }
 }
 
-const retryError = (error) => {
+const retryError = error => {
   emit('error-retried', error)
 }
 
@@ -426,7 +420,7 @@ const updateStats = () => {
 watch(() => errorHistory.value.length, updateStats)
 
 // 全局错误监听器
-const handleGlobalError = (event) => {
+const handleGlobalError = event => {
   addError({
     type: 'runtime',
     title: t('workspace.error.runtime.title'),
@@ -436,7 +430,7 @@ const handleGlobalError = (event) => {
   })
 }
 
-const handleUnhandledRejection = (event) => {
+const handleUnhandledRejection = event => {
   addError({
     type: 'promise',
     title: t('workspace.error.promise.title'),
@@ -468,8 +462,8 @@ defineExpose({
   handleUploadError,
   handleProcessingError,
   handleValidationError,
-  showHistory: () => showErrorHistory.value = true,
-  showStats: () => showStats.value = true,
+  showHistory: () => (showErrorHistory.value = true),
+  showStats: () => (showStats.value = true),
   getStats: () => errorStats.value,
   getHistory: () => errorHistory.value
 })

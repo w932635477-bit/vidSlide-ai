@@ -1,35 +1,40 @@
 <template>
   <div
     class="upload-area"
+    role="button"
+    tabindex="0"
+    aria-label="点击或拖拽上传图片"
     @dragover.prevent
     @drop.prevent="$emit('drop', $event)"
     @click="$refs.fileInput.click()"
-    role="button"
-    tabindex="0"
     @keydown.enter="$refs.fileInput.click()"
     @keydown.space="$refs.fileInput.click()"
-    aria-label="点击或拖拽上传图片"
   >
     <div class="upload-icon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="9" cy="9" r="2"/>
-        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="9" cy="9" r="2" />
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
       </svg>
     </div>
     <h3>上传图片开始背景移除</h3>
     <p>支持 JPG、PNG 格式，最大 10MB</p>
-    <button class="upload-btn primary">
-      选择图片
-    </button>
+    <button class="upload-btn primary">选择图片</button>
 
     <input
       ref="fileInput"
       type="file"
       accept="image/*"
-      @change="$emit('file-select', $event)"
       class="file-input"
       aria-label="选择图片文件"
+      @change="$emit('file-select', $event)"
     />
   </div>
 </template>

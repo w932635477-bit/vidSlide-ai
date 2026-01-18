@@ -3,13 +3,9 @@
   提供实时的性能指标监控和可视化
 -->
 <template>
-  <div
-class="performance-monitor" :class="{ minimized }"
->
+  <div class="performance-monitor" :class="{ minimized }">
     <!-- 监控面板头部 -->
-    <div
-class="monitor-header" @click="toggleMinimized"
->
+    <div class="monitor-header" @click="toggleMinimized">
       <h3 class="monitor-title">
         <el-icon><DataAnalysis /></el-icon>
         性能监控
@@ -37,9 +33,7 @@ class="monitor-header" @click="toggleMinimized"
     </div>
 
     <!-- 监控内容区域 -->
-    <div
-v-show="!minimized" class="monitor-content"
->
+    <div v-show="!minimized" class="monitor-content">
       <!-- 实时指标 -->
       <div class="metrics-section">
         <h4 class="section-title">实时指标</h4>
@@ -57,9 +51,7 @@ v-show="!minimized" class="monitor-content"
                 {{ currentFps }}
               </div>
               <div class="metric-label">FPS</div>
-              <div
-class="metric-status" :class="getFpsStatus()"
->
+              <div class="metric-status" :class="getFpsStatus()">
                 {{ getFpsStatusText() }}
               </div>
             </div>
@@ -78,9 +70,7 @@ class="metric-status" :class="getFpsStatus()"
                 {{ formatMemory(memoryUsage) }}
               </div>
               <div class="metric-label">内存使用</div>
-              <div
-class="metric-status" :class="getMemoryStatus()"
->
+              <div class="metric-status" :class="getMemoryStatus()">
                 {{ getMemoryStatusText() }}
               </div>
             </div>
@@ -97,9 +87,7 @@ class="metric-status" :class="getMemoryStatus()"
             <div class="metric-info">
               <div class="metric-value">{{ renderTime.toFixed(1) }}ms</div>
               <div class="metric-label">渲染时间</div>
-              <div
-class="metric-status" :class="getRenderStatus()"
->
+              <div class="metric-status" :class="getRenderStatus()">
                 {{ getRenderStatusText() }}
               </div>
             </div>
@@ -116,9 +104,7 @@ class="metric-status" :class="getRenderStatus()"
             <div class="metric-info">
               <div class="metric-value">{{ cacheHitRate }}%</div>
               <div class="metric-label">缓存命中率</div>
-              <div
-class="metric-status" :class="getCacheStatus()"
->
+              <div class="metric-status" :class="getCacheStatus()">
                 {{ getCacheStatusText() }}
               </div>
             </div>
@@ -135,9 +121,7 @@ class="metric-status" :class="getCacheStatus()"
               <span>FPS 历史</span>
               <span class="chart-value">{{ averageFps.toFixed(1) }} avg</span>
             </div>
-            <div
-class="chart-visual" :aria-label="`FPS趋势图表，平均值: ${averageFps.toFixed(1)}`"
->
+            <div class="chart-visual" :aria-label="`FPS趋势图表，平均值: ${averageFps.toFixed(1)}`">
               <div
                 v-for="(fps, index) in fpsHistory.slice(-10)"
                 :key="index"
@@ -191,17 +175,11 @@ class="chart-visual" :aria-label="`FPS趋势图表，平均值: ${averageFps.toF
 
       <!-- 控制按钮 -->
       <div class="monitor-controls">
-        <el-button
-size="small" @click="clearStats"
-:aria-label="清除性能统计数据"
->
+        <el-button size="small" :aria-label="清除性能统计数据" @click="clearStats">
           <el-icon><Delete /></el-icon>
           清除统计
         </el-button>
-        <el-button
-size="small" type="primary"
-:aria-label="导出性能报告" @click="exportReport"
->
+        <el-button size="small" type="primary" :aria-label="导出性能报告" @click="exportReport">
           <el-icon><Download /></el-icon>
           导出报告
         </el-button>

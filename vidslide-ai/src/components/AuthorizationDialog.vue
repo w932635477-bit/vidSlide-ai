@@ -1,17 +1,18 @@
 <template>
   <div v-if="visible" class="authorization-dialog-overlay" @click.stop>
-    <div class="authorization-dialog" role="dialog" aria-labelledby="auth-dialog-title" aria-describedby="auth-dialog-description">
+    <div
+      class="authorization-dialog"
+      role="dialog"
+      aria-labelledby="auth-dialog-title"
+      aria-describedby="auth-dialog-description"
+    >
       <!-- 头部 -->
       <div class="dialog-header">
         <h2 id="auth-dialog-title" class="dialog-title">
           <el-icon><warning /></el-icon>
           外部素材获取授权
         </h2>
-        <button
-          class="close-btn"
-          @click="closeDialog"
-          aria-label="关闭对话框"
-        >
+        <button class="close-btn" aria-label="关闭对话框" @click="closeDialog">
           <el-icon><close /></el-icon>
         </button>
       </div>
@@ -20,7 +21,8 @@
       <div class="dialog-content">
         <div id="auth-dialog-description" class="description">
           <p class="main-description">
-            系统检测到需要外部素材来优化您的演示效果。为确保最佳体验，VidSlide AI需要您的授权来搜索相关图片素材。
+            系统检测到需要外部素材来优化您的演示效果。为确保最佳体验，VidSlide
+            AI需要您的授权来搜索相关图片素材。
           </p>
         </div>
 
@@ -91,12 +93,7 @@
         <div class="alternative-section">
           <h4 class="alternative-title">替代方案</h4>
           <div class="alternative-options">
-            <el-button
-              type="info"
-              plain
-              @click="useLocalOnly"
-              class="alternative-btn"
-            >
+            <el-button type="info" plain class="alternative-btn" @click="useLocalOnly">
               <el-icon><home-filled /></el-icon>
               仅使用本地素材
             </el-button>
@@ -107,17 +104,12 @@
 
       <!-- 操作按钮 -->
       <div class="dialog-actions">
-        <el-button
-          @click="closeDialog"
-          class="cancel-btn"
-        >
-          取消
-        </el-button>
+        <el-button class="cancel-btn" @click="closeDialog"> 取消 </el-button>
         <el-button
           type="primary"
-          @click="confirmAuthorization"
           :disabled="!userConsent"
           class="confirm-btn"
+          @click="confirmAuthorization"
         >
           确认授权
         </el-button>
@@ -162,8 +154,8 @@ const props = defineProps({
 // ==================== Emits定义 ====================
 
 const emit = defineEmits([
-  'authorize',     // 用户确认授权
-  'cancel',        // 用户取消
+  'authorize', // 用户确认授权
+  'cancel', // 用户取消
   'use-local-only' // 用户选择仅使用本地素材
 ])
 
@@ -206,11 +198,14 @@ const useLocalOnly = () => {
 // ==================== 监听器 ====================
 
 // 当对话框打开时重置状态
-watch(() => props.visible, (newVisible) => {
-  if (newVisible) {
-    userConsent.value = false
+watch(
+  () => props.visible,
+  newVisible => {
+    if (newVisible) {
+      userConsent.value = false
+    }
   }
-})
+)
 </script>
 
 <style scoped>

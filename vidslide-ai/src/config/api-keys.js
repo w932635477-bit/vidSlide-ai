@@ -18,11 +18,11 @@ export const BAIDU_SPEECH_CONFIG = {
   apiKey: '5bAqP0hDvOJ5qjxqf8HCAp04',
   secretKey: 'EeGwJFeifTImA843vw3DozuR6hzBq7wJ',
   // 识别参数
-  format: 'pcm',   // 音频格式: pcm, wav, amr, m4a
-  rate: 16000,     // 采样率: 16000
-  channel: 1,      // 声道数: 1
+  format: 'pcm', // 音频格式: pcm, wav, amr, m4a
+  rate: 16000, // 采样率: 16000
+  channel: 1, // 声道数: 1
   cuid: 'vidslide_ai_client', // 用户唯一标识
-  devPid: 1537     // 语言模型: 1537=普通话(支持简单英文), 1737=英语
+  devPid: 1537 // 语言模型: 1537=普通话(支持简单英文), 1737=英语
 }
 
 // 百度NLP API配置（关键词提取）

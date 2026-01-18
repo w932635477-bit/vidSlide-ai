@@ -2,15 +2,15 @@
   <div
     class="keyframe-item"
     :class="{
-      'selected': isSelected,
-      'processing': keyframe.isProcessing
+      selected: isSelected,
+      processing: keyframe.isProcessing
     }"
-    @click="$emit('select')"
-    @keydown.enter="$emit('select')"
-    @keydown.space="$emit('select')"
     role="button"
     tabindex="0"
     :aria-label="`选择关键帧 ${keyframe.id}，时间 ${formatTime(keyframe.timestamp)}，重要性 ${(keyframe.importance * 100).toFixed(1)}%`"
+    @click="$emit('select')"
+    @keydown.enter="$emit('select')"
+    @keydown.space="$emit('select')"
   >
     <div class="thumbnail-container">
       <img
@@ -22,10 +22,7 @@
       />
       <div v-else class="thumbnail-placeholder">🎬</div>
 
-      <div
-        v-if="keyframe.isProcessing"
-        class="processing-overlay"
-      >
+      <div v-if="keyframe.isProcessing" class="processing-overlay">
         <div class="processing-spinner"></div>
       </div>
     </div>
@@ -38,36 +35,23 @@
         </span>
       </div>
       <div class="importance-bar">
-        <div
-          class="importance-fill"
-          :style="{ width: (keyframe.importance * 100) + '%' }"
-        ></div>
+        <div class="importance-fill" :style="{ width: keyframe.importance * 100 + '%' }"></div>
       </div>
-      <div class="importance-value">
-        {{ (keyframe.importance * 100).toFixed(1) }}%
-      </div>
+      <div class="importance-value">{{ (keyframe.importance * 100).toFixed(1) }}%</div>
     </div>
 
     <div class="keyframe-actions">
-      <button
-        class="action-btn preview-btn"
-        @click.stop="$emit('preview')"
-        title="预览关键帧"
-      >
+      <button class="action-btn preview-btn" title="预览关键帧" @click.stop="$emit('preview')">
         👁️
       </button>
       <button
         class="action-btn create-card-btn"
-        @click.stop="$emit('create-card')"
         title="创建文字卡片"
+        @click.stop="$emit('create-card')"
       >
         📄
       </button>
-      <button
-        class="action-btn delete-btn"
-        @click.stop="$emit('remove')"
-        title="删除关键帧"
-      >
+      <button class="action-btn delete-btn" title="删除关键帧" @click.stop="$emit('remove')">
         🗑️
       </button>
     </div>
@@ -84,28 +68,28 @@ defineProps({
 
 defineEmits(['select', 'preview', 'create-card', 'remove'])
 
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-const getMethodClass = (method) => {
+const getMethodClass = method => {
   const classes = {
     'scene-change': 'method-scene',
-    'motion': 'method-motion',
-    'face': 'method-face',
-    'text': 'method-text'
+    motion: 'method-motion',
+    face: 'method-face',
+    text: 'method-text'
   }
   return classes[method] || 'method-default'
 }
 
-const getMethodLabel = (method) => {
+const getMethodLabel = method => {
   const labels = {
     'scene-change': '场景',
-    'motion': '运动',
-    'face': '人脸',
-    'text': '文字'
+    motion: '运动',
+    face: '人脸',
+    text: '文字'
   }
   return labels[method] || '其他'
 }
@@ -181,7 +165,9 @@ const getMethodLabel = (method) => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .keyframe-info {

@@ -38,14 +38,33 @@ async function testTemplates() {
   console.log('\n🔍 验证每个模板:')
   const expectedTemplates = [
     // 基础模板 (12个)
-    'picture-in-picture', 'info-card', 'keyword-highlight', 'timeline',
-    'split-screen', 'dialog-popup', 'chart-analysis', 'document-display',
-    'minimalist', 'speaker-focus', 'educational', 'product-showcase',
+    'picture-in-picture',
+    'info-card',
+    'keyword-highlight',
+    'timeline',
+    'split-screen',
+    'dialog-popup',
+    'chart-analysis',
+    'document-display',
+    'minimalist',
+    'speaker-focus',
+    'educational',
+    'product-showcase',
     // 短视频模板 (8个)
-    'douyin-marketing', 'traffic-acquisition', 'ad-performance', 'personal-ip',
-    'fan-engagement', 'knowledge-sharing', 'comparison-review', 'data-storytelling',
+    'douyin-marketing',
+    'traffic-acquisition',
+    'ad-performance',
+    'personal-ip',
+    'fan-engagement',
+    'knowledge-sharing',
+    'comparison-review',
+    'data-storytelling',
     // PPT模板 (5个)
-    'ppt-title-slide', 'ppt-bullet-points', 'ppt-big-number', 'ppt-comparison', 'ppt-quote'
+    'ppt-title-slide',
+    'ppt-bullet-points',
+    'ppt-big-number',
+    'ppt-comparison',
+    'ppt-quote'
   ]
 
   let successCount = 0

@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="keyframe-extractor"
-    role="region"
-    aria-labelledby="keyframe-heading"
-  >
+  <div class="keyframe-extractor" role="region" aria-labelledby="keyframe-heading">
     <ExtractorHeader
       :is-extracting="isExtracting"
       :extraction-progress="extractionProgress"
@@ -114,7 +110,7 @@ const startExtraction = async () => {
       mockKeyframes.push({
         id: `kf_${Date.now()}_${i}`,
         timestamp: i * 2,
-        thumbnailUrl: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect fill="%23${Math.floor(Math.random()*16777215).toString(16)}" width="320" height="180"/></svg>`,
+        thumbnailUrl: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect fill="%23${Math.floor(Math.random() * 16777215).toString(16)}" width="320" height="180"/></svg>`,
         importance: Math.random(),
         detectionMethod: ['scene-change', 'motion', 'face', 'text'][Math.floor(Math.random() * 4)],
         isProcessing: false
@@ -136,7 +132,7 @@ const stopExtraction = () => {
   isExtracting.value = false
 }
 
-const selectKeyframe = (keyframe) => {
+const selectKeyframe = keyframe => {
   const index = selectedKeyframes.value.findIndex(kf => kf.id === keyframe.id)
   if (index > -1) {
     selectedKeyframes.value.splice(index, 1)
@@ -146,15 +142,15 @@ const selectKeyframe = (keyframe) => {
   emit('keyframe-selected', selectedKeyframes.value)
 }
 
-const previewKeyframe = (keyframe) => {
+const previewKeyframe = keyframe => {
   console.log('Preview keyframe:', keyframe)
 }
 
-const createTextCard = (keyframe) => {
+const createTextCard = keyframe => {
   emit('card-created', keyframe)
 }
 
-const removeKeyframe = (keyframe) => {
+const removeKeyframe = keyframe => {
   const index = keyframes.value.findIndex(kf => kf.id === keyframe.id)
   if (index > -1) {
     keyframes.value.splice(index, 1)

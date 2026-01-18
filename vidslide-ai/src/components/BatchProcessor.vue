@@ -5,7 +5,7 @@
       <div class="processing-status">
         <span class="status-indicator" :class="overallStatusClass"></span>
         <span class="status-text">{{ overallStatusText }}</span>
-        <span class="progress-summary" v-if="totalFiles > 0">
+        <span v-if="totalFiles > 0" class="progress-summary">
           {{ completedFiles }}/{{ totalFiles }} 已完成
         </span>
       </div>
@@ -14,39 +14,50 @@
     <div class="processor-content">
       <!-- 文件上传区域 -->
       <div class="upload-section">
-        <div class="upload-area" :class="{ 'drag-over': isDragOver }" @dragover.prevent @dragleave.prevent @drop.prevent="handleDrop">
+        <div
+          class="upload-area"
+          :class="{ 'drag-over': isDragOver }"
+          @dragover.prevent
+          @dragleave.prevent
+          @drop.prevent="handleDrop"
+        >
           <div class="upload-content">
             <div class="upload-icon">📁</div>
             <div class="upload-text">
-              <p>拖拽视频文件到此处，或 <label for="file-input" class="upload-link">点击选择文件</label></p>
+              <p>
+                拖拽视频文件到此处，或
+                <label for="file-input" class="upload-link">点击选择文件</label>
+              </p>
               <p class="upload-hint">支持 MP4、AVI、MOV、MKV 等格式，单个文件最大 500MB</p>
             </div>
             <input
               id="file-input"
+              ref="fileInput"
               type="file"
               multiple
               accept="video/*"
-              @change="handleFileSelect"
               class="file-input"
-              ref="fileInput"
+              @change="handleFileSelect"
             />
           </div>
         </div>
 
         <!-- 已选择的文件列表 -->
-        <div class="file-list" v-if="files.length > 0">
+        <div v-if="files.length > 0" class="file-list">
           <div class="file-list-header">
             <span>已选择的文件 ({{ files.length }})</span>
-            <button class="clear-btn" @click="clearFiles" :disabled="isProcessing">
-              清空列表
-            </button>
+            <button class="clear-btn" :disabled="isProcessing" @click="clearFiles">清空列表</button>
           </div>
           <div class="file-items">
             <div
               v-for="(file, index) in files"
               :key="index"
               class="file-item"
-              :class="{ 'processing': file.status === 'processing', 'completed': file.status === 'completed', 'error': file.status === 'error' }"
+              :class="{
+                processing: file.status === 'processing',
+                completed: file.status === 'completed',
+                error: file.status === 'error'
+              }"
             >
               <div class="file-info">
                 <div class="file-icon">🎬</div>
@@ -62,14 +73,14 @@
                   <span v-else-if="file.status === 'completed'">✅</span>
                   <span v-else-if="file.status === 'error'">❌</span>
                 </div>
-                <div class="progress-bar" v-if="file.status === 'processing'">
+                <div v-if="file.status === 'processing'" class="progress-bar">
                   <div class="progress-fill" :style="{ width: file.progress + '%' }"></div>
                 </div>
                 <button
-                  class="remove-btn"
-                  @click="removeFile(index)"
-                  :disabled="isProcessing"
                   v-if="file.status !== 'processing'"
+                  class="remove-btn"
+                  :disabled="isProcessing"
+                  @click="removeFile(index)"
                 >
                   ✕
                 </button>
@@ -85,7 +96,11 @@
         <div class="settings-grid">
           <div class="setting-item">
             <label class="setting-label">输出格式:</label>
-            <select v-model="processingSettings.outputFormat" :disabled="isProcessing" aria-label="输出格式选择">
+            <select
+              v-model="processingSettings.outputFormat"
+              :disabled="isProcessing"
+              aria-label="输出格式选择"
+            >
               <option value="mp4">MP4 (推荐)</option>
               <option value="webm">WebM</option>
               <option value="avi">AVI</option>
@@ -94,7 +109,11 @@
 
           <div class="setting-item">
             <label class="setting-label">分辨率:</label>
-            <select v-model="processingSettings.resolution" :disabled="isProcessing" aria-label="分辨率选择">
+            <select
+              v-model="processingSettings.resolution"
+              :disabled="isProcessing"
+              aria-label="分辨率选择"
+            >
               <option value="original">保持原分辨率</option>
               <option value="1080p">1080p (全高清)</option>
               <option value="720p">720p (高清)</option>
@@ -104,7 +123,11 @@
 
           <div class="setting-item">
             <label class="setting-label">质量:</label>
-            <select v-model="processingSettings.quality" :disabled="isProcessing" aria-label="质量选择">
+            <select
+              v-model="processingSettings.quality"
+              :disabled="isProcessing"
+              aria-label="质量选择"
+            >
               <option value="high">高质量 (大文件)</option>
               <option value="medium">中等质量 (平衡)</option>
               <option value="low">低质量 (小文件)</option>
@@ -113,7 +136,11 @@
 
           <div class="setting-item">
             <label class="setting-label">并发处理:</label>
-            <select v-model="processingSettings.concurrency" :disabled="isProcessing" aria-label="并发处理数量选择">
+            <select
+              v-model="processingSettings.concurrency"
+              :disabled="isProcessing"
+              aria-label="并发处理数量选择"
+            >
               <option value="1">1个文件 (稳定)</option>
               <option value="2">2个文件</option>
               <option value="3">3个文件 (推荐)</option>
@@ -125,8 +152,8 @@
         <div class="settings-options">
           <label class="option-item">
             <input
-              type="checkbox"
               v-model="processingSettings.extractAudio"
+              type="checkbox"
               :disabled="isProcessing"
               aria-label="提取音频轨道"
             />
@@ -134,8 +161,8 @@
           </label>
           <label class="option-item">
             <input
-              type="checkbox"
               v-model="processingSettings.generateThumbnails"
+              type="checkbox"
               :disabled="isProcessing"
               aria-label="生成缩略图"
             />
@@ -143,8 +170,8 @@
           </label>
           <label class="option-item">
             <input
-              type="checkbox"
               v-model="processingSettings.optimizeForWeb"
+              type="checkbox"
               :disabled="isProcessing"
               aria-label="Web优化 (H.264编码)"
             />
@@ -154,7 +181,7 @@
       </div>
 
       <!-- 总体进度 -->
-      <div class="progress-section" v-if="isProcessing || completedFiles > 0">
+      <div v-if="isProcessing || completedFiles > 0" class="progress-section">
         <div class="overall-progress">
           <div class="progress-info">
             <span class="progress-label">总体进度</span>
@@ -173,7 +200,7 @@
       </div>
 
       <!-- 错误汇总 -->
-      <div class="errors-section" v-if="errors.length > 0">
+      <div v-if="errors.length > 0" class="errors-section">
         <div class="errors-header">
           <span class="errors-title">处理错误 ({{ errors.length }})</span>
           <button class="clear-errors-btn" @click="clearErrors">清空错误</button>
@@ -192,26 +219,20 @@
 
     <!-- 操作按钮 -->
     <div class="processor-footer">
-      <div class="stats-info" v-if="files.length > 0">
+      <div v-if="files.length > 0" class="stats-info">
         <span>总大小: {{ formatFileSize(totalSize) }}</span>
         <span>预计时间: {{ estimatedTime }}</span>
       </div>
       <div class="action-buttons">
-        <button class="cancel-btn" @click="cancelProcessing" v-if="isProcessing">
-          取消处理
-        </button>
-        <button
-          class="start-btn"
-          @click="startProcessing"
-          :disabled="!canStartProcessing"
-        >
+        <button v-if="isProcessing" class="cancel-btn" @click="cancelProcessing">取消处理</button>
+        <button class="start-btn" :disabled="!canStartProcessing" @click="startProcessing">
           {{ isProcessing ? '处理中...' : '开始处理' }}
         </button>
         <button
-          class="export-btn"
-          @click="exportResults"
-          :disabled="!canExportResults"
           v-if="completedFiles > 0"
+          class="export-btn"
+          :disabled="!canExportResults"
+          @click="exportResults"
         >
           导出结果
         </button>
@@ -246,7 +267,9 @@ const totalFiles = computed(() => files.value.length)
 const completedFiles = computed(() => files.value.filter(f => f.status === 'completed').length)
 const processingFiles = computed(() => files.value.filter(f => f.status === 'processing').length)
 const failedFiles = computed(() => files.value.filter(f => f.status === 'error').length)
-const remainingFiles = computed(() => totalFiles.value - completedFiles.value - processingFiles.value - failedFiles.value)
+const remainingFiles = computed(
+  () => totalFiles.value - completedFiles.value - processingFiles.value - failedFiles.value
+)
 
 const overallProgress = computed(() => {
   if (totalFiles.value === 0) return 0
@@ -281,14 +304,15 @@ const estimatedTime = computed(() => {
   const baseTimePerMB = 2 // 2秒/MB
   const settingsMultiplier = getSettingsMultiplier()
   const avgTimePerFile = (avgSize / (1024 * 1024)) * baseTimePerMB * settingsMultiplier
-  const totalTime = avgTimePerFile * totalFiles.value / parseInt(processingSettings.value.concurrency)
+  const totalTime =
+    (avgTimePerFile * totalFiles.value) / parseInt(processingSettings.value.concurrency)
   return formatTime(totalTime)
 })
 
 const canStartProcessing = computed(() => {
-  return files.value.length > 0 &&
-         files.value.some(f => f.status === 'pending') &&
-         !isProcessing.value
+  return (
+    files.value.length > 0 && files.value.some(f => f.status === 'pending') && !isProcessing.value
+  )
 })
 
 const canExportResults = computed(() => {
@@ -296,14 +320,14 @@ const canExportResults = computed(() => {
 })
 
 // 方法
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const selectedFiles = Array.from(event.target.files)
   addFiles(selectedFiles)
   // 重置input值，允许选择相同文件
   event.target.value = ''
 }
 
-const handleDrop = (event) => {
+const handleDrop = event => {
   isDragOver.value = false
   const droppedFiles = Array.from(event.dataTransfer.files)
   const videoFiles = droppedFiles.filter(file => file.type.startsWith('video/'))
@@ -314,7 +338,7 @@ const handleDrop = (event) => {
   }
 }
 
-const addFiles = (newFiles) => {
+const addFiles = newFiles => {
   const validFiles = newFiles.filter(file => {
     // 检查文件类型
     if (!file.type.startsWith('video/')) {
@@ -348,7 +372,7 @@ const addFiles = (newFiles) => {
   emit('files-added', fileObjects)
 }
 
-const removeFile = (index) => {
+const removeFile = index => {
   if (!isProcessing.value) {
     files.value.splice(index, 1)
     emit('file-removed', index)
@@ -392,7 +416,7 @@ const startProcessing = async () => {
   })
 }
 
-const processFile = async (fileObj) => {
+const processFile = async fileObj => {
   fileObj.status = 'processing'
   fileObj.progress = 0
 
@@ -404,7 +428,8 @@ const processFile = async (fileObj) => {
       fileObj.progress = (step / totalSteps) * 100
 
       // 随机模拟错误
-      if (Math.random() < 0.1) { // 10%错误率
+      if (Math.random() < 0.1) {
+        // 10%错误率
         throw new Error('处理过程中出现未知错误')
       }
     }
@@ -417,7 +442,6 @@ const processFile = async (fileObj) => {
     }
 
     emit('file-processed', { file: fileObj, success: true })
-
   } catch (error) {
     fileObj.status = 'error'
     fileObj.error = error.message
@@ -443,12 +467,14 @@ const cancelProcessing = () => {
 }
 
 const exportResults = () => {
-  const results = files.value.filter(f => f.status === 'completed').map(f => ({
-    originalName: f.name,
-    outputPath: f.result.outputPath,
-    duration: f.result.duration,
-    size: f.result.size
-  }))
+  const results = files.value
+    .filter(f => f.status === 'completed')
+    .map(f => ({
+      originalName: f.name,
+      outputPath: f.result.outputPath,
+      duration: f.result.duration,
+      size: f.result.size
+    }))
 
   emit('results-exported', results)
 }
@@ -457,7 +483,7 @@ const clearErrors = () => {
   errors.value = []
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -465,7 +491,7 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   if (seconds < 60) return `${Math.ceil(seconds)}秒`
   if (seconds < 3600) return `${Math.ceil(seconds / 60)}分钟`
   return `${Math.ceil(seconds / 3600)}小时`
@@ -582,8 +608,13 @@ const emit = defineEmits([
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .status-text {
@@ -855,7 +886,7 @@ const emit = defineEmits([
   gap: 8px;
 }
 
-.option-item input[type="checkbox"] {
+.option-item input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: #007aff;

@@ -16,7 +16,10 @@
         </div>
         <div class="property-group">
           <label class="property-label">过渡效果</label>
-          <select :value="slide?.transition" @change="$emit('update-slide', activeSlideIndex, 'transition', $event.target.value)">
+          <select
+            :value="slide?.transition"
+            @change="$emit('update-slide', activeSlideIndex, 'transition', $event.target.value)"
+          >
             <option value="fade">淡入淡出</option>
             <option value="slide">滑动</option>
             <option value="zoom">缩放</option>
@@ -38,9 +41,9 @@
           <input
             type="number"
             :value="selectedElement.element.x"
-            @input="$emit('update-element', 'x', Number($event.target.value))"
             min="0"
             max="100"
+            @input="$emit('update-element', 'x', Number($event.target.value))"
           />
         </div>
 
@@ -49,9 +52,9 @@
           <input
             type="number"
             :value="selectedElement.element.y"
-            @input="$emit('update-element', 'y', Number($event.target.value))"
             min="0"
             max="100"
+            @input="$emit('update-element', 'y', Number($event.target.value))"
           />
         </div>
 
@@ -60,9 +63,9 @@
           <input
             type="number"
             :value="selectedElement.element.width"
-            @input="$emit('update-element', 'width', Number($event.target.value))"
             min="10"
             max="100"
+            @input="$emit('update-element', 'width', Number($event.target.value))"
           />
         </div>
 
@@ -71,9 +74,9 @@
           <input
             type="number"
             :value="selectedElement.element.height"
-            @input="$emit('update-element', 'height', Number($event.target.value))"
             min="10"
             max="100"
+            @input="$emit('update-element', 'height', Number($event.target.value))"
           />
         </div>
 
@@ -83,8 +86,8 @@
             <label class="property-label">文本内容</label>
             <textarea
               :value="selectedElement.element.content"
-              @input="$emit('update-element', 'content', $event.target.value)"
               rows="3"
+              @input="$emit('update-element', 'content', $event.target.value)"
             ></textarea>
           </div>
 
@@ -93,9 +96,9 @@
             <input
               type="number"
               :value="selectedElement.element.fontSize"
-              @input="$emit('update-element', 'fontSize', Number($event.target.value))"
               min="12"
               max="72"
+              @input="$emit('update-element', 'fontSize', Number($event.target.value))"
             />
           </div>
 
@@ -116,14 +119,17 @@
             <input
               type="text"
               :value="selectedElement.element.src"
-              @input="$emit('update-element', 'src', $event.target.value)"
               placeholder="输入图片URL"
+              @input="$emit('update-element', 'src', $event.target.value)"
             />
           </div>
 
           <div class="property-group">
             <label class="property-label">适应方式</label>
-            <select :value="selectedElement.element.objectFit" @change="$emit('update-element', 'objectFit', $event.target.value)">
+            <select
+              :value="selectedElement.element.objectFit"
+              @change="$emit('update-element', 'objectFit', $event.target.value)"
+            >
               <option value="cover">覆盖</option>
               <option value="contain">包含</option>
               <option value="fill">填充</option>

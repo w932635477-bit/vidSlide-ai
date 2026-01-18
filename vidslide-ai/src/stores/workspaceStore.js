@@ -56,6 +56,13 @@ export const useWorkspaceStore = defineStore('workspace', {
       analysisProgress: 0
     },
 
+    // ========== 生成结果 ==========
+    generation: {
+      result: null, // 完整的生成结果
+      isGenerating: false,
+      generationProgress: 0
+    },
+
     // ========== 画中画状态 ==========
     pip: {
       enabled: false,
@@ -118,31 +125,30 @@ export const useWorkspaceStore = defineStore('workspace', {
 
   getters: {
     // 视频相关
-    isVerticalVideo: (state) => state.video.height > state.video.width,
-    hasVideo: (state) => !!state.video.src,
-    videoAspectRatio: (state) => {
+    isVerticalVideo: state => state.video.height > state.video.width,
+    hasVideo: state => !!state.video.src,
+    videoAspectRatio: state => {
       if (!state.video.width || !state.video.height) return 16 / 9
       return state.video.width / state.video.height
     },
 
     // 导出相关
-    canExport: (state) => {
+    canExport: state => {
       return !!state.video.src && !!state.template.selected
     },
 
     // 分析相关
-    hasAnalysisResults: (state) => {
-      return state.analysis.keywords.length > 0 ||
-             state.analysis.keyframes.length > 0
+    hasAnalysisResults: state => {
+      return state.analysis.keywords.length > 0 || state.analysis.keyframes.length > 0
     },
 
     // 素材相关
-    hasMaterialRequirements: (state) => {
+    hasMaterialRequirements: state => {
       return state.materials.requirements.length > 0
     },
 
     // 项目相关
-    projectTitle: (state) => {
+    projectTitle: state => {
       return state.project.data?.title || '未命名项目'
     }
   },

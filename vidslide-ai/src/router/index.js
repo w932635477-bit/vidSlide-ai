@@ -1,15 +1,11 @@
 /**
  * index.js
- * VidSlide AI - 紧急补齐阶段
- * 实现P0/P1功能：模板引擎、用户调整、画中画效果、素材管理、动画系统
+ * VidSlide AI - 路由配置
+ * 剪映风格工作区布局
  */
 
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
-/**
- * router 函数
- * 紧急补齐阶段功能实现
- */
 const router = createRouter({
   history: createWebHistory('/'),
   routes: [
@@ -26,22 +22,16 @@ const router = createRouter({
     {
       path: '/workspace',
       name: 'workspace',
-      component: () => import('../views/WorkspaceView.vue')
-    },
-    {
-      path: '/layout-test',
-      name: 'layout-test',
-      component: () => import('../views/LayoutTestPage.vue')
+      component: () => import('../views/WorkspaceView.vue'),
+      meta: {
+        title: 'VidSlide AI - 工作区',
+        description: '剪映风格的视频编辑工作区'
+      }
     },
     {
       path: '/help',
       name: 'help',
       component: () => import('../views/HelpView.vue')
-    },
-    {
-      path: '/wegic-showcase',
-      name: 'wegic-showcase',
-      component: () => import('../components/WegicDesignShowcase.vue')
     }
   ]
 })

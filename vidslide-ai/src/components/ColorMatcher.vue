@@ -2,10 +2,7 @@
   <div class="color-matcher">
     <ColorMatcherHeader />
 
-    <ImageUploader
-      v-if="!uploadedImage"
-      @image-uploaded="handleImageUpload"
-    />
+    <ImageUploader v-if="!uploadedImage" @image-uploaded="handleImageUpload" />
 
     <div v-else class="matcher-workspace">
       <ColorToolbar
@@ -22,9 +19,9 @@
       <div class="workspace-content">
         <div class="image-section">
           <img
+            ref="imageElement"
             :src="uploadedImage"
             alt="Uploaded image"
-            ref="imageElement"
             class="uploaded-image"
             @load="onImageLoad"
           />
@@ -73,7 +70,7 @@ const showPreview = ref(false)
 const paletteSize = ref(5)
 
 // 方法
-const handleImageUpload = (imageUrl) => {
+const handleImageUpload = imageUrl => {
   uploadedImage.value = imageUrl
 }
 
@@ -124,7 +121,9 @@ const kMeansClustering = (pixels, k) => {
   let iterations = 10
 
   for (let iter = 0; iter < iterations; iter++) {
-    const clusters = Array(k).fill(null).map(() => [])
+    const clusters = Array(k)
+      .fill(null)
+      .map(() => [])
 
     pixels.forEach(pixel => {
       let minDist = Infinity
@@ -144,11 +143,14 @@ const kMeansClustering = (pixels, k) => {
     centroids = clusters.map(cluster => {
       if (cluster.length === 0) return centroids[0]
 
-      const sum = cluster.reduce((acc, pixel) => ({
-        r: acc.r + pixel.r,
-        g: acc.g + pixel.g,
-        b: acc.b + pixel.b
-      }), { r: 0, g: 0, b: 0 })
+      const sum = cluster.reduce(
+        (acc, pixel) => ({
+          r: acc.r + pixel.r,
+          g: acc.g + pixel.g,
+          b: acc.b + pixel.b
+        }),
+        { r: 0, g: 0, b: 0 }
+      )
 
       return {
         r: Math.round(sum.r / cluster.length),
@@ -162,30 +164,31 @@ const kMeansClustering = (pixels, k) => {
 }
 
 const colorDistance = (c1, c2) => {
-  return Math.sqrt(
-    Math.pow(c1.r - c2.r, 2) +
-    Math.pow(c1.g - c2.g, 2) +
-    Math.pow(c1.b - c2.b, 2)
-  )
+  return Math.sqrt(Math.pow(c1.r - c2.r, 2) + Math.pow(c1.g - c2.g, 2) + Math.pow(c1.b - c2.b, 2))
 }
 
 const rgbToHex = (r, g, b) => {
-  return '#' + [r, g, b].map(x => {
-    const hex = x.toString(16)
-    return hex.length === 1 ? '0' + hex : hex
-  }).join('')
+  return (
+    '#' +
+    [r, g, b]
+      .map(x => {
+        const hex = x.toString(16)
+        return hex.length === 1 ? '0' + hex : hex
+      })
+      .join('')
+  )
 }
 
-const selectColor = (color) => {
+const selectColor = color => {
   selectedColor.value = color
   showPreview.value = true
 }
 
-const copyColor = (color) => {
+const copyColor = color => {
   navigator.clipboard.writeText(color.hex)
 }
 
-const applyColor = (color) => {
+const applyColor = color => {
   emit('color-applied', color)
 }
 

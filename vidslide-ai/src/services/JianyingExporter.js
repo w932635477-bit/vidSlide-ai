@@ -47,7 +47,10 @@ class JianyingExporter {
       return this.colorCache.get(cssColor)
     }
 
-    let r = 0, g = 0, b = 0, a = 1
+    let r = 0,
+      g = 0,
+      b = 0,
+      a = 1
 
     // 处理 hex 颜色
     if (cssColor.startsWith('#')) {
@@ -288,13 +291,13 @@ class JianyingExporter {
       style_name: '',
       sub_type: 0,
       text_alpha: 1.0,
-      text_color: `rgba(${Math.round(rgba[0]*255)},${Math.round(rgba[1]*255)},${Math.round(rgba[2]*255)},${rgba[3]})`,
+      text_color: `rgba(${Math.round(rgba[0] * 255)},${Math.round(rgba[1] * 255)},${Math.round(rgba[2] * 255)},${rgba[3]})`,
       text_preset_resource_id: '',
       text_size: fontSize,
       text_to_audio_ids: [],
       tts_auto_update: false,
       type: 'text',
-      typesetting: alignment === 'center' ? 1 : (alignment === 'left' ? 0 : 2),
+      typesetting: alignment === 'center' ? 1 : alignment === 'left' ? 0 : 2,
       underline: false,
       use_effect_default_color: false,
       words: {
@@ -437,11 +440,7 @@ class JianyingExporter {
    * @returns {Object} 剪映草稿对象
    */
   convertTemplate(template, options = {}) {
-    const {
-      duration = this.defaultDuration,
-      texts = [],
-      customColors = {}
-    } = options
+    const { duration = this.defaultDuration, texts = [], customColors = {} } = options
 
     // 创建草稿基础
     const draft = this.createDraftBase({
@@ -564,11 +563,11 @@ class JianyingExporter {
 
     if (typeof position === 'string') {
       const posMap = {
-        'center': 0.5,
-        'top': axis === 'y' ? 0.2 : 0.5,
-        'bottom': axis === 'y' ? 0.8 : 0.5,
-        'left': axis === 'x' ? 0.2 : 0.5,
-        'right': axis === 'x' ? 0.8 : 0.5,
+        center: 0.5,
+        top: axis === 'y' ? 0.2 : 0.5,
+        bottom: axis === 'y' ? 0.8 : 0.5,
+        left: axis === 'x' ? 0.2 : 0.5,
+        right: axis === 'x' ? 0.8 : 0.5,
         'top-left': axis === 'x' ? 0.2 : 0.2,
         'top-right': axis === 'x' ? 0.8 : 0.2,
         'bottom-left': axis === 'x' ? 0.2 : 0.8,
@@ -581,13 +580,21 @@ class JianyingExporter {
 
     if (typeof position === 'object') {
       if (axis === 'x') {
-        return position.x === 'center' ? 0.5 :
-               position.x === 'left' ? 0.2 :
-               position.x === 'right' ? 0.8 : 0.5
+        return position.x === 'center'
+          ? 0.5
+          : position.x === 'left'
+            ? 0.2
+            : position.x === 'right'
+              ? 0.8
+              : 0.5
       } else {
-        return position.y === 'center' ? 0.5 :
-               position.y === 'top' ? 0.2 :
-               position.y === 'bottom' ? 0.8 : 0.5
+        return position.y === 'center'
+          ? 0.5
+          : position.y === 'top'
+            ? 0.2
+            : position.y === 'bottom'
+              ? 0.8
+              : 0.5
       }
     }
 
@@ -635,11 +642,7 @@ class JianyingExporter {
         '3. 创建新文件夹，将下载的 draft_content.json 放入',
         '4. 重启剪映，即可在草稿列表中看到导入的项目'
       ],
-      tips: [
-        '建议先备份原有草稿',
-        '导入后可在剪映中自由编辑',
-        '支持添加更多素材和特效'
-      ]
+      tips: ['建议先备份原有草稿', '导入后可在剪映中自由编辑', '支持添加更多素材和特效']
     }
   }
 

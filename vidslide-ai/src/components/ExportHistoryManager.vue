@@ -138,10 +138,11 @@ const filteredHistory = computed(() => {
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(item =>
-      item.title.toLowerCase().includes(query) ||
-      item.type.toLowerCase().includes(query) ||
-      (item.format && item.format.toLowerCase().includes(query))
+    filtered = filtered.filter(
+      item =>
+        item.title.toLowerCase().includes(query) ||
+        item.type.toLowerCase().includes(query) ||
+        (item.format && item.format.toLowerCase().includes(query))
     )
   }
 
@@ -210,7 +211,10 @@ const generateMockHistory = () => {
         watermark: Math.random() > 0.7
       },
       errorMessage: status === 'failed' ? '导出过程中发生未知错误，请重试' : null,
-      logs: status === 'failed' ? '2024-01-01 10:00:00 - 开始导出\n2024-01-01 10:05:00 - 处理失败' : null
+      logs:
+        status === 'failed'
+          ? '2024-01-01 10:00:00 - 开始导出\n2024-01-01 10:05:00 - 处理失败'
+          : null
     })
   }
 
@@ -234,7 +238,7 @@ const toggleSelectAll = () => {
   }
 }
 
-const toggleSelect = (id) => {
+const toggleSelect = id => {
   const index = selectedItems.value.indexOf(id)
   if (index > -1) {
     selectedItems.value.splice(index, 1)
@@ -243,29 +247,29 @@ const toggleSelect = (id) => {
   }
 }
 
-const goToPage = (page) => {
+const goToPage = page => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
   }
 }
 
-const changePageSize = (size) => {
+const changePageSize = size => {
   pageSize.value = size
   currentPage.value = 1
 }
 
-const viewDetails = (item) => {
+const viewDetails = item => {
   selectedItem.value = item
   showDetailsDialog.value = true
 }
 
-const downloadItem = (item) => {
+const downloadItem = item => {
   if (item.status === 'success' && item.outputPath) {
     emit('download-item', item)
   }
 }
 
-const retryExport = (item) => {
+const retryExport = item => {
   item.status = 'processing'
   emit('retry-export', item)
 
@@ -280,14 +284,14 @@ const retryExport = (item) => {
 }
 
 const retrySelected = () => {
-  const failedItems = exportHistory.value.filter(item =>
-    selectedItems.value.includes(item.id) && item.status === 'failed'
+  const failedItems = exportHistory.value.filter(
+    item => selectedItems.value.includes(item.id) && item.status === 'failed'
   )
   failedItems.forEach(item => retryExport(item))
   selectedItems.value = []
 }
 
-const showSingleDeleteDialog = (item) => {
+const showSingleDeleteDialog = item => {
   itemToDelete.value = item
   showDeleteDialog.value = true
 }
@@ -328,7 +332,9 @@ const confirmCleanup = ({ option, count, size }) => {
       break
     case 'older':
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-      deleteIds = exportHistory.value.filter(item => new Date(item.exportTime) < thirtyDaysAgo).map(item => item.id)
+      deleteIds = exportHistory.value
+        .filter(item => new Date(item.exportTime) < thirtyDaysAgo)
+        .map(item => item.id)
       break
     case 'all':
       deleteIds = exportHistory.value.map(item => item.id)

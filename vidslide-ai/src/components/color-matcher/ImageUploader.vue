@@ -1,37 +1,42 @@
 <template>
   <div
     class="upload-area"
+    :class="{ 'drag-over': isDragOver }"
+    role="button"
+    tabindex="0"
+    aria-label="点击或拖拽上传图片"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
     @drop.prevent="handleDrop"
     @click="triggerFileInput"
-    :class="{ 'drag-over': isDragOver }"
-    role="button"
-    tabindex="0"
     @keydown.enter="triggerFileInput"
     @keydown.space="triggerFileInput"
-    aria-label="点击或拖拽上传图片"
   >
     <div class="upload-icon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="9" cy="9" r="2"/>
-        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <circle cx="9" cy="9" r="2" />
+        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
       </svg>
     </div>
     <h3>上传图片开始色彩分析</h3>
     <p>支持 JPG、PNG 格式，最大 {{ maxFileSizeMB }}MB</p>
-    <button class="upload-btn primary" @click.stop="triggerFileInput">
-      选择图片
-    </button>
+    <button class="upload-btn primary" @click.stop="triggerFileInput">选择图片</button>
 
     <input
       ref="fileInput"
       type="file"
       accept="image/*"
-      @change="handleFileSelect"
       class="file-input"
       aria-label="选择图片文件"
+      @change="handleFileSelect"
     />
   </div>
 </template>
@@ -71,7 +76,7 @@ const handleDragLeave = () => {
   isDragOver.value = false
 }
 
-const handleDrop = (event) => {
+const handleDrop = event => {
   isDragOver.value = false
   const file = event.dataTransfer.files[0]
   if (file) {
@@ -79,14 +84,14 @@ const handleDrop = (event) => {
   }
 }
 
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const file = event.target.files[0]
   if (file) {
     validateAndEmit(file)
   }
 }
 
-const validateAndEmit = (file) => {
+const validateAndEmit = file => {
   // 验证文件格式
   if (!props.supportedFormats.includes(file.type)) {
     emit('error', '不支持的文件格式，请选择 JPG、PNG 或 WebP 格式的图片')

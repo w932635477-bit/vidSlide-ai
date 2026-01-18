@@ -1,26 +1,16 @@
 <template>
   <header class="analyzer-header" role="banner">
     <h2 id="analyzer-heading">📊 素材需求分析</h2>
-    <p class="analyzer-description">
-      基于AI分析结果，智能推荐所需的PPT素材资源
-    </p>
+    <p class="analyzer-description">基于AI分析结果，智能推荐所需的PPT素材资源</p>
 
     <!-- 分析状态显示 -->
-    <div
-      v-if="isAnalyzing"
-      class="analysis-status"
-      role="status"
-      aria-live="polite"
-    >
+    <div v-if="isAnalyzing" class="analysis-status" role="status" aria-live="polite">
       <div class="status-indicator">
         <div class="loading-spinner"></div>
         <span>正在分析素材需求...</span>
       </div>
       <div class="progress-bar">
-        <div
-          class="progress-fill"
-          :style="{ width: analysisProgress + '%' }"
-        ></div>
+        <div class="progress-fill" :style="{ width: analysisProgress + '%' }"></div>
       </div>
     </div>
   </header>
@@ -89,8 +79,12 @@ defineProps({
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .progress-bar {

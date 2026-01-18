@@ -20,12 +20,12 @@ const store = useWorkspaceStore()
 const animations = computed(() => store.animations.list)
 
 // 事件处理
-const handleAnimationAdded = (animation) => {
+const handleAnimationAdded = animation => {
   console.log('添加动画:', animation)
   store.addAnimation(animation)
 }
 
-const handleAnimationRemoved = (animationId) => {
+const handleAnimationRemoved = animationId => {
   console.log('移除动画:', animationId)
   store.removeAnimation(animationId)
 }

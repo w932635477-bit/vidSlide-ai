@@ -37,7 +37,11 @@
           </div>
 
           <div class="document-body">
-            <div v-for="paragraph in document.content" :key="paragraph.id" class="document-paragraph">
+            <div
+              v-for="paragraph in document.content"
+              :key="paragraph.id"
+              class="document-paragraph"
+            >
               <p>{{ paragraph.text }}</p>
             </div>
           </div>
@@ -108,8 +112,14 @@ export default {
           pages: 45,
           views: '2.3k',
           content: [
-            { id: 1, text: 'VidSlide AI是一款基于人工智能的视频转PPT工具，能够自动分析视频内容并生成专业的演示文稿。' },
-            { id: 2, text: '核心功能包括智能剪辑、模板引擎、素材管理和AI内容分析，为用户提供全方位的演示制作体验。' }
+            {
+              id: 1,
+              text: 'VidSlide AI是一款基于人工智能的视频转PPT工具，能够自动分析视频内容并生成专业的演示文稿。'
+            },
+            {
+              id: 2,
+              text: '核心功能包括智能剪辑、模板引擎、素材管理和AI内容分析，为用户提供全方位的演示制作体验。'
+            }
           ]
         },
         {
@@ -121,7 +131,10 @@ export default {
           pages: 28,
           views: '1.8k',
           content: [
-            { id: 1, text: '本指南详细介绍了VidSlide AI的各项功能使用方法，包括视频上传、内容分析、模板选择等操作流程。' },
+            {
+              id: 1,
+              text: '本指南详细介绍了VidSlide AI的各项功能使用方法，包括视频上传、内容分析、模板选择等操作流程。'
+            },
             { id: 2, text: '通过本指南，您可以快速掌握软件的使用技巧，提升演示制作效率。' }
           ]
         },
@@ -177,11 +190,14 @@ export default {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
   padding: 48px;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   perspective: 1000px;
@@ -201,7 +217,7 @@ export default {
 .bg-circle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(0,123,255,0.03) 0%, rgba(52,199,89,0.03) 100%);
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(52, 199, 89, 0.03) 100%);
   backdrop-filter: blur(20px);
 }
 
@@ -230,7 +246,8 @@ export default {
 }
 
 @keyframes subtle-circle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) scale(1);
   }
   50% {

@@ -51,7 +51,7 @@ class SmartCache {
         resolve()
       }
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = event.target.result
 
         // 创建对象存储
@@ -280,7 +280,7 @@ class SmartCache {
       const toDelete = []
 
       return new Promise((resolve, reject) => {
-        request.onsuccess = (event) => {
+        request.onsuccess = event => {
           const cursor = event.target.result
 
           if (cursor && toDelete.length < count) {
@@ -325,7 +325,7 @@ class SmartCache {
       let deletedCount = 0
 
       return new Promise((resolve, reject) => {
-        request.onsuccess = (event) => {
+        request.onsuccess = event => {
           const cursor = event.target.result
 
           if (cursor) {
@@ -393,15 +393,15 @@ class SmartCache {
 
     try {
       const size = await this.getSize()
-      const hitRate = this.stats.hits + this.stats.misses > 0
-        ? (this.stats.hits / (this.stats.hits + this.stats.misses) * 100).toFixed(2)
-        : 0
+      const hitRate =
+        this.stats.hits + this.stats.misses > 0
+          ? ((this.stats.hits / (this.stats.hits + this.stats.misses)) * 100).toFixed(2)
+          : 0
 
       // 估算缓存占用空间（每个素材元数据约2KB）
       const estimatedSize = size * 2 // KB
-      const sizeFormatted = estimatedSize > 1024
-        ? `${(estimatedSize / 1024).toFixed(2)} MB`
-        : `${estimatedSize} KB`
+      const sizeFormatted =
+        estimatedSize > 1024 ? `${(estimatedSize / 1024).toFixed(2)} MB` : `${estimatedSize} KB`
 
       return {
         size,
@@ -479,9 +479,12 @@ class SmartCache {
    */
   startAutoCleanup() {
     // 每小时执行一次自动清理
-    setInterval(() => {
-      this.autoCleanup()
-    }, 60 * 60 * 1000)
+    setInterval(
+      () => {
+        this.autoCleanup()
+      },
+      60 * 60 * 1000
+    )
 
     console.log('⏰ 自动清理定时器已启动（每小时执行一次）')
   }

@@ -50,11 +50,14 @@ const drawOriginalImage = () => {
   }
 }
 
-watch(() => props.currentImage, () => {
-  nextTick(() => {
-    drawOriginalImage()
-  })
-})
+watch(
+  () => props.currentImage,
+  () => {
+    nextTick(() => {
+      drawOriginalImage()
+    })
+  }
+)
 
 onMounted(() => {
   nextTick(() => {

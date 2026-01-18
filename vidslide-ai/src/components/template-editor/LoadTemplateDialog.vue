@@ -14,9 +14,7 @@
             {{ template.slides.length }} 页 · {{ formatDate(template.updatedAt) }}
           </div>
         </div>
-        <div v-if="templates.length === 0" class="empty-state">
-          暂无保存的模板
-        </div>
+        <div v-if="templates.length === 0" class="empty-state">暂无保存的模板</div>
       </div>
       <div class="modal-actions">
         <button class="cancel-btn" @click="$emit('close')">取消</button>
@@ -33,7 +31,7 @@ defineProps({
 
 defineEmits(['close', 'load'])
 
-const formatDate = (dateString) => {
+const formatDate = dateString => {
   if (!dateString) return ''
   return new Date(dateString).toLocaleDateString()
 }

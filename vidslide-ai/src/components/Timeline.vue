@@ -4,39 +4,33 @@
     <div class="timeline-header">
       <div class="timeline-info">
         <span class="timeline-label">{{ t('workspace.timeline.title') }}</span>
-        <span class="marker-count">{{ t('workspace.timeline.markerCount') }}: {{ markers.length }}</span>
+        <span class="marker-count"
+          >{{ t('workspace.timeline.markerCount') }}: {{ markers.length }}</span
+        >
       </div>
 
       <div class="timeline-controls">
         <div class="zoom-controls">
-          <button
-            class="zoom-btn"
-            @click="zoomOut"
-            :disabled="zoomLevel <= 0.5"
-          >
+          <button class="zoom-btn" :disabled="zoomLevel <= 0.5" @click="zoomOut">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="5" y1="12" x2="19" y2="12"/>
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </button>
 
           <span class="zoom-level">{{ Math.round(zoomLevel * 100) }}%</span>
 
-          <button
-            class="zoom-btn"
-            @click="zoomIn"
-            :disabled="zoomLevel >= 3.0"
-          >
+          <button class="zoom-btn" :disabled="zoomLevel >= 3.0" @click="zoomIn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </button>
         </div>
 
         <button class="action-btn primary" @click="addMarker">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           {{ t('workspace.timeline.addMarker') }}
         </button>
@@ -44,7 +38,7 @@
     </div>
 
     <!-- 时间轴主体 -->
-    <div class="timeline-body" ref="timelineBody">
+    <div ref="timelineBody" class="timeline-body">
       <!-- 时间刻度 -->
       <div class="timeline-ruler">
         <div
@@ -93,11 +87,7 @@
         </div>
 
         <!-- 拖拽中的标记预览 -->
-        <div
-          v-if="draggingMarker"
-          class="marker-preview"
-          :style="{ left: dragPosition + 'px' }"
-        >
+        <div v-if="draggingMarker" class="marker-preview" :style="{ left: dragPosition + 'px' }">
           <div class="marker-handle preview">
             <div class="marker-line"></div>
             <div class="marker-dot"></div>
@@ -108,69 +98,47 @@
       <!-- 时间轴底部控制栏 -->
       <div class="timeline-footer">
         <div class="playback-controls">
-          <button
-            class="control-btn"
-            @click="goToStart"
-            :disabled="!markers.length"
-          >
+          <button class="control-btn" :disabled="!markers.length" @click="goToStart">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="19,20 9,12 19,4"/>
-              <line x1="5" y1="4" x2="5" y2="20"/>
+              <polygon points="19,20 9,12 19,4" />
+              <line x1="5" y1="4" x2="5" y2="20" />
             </svg>
           </button>
 
-          <button
-            class="control-btn"
-            @click="previousMarker"
-            :disabled="!markers.length"
-          >
+          <button class="control-btn" :disabled="!markers.length" @click="previousMarker">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="15,20 5,12 15,4"/>
+              <polygon points="15,20 5,12 15,4" />
             </svg>
           </button>
 
-          <button
-            class="control-btn"
-            @click="nextMarker"
-            :disabled="!markers.length"
-          >
+          <button class="control-btn" :disabled="!markers.length" @click="nextMarker">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="9,20 19,12 9,4"/>
+              <polygon points="9,20 19,12 9,4" />
             </svg>
           </button>
 
-          <button
-            class="control-btn"
-            @click="goToEnd"
-            :disabled="!markers.length"
-          >
+          <button class="control-btn" :disabled="!markers.length" @click="goToEnd">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="5,20 15,12 5,4"/>
-              <line x1="19" y1="4" x2="19" y2="20"/>
+              <polygon points="5,20 15,12 5,4" />
+              <line x1="19" y1="4" x2="19" y2="20" />
             </svg>
           </button>
         </div>
 
         <div class="marker-actions">
-          <button
-            v-if="selectedMarkerId"
-            class="action-btn danger"
-            @click="deleteSelectedMarker"
-          >
+          <button v-if="selectedMarkerId" class="action-btn danger" @click="deleteSelectedMarker">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3,6 5,6 21,6"/>
-              <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"/>
-              <line x1="10" y1="11" x2="10" y2="17"/>
-              <line x1="14" y1="11" x2="14" y2="17"/>
+              <polyline points="3,6 5,6 21,6" />
+              <path
+                d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"
+              />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
             </svg>
             {{ t('workspace.timeline.removeMarker') }}
           </button>
 
-          <button
-            class="action-btn secondary"
-            @click="clearAllMarkers"
-            :disabled="!markers.length"
-          >
+          <button class="action-btn secondary" :disabled="!markers.length" @click="clearAllMarkers">
             {{ t('workspace.timeline.clearAll') }}
           </button>
         </div>
@@ -285,26 +253,26 @@ const visibleTicks = computed(() => {
 })
 
 // 工具函数
-const timeToPosition = (time) => {
+const timeToPosition = time => {
   if (!timelineBody.value) return 0
   const trackWidth = timelineBody.value.clientWidth - 40 // 减去padding
   return (time / props.duration) * trackWidth * zoomLevel.value
 }
 
-const positionToTime = (position) => {
+const positionToTime = position => {
   if (!timelineBody.value) return 0
   const trackWidth = timelineBody.value.clientWidth - 40
   return (position / (trackWidth * zoomLevel.value)) * props.duration
 }
 
-const formatTime = (seconds) => {
+const formatTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = Math.floor(seconds % 60)
   const ms = Math.floor((seconds % 1) * 10)
   return `${mins}:${secs.toString().padStart(2, '0')}.${ms}`
 }
 
-const getMarkerTypeText = (type) => {
+const getMarkerTypeText = type => {
   const types = {
     text: t('workspace.timeline.types.text'),
     image: t('workspace.timeline.types.image'),
@@ -357,22 +325,18 @@ const closeAddDialog = () => {
   newMarkerTime.value = 0
 }
 
-const selectMarker = (marker) => {
+const selectMarker = marker => {
   emit('marker-selected', marker.id)
 }
 
 const deleteSelectedMarker = () => {
   if (!props.selectedMarkerId) return
 
-  ElMessageBox.confirm(
-    t('workspace.timeline.confirmDelete'),
-    t('workspace.timeline.deleteTitle'),
-    {
-      confirmButtonText: t('workspace.timeline.confirm'),
-      cancelButtonText: t('workspace.timeline.cancel'),
-      type: 'warning'
-    }
-  ).then(() => {
+  ElMessageBox.confirm(t('workspace.timeline.confirmDelete'), t('workspace.timeline.deleteTitle'), {
+    confirmButtonText: t('workspace.timeline.confirm'),
+    cancelButtonText: t('workspace.timeline.cancel'),
+    type: 'warning'
+  }).then(() => {
     emit('marker-removed', props.selectedMarkerId)
     ElMessage.success(t('workspace.timeline.markerDeleted'))
   })
@@ -394,11 +358,11 @@ const clearAllMarkers = () => {
 }
 
 // 拖拽功能
-const startDrag = (marker) => {
+const startDrag = marker => {
   draggingMarker.value = marker
   isDragging.value = true
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = e => {
     if (!timelineBody.value) return
 
     const rect = timelineBody.value.getBoundingClientRect()
@@ -468,7 +432,7 @@ const nextMarker = () => {
 // 生命周期
 onMounted(() => {
   // 监听键盘事件
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     if (e.key === 'Delete' && props.selectedMarkerId) {
       deleteSelectedMarker()
     }
@@ -482,12 +446,15 @@ onMounted(() => {
 })
 
 // 监听duration变化，调整缩放
-watch(() => props.duration, () => {
-  // 确保缩放级别合理
-  if (zoomLevel.value * props.duration > 10000) {
-    zoomLevel.value = Math.max(0.5, 10000 / props.duration)
+watch(
+  () => props.duration,
+  () => {
+    // 确保缩放级别合理
+    if (zoomLevel.value * props.duration > 10000) {
+      zoomLevel.value = Math.max(0.5, 10000 / props.duration)
+    }
   }
-})
+)
 
 // 暴露方法给父组件
 defineExpose({

@@ -176,11 +176,7 @@
         <span v-else>⏳ 导出中...</span>
       </button>
 
-      <button
-        v-if="currentStep === 4"
-        class="action-btn secondary-btn"
-        @click="resetGenerator"
-      >
+      <button v-if="currentStep === 4" class="action-btn secondary-btn" @click="resetGenerator">
         🔄 重新生成
       </button>
 
@@ -330,7 +326,7 @@ const startGeneration = async () => {
   }
 }
 
-const selectTemplate = (templateId) => {
+const selectTemplate = templateId => {
   selectedTemplate.value = templateId
 }
 
@@ -418,7 +414,7 @@ const exportPpt = async () => {
   }
 }
 
-const convertSceneToElements = (scene) => {
+const convertSceneToElements = scene => {
   const elements = []
 
   // 根据模板类型生成元素
@@ -517,7 +513,7 @@ const resetGenerator = () => {
   progressText.value = ''
 }
 
-const getTemplateIcon = (templateId) => {
+const getTemplateIcon = templateId => {
   const icons = {
     'ppt-title-slide': '📋',
     'ppt-bullet-points': '📝',
@@ -528,7 +524,7 @@ const getTemplateIcon = (templateId) => {
   return icons[templateId] || '📄'
 }
 
-const formatDuration = (ms) => {
+const formatDuration = ms => {
   if (!ms) return '0秒'
   const seconds = Math.floor(ms / 1000)
   if (seconds < 60) return `${seconds}秒`
@@ -537,7 +533,7 @@ const formatDuration = (ms) => {
   return `${minutes}分${remainingSeconds}秒`
 }
 
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (!bytes) return '0 KB'
   const kb = Math.round(bytes / 1024)
   if (kb < 1024) return `${kb} KB`
@@ -832,7 +828,7 @@ const formatFileSize = (bytes) => {
   cursor: pointer;
 }
 
-.option-checkbox input[type="checkbox"] {
+.option-checkbox input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;

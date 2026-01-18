@@ -12,11 +12,7 @@
     />
   </div>
 
-  <div
-    v-if="keyframes.length === 0"
-    class="empty-state"
-    role="status"
-  >
+  <div v-if="keyframes.length === 0" class="empty-state" role="status">
     <div class="empty-icon">🎬</div>
     <h3>暂无关键帧</h3>
     <p>开始提取视频关键帧以显示内容</p>
@@ -31,12 +27,7 @@ defineProps({
   selectedKeyframes: { type: Array, default: () => [] }
 })
 
-defineEmits([
-  'select-keyframe',
-  'preview-keyframe',
-  'create-card',
-  'remove-keyframe'
-])
+defineEmits(['select-keyframe', 'preview-keyframe', 'create-card', 'remove-keyframe'])
 </script>
 
 <style scoped>

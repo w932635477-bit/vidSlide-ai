@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-if="visible"
-    class="material-selection-dialog-overlay"
-    @click="handleOverlayClick"
-  >
+  <div v-if="visible" class="material-selection-dialog-overlay" @click="handleOverlayClick">
     <div class="material-selection-dialog" @click.stop>
       <!-- 对话框头部 -->
       <header class="dialog-header">
@@ -14,18 +10,19 @@
           </h3>
           <p class="dialog-subtitle">
             找到 <strong>{{ materials.length }}</strong> 个素材
-            <span v-if="source" class="source-badge">
-              来自: {{ getSourceLabel(source) }}
-            </span>
+            <span v-if="source" class="source-badge"> 来自: {{ getSourceLabel(source) }} </span>
           </p>
         </div>
-        <button
-          class="close-btn"
-          @click="handleClose"
-          aria-label="关闭对话框"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"/>
+        <button class="close-btn" aria-label="关闭对话框" @click="handleClose">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
       </header>
@@ -33,16 +30,19 @@
       <!-- 搜索和筛选 -->
       <div class="dialog-filters">
         <div class="search-box">
-          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
+          <svg
+            class="search-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
           </svg>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索素材..."
-            class="search-input"
-          />
+          <input v-model="searchQuery" type="text" placeholder="搜索素材..." class="search-input" />
         </div>
         <div class="filter-controls">
           <button
@@ -70,8 +70,8 @@
               v-if="material.thumbnail || material.url"
               :src="material.thumbnail || material.url"
               :alt="material.title || '素材'"
-              @error="handleImageError"
               loading="lazy"
+              @error="handleImageError"
             />
             <div v-else class="thumbnail-placeholder">
               <span class="placeholder-icon">{{ getTypeIcon(material.type) }}</span>
@@ -79,8 +79,15 @@
 
             <!-- 选中标记 -->
             <div v-if="isSelected(material)" class="selection-badge">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
-                <path d="M20 6L9 17l-5-5"/>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="white"
+                stroke="white"
+                stroke-width="2"
+              >
+                <path d="M20 6L9 17l-5-5" />
               </svg>
             </div>
 
@@ -98,15 +105,29 @@
             </p>
             <div class="material-meta">
               <span v-if="material.source" class="meta-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
                 </svg>
                 {{ material.source }}
               </span>
               <span v-if="material.size" class="meta-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                 </svg>
                 {{ formatSize(material.size) }}
               </span>
@@ -117,9 +138,16 @@
         <!-- 空状态 -->
         <div v-if="filteredMaterials.length === 0" class="empty-state">
           <div class="empty-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
             </svg>
           </div>
           <h3>未找到素材</h3>
@@ -133,9 +161,7 @@
           已选择 <strong>{{ selectedMaterials.length }}</strong> 个素材
         </div>
         <div class="footer-actions">
-          <button class="btn btn-secondary" @click="handleClose">
-            取消
-          </button>
+          <button class="btn btn-secondary" @click="handleClose">取消</button>
           <button
             class="btn btn-primary"
             :disabled="selectedMaterials.length === 0"
@@ -209,11 +235,11 @@ const filteredMaterials = computed(() => {
 })
 
 // 选择相关方法
-const isSelected = (material) => {
+const isSelected = material => {
   return selectedMaterials.value.some(m => m.id === material.id)
 }
 
-const toggleSelection = (material) => {
+const toggleSelection = material => {
   const index = selectedMaterials.value.findIndex(m => m.id === material.id)
   if (index > -1) {
     selectedMaterials.value.splice(index, 1)
@@ -239,49 +265,49 @@ const handleConfirm = () => {
   }
 }
 
-const handleImageError = (event) => {
+const handleImageError = event => {
   event.target.style.display = 'none'
   event.target.parentElement.classList.add('image-error')
 }
 
 // 辅助方法
-const getSourceLabel = (source) => {
+const getSourceLabel = source => {
   const labels = {
-    'external': '外部平台',
-    'cache': '缓存',
-    'preset': '预置素材',
-    'baidu': '百度图片',
-    'unsplash': 'Unsplash',
-    'pexels': 'Pexels'
+    external: '外部平台',
+    cache: '缓存',
+    preset: '预置素材',
+    baidu: '百度图片',
+    unsplash: 'Unsplash',
+    pexels: 'Pexels'
   }
   return labels[source] || source
 }
 
-const getTypeIcon = (type) => {
+const getTypeIcon = type => {
   const icons = {
-    'image': '🖼️',
-    'video': '🎬',
-    'icon': '🔘',
-    'illustration': '🎨',
-    'diagram': '📊',
-    'chart': '📈'
+    image: '🖼️',
+    video: '🎬',
+    icon: '🔘',
+    illustration: '🎨',
+    diagram: '📊',
+    chart: '📈'
   }
   return icons[type] || '📄'
 }
 
-const getTypeLabel = (type) => {
+const getTypeLabel = type => {
   const labels = {
-    'image': '图片',
-    'video': '视频',
-    'icon': '图标',
-    'illustration': '插图',
-    'diagram': '图表',
-    'chart': '数据图'
+    image: '图片',
+    video: '视频',
+    icon: '图标',
+    illustration: '插图',
+    diagram: '图表',
+    chart: '数据图'
   }
   return labels[type] || type
 }
 
-const formatSize = (size) => {
+const formatSize = size => {
   if (!size) return ''
   if (typeof size === 'string') return size
   if (size < 1024) return `${size}B`
@@ -290,13 +316,16 @@ const formatSize = (size) => {
 }
 
 // 监听对话框显示状态，重置选择
-watch(() => props.visible, (newVal) => {
-  if (newVal) {
-    selectedMaterials.value = []
-    searchQuery.value = ''
-    selectedFilter.value = 'all'
+watch(
+  () => props.visible,
+  newVal => {
+    if (newVal) {
+      selectedMaterials.value = []
+      searchQuery.value = ''
+      selectedFilter.value = 'all'
+    }
   }
-})
+)
 </script>
 
 <style scoped>

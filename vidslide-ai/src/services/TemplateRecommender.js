@@ -40,22 +40,47 @@ class TemplateRecommender {
           reason: '视频内容适合叠加展示和演讲者聚焦'
         },
         presentation: {
-          templates: ['ppt-title-slide', 'ppt-bullet-points', 'info-card', 'keyword-highlight', 'timeline', 'minimalist'],
+          templates: [
+            'ppt-title-slide',
+            'ppt-bullet-points',
+            'info-card',
+            'keyword-highlight',
+            'timeline',
+            'minimalist'
+          ],
           weight: 0.85,
           reason: '演示内容适合PPT风格结构化展示'
         },
         educational: {
-          templates: ['ppt-bullet-points', 'educational', 'timeline', 'split-screen', 'document-display', 'knowledge-sharing'],
+          templates: [
+            'ppt-bullet-points',
+            'educational',
+            'timeline',
+            'split-screen',
+            'document-display',
+            'knowledge-sharing'
+          ],
           weight: 0.85,
           reason: '教育内容适合要点列表和逻辑化展示'
         },
         promotional: {
-          templates: ['douyin-marketing', 'traffic-acquisition', 'product-showcase', 'ad-performance'],
+          templates: [
+            'douyin-marketing',
+            'traffic-acquisition',
+            'product-showcase',
+            'ad-performance'
+          ],
           weight: 0.9,
           reason: '营销推广内容适合短视频营销模板'
         },
         data: {
-          templates: ['ppt-big-number', 'data-storytelling', 'chart-analysis', 'ad-performance', 'timeline'],
+          templates: [
+            'ppt-big-number',
+            'data-storytelling',
+            'chart-analysis',
+            'ad-performance',
+            'timeline'
+          ],
           weight: 0.9,
           reason: '数据内容适合大数字展示和数据故事模板'
         },
@@ -71,7 +96,12 @@ class TemplateRecommender {
           reason: '短视频内容适合抖音营销和流量获客模板'
         },
         marketing: {
-          templates: ['traffic-acquisition', 'ad-performance', 'douyin-marketing', 'product-showcase'],
+          templates: [
+            'traffic-acquisition',
+            'ad-performance',
+            'douyin-marketing',
+            'product-showcase'
+          ],
           weight: 0.9,
           reason: '营销内容适合流量和投放效果模板'
         },
@@ -82,7 +112,13 @@ class TemplateRecommender {
         },
         // PPT风格内容类型
         pptStyle: {
-          templates: ['ppt-title-slide', 'ppt-bullet-points', 'ppt-big-number', 'ppt-comparison', 'ppt-quote'],
+          templates: [
+            'ppt-title-slide',
+            'ppt-bullet-points',
+            'ppt-big-number',
+            'ppt-comparison',
+            'ppt-quote'
+          ],
           weight: 0.9,
           reason: 'PPT风格内容适合专业演示模板'
         },
@@ -107,7 +143,18 @@ class TemplateRecommender {
 
         // 流量获客
         trafficAcquisition: {
-          patterns: ['获客', '流量', '转化', '变现', '引流', '私域', '公域', '漏斗', '陌生流量', '流量推送'],
+          patterns: [
+            '获客',
+            '流量',
+            '转化',
+            '变现',
+            '引流',
+            '私域',
+            '公域',
+            '漏斗',
+            '陌生流量',
+            '流量推送'
+          ],
           template: 'traffic-acquisition',
           weight: 0.95,
           reason: '流量获客内容适合流量漏斗模板'
@@ -115,7 +162,18 @@ class TemplateRecommender {
 
         // 广告投放
         advertising: {
-          patterns: ['投放', '巨量AD', '质量AD', '广告', 'ROI', 'CPM', 'CPC', 'CTR', '推广', '信息流'],
+          patterns: [
+            '投放',
+            '巨量AD',
+            '质量AD',
+            '广告',
+            'ROI',
+            'CPM',
+            'CPC',
+            'CTR',
+            '推广',
+            '信息流'
+          ],
           template: 'ad-performance',
           weight: 0.9,
           reason: '广告投放内容适合投放效果模板'
@@ -239,7 +297,19 @@ class TemplateRecommender {
 
         // PPT要点/列表
         pptBullets: {
-          patterns: ['第一', '第二', '第三', '首先', '其次', '然后', '最后', '要点', '步骤', '方法', '技巧'],
+          patterns: [
+            '第一',
+            '第二',
+            '第三',
+            '首先',
+            '其次',
+            '然后',
+            '最后',
+            '要点',
+            '步骤',
+            '方法',
+            '技巧'
+          ],
           template: 'ppt-bullet-points',
           weight: 0.9,
           reason: '列举内容适合PPT要点列表模板'
@@ -721,7 +791,7 @@ class TemplateRecommender {
     let hash = 0
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
+      hash = (hash << 5) - hash + char
       hash = hash & hash // Convert to 32bit integer
     }
     return 'cache_' + Math.abs(hash).toString(36)

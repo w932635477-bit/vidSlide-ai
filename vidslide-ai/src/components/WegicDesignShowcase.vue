@@ -10,10 +10,7 @@
       <div class="button-grid">
         <button class="wegic-btn wegic-btn-primary">
           <span>主要按钮</span>
-          <svg
-width="16" height="16"
-viewBox="0 0 24 24" fill="currentColor"
->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path
               d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
             />
@@ -29,13 +26,8 @@ viewBox="0 0 24 24" fill="currentColor"
     <section class="wegic-section">
       <h2 class="wegic-heading wegic-heading-lg">颜色系统</h2>
       <div class="color-palette">
-        <div
-v-for="(color, index) in colorPalette" class="color-item"
-:key="index"
->
-          <div
-class="color-swatch" :style="{ backgroundColor: color.value }"
-/>
+        <div v-for="(color, index) in colorPalette" :key="index" class="color-item">
+          <div class="color-swatch" :style="{ backgroundColor: color.value }" />
           <span class="color-name">{{ color.name }}</span>
           <code class="color-code">{{ color.value }}</code>
         </div>
@@ -45,13 +37,8 @@ class="color-swatch" :style="{ backgroundColor: color.value }"
     <section class="wegic-section">
       <h2 class="wegic-heading wegic-heading-lg">卡片组件</h2>
       <div class="card-grid">
-        <div
-v-for="card in showcaseCards" class="wegic-card"
-:key="card.title"
->
-          <div
-class="card-icon" :class="card.iconClass"
->
+        <div v-for="card in showcaseCards" :key="card.title" class="wegic-card">
+          <div class="card-icon" :class="card.iconClass">
             {{ card.icon }}
           </div>
           <h3 class="wegic-heading wegic-heading-md">

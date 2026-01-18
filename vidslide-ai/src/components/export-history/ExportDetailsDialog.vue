@@ -6,7 +6,7 @@
         <button class="close-btn" @click="$emit('close')">✕</button>
       </div>
 
-      <div class="modal-body" v-if="item">
+      <div v-if="item" class="modal-body">
         <div class="detail-grid">
           <div class="detail-item">
             <label class="detail-label">标题:</label>
@@ -34,27 +34,27 @@
             <label class="detail-label">耗时:</label>
             <span class="detail-value">{{ formattedDuration }}</span>
           </div>
-          <div class="detail-item" v-if="item.outputPath">
+          <div v-if="item.outputPath" class="detail-item">
             <label class="detail-label">输出路径:</label>
             <span class="detail-value">{{ item.outputPath }}</span>
           </div>
-          <div class="detail-item" v-if="item.format">
+          <div v-if="item.format" class="detail-item">
             <label class="detail-label">格式:</label>
             <span class="detail-value">{{ item.format }}</span>
           </div>
-          <div class="detail-item" v-if="item.resolution">
+          <div v-if="item.resolution" class="detail-item">
             <label class="detail-label">分辨率:</label>
             <span class="detail-value">{{ item.resolution }}</span>
           </div>
-          <div class="detail-item" v-if="item.settings">
+          <div v-if="item.settings" class="detail-item">
             <label class="detail-label">导出设置:</label>
             <pre class="detail-value settings">{{ JSON.stringify(item.settings, null, 2) }}</pre>
           </div>
-          <div class="detail-item full-width" v-if="item.errorMessage">
+          <div v-if="item.errorMessage" class="detail-item full-width">
             <label class="detail-label">错误信息:</label>
             <div class="detail-value error-message">{{ item.errorMessage }}</div>
           </div>
-          <div class="detail-item full-width" v-if="item.logs">
+          <div v-if="item.logs" class="detail-item full-width">
             <label class="detail-label">执行日志:</label>
             <pre class="detail-value logs">{{ item.logs }}</pre>
           </div>

@@ -228,7 +228,7 @@ console.log('-'.repeat(60))
 test('核心渲染器代码行数大幅减少', () => {
   const originalLines = countLines(files.backup)
   const newLines = countLines(files.core)
-  const reduction = ((originalLines - newLines) / originalLines * 100).toFixed(1)
+  const reduction = (((originalLines - newLines) / originalLines) * 100).toFixed(1)
   console.log(`    原始行数: ${originalLines}`)
   console.log(`    重构后行数: ${newLines}`)
   console.log(`    减少比例: ${reduction}%`)

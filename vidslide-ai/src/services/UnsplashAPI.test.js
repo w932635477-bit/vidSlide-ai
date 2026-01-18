@@ -57,10 +57,7 @@ describe('UnsplashAPI', () => {
             width: 1920,
             height: 1080,
             likes: 42,
-            tags: [
-              { title: 'nature' },
-              { title: 'landscape' }
-            ]
+            tags: [{ title: 'nature' }, { title: 'landscape' }]
           }
         ],
         total: 1,
@@ -147,7 +144,9 @@ describe('UnsplashAPI', () => {
         statusText: 'Unauthorized'
       })
 
-      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow('Unsplash API error: 401 Unauthorized')
+      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow(
+        'Unsplash API error: 401 Unauthorized'
+      )
     })
 
     it('应该处理网络错误', async () => {
@@ -327,10 +326,7 @@ describe('UnsplashAPI', () => {
         width: 1920,
         height: 1080,
         likes: 42,
-        tags: [
-          { title: 'test' },
-          { title: 'photo' }
-        ]
+        tags: [{ title: 'test' }, { title: 'photo' }]
       }
 
       const converted = unsplashAPI.transformPhotoData(rawPhoto)
@@ -447,14 +443,23 @@ describe('UnsplashAPI', () => {
 
     it('应该处理超时错误', async () => {
       global.fetch.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({
-          ok: false,
-          status: 408,
-          statusText: 'Request Timeout'
-        }), 100))
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  ok: false,
+                  status: 408,
+                  statusText: 'Request Timeout'
+                }),
+              100
+            )
+          )
       )
 
-      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow('Unsplash API error: 408 Request Timeout')
+      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow(
+        'Unsplash API error: 408 Request Timeout'
+      )
     })
 
     it('应该处理服务器错误', async () => {
@@ -464,7 +469,9 @@ describe('UnsplashAPI', () => {
         statusText: 'Internal Server Error'
       })
 
-      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow('Unsplash API error: 500 Internal Server Error')
+      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow(
+        'Unsplash API error: 500 Internal Server Error'
+      )
     })
 
     it('应该处理限流错误', async () => {
@@ -474,7 +481,9 @@ describe('UnsplashAPI', () => {
         statusText: 'Too Many Requests'
       })
 
-      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow('Unsplash API error: 429 Too Many Requests')
+      await expect(unsplashAPI.searchPhotos('test')).rejects.toThrow(
+        'Unsplash API error: 429 Too Many Requests'
+      )
     })
   })
 

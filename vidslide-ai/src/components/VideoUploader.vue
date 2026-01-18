@@ -14,9 +14,9 @@
         <!-- 上传图标 -->
         <div class="upload-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-            <polyline points="14,2 14,8 20,8"/>
-            <path d="M10 12l2 2 4-4"/>
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+            <polyline points="14,2 14,8 20,8" />
+            <path d="M10 12l2 2 4-4" />
           </svg>
         </div>
 
@@ -30,9 +30,9 @@
         <div class="upload-actions">
           <button class="upload-btn primary">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7,10 12,15 17,10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7,10 12,15 17,10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             {{ t('workspace.upload.button') }}
           </button>
@@ -41,7 +41,7 @@
         <!-- 支持格式提示 -->
         <div class="format-hint">
           <small>{{ t('workspace.upload.supportedFormats') }}: MP4, AVI, MOV, WMV</small>
-          <br>
+          <br />
           <small>{{ t('workspace.upload.maxSize') }}: 500MB</small>
         </div>
       </div>
@@ -51,8 +51,8 @@
         ref="fileInput"
         type="file"
         accept="video/*"
+        style="display: none"
         @change="handleFileSelect"
-        style="display: none;"
       />
     </div>
 
@@ -61,8 +61,19 @@
       <div class="progress-content">
         <div class="progress-icon">
           <svg class="animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/>
-            <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+              class="opacity-25"
+            />
+            <path
+              fill="currentColor"
+              class="opacity-75"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
         </div>
 
@@ -72,44 +83,11 @@
           <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
         </div>
 
-        <div class="progress-text">
-          {{ uploadProgress }}% {{ t('workspace.upload.completed') }}
-        </div>
+        <div class="progress-text">{{ uploadProgress }}% {{ t('workspace.upload.completed') }}</div>
 
-        <button
-          v-if="canCancel"
-          class="cancel-btn"
-          @click="cancelUpload"
-        >
+        <button v-if="canCancel" class="cancel-btn" @click="cancelUpload">
           {{ t('workspace.upload.cancel') }}
         </button>
-      </div>
-    </div>
-
-    <!-- 上传完成区域 -->
-    <div v-else class="upload-success">
-      <div class="success-content">
-        <div class="success-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-
-        <h4 class="success-title">{{ t('workspace.upload.uploadSuccess') }}</h4>
-
-        <div class="file-info">
-          <div class="file-name">{{ videoFile.name }}</div>
-          <div class="file-size">{{ formatFileSize(videoFile.size) }}</div>
-        </div>
-
-        <div class="success-actions">
-          <button class="action-btn secondary" @click="clearUpload">
-            {{ t('workspace.upload.uploadAnother') }}
-          </button>
-          <button class="action-btn primary" @click="$emit('video-uploaded', videoFile)">
-            {{ t('workspace.upload.startAnalysis') }}
-          </button>
-        </div>
       </div>
     </div>
 
@@ -118,9 +96,9 @@
       <div class="error-content">
         <div class="error-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
           </svg>
         </div>
 
@@ -169,19 +147,26 @@ const canCancel = ref(true)
 
 // 计算属性
 const supportedFormatsText = computed(() => {
-  return props.acceptedFormats.map(format => {
-    switch(format) {
-      case 'video/mp4': return 'MP4'
-      case 'video/avi': return 'AVI'
-      case 'video/quicktime': return 'MOV'
-      case 'video/x-msvideo': return 'WMV'
-      default: return format.split('/')[1].toUpperCase()
-    }
-  }).join(', ')
+  return props.acceptedFormats
+    .map(format => {
+      switch (format) {
+        case 'video/mp4':
+          return 'MP4'
+        case 'video/avi':
+          return 'AVI'
+        case 'video/quicktime':
+          return 'MOV'
+        case 'video/x-msvideo':
+          return 'WMV'
+        default:
+          return format.split('/')[1].toUpperCase()
+      }
+    })
+    .join(', ')
 })
 
 // 文件大小格式化
-const formatFileSize = (bytes) => {
+const formatFileSize = bytes => {
   if (bytes === 0) return '0 B'
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB']
@@ -190,7 +175,7 @@ const formatFileSize = (bytes) => {
 }
 
 // 验证文件
-const validateFile = (file) => {
+const validateFile = file => {
   // 检查文件类型
   if (!props.acceptedFormats.includes(file.type)) {
     return t('workspace.upload.errors.invalidFormat')
@@ -205,7 +190,7 @@ const validateFile = (file) => {
 }
 
 // 处理文件选择
-const handleFileSelect = (event) => {
+const handleFileSelect = event => {
   const file = event.target.files[0]
   if (file) {
     processFile(file)
@@ -221,7 +206,7 @@ const handleDragLeave = () => {
   isDragOver.value = false
 }
 
-const handleDrop = (event) => {
+const handleDrop = event => {
   isDragOver.value = false
   const file = event.dataTransfer.files[0]
   if (file) {
@@ -235,7 +220,7 @@ const triggerFileSelect = () => {
 }
 
 // 处理文件
-const processFile = async (file) => {
+const processFile = async file => {
   // 验证文件
   const validationError = validateFile(file)
   if (validationError) {
@@ -247,30 +232,14 @@ const processFile = async (file) => {
   // 清空错误
   error.value = ''
 
-  // 开始上传
-  videoFile.value = file
-  isUploading.value = true
-  uploadProgress.value = 0
-
+  // 直接触发事件，不显示上传进度
   try {
-    // 模拟上传进度
-    const progressInterval = setInterval(() => {
-      uploadProgress.value += Math.random() * 15
-      if (uploadProgress.value >= 100) {
-        uploadProgress.value = 100
-        clearInterval(progressInterval)
-
-        // 上传完成
-        setTimeout(() => {
-          isUploading.value = false
-          ElMessage.success(t('workspace.upload.uploadSuccess'))
-        }, 500)
-      }
-    }, 200)
-
+    emit('video-uploaded', file)
+    // 重置状态
+    videoFile.value = null
+    uploadProgress.value = 0
   } catch (err) {
     error.value = t('workspace.upload.errors.uploadFailed')
-    isUploading.value = false
     ElMessage.error(error.value)
   }
 }

@@ -20,13 +20,15 @@ describe('TemplateDefinitions', () => {
     it('应该包含5种核心模板类型', () => {
       const types = Object.values(TEMPLATE_TYPES)
       expect(types).toHaveLength(5)
-      expect(types).toEqual(expect.arrayContaining([
-        'dialog-popup',
-        'timeline-display',
-        'split-screen',
-        'chart-analysis',
-        'emphasis-focus'
-      ]))
+      expect(types).toEqual(
+        expect.arrayContaining([
+          'dialog-popup',
+          'timeline-display',
+          'split-screen',
+          'chart-analysis',
+          'emphasis-focus'
+        ])
+      )
     })
 
     it('应该有唯一的模板类型值', () => {
@@ -254,9 +256,15 @@ describe('TemplateDefinitions', () => {
       types.forEach(type => {
         const config = TEMPLATE_CONFIGS[type]
         const validPositions = [
-          'top-left', 'top', 'top-right',
-          'left', 'center', 'right',
-          'bottom-left', 'bottom', 'bottom-right'
+          'top-left',
+          'top',
+          'top-right',
+          'left',
+          'center',
+          'right',
+          'bottom-left',
+          'bottom',
+          'bottom-right'
         ]
 
         expect(validPositions).toContain(config.visual.position)
@@ -269,9 +277,15 @@ describe('TemplateDefinitions', () => {
       types.forEach(type => {
         const config = TEMPLATE_CONFIGS[type]
         const validShapes = [
-          'rounded-rectangle', 'circle', 'triangle',
-          'timeline-bar', 'split-layout', 'chart-container',
-          'highlight-overlay', 'speech-bubble', 'arrow-pointer'
+          'rounded-rectangle',
+          'circle',
+          'triangle',
+          'timeline-bar',
+          'split-layout',
+          'chart-container',
+          'highlight-overlay',
+          'speech-bubble',
+          'arrow-pointer'
         ]
 
         expect(validShapes).toContain(config.visual.shape)
@@ -284,9 +298,14 @@ describe('TemplateDefinitions', () => {
       types.forEach(type => {
         const config = TEMPLATE_CONFIGS[type]
         const validAnimations = [
-          'fade-in', 'fade-in-scale', 'slide-in',
-          'bounce-in', 'zoom-in', 'rotate-in',
-          'timeline-progress', 'chart-animation'
+          'fade-in',
+          'fade-in-scale',
+          'slide-in',
+          'bounce-in',
+          'zoom-in',
+          'rotate-in',
+          'timeline-progress',
+          'chart-animation'
         ]
 
         expect(validAnimations).toContain(config.visual.animation.type)

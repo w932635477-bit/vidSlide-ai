@@ -53,7 +53,7 @@ export function useAssetPreview(emit) {
    * 打开素材预览
    * @param {Object} asset - 素材对象
    */
-  const previewAsset = (asset) => {
+  const previewAsset = asset => {
     previewAssetData.value = asset
     previewDialogVisible.value = true
     emit('asset-previewed', asset)
@@ -130,7 +130,7 @@ export function useAssetPreview(emit) {
           const canvas = document.createElement('canvas')
           const ctx = canvas.getContext('2d')
 
-          const resolutionConfig = previewResolutions.find((r) => r.value === resolution)
+          const resolutionConfig = previewResolutions.find(r => r.value === resolution)
           if (!resolutionConfig) {
             resolve(originalUrl)
             return
@@ -181,7 +181,7 @@ export function useAssetPreview(emit) {
    * 发射素材选择事件
    * @param {Object} asset - 素材对象
    */
-  const emitAssetSelected = (asset) => {
+  const emitAssetSelected = asset => {
     emit('asset-selected', asset)
     closePreview()
   }
@@ -193,7 +193,7 @@ export function useAssetPreview(emit) {
    * @param {string} source - 素材来源标识
    * @returns {string} 显示名称
    */
-  const getSourceDisplayName = (source) => {
+  const getSourceDisplayName = source => {
     const sourceNames = {
       unsplash: 'Unsplash',
       pexels: 'Pexels',
@@ -209,7 +209,7 @@ export function useAssetPreview(emit) {
    * @param {number} bytes - 文件大小（字节）
    * @returns {string} 格式化的文件大小字符串
    */
-  const formatFileSize = (bytes) => {
+  const formatFileSize = bytes => {
     if (!bytes) return ''
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     if (bytes === 0) return '0 Bytes'
@@ -222,7 +222,7 @@ export function useAssetPreview(emit) {
    * @param {Object} copyrightInfo - 版权信息对象
    * @returns {string} CSS类名
    */
-  const getCopyrightClass = (copyrightInfo) => {
+  const getCopyrightClass = copyrightInfo => {
     if (copyrightInfo.isSafe) return 'safe'
     if (copyrightInfo.status === 'unknown') return 'unknown'
     return 'unsafe'
@@ -233,7 +233,7 @@ export function useAssetPreview(emit) {
    * @param {Object} copyrightInfo - 版权信息对象
    * @returns {string} 标签类型
    */
-  const getCopyrightTagType = (copyrightInfo) => {
+  const getCopyrightTagType = copyrightInfo => {
     if (copyrightInfo.isSafe) return 'success'
     if (copyrightInfo.status === 'unknown') return 'warning'
     return 'danger'
@@ -244,7 +244,7 @@ export function useAssetPreview(emit) {
    * @param {Object} copyrightInfo - 版权信息对象
    * @returns {string} 状态文本
    */
-  const getCopyrightStatusText = (copyrightInfo) => {
+  const getCopyrightStatusText = copyrightInfo => {
     const statusTexts = {
       free: '免费使用',
       cc: '创意共享',
@@ -259,7 +259,7 @@ export function useAssetPreview(emit) {
    * 处理图像加载错误
    * @param {Event} event - 错误事件
    */
-  const handleImageError = (event) => {
+  const handleImageError = event => {
     // 图片加载失败时显示占位符
     const img = event.target
     img.style.display = 'none'

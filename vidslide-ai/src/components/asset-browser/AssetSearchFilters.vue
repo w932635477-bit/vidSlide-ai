@@ -45,11 +45,7 @@
         <el-option label="音频" value="audio" />
       </el-select>
 
-      <el-select
-        :model-value="sortBy"
-        placeholder="排序"
-        @change="$emit('update:sortBy', $event)"
-      >
+      <el-select :model-value="sortBy" placeholder="排序" @change="$emit('update:sortBy', $event)">
         <el-option label="最新使用" value="lastUsed" />
         <el-option label="创建时间" value="createdAt" />
         <el-option label="名称" value="name" />
@@ -58,15 +54,8 @@
     </div>
 
     <div class="filter-row">
-      <el-checkbox-group
-        :model-value="colorFilters"
-        @change="$emit('update:colorFilters', $event)"
-      >
-        <el-checkbox
-          v-for="color in supportedColors"
-          :key="color.id"
-          :label="color.id"
-        >
+      <el-checkbox-group :model-value="colorFilters" @change="$emit('update:colorFilters', $event)">
+        <el-checkbox v-for="color in supportedColors" :key="color.id" :label="color.id">
           {{ color.name }}
         </el-checkbox>
       </el-checkbox-group>

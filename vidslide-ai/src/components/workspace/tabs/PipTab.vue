@@ -20,7 +20,7 @@ const pipEnabled = computed(() => store.pip.enabled)
 const pipSettings = computed(() => store.pip.settings)
 
 // 事件处理
-const handleSettingsChanged = (settings) => {
+const handleSettingsChanged = settings => {
   console.log('画中画设置更新:', settings)
   store.updatePipSettings(settings)
 }

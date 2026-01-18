@@ -8,9 +8,7 @@
         动画演示
       </div>
 
-      <div ref="pipElement" class="preview-pip">
-        画中画动画演示
-      </div>
+      <div ref="pipElement" class="preview-pip">画中画动画演示</div>
     </div>
   </div>
 </template>

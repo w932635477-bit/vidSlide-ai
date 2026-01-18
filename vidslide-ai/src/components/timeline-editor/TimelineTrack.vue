@@ -1,37 +1,37 @@
 <template>
-  <div 
+  <div
     class="timeline-track"
-    :class="{ 
+    :class="{
       selected: isSelected,
-      'can-drop': canDrop 
+      'can-drop': canDrop
     }"
+    :style="{ width: trackWidth + 'px' }"
     @click="handleTrackClick"
     @dragover.prevent="handleDragOver"
     @drop="handleDrop"
-    :style="{ width: trackWidth + 'px' }"
   >
     <!-- 轨道头部 -->
     <div class="track-header">
       <div class="track-info">
         <el-input
           v-model="localTrackName"
-          @change="$emit('update:name', localTrackName)"
           size="small"
           placeholder="轨道名称"
           class="track-name-input"
+          @change="$emit('update:name', localTrackName)"
         />
         <div class="track-controls">
           <el-button
             :icon="track.visible ? 'View' : 'Hide'"
             size="small"
-            @click.stop="$emit('toggle-visibility')"
             :title="track.visible ? '隐藏' : '显示'"
+            @click.stop="$emit('toggle-visibility')"
           />
           <el-button
             :icon="track.locked ? 'Lock' : 'Unlock'"
             size="small"
-            @click.stop="$emit('toggle-lock')"
             :title="track.locked ? '解锁' : '锁定'"
+            @click.stop="$emit('toggle-lock')"
           />
         </div>
       </div>
@@ -113,7 +113,7 @@ const handleTrackClick = () => {
 }
 
 // 处理片段点击
-const handleClipClick = (clip) => {
+const handleClipClick = clip => {
   emit('clip-click', clip)
 }
 
@@ -130,21 +130,21 @@ const handleClipResizeStart = (clip, event) => {
 }
 
 // 处理拖拽悬停
-const handleDragOver = (event) => {
+const handleDragOver = event => {
   if (props.track.locked) return
   canDrop.value = true
   event.dataTransfer.dropEffect = 'move'
 }
 
 // 处理放置
-const handleDrop = (event) => {
+const handleDrop = event => {
   if (props.track.locked) return
   canDrop.value = false
-  
+
   const rect = event.currentTarget.getBoundingClientRect()
   const offsetX = event.clientX - rect.left
   const time = offsetX / (props.pixelsPerSecond * props.zoom)
-  
+
   emit('drop-clip', {
     trackId: props.track.id,
     time: Math.max(0, time)

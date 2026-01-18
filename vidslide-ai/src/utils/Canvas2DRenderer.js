@@ -587,7 +587,7 @@ class Canvas2DRenderer {
       renderer: 'canvas2d-composition',
       play: () => this.playComposition(),
       pause: () => this.pauseComposition(),
-      seekToScene: (index) => this.seekToScene(index),
+      seekToScene: index => this.seekToScene(index),
       getCurrentScene: () => this.getCurrentScene(),
       stop: () => this.stopComposition()
     }
@@ -722,7 +722,13 @@ class Canvas2DRenderer {
       if (props.backgroundColor && props.backgroundColor !== 'transparent') {
         this.ctx.fillStyle = props.backgroundColor
         this.ctx.globalAlpha = props.opacity || 1.0
-        this.fillRoundedRect(bounds.x, bounds.y, bounds.width, bounds.height, props.borderRadius || 0)
+        this.fillRoundedRect(
+          bounds.x,
+          bounds.y,
+          bounds.width,
+          bounds.height,
+          props.borderRadius || 0
+        )
         this.ctx.globalAlpha = 1.0
       }
 
@@ -730,12 +736,17 @@ class Canvas2DRenderer {
       if (props.border) {
         this.ctx.strokeStyle = props.border.color || '#FFFFFF'
         this.ctx.lineWidth = props.border.width || 1
-        this.strokeRoundedRect(bounds.x, bounds.y, bounds.width, bounds.height, props.borderRadius || 0)
+        this.strokeRoundedRect(
+          bounds.x,
+          bounds.y,
+          bounds.width,
+          bounds.height,
+          props.borderRadius || 0
+        )
       }
 
       // 渲染文字内容
       await this.renderLayerText(layer, content, bounds, elapsed)
-
     } finally {
       this.ctx.restore()
     }

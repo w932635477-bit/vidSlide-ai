@@ -268,8 +268,8 @@ class KeywordAnalyzer {
 
     if (hasProfessionalTerms) return 'high'
     // 只有匹配到专业相关的模式才返回medium，排除通用的中文字符模式
-    const professionalPatterns = analysis.patterns.filter(p =>
-      p.pattern !== '[\\u4e00-\\u9fff]' && p.pattern !== '^[a-zA-Z\\s\\-.&()]+$'
+    const professionalPatterns = analysis.patterns.filter(
+      p => p.pattern !== '[\\u4e00-\\u9fff]' && p.pattern !== '^[a-zA-Z\\s\\-.&()]+$'
     )
     if (professionalPatterns.length > 0) return 'medium'
     return 'low'

@@ -16,7 +16,7 @@ export function useMaterialManagement() {
   }
 
   // 搜索素材
-  const searchMaterials = async (requirement) => {
+  const searchMaterials = async requirement => {
     try {
       console.log('🔍 搜索素材:', requirement)
 
@@ -53,18 +53,12 @@ export function useMaterialManagement() {
       } else if (results.source === 'cache') {
         ElMessage.info(`找到 ${results.materials.length} 个缓存素材`)
       } else if (results.source === 'preset') {
-        ElMessage.warning(
-          `找到 ${results.materials.length} 个预置素材（建议联网获取更多）`
-        )
+        ElMessage.warning(`找到 ${results.materials.length} 个预置素材（建议联网获取更多）`)
       }
 
       // 更新搜索结果并显示对话框
       if (results.materials.length > 0) {
-        store.setMaterialSearchResults(
-          results.materials,
-          results.source,
-          results.platforms || []
-        )
+        store.setMaterialSearchResults(results.materials, results.source, results.platforms || [])
         store.showMaterialSelectionDialog()
       } else {
         ElMessage.warning('未找到相关素材')
@@ -79,7 +73,7 @@ export function useMaterialManagement() {
   }
 
   // 授权搜索
-  const authorizeSearch = async (platforms) => {
+  const authorizeSearch = async platforms => {
     try {
       console.log('用户授权平台:', platforms)
 
@@ -97,11 +91,7 @@ export function useMaterialManagement() {
       // 显示搜索结果
       if (results.materials.length > 0) {
         ElMessage.success(`找到 ${results.materials.length} 个素材`)
-        store.setMaterialSearchResults(
-          results.materials,
-          results.source,
-          results.platforms || []
-        )
+        store.setMaterialSearchResults(results.materials, results.source, results.platforms || [])
         store.showMaterialSelectionDialog()
       } else {
         ElMessage.warning('未找到相关素材')
@@ -141,11 +131,7 @@ export function useMaterialManagement() {
       // 显示搜索结果
       if (results.materials.length > 0) {
         ElMessage.success(`找到 ${results.materials.length} 个本地素材`)
-        store.setMaterialSearchResults(
-          results.materials,
-          results.source,
-          []
-        )
+        store.setMaterialSearchResults(results.materials, results.source, [])
         store.showMaterialSelectionDialog()
       } else {
         ElMessage.warning('本地素材库中未找到相关素材')
@@ -160,7 +146,7 @@ export function useMaterialManagement() {
   }
 
   // 确认选择素材
-  const confirmMaterialSelection = (selectedMaterials) => {
+  const confirmMaterialSelection = selectedMaterials => {
     console.log('用户选择的素材:', selectedMaterials)
 
     if (selectedMaterials.length > 0) {

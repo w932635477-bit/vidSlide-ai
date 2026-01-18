@@ -8,7 +8,7 @@ import { safeHtml, SafeHtmlDirective } from './safeHtml.js'
 
 // Mock document for Node.js environment
 const mockDocument = {
-  createElement: vi.fn((tag) => {
+  createElement: vi.fn(tag => {
     const element = {
       tagName: tag.toUpperCase(),
       innerHTML: '',
@@ -24,7 +24,7 @@ const mockDocument = {
     // Mock children array behavior
     Object.defineProperty(element, 'children', {
       get: () => element._children || [],
-      set: (value) => element._children = value
+      set: value => (element._children = value)
     })
 
     // Mock attributes behavior
@@ -55,7 +55,23 @@ describe('safeHtml', () => {
     })
 
     it('应该包含允许的HTML标签', () => {
-      const expectedTags = ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 'br', 'img', 'a']
+      const expectedTags = [
+        'div',
+        'span',
+        'p',
+        'h1',
+        'h2',
+        'h3',
+        'h4',
+        'h5',
+        'h6',
+        'strong',
+        'em',
+        'u',
+        'br',
+        'img',
+        'a'
+      ]
       expect(renderer.allowedTags).toEqual(expectedTags)
     })
 
@@ -67,7 +83,8 @@ describe('safeHtml', () => {
 
   describe('HTML清理', () => {
     it('应该清理不安全的HTML标签', () => {
-      const unsafeHtml = '<script>alert("xss")</script><div>Safe content</div><iframe src="evil.com"></iframe>'
+      const unsafeHtml =
+        '<script>alert("xss")</script><div>Safe content</div><iframe src="evil.com"></iframe>'
       const result = renderer.sanitize(unsafeHtml)
       expect(result).not.toContain('<script>')
       expect(result).not.toContain('<iframe>')
@@ -201,7 +218,8 @@ describe('safeHtml', () => {
     })
 
     it('应该处理自闭合标签', () => {
-      const selfClosingHtml = '<div><br><img src="test.jpg" alt="test"><input type="text" disabled></div>'
+      const selfClosingHtml =
+        '<div><br><img src="test.jpg" alt="test"><input type="text" disabled></div>'
       const result = renderer.sanitize(selfClosingHtml)
 
       expect(result).toContain('<br>')

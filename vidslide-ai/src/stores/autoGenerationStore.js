@@ -30,22 +30,22 @@ export const useAutoGenerationStore = defineStore('autoGeneration', {
     /**
      * 是否可以开始生成
      */
-    canStartGeneration: (state) => !state.isProcessing,
+    canStartGeneration: state => !state.isProcessing,
 
     /**
      * 是否有结果
      */
-    hasResult: (state) => state.result !== null,
+    hasResult: state => state.result !== null,
 
     /**
      * 是否可以导出
      */
-    canExport: (state) => state.result?.canExport || false,
+    canExport: state => state.result?.canExport || false,
 
     /**
      * 是否预览就绪
      */
-    isPreviewReady: (state) => state.result?.previewReady || false
+    isPreviewReady: state => state.result?.previewReady || false
   },
 
   actions: {
@@ -75,10 +75,7 @@ export const useAutoGenerationStore = defineStore('autoGeneration', {
       try {
         console.log('🚀 Store: 开始自动生成...')
 
-        const result = await this.agent.autoGenerate(
-          videoFile,
-          this.handleProgress.bind(this)
-        )
+        const result = await this.agent.autoGenerate(videoFile, this.handleProgress.bind(this))
 
         console.log('✅ Store: 自动生成完成', result)
 

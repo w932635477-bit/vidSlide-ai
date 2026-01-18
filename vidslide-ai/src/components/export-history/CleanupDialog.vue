@@ -8,15 +8,15 @@
       <div class="modal-body">
         <div class="cleanup-options">
           <label class="option-item">
-            <input type="radio" :value="'failed'" v-model="selectedOption" />
+            <input v-model="selectedOption" type="radio" :value="'failed'" />
             <span>仅删除失败的记录</span>
           </label>
           <label class="option-item">
-            <input type="radio" :value="'older'" v-model="selectedOption" />
+            <input v-model="selectedOption" type="radio" :value="'older'" />
             <span>删除30天前的记录</span>
           </label>
           <label class="option-item">
-            <input type="radio" :value="'all'" v-model="selectedOption" />
+            <input v-model="selectedOption" type="radio" :value="'all'" />
             <span>删除所有记录</span>
           </label>
         </div>
@@ -28,7 +28,7 @@
 
       <div class="modal-actions">
         <button class="cancel-btn" @click="$emit('close')">取消</button>
-        <button class="cleanup-confirm-btn" @click="handleConfirm" :disabled="!selectedOption">
+        <button class="cleanup-confirm-btn" :disabled="!selectedOption" @click="handleConfirm">
           确认清理
         </button>
       </div>
@@ -48,11 +48,14 @@ const emit = defineEmits(['close', 'confirm'])
 
 const selectedOption = ref('')
 
-watch(() => props.show, (newVal) => {
-  if (!newVal) {
-    selectedOption.value = ''
+watch(
+  () => props.show,
+  newVal => {
+    if (!newVal) {
+      selectedOption.value = ''
+    }
   }
-})
+)
 
 const cleanupCount = computed(() => {
   if (!selectedOption.value) return 0
@@ -166,7 +169,7 @@ const handleConfirm = () => {
   gap: 8px;
 }
 
-.option-item input[type="radio"] {
+.option-item input[type='radio'] {
   width: 16px;
   height: 16px;
   accent-color: #007aff;

@@ -47,7 +47,9 @@
 
       <!-- 说明文字 -->
       <div class="description-section">
-        <p class="description">{{ description || '通过视觉突出和颜色编码，帮助观众快速识别和记忆重要概念' }}</p>
+        <p class="description">
+          {{ description || '通过视觉突出和颜色编码，帮助观众快速识别和记忆重要概念' }}
+        </p>
       </div>
     </div>
 
@@ -165,14 +167,22 @@ export default {
       }
     },
     lightenColor(color, percent) {
-      const num = parseInt(color.replace("#", ""), 16)
+      const num = parseInt(color.replace('#', ''), 16)
       const amt = Math.round(2.55 * percent * 100)
       const R = (num >> 16) + amt
-      const G = (num >> 8 & 0x00FF) + amt
-      const B = (num & 0x0000FF) + amt
-      return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-        (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-        (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1)
+      const G = ((num >> 8) & 0x00ff) + amt
+      const B = (num & 0x0000ff) + amt
+      return (
+        '#' +
+        (
+          0x1000000 +
+          (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+          (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+          (B < 255 ? (B < 1 ? 0 : B) : 255)
+        )
+          .toString(16)
+          .slice(1)
+      )
     },
     generateParticles() {
       const particles = []
@@ -208,9 +218,12 @@ export default {
   background: #f8f9fa;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -231,9 +244,9 @@ export default {
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at 20% 80%, rgba(0,123,255,0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(52,199,89,0.03) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(255,59,48,0.02) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, rgba(0, 123, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(52, 199, 89, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 59, 48, 0.02) 0%, transparent 50%);
 }
 
 .bg-gradient {
@@ -242,10 +255,12 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg,
-    rgba(0,123,255,0.02) 0%,
-    rgba(52,199,89,0.02) 50%,
-    rgba(255,59,48,0.02) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 123, 255, 0.02) 0%,
+    rgba(52, 199, 89, 0.02) 50%,
+    rgba(255, 59, 48, 0.02) 100%
+  );
 }
 
 /* 内容区域 */
@@ -304,12 +319,16 @@ export default {
   animation: keywordFadeIn 0.8s ease-out forwards;
   opacity: 0;
   transform: translateY(20px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .keyword-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 @keyframes keywordFadeIn {
@@ -353,7 +372,12 @@ export default {
 .decoration-shape {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
   border-radius: inherit;
 }
 

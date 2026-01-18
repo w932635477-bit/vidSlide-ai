@@ -10,10 +10,7 @@
 
     <div class="component-test">
       <h2>组件测试</h2>
-      <AssetBrowser
-        v-if="showAssetBrowser"
-        aria-label="测试素材浏览器"
-      />
+      <AssetBrowser v-if="showAssetBrowser" aria-label="测试素材浏览器" />
       <button @click="toggleAssetBrowser">
         {{ showAssetBrowser ? '隐藏' : '显示' }} AssetBrowser
       </button>
@@ -35,14 +32,14 @@ export default {
       currentUrl: window.location.href
     }
   },
+  mounted() {
+    console.log('简化工作空间组件已挂载')
+    console.log('当前路由:', this.$route)
+  },
   methods: {
     toggleAssetBrowser() {
       this.showAssetBrowser = !this.showAssetBrowser
     }
-  },
-  mounted() {
-    console.log('简化工作空间组件已挂载')
-    console.log('当前路由:', this.$route)
   }
 }
 </script>

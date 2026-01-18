@@ -180,7 +180,10 @@ export class SplitScreenRenderer extends BaseRenderer {
           borderRadius,
           panelConfig.background
         )
-      } else if (panelConfig.background.type === 'linear' || panelConfig.background.type === 'radial') {
+      } else if (
+        panelConfig.background.type === 'linear' ||
+        panelConfig.background.type === 'radial'
+      ) {
         // 渐变背景
         this.visualEffects.drawGradientBackground(
           panel.x,
@@ -243,12 +246,19 @@ export class SplitScreenRenderer extends BaseRenderer {
     const maxWidth = panel.width - padding * 2
     const lineHeight = textConfig.lineHeight || 18
 
-    this.visualEffects.drawMultilineText(content, panel.x + padding, contentY, maxWidth, lineHeight, {
-      font: textConfig.font || '14px Arial',
-      color: textConfig.color || '#666666',
-      textAlign: 'left',
-      textBaseline: 'top'
-    })
+    this.visualEffects.drawMultilineText(
+      content,
+      panel.x + padding,
+      contentY,
+      maxWidth,
+      lineHeight,
+      {
+        font: textConfig.font || '14px Arial',
+        color: textConfig.color || '#666666',
+        textAlign: 'left',
+        textBaseline: 'top'
+      }
+    )
   }
 
   /**

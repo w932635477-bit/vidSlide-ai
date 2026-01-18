@@ -19,7 +19,8 @@ export const locales = {
     hero: {
       badge: 'AI驱动的视频转PPT工具',
       title: '3分钟将口播视频转换为专业PPT演示',
-      subtitle: 'VidSlide AI 自动分析视频内容，智能生成现代化PPT幻灯片，与原视频完美融合。节省3-5小时工作量，让内容创作更高效。',
+      subtitle:
+        'VidSlide AI 自动分析视频内容，智能生成现代化PPT幻灯片，与原视频完美融合。节省3-5小时工作量，让内容创作更高效。',
       cta: {
         primary: '立即开始',
         secondary: '观看演示'
@@ -266,7 +267,8 @@ export const locales = {
     hero: {
       badge: 'AI-Powered Video to PPT Tool',
       title: 'Convert Video to Professional PPT in 3 Minutes',
-      subtitle: 'VidSlide AI automatically analyzes video content, intelligently generates modern PPT slides, and perfectly integrates with the original video. Save 3-5 hours of work and make content creation more efficient.',
+      subtitle:
+        'VidSlide AI automatically analyzes video content, intelligently generates modern PPT slides, and perfectly integrates with the original video. Save 3-5 hours of work and make content creation more efficient.',
       cta: {
         primary: 'Get Started',
         secondary: 'Watch Demo'
@@ -498,4 +500,4 @@ export const locales = {
       }
     }
   }
-};
+}

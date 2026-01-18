@@ -1,15 +1,9 @@
 <template>
-  <div
-v-if="visible" class="export-dialog-overlay"
-@click="close"
->
-    <div
-class="export-dialog" @click.stop
->
+  <div v-if="visible" class="export-dialog-overlay" @click="close">
+    <div class="export-dialog" @click.stop>
       <div class="dialog-header">
         <h2>导出演示文稿</h2>
-        <button
-class="close-btn" @click="close" aria-label="关闭">×</button>
+        <button class="close-btn" aria-label="关闭" @click="close">×</button>
       </div>
 
       <div class="dialog-body">
@@ -17,10 +11,7 @@ class="close-btn" @click="close" aria-label="关闭">×</button>
         <div class="export-section">
           <h3>导出格式</h3>
           <div class="format-options">
-            <label
-v-for="format in availableFormats" class="format-option"
-:key="format.id"
->
+            <label v-for="format in availableFormats" :key="format.id" class="format-option">
               <input
                 v-model="selectedFormat"
                 type="radio"
@@ -42,9 +33,7 @@ v-for="format in availableFormats" class="format-option"
         </div>
 
         <!-- 导出选项 -->
-        <div
-v-if="currentFormat" class="export-section"
->
+        <div v-if="currentFormat" class="export-section">
           <h3>导出选项</h3>
           <div class="export-options">
             <!-- 视频导出选项 -->
@@ -52,23 +41,17 @@ v-if="currentFormat" class="export-section"
               <div class="option-group">
                 <label class="option-label">
                   <span>分辨率</span>
-                  <select
-v-model="videoOptions.resolution" class="option-select"
->
+                  <select v-model="videoOptions.resolution" class="option-select">
                     <option value="720p">720p (1280×720)</option>
                     <option value="1080p">1080p (1920×1080)</option>
-                    <option
-value="4k" :disabled="!is4KSupported"
->4K (3840×2160)</option>
+                    <option value="4k" :disabled="!is4KSupported">4K (3840×2160)</option>
                   </select>
                 </label>
               </div>
               <div class="option-group">
                 <label class="option-label">
                   <span>质量</span>
-                  <select
-v-model="videoOptions.quality" class="option-select"
->
+                  <select v-model="videoOptions.quality" class="option-select">
                     <option value="low">低质量 (较小文件)</option>
                     <option value="medium">中等质量</option>
                     <option value="high">高质量</option>
@@ -79,9 +62,7 @@ v-model="videoOptions.quality" class="option-select"
               <div class="option-group">
                 <label class="option-label">
                   <span>帧率</span>
-                  <select
-v-model="videoOptions.frameRate" class="option-select"
->
+                  <select v-model="videoOptions.frameRate" class="option-select">
                     <option value="24">24 fps</option>
                     <option value="30">30 fps</option>
                     <option value="60">60 fps</option>
@@ -91,13 +72,8 @@ v-model="videoOptions.frameRate" class="option-select"
               <div class="option-group">
                 <label class="option-label">
                   <span>格式</span>
-                  <select
-v-model="videoOptions.format" class="option-select"
->
-                    <option
-v-for="format in supportedVideoFormats" :key="format"
-:value="format"
->
+                  <select v-model="videoOptions.format" class="option-select">
+                    <option v-for="format in supportedVideoFormats" :key="format" :value="format">
                       {{ getFormatDisplayName(format) }}
                     </option>
                   </select>
@@ -110,9 +86,7 @@ v-for="format in supportedVideoFormats" :key="format"
               <div class="option-group">
                 <label class="option-label">
                   <span>模板样式</span>
-                  <select
-v-model="htmlOptions.template" class="option-select"
->
+                  <select v-model="htmlOptions.template" class="option-select">
                     <option value="modern">现代化</option>
                     <option value="professional">专业版</option>
                     <option value="minimal">极简版</option>
@@ -121,15 +95,13 @@ v-model="htmlOptions.template" class="option-select"
               </div>
               <div class="option-group">
                 <label class="checkbox-option">
-                  <input
-v-model="htmlOptions.includeControls" type="checkbox" />
+                  <input v-model="htmlOptions.includeControls" type="checkbox" />
                   <span>包含播放控制</span>
                 </label>
               </div>
               <div class="option-group">
                 <label class="checkbox-option">
-                  <input
-v-model="htmlOptions.autoPlay" type="checkbox" />
+                  <input v-model="htmlOptions.autoPlay" type="checkbox" />
                   <span>自动播放</span>
                 </label>
               </div>
@@ -138,8 +110,7 @@ v-model="htmlOptions.autoPlay" type="checkbox" />
             <!-- 水印选项 -->
             <div class="option-group">
               <label class="checkbox-option">
-                <input
-v-model="exportOptions.applyWatermark" type="checkbox" />
+                <input v-model="exportOptions.applyWatermark" type="checkbox" />
                 <span>应用水印 ({{ watermarkDescription }})</span>
               </label>
             </div>
@@ -160,9 +131,7 @@ v-model="exportOptions.applyWatermark" type="checkbox" />
         </div>
 
         <!-- 水印选项 (仅付费用户) -->
-        <div
-v-if="showWatermarkOptions" class="export-section"
->
+        <div v-if="showWatermarkOptions" class="export-section">
           <h3>水印设置</h3>
           <div class="watermark-options">
             <div class="watermark-notice">
@@ -174,40 +143,28 @@ v-if="showWatermarkOptions" class="export-section"
                 </div>
               </div>
             </div>
-            <div
-v-if="watermarkPreview" class="watermark-preview"
->
+            <div v-if="watermarkPreview" class="watermark-preview">
               <div class="preview-label">水印预览:</div>
-              <div
-ref="watermarkCanvas" class="preview-canvas"
-/>
+              <div ref="watermarkCanvas" class="preview-canvas" />
             </div>
           </div>
         </div>
       </div>
 
       <div class="dialog-footer">
-        <div
-v-if="estimatedSize" class="export-info"
->
+        <div v-if="estimatedSize" class="export-info">
           <span>预计文件大小: {{ formatFileSize(estimatedSize) }}</span>
         </div>
         <div class="dialog-actions">
-          <button
-class="cancel-btn" @click="close" :disabled="isExporting">取消</button>
-          <button
-class="export-btn" @click="startExport"
-:disabled="!canExport || isExporting"
->
+          <button class="cancel-btn" :disabled="isExporting" @click="close">取消</button>
+          <button class="export-btn" :disabled="!canExport || isExporting" @click="startExport">
             {{ isExporting ? '导出中...' : '开始导出' }}
           </button>
         </div>
       </div>
 
       <!-- 导出进度 -->
-      <div
-v-if="isExporting" class="export-progress"
->
+      <div v-if="isExporting" class="export-progress">
         <div class="progress-overlay">
           <div class="progress-content">
             <div class="progress-spinner" />
@@ -215,13 +172,9 @@ v-if="isExporting" class="export-progress"
               {{ progressMessage }}
             </div>
             <div class="progress-bar">
-              <div
-class="progress-fill" :style="{ width: progressPercent + '%' }"
-/>
+              <div class="progress-fill" :style="{ width: progressPercent + '%' }" />
             </div>
-            <div
-v-if="progressDetails" class="progress-details"
->
+            <div v-if="progressDetails" class="progress-details">
               {{ progressDetails }}
             </div>
           </div>

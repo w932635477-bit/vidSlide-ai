@@ -14,11 +14,11 @@ import 'element-plus/dist/index.css'
 console.log('✅ ElementPlus 导入成功')
 
 // 设计系统集成 - 顺序很重要!后导入的会覆盖前面的
-import './styles/wegic-design-system.css'  // 旧的设计系统
-import './styles/theme.css'                 // 新的设计系统(会覆盖上面的)
-import './styles/jianying-theme.css'        // 剪映风格(最后应用)
-import './styles/jianying-dark-theme.css'   // 剪映深色主题全局覆盖(最高优先级)
-import './styles/compat.css'                // 兼容层(确保变量正确映射)
+// import './styles/wegic-design-system.css' // 旧的设计系统 - 已弃用，仅保留用于 WegicDesignShowcase 组件
+import './styles/theme.css' // 新的设计系统
+import './styles/jianying-theme.css' // 剪映风格(最后应用)
+import './styles/jianying-dark-theme.css' // 剪映深色主题全局覆盖(最高优先级)
+import './styles/compat.css' // 兼容层(确保变量正确映射)
 console.log('✅ CSS 导入成功')
 
 import App from './App.vue'

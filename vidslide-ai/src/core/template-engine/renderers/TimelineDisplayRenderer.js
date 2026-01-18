@@ -82,7 +82,13 @@ export class TimelineDisplayRenderer extends BaseRenderer {
   drawTimelineBackground(position, size, visual) {
     if (visual.background.type === 'linear' || visual.background.type === 'radial') {
       // 渐变背景
-      this.visualEffects.drawGradientBackground(position.x, position.y, size.width, size.height, visual.background)
+      this.visualEffects.drawGradientBackground(
+        position.x,
+        position.y,
+        size.width,
+        size.height,
+        visual.background
+      )
     } else {
       // 纯色背景
       this.ctx.save()

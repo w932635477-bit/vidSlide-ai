@@ -141,12 +141,14 @@ describe('NewsImageService', () => {
 
   describe('数据源搜索', () => {
     it('应该从Google搜索图片', async () => {
-      const mockResults = [{
-        id: 'google1',
-        url: 'google.jpg',
-        title: 'Google Result',
-        source: 'google'
-      }]
+      const mockResults = [
+        {
+          id: 'google1',
+          url: 'google.jpg',
+          title: 'Google Result',
+          source: 'google'
+        }
+      ]
 
       global.fetch.mockResolvedValue({
         ok: true,
@@ -160,12 +162,14 @@ describe('NewsImageService', () => {
     })
 
     it('应该从Bing搜索图片', async () => {
-      const mockResults = [{
-        id: 'bing1',
-        url: 'bing.jpg',
-        title: 'Bing Result',
-        source: 'bing'
-      }]
+      const mockResults = [
+        {
+          id: 'bing1',
+          url: 'bing.jpg',
+          title: 'Bing Result',
+          source: 'bing'
+        }
+      ]
 
       global.fetch.mockResolvedValue({
         ok: true,
@@ -179,12 +183,14 @@ describe('NewsImageService', () => {
     })
 
     it('应该从NewsAPI搜索图片', async () => {
-      const mockResults = [{
-        id: 'news1',
-        url: 'news.jpg',
-        title: 'News Result',
-        source: 'newsapi'
-      }]
+      const mockResults = [
+        {
+          id: 'news1',
+          url: 'news.jpg',
+          title: 'News Result',
+          source: 'newsapi'
+        }
+      ]
 
       global.fetch.mockResolvedValue({
         ok: true,
@@ -416,7 +422,10 @@ describe('NewsImageService', () => {
         // 次要数据源成功
         .mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve({ images: [{ id: 'fallback', url: 'fallback.jpg', source: 'newsapi' }] })
+          json: () =>
+            Promise.resolve({
+              images: [{ id: 'fallback', url: 'fallback.jpg', source: 'newsapi' }]
+            })
         })
 
       const results = await newsService.searchLatestImages('test')
@@ -435,12 +444,11 @@ describe('NewsImageService', () => {
     })
 
     it('应该处理部分数据源失败的情况', async () => {
-      global.fetch
-        .mockRejectedValueOnce(new Error('Source 1 failed'))
-        .mockResolvedValue({
-          ok: true,
-          json: () => Promise.resolve({ images: [{ id: 'success', url: 'success.jpg', source: 'bing' }] })
-        })
+      global.fetch.mockRejectedValueOnce(new Error('Source 1 failed')).mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({ images: [{ id: 'success', url: 'success.jpg', source: 'bing' }] })
+      })
 
       const results = await newsService.searchLatestImages('test')
 

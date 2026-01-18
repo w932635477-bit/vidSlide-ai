@@ -1,7 +1,7 @@
 <template>
   <div class="color-section">
     <h4>{{ title }}</h4>
-    
+
     <!-- 原始色彩调色板 -->
     <div v-if="type === 'original'" class="color-palette original-palette">
       <div
@@ -9,11 +9,11 @@
         :key="'color-' + index"
         class="color-swatch"
         :style="{ backgroundColor: color.hex }"
-        @click="$emit('select-color', color)"
         :class="{ selected: selectedColor && selectedColor.hex === color.hex }"
         role="button"
         tabindex="0"
         :aria-label="`选择颜色 ${color.hex}，占比 ${color.percentage}%`"
+        @click="$emit('select-color', color)"
       >
         <span class="color-info">
           <span class="color-hex">{{ color.hex }}</span>
@@ -24,11 +24,7 @@
 
     <!-- 协调配色方案 -->
     <div v-else-if="type === 'harmonized'" class="harmonized-palettes">
-      <div
-        v-for="(scheme, index) in schemes"
-        :key="'scheme-' + index"
-        class="palette-scheme"
-      >
+      <div v-for="(scheme, index) in schemes" :key="'scheme-' + index" class="palette-scheme">
         <h5>{{ scheme.name }}</h5>
         <div class="scheme-colors">
           <div
@@ -36,8 +32,8 @@
             :key="'scheme-color-' + colorIndex"
             class="scheme-swatch"
             :style="{ backgroundColor: hex }"
-            @click="copyColor(hex)"
             :title="`点击复制 ${hex}`"
+            @click="copyColor(hex)"
           >
             <span class="swatch-hex">{{ hex }}</span>
           </div>
@@ -76,7 +72,7 @@ defineProps({
   type: {
     type: String,
     default: 'original', // 'original' | 'harmonized'
-    validator: (value) => ['original', 'harmonized'].includes(value)
+    validator: value => ['original', 'harmonized'].includes(value)
   },
   colors: {
     type: Array,
@@ -98,7 +94,7 @@ defineProps({
 
 defineEmits(['select-color'])
 
-const copyColor = async (hex) => {
+const copyColor = async hex => {
   try {
     await navigator.clipboard.writeText(hex)
     ElMessage.success(`已复制颜色 ${hex}`)

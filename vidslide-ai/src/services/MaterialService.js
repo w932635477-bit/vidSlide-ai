@@ -118,7 +118,11 @@ class MaterialService {
           let finalMaterials = externalResults.images
           if (options.enableSmartMatching !== false) {
             try {
-              finalMaterials = await this.matching.smartMatchMaterials(query, externalResults.images, context)
+              finalMaterials = await this.matching.smartMatchMaterials(
+                query,
+                externalResults.images,
+                context
+              )
               console.log('🧠 已应用CLIP智能排序')
             } catch (error) {
               console.warn('CLIP排序失败，使用默认排序:', error.message)
@@ -362,10 +366,7 @@ class MaterialService {
    * @returns {Promise<Object>} 素材对象
    */
   async getCuratedMaterial(recipeId) {
-    return await this.curated.getCuratedMaterial(
-      recipeId,
-      this.searchMaterials.bind(this)
-    )
+    return await this.curated.getCuratedMaterial(recipeId, this.searchMaterials.bind(this))
   }
 
   /**
@@ -423,10 +424,7 @@ class MaterialService {
    * @returns {Promise<Array>} 素材数组
    */
   async getCuratedMaterialsBatch(recipeIds) {
-    return await this.curated.getCuratedMaterialsBatch(
-      recipeIds,
-      this.searchMaterials.bind(this)
-    )
+    return await this.curated.getCuratedMaterialsBatch(recipeIds, this.searchMaterials.bind(this))
   }
 
   /**
@@ -447,7 +445,9 @@ class MaterialService {
     }
 
     // 监听素材使用行为
-    const originalRecordUsage = this.localSearch.localLibrary.recordUsage.bind(this.localSearch.localLibrary)
+    const originalRecordUsage = this.localSearch.localLibrary.recordUsage.bind(
+      this.localSearch.localLibrary
+    )
     this.localSearch.localLibrary.recordUsage = async materialId => {
       await originalRecordUsage(materialId)
 

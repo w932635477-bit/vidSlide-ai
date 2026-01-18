@@ -21,12 +21,7 @@
         刷新
       </el-button>
 
-      <el-button
-        type="success"
-        size="small"
-        aria-label="上传本地素材文件"
-        @click="$emit('upload')"
-      >
+      <el-button type="success" size="small" aria-label="上传本地素材文件" @click="$emit('upload')">
         <el-icon aria-hidden="true">
           <Upload />
         </el-icon>

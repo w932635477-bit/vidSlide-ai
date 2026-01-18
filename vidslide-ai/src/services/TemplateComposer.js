@@ -68,7 +68,7 @@ class TemplateComposer {
       },
 
       // 故事叙述模式：背景 -> 发展 -> 高潮 -> 结局
-      'storytelling': {
+      storytelling: {
         name: '故事叙述',
         description: '适合案例分享和经历讲述',
         sequence: [
@@ -147,31 +147,33 @@ class TemplateComposer {
     const keywordTexts = keywords.map(k => (k.text || k).toLowerCase())
 
     // 数据密集型内容
-    if (dataMentions > 0.3 || keywordTexts.some(k =>
-      ['数据', '增长', '统计', '分析', '报告'].some(p => k.includes(p))
-    )) {
+    if (
+      dataMentions > 0.3 ||
+      keywordTexts.some(k => ['数据', '增长', '统计', '分析', '报告'].some(p => k.includes(p)))
+    ) {
       return 'data-driven'
     }
 
     // 对比评测内容
-    if (keywordTexts.some(k =>
-      ['对比', '评测', '测评', 'vs', '区别', '选择'].some(p => k.includes(p))
-    )) {
+    if (
+      keywordTexts.some(k =>
+        ['对比', '评测', '测评', 'vs', '区别', '选择'].some(p => k.includes(p))
+      )
+    ) {
       return 'comparison-analysis'
     }
 
     // 营销获客内容
-    if (contentType === 'promotional' || contentType === 'marketing' ||
-        keywordTexts.some(k =>
-          ['获客', '转化', '变现', '投放', '推广'].some(p => k.includes(p))
-        )) {
+    if (
+      contentType === 'promotional' ||
+      contentType === 'marketing' ||
+      keywordTexts.some(k => ['获客', '转化', '变现', '投放', '推广'].some(p => k.includes(p)))
+    ) {
       return 'marketing-funnel'
     }
 
     // 故事/案例内容
-    if (keywordTexts.some(k =>
-      ['故事', '经历', '案例', '分享', '历程'].some(p => k.includes(p))
-    )) {
+    if (keywordTexts.some(k => ['故事', '经历', '案例', '分享', '历程'].some(p => k.includes(p)))) {
       return 'storytelling'
     }
 
@@ -384,14 +386,14 @@ class TemplateComposer {
 
     switch (template.id) {
       case 'ppt-title-slide':
-        content.title = title || (keywords[0]?.text || keywords[0] || '主题')
+        content.title = title || keywords[0]?.text || keywords[0] || '主题'
         content.subtitle = subtitle || ''
         break
 
       case 'ppt-bullet-points':
         // 提取要点列表
         content.sectionTitle = scene.trigger === 'points' ? '核心要点' : '关键内容'
-        content.bullets = keywords.slice(0, 5).map(k => typeof k === 'string' ? k : k.text)
+        content.bullets = keywords.slice(0, 5).map(k => (typeof k === 'string' ? k : k.text))
         break
 
       case 'ppt-big-number':
@@ -400,7 +402,11 @@ class TemplateComposer {
           const text = typeof k === 'string' ? k : k.text
           return /\d+/.test(text)
         })
-        content.number = dataKeyword ? (typeof dataKeyword === 'string' ? dataKeyword : dataKeyword.text) : '100%'
+        content.number = dataKeyword
+          ? typeof dataKeyword === 'string'
+            ? dataKeyword
+            : dataKeyword.text
+          : '100%'
         content.label = scene.trigger === 'data' ? '关键数据' : '核心指标'
         content.trend = '+' // 默认上升趋势
         break
@@ -409,19 +415,20 @@ class TemplateComposer {
         content.title = '对比分析'
         content.leftTitle = '优势'
         content.rightTitle = '劣势'
-        content.leftPoints = keywords.slice(0, 3).map(k => typeof k === 'string' ? k : k.text)
-        content.rightPoints = keywords.slice(3, 6).map(k => typeof k === 'string' ? k : k.text)
+        content.leftPoints = keywords.slice(0, 3).map(k => (typeof k === 'string' ? k : k.text))
+        content.rightPoints = keywords.slice(3, 6).map(k => (typeof k === 'string' ? k : k.text))
         break
 
       case 'ppt-quote':
         // 使用最重要的关键词作为金句
         const quoteKeyword = keywords[0]
-        content.quote = typeof quoteKeyword === 'string' ? quoteKeyword : (quoteKeyword?.text || '核心观点')
+        content.quote =
+          typeof quoteKeyword === 'string' ? quoteKeyword : quoteKeyword?.text || '核心观点'
         content.author = ''
         break
 
       default:
-        content.text = keywords.map(k => typeof k === 'string' ? k : k.text).join(' ')
+        content.text = keywords.map(k => (typeof k === 'string' ? k : k.text)).join(' ')
     }
 
     return content
@@ -451,7 +458,7 @@ class TemplateComposer {
   extractAnimations(template) {
     const animations = []
 
-    const processLayers = (layers) => {
+    const processLayers = layers => {
       layers.forEach(layer => {
         if (layer.properties?.animation) {
           animations.push({

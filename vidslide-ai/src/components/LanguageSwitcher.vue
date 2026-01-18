@@ -1,34 +1,20 @@
 <template>
   <div class="language-switcher">
-    <button 
-      class="lang-btn" 
-      @click="toggleDropdown"
-      :aria-label="currentLanguage.name"
-    >
+    <button class="lang-btn" :aria-label="currentLanguage.name" @click="toggleDropdown">
       <span class="lang-flag">{{ currentLanguage.flag }}</span>
       <span class="lang-name">{{ currentLanguage.name }}</span>
-      <svg 
-        width="12" 
-        height="12" 
-        viewBox="0 0 12 12" 
-        fill="none"
-        :class="{ 'rotate': showDropdown }"
-      >
-        <path 
-          d="M3 4.5L6 7.5L9 4.5" 
-          stroke="currentColor" 
-          stroke-width="1.5" 
-          stroke-linecap="round" 
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" :class="{ rotate: showDropdown }">
+        <path
+          d="M3 4.5L6 7.5L9 4.5"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
           stroke-linejoin="round"
         />
       </svg>
     </button>
-    
-    <div 
-      v-if="showDropdown" 
-      class="lang-dropdown"
-      @click.stop
-    >
+
+    <div v-if="showDropdown" class="lang-dropdown" @click.stop>
       <button
         v-for="(lang, code) in languages"
         :key="code"
@@ -38,18 +24,12 @@
       >
         <span class="lang-flag">{{ lang.flag }}</span>
         <span class="lang-name">{{ lang.name }}</span>
-        <svg 
-          v-if="code === currentLocale"
-          width="16" 
-          height="16" 
-          viewBox="0 0 16 16" 
-          fill="none"
-        >
-          <path 
-            d="M13 4L6 11L3 8" 
-            stroke="currentColor" 
-            stroke-width="2" 
-            stroke-linecap="round" 
+        <svg v-if="code === currentLocale" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M13 4L6 11L3 8"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
             stroke-linejoin="round"
           />
         </svg>
@@ -83,14 +63,14 @@ const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value
 }
 
-const selectLanguage = (code) => {
+const selectLanguage = code => {
   locale.value = code
   localStorage.setItem('vidslide-lang', code)
   showDropdown.value = false
   emit('change', code)
 }
 
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (!event.target.closest('.language-switcher')) {
     showDropdown.value = false
   }
@@ -125,7 +105,7 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -165,7 +145,7 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   overflow: hidden;
@@ -192,7 +172,7 @@ onUnmounted(() => {
   padding: 0.75rem 1rem;
   background: transparent;
   border: none;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -206,12 +186,12 @@ onUnmounted(() => {
 
 .lang-option.active {
   background: rgba(0, 128, 255, 0.2);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .lang-option.active svg {
   margin-left: auto;
-  color: #0080FF;
+  color: #0080ff;
 }
 
 .lang-option .lang-flag {

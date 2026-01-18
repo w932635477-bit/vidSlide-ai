@@ -13,20 +13,23 @@
       </button>
 
       <!-- 折叠按钮 -->
-      <button class="collapse-btn" @click="toggleCollapse" title="折叠/展开">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline :points="isPanelCollapsed ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+      <button class="collapse-btn" title="折叠/展开" @click="toggleCollapse">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline :points="isPanelCollapsed ? '18 15 12 9 6 15' : '6 9 12 15 18 9'" />
         </svg>
       </button>
     </div>
 
     <!-- 标签内容区域 -->
     <div v-show="!isPanelCollapsed" class="panel-content">
-      <component
-        :is="currentTabComponent"
-        v-if="currentTabComponent"
-        v-bind="currentTabProps"
-      />
+      <component :is="currentTabComponent" v-if="currentTabComponent" v-bind="currentTabProps" />
     </div>
   </div>
 </template>
@@ -55,14 +58,14 @@ const tabs = [
 
 // 动态加载标签页组件
 const tabComponents = {
-  'analysis': defineAsyncComponent(() => import('./tabs/AnalysisTab.vue')),
-  'materials': defineAsyncComponent(() => import('./tabs/MaterialsTab.vue')),
-  'templates': defineAsyncComponent(() => import('./tabs/TemplatesTab.vue')),
+  analysis: defineAsyncComponent(() => import('./tabs/AnalysisTab.vue')),
+  materials: defineAsyncComponent(() => import('./tabs/MaterialsTab.vue')),
+  templates: defineAsyncComponent(() => import('./tabs/TemplatesTab.vue')),
   'smart-tools': defineAsyncComponent(() => import('./tabs/SmartToolsTab.vue')),
-  'pip': defineAsyncComponent(() => import('./tabs/PipTab.vue')),
-  'animations': defineAsyncComponent(() => import('./tabs/AnimationsTab.vue')),
-  'adjust': defineAsyncComponent(() => import('./tabs/AdjustTab.vue')),
-  'ai': defineAsyncComponent(() => import('./tabs/AiTab.vue'))
+  pip: defineAsyncComponent(() => import('./tabs/PipTab.vue')),
+  animations: defineAsyncComponent(() => import('./tabs/AnimationsTab.vue')),
+  adjust: defineAsyncComponent(() => import('./tabs/AdjustTab.vue')),
+  ai: defineAsyncComponent(() => import('./tabs/AiTab.vue'))
 }
 
 // 当前标签组件
@@ -77,7 +80,7 @@ const currentTabProps = computed(() => {
 })
 
 // 切换标签
-const setActiveTab = (tabId) => {
+const setActiveTab = tabId => {
   store.setActiveTab(tabId)
 }
 
@@ -89,7 +92,7 @@ const toggleCollapse = () => {
 
 <style scoped>
 .workspace-bottom-panel {
-  height: 400px;
+  height: 100%; /* 使用父容器的高度 */
   background: #ffffff;
   border-top: 1px solid #e5e5e7;
   display: flex;
