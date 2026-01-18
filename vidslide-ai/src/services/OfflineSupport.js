@@ -94,29 +94,23 @@ class OfflineSupport {
    * 检查网络状态（备用方法）
    */
   async checkNetworkStatus() {
-    try {
-      // 尝试发送一个小的请求来检测网络
-      const response = await fetch('https://www.google.com/favicon.ico', {
-        method: 'HEAD',
-        mode: 'no-cors',
-        cache: 'no-cache'
-      })
+    // 使用 navigator.onLine 作为主要检测方式
+    // 不再使用外部URL请求，避免CSP违规
+    const currentOnlineStatus = navigator.onLine
 
-      const wasOffline = !this.isOnline
-      this.isOnline = true
+    const wasOffline = !this.isOnline
+    const wasOnline = this.isOnline
 
-      // 如果之前是离线状态，现在恢复了
-      if (wasOffline) {
-        this.handleOnline()
-      }
-    } catch (error) {
-      const wasOnline = this.isOnline
-      this.isOnline = false
+    // 更新状态
+    this.isOnline = currentOnlineStatus
 
-      // 如果之前是在线状态，现在断开了
-      if (wasOnline) {
-        this.handleOffline()
-      }
+    // 如果之前是离线状态，现在恢复了
+    if (wasOffline && currentOnlineStatus) {
+      this.handleOnline()
+    }
+    // 如果之前是在线状态，现在断开了
+    else if (wasOnline && !currentOnlineStatus) {
+      this.handleOffline()
     }
   }
 

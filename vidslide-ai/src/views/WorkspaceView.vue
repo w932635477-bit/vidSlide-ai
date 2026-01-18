@@ -105,6 +105,7 @@
             ref="workspaceMainArea"
             :is-generating="isAutoGenerating"
             @auto-generate="handleAutoGenerate"
+            @ppt-slides-updated="handlePptSlidesUpdated"
           />
         </div>
         <div v-else class="preview-placeholder fade-in">
@@ -124,6 +125,8 @@
         :video-resolution="videoResolution"
         :video-duration="videoDuration"
         :video-format="videoFormat"
+        :ppt-slides="pptSlides"
+        :show-ppt-tab="showPptTab"
         @workflow-pause="handleWorkflowPause"
         @workflow-resume="handleWorkflowResume"
         @workflow-cancel="handleWorkflowCancel"
@@ -204,10 +207,14 @@ const videoDuration = computed(() => {
 })
 
 const videoFormat = computed(() => {
-  if (!store.video.file) return '未知'
-  const ext = store.video.file.name.split('.').pop().toUpperCase()
+  if (!store.video.file || !store.video.file.name) return '未知'
+  const ext = store.video.file.name.split('.').pop()?.toUpperCase()
   return ext || 'MP4'
 })
+
+// PPT 幻灯片状态
+const pptSlides = ref([])
+const showPptTab = ref(false)
 
 // ========== 工作流监控状态 ==========
 const workflowSteps = ref([])
@@ -268,16 +275,36 @@ const handleAutoGenerate = async () => {
     })
 
     // 显示生成预览
-    if (workspaceMainArea.value) {
-      const mockPptSlides = [
-        { id: 1, title: '封面页', thumbnail: '', image: '' },
-        { id: 2, title: '内容概述', thumbnail: '', image: '' },
-        { id: 3, title: '详细分析', thumbnail: '', image: '' }
+    if (workspaceMainArea.value && result) {
+      console.log('📺 准备显示预览，结果:', result)
+
+      // 使用生成结果中的场景数据生成PPT幻灯片
+      const pptSlides = result.scenes?.map((scene, index) => ({
+        id: index + 1,
+        title: scene.title || `场景 ${index + 1}`,
+        content: scene.content || '',
+        thumbnail: scene.material?.materials?.[0]?.thumbnail || '',
+        image: scene.material?.materials?.[0]?.url || ''
+      })) || []
+
+      // 如果没有场景，使用mock数据
+      const slidesToShow = pptSlides.length > 0 ? pptSlides : [
+        { id: 1, title: '封面页', thumbnail: '', image: '', content: result.transcript?.substring(0, 50) || '' },
+        { id: 2, title: '内容概述', thumbnail: '', image: '', content: result.transcript?.substring(50, 100) || '' },
+        { id: 3, title: '详细分析', thumbnail: '', image: '', content: result.transcript?.substring(100, 150) || '' }
       ]
 
+      console.log('📄 PPT幻灯片数据:', slidesToShow)
+
+      // 使用生成结果中的视频URL（如果有渲染后的视频）或原始视频
+      const videoUrl = result.video?.renderedUrl || result.video?.url || store.video.src
+
+      console.log('🎬 视频URL:', videoUrl)
+      console.log('📊 模板:', result.template?.name)
+
       workspaceMainArea.value.showPreview(
-        store.video.src,
-        mockPptSlides,
+        videoUrl,
+        slidesToShow,
         new Date().toLocaleString(),
         store.video.file?.size || 0
       )
@@ -291,6 +318,13 @@ const handleAutoGenerate = async () => {
       errorHandler.value.handleError(error)
     }
   }
+}
+
+// 处理 PPT 幻灯片更新
+const handlePptSlidesUpdated = (data) => {
+  pptSlides.value = data.slides || []
+  showPptTab.value = data.showPptTab || false
+  console.log('PPT 幻灯片已更新:', pptSlides.value.length, '页')
 }
 
 // 选择素材
@@ -533,6 +567,9 @@ const simulateWorkflowProgress = () => {
 
 // ========== 生命周期 ==========
 
+// 自动保存定时器引用
+let autoSaveInterval = null
+
 onMounted(async () => {
   console.log('🚀 WorkspaceView mounted')
 
@@ -544,15 +581,18 @@ onMounted(async () => {
   }
 
   // 设置自动保存定时器（每30秒）
-  const autoSaveInterval = setInterval(() => {
+  autoSaveInterval = setInterval(() => {
     autoSave()
   }, 30000)
+})
 
-  // 清理定时器
-  onUnmounted(() => {
+// 清理定时器
+onUnmounted(() => {
+  if (autoSaveInterval) {
     clearInterval(autoSaveInterval)
-    console.log('🔚 WorkspaceView unmounted')
-  })
+    autoSaveInterval = null
+  }
+  console.log('🔚 WorkspaceView unmounted')
 })
 
 // 页面卸载前保存

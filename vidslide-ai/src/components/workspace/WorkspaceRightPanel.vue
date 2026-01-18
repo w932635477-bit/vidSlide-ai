@@ -92,6 +92,66 @@
           </div>
         </div>
 
+        <!-- PPT标签页 -->
+        <div v-if="activeTab === 'ppt'" class="tab-pane ppt-pane">
+          <div class="ppt-section">
+            <h3 class="section-title">PPT幻灯片 ({{ pptSlides?.length || 0 }}页)</h3>
+
+            <!-- PPT控制按钮 -->
+            <div class="ppt-controls">
+              <button
+                class="ppt-btn"
+                :disabled="currentSlide === 0"
+                @click="previousSlide"
+              >
+                ◀ 上一页
+              </button>
+              <span class="slide-counter">{{ currentSlide + 1 }} / {{ pptSlides?.length || 0 }}</span>
+              <button
+                class="ppt-btn"
+                :disabled="currentSlide >= (pptSlides?.length || 1) - 1"
+                @click="nextSlide"
+              >
+                下一页 ▶
+              </button>
+            </div>
+
+            <!-- 当前幻灯片大图 -->
+            <div class="current-slide">
+              <img
+                v-if="pptSlides?.[currentSlide]?.image"
+                :src="pptSlides[currentSlide].image"
+                :alt="`幻灯片 ${currentSlide + 1}`"
+                class="slide-image"
+              />
+              <div v-else class="slide-placeholder">
+                <span>幻灯片 {{ currentSlide + 1 }}</span>
+              </div>
+            </div>
+
+            <!-- 幻灯片缩略图列表 -->
+            <div class="ppt-slides">
+              <div
+                v-for="(slide, index) in pptSlides"
+                :key="index"
+                class="slide-item"
+                :class="{ active: index === currentSlide }"
+                @click="currentSlide = index"
+              >
+                <img
+                  v-if="slide.thumbnail"
+                  :src="slide.thumbnail"
+                  :alt="`幻灯片 ${index + 1}`"
+                />
+                <div v-else class="slide-placeholder-small">
+                  <span>{{ index + 1 }}</span>
+                </div>
+                <div class="slide-title">{{ slide.title || `幻灯片 ${index + 1}` }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 监控标签页 -->
         <div v-if="activeTab === 'monitor'" class="tab-pane monitor-pane">
           <WorkflowMonitor
@@ -157,23 +217,52 @@ const props = defineProps({
   videoFormat: {
     type: String,
     default: 'MP4'
+  },
+  pptSlides: {
+    type: Array,
+    default: () => []
+  },
+  showPptTab: {
+    type: Boolean,
+    default: false
   }
 })
 
 defineEmits(['workflow-pause', 'workflow-resume', 'workflow-cancel', 'clear-logs'])
 
 const isCollapsed = ref(false)
-const activeTab = ref('properties')
+const activeTab = ref('monitor') // 默认显示监控标签页
+const currentSlide = ref(0)
 
-const tabs = [
-  { id: 'properties', icon: '⚙️', label: '属性' },
-  { id: 'effects', icon: '✨', label: '特效' },
-  { id: 'animation', icon: '🎭', label: '动画' },
-  { id: 'monitor', icon: '📊', label: '监控' }
-]
+const tabs = computed(() => {
+  const baseTabs = [
+    { id: 'properties', icon: '⚙️', label: '属性' },
+    { id: 'effects', icon: '✨', label: '特效' },
+    { id: 'animation', icon: '🎭', label: '动画' },
+    { id: 'monitor', icon: '📊', label: '监控' }
+  ]
+
+  if (props.showPptTab && props.pptSlides?.length > 0) {
+    baseTabs.splice(1, 0, { id: 'ppt', icon: '📄', label: 'PPT' })
+  }
+
+  return baseTabs
+})
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
+}
+
+const previousSlide = () => {
+  if (currentSlide.value > 0) {
+    currentSlide.value--
+  }
+}
+
+const nextSlide = () => {
+  if (currentSlide.value < props.pptSlides.length - 1) {
+    currentSlide.value++
+  }
 }
 </script>
 
@@ -387,6 +476,142 @@ const toggleCollapse = () => {
 .animation-name {
   font-size: 13px;
   color: #d4d4d4;
+}
+
+/* PPT标签页样式 */
+.ppt-pane {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.ppt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.ppt-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  background: #252526;
+  border-radius: 6px;
+}
+
+.ppt-btn {
+  padding: 6px 12px;
+  border: 1px solid #3a3a3a;
+  background: #2a2a2a;
+  border-radius: 4px;
+  color: #d4d4d4;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ppt-btn:hover:not(:disabled) {
+  background: #3a3a3a;
+  border-color: #4a4a4a;
+}
+
+.ppt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.slide-counter {
+  font-size: 12px;
+  color: #8a8a8a;
+}
+
+.current-slide {
+  flex-shrink: 0;
+  background: #252526;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.slide-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #8a8a8a;
+  font-size: 24px;
+}
+
+.ppt-slides {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.slide-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #252526;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.slide-item:hover {
+  background: #2a2a2a;
+  border-color: #3a3a3a;
+}
+
+.slide-item.active {
+  border-color: #4a9eff;
+  background: #2a2a2a;
+}
+
+.slide-item img {
+  width: 60px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.slide-placeholder-small {
+  width: 60px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e1e1e;
+  border-radius: 4px;
+  color: #8a8a8a;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.slide-title {
+  flex: 1;
+  font-size: 12px;
+  color: #d4d4d4;
+  display: flex;
+  align-items: center;
 }
 
 /* 滚动条样式 */

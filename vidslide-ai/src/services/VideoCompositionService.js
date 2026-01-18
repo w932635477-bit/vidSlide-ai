@@ -67,16 +67,20 @@ class VideoCompositionService {
 
       // 步骤1: 分割原视频 (0-20%)
       this.updateProgress('分割视频', 0, onProgress)
-      const videoSegments = await this.videoSplitter.splitVideo(videoFile, scenes, (progress) => {
+      const videoSegments = await this.videoSplitter.splitVideo(videoFile, scenes, progress => {
         this.updateProgress('分割视频', progress * 0.2, onProgress)
       })
       console.log('✅ 视频分割完成,片段数:', videoSegments.length)
 
       // 步骤2: 渲染PPT模板 (20-40%)
       this.updateProgress('渲染PPT模板', 20, onProgress)
-      const templateVideos = await this.remotionRenderer.renderScenes(scenes, template, (progress) => {
-        this.updateProgress('渲染PPT模板', 20 + progress * 0.2, onProgress)
-      })
+      const templateVideos = await this.remotionRenderer.renderScenes(
+        scenes,
+        template,
+        progress => {
+          this.updateProgress('渲染PPT模板', 20 + progress * 0.2, onProgress)
+        }
+      )
       console.log('✅ PPT模板渲染完成,数量:', templateVideos.length)
 
       // 步骤3: 合成画中画 (40-60%)
@@ -85,7 +89,7 @@ class VideoCompositionService {
         videoSegments,
         templateVideos,
         options.pipConfig,
-        (progress) => {
+        progress => {
           this.updateProgress('合成画中画', 40 + progress * 0.2, onProgress)
         }
       )
@@ -93,7 +97,7 @@ class VideoCompositionService {
 
       // 步骤4: 拼接视频 (60-80%)
       this.updateProgress('拼接视频', 60, onProgress)
-      const mergedVideo = await this.videoMerger.mergeVideos(composedScenes, (progress) => {
+      const mergedVideo = await this.videoMerger.mergeVideos(composedScenes, progress => {
         this.updateProgress('拼接视频', 60 + progress * 0.2, onProgress)
       })
       console.log('✅ 视频拼接完成')
@@ -103,7 +107,7 @@ class VideoCompositionService {
       const finalVideo = await this.videoCompressor.compress(
         mergedVideo,
         options.platform || 'douyin',
-        (progress) => {
+        progress => {
           this.updateProgress('智能压缩', 80 + progress * 0.2, onProgress)
         }
       )
@@ -207,6 +211,7 @@ class VideoCompositionService {
    * @param {string} platform - 目标平台
    * @returns {number} 预估文件大小(MB)
    */
+  // eslint-disable-next-line no-unused-vars
   estimateFileSize(videoDuration, platform = 'douyin') {
     // 文件大小(MB) = (视频码率 + 音频码率) × 时长(秒) / 8 / 1024
     const videoBitrate = 7 * 1024 // 7 Mbps = 7168 kbps

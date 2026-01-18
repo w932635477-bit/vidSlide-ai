@@ -735,7 +735,7 @@ export class BaiduSpeechService {
 
   /**
    * 分段识别长音频
-   * 百度API限制单次请求音频时长不超过60秒
+   * 百度API限制单次请求音频时长不超过60秒，且Base64编码后不超过2MB
    * @param {ArrayBuffer} pcmData - PCM音频数据
    * @param {Function} onProgress - 进度回调
    * @returns {Promise<string>} 完整识别结果
@@ -743,17 +743,23 @@ export class BaiduSpeechService {
   async recognizeLongAudio(pcmData, onProgress = null) {
     const sampleRate = 16000
     const bytesPerSample = 2 // 16位
-    const maxDuration = 55 // 每段最大55秒，留5秒余量
+    // 减小每段时长到30秒，确保Base64编码后不超过2MB
+    // 30秒 * 16000Hz * 2字节 = 960,000字节 ≈ 0.96MB，Base64后约1.28MB
+    const maxDuration = 30 // 每段最大30秒
     const maxBytes = maxDuration * sampleRate * bytesPerSample
 
     const totalBytes = pcmData.byteLength
     const segments = Math.ceil(totalBytes / maxBytes)
     const results = []
 
+    console.log(`📊 音频总大小: ${(totalBytes / 1024 / 1024).toFixed(2)}MB，将分为 ${segments} 段处理`)
+
     for (let i = 0; i < segments; i++) {
       const start = i * maxBytes
       const end = Math.min(start + maxBytes, totalBytes)
       const segment = pcmData.slice(start, end)
+
+      console.log(`🎤 处理第 ${i + 1}/${segments} 段，大小: ${(segment.byteLength / 1024).toFixed(2)}KB`)
 
       if (onProgress) {
         onProgress((i + 0.5) / segments)
@@ -763,6 +769,11 @@ export class BaiduSpeechService {
         const text = await this.recognizeSpeech(segment)
         if (text) {
           results.push(text)
+        }
+
+        // 添加短暂延迟，避免API请求过快
+        if (i < segments - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500))
         }
       } catch (error) {
         console.warn(`第${i + 1}段识别失败:`, error)

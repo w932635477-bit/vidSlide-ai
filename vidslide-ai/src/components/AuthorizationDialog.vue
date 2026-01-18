@@ -51,7 +51,7 @@
 
           <div class="detail-section">
             <h3 class="section-title">
-              <el-icon><shield /></el-icon>
+              <el-icon><Lock /></el-icon>
               隐私保护
             </h3>
             <div class="detail-content">

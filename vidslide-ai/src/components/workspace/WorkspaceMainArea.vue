@@ -1,12 +1,22 @@
+<!--
+  ⚠️ 设计保护区域 - 请勿随意修改
+
+  此组件为工作区核心设计的一部分，任何修改都需要项目负责人批准。
+
+  受保护的内容：
+  - 布局结构（视频区域 + 时间轴）
+  - 按钮位置（一键生成、预览操作按钮）
+  - 时间轴显示逻辑（始终显示）
+
+  参考文档：WORKSPACE_DESIGN_PROTECTION.md
+  修改流程：DESIGN_PROTECTION_README.md
+-->
 <template>
   <div class="workspace-main-area">
-    <!-- 视频预览区 -->
-    <div
-      v-if="!showGeneratedPreview"
-      class="video-section"
-      :class="{ 'vertical-video': isVerticalVideo }"
-    >
-      <div class="editor-canvas">
+    <!-- 视频预览区 / 生成预览区 -->
+    <div class="video-section" :class="{ 'vertical-video': isVerticalVideo }">
+      <!-- 原始视频预览 -->
+      <div v-if="!showGeneratedPreview" class="editor-canvas">
         <video
           v-if="videoSrc"
           ref="videoElement"
@@ -81,22 +91,42 @@
           @close="toggleQualityControl"
         />
       </div>
+
+      <!-- 生成预览（替换视频区域，但保留时间轴） -->
+      <div v-else class="preview-canvas">
+        <GeneratedPreview
+          ref="generatedPreviewElement"
+          :video-src="generatedVideoSrc"
+          :ppt-slides="generatedPptSlides"
+          :generation-time="generationTime"
+          :file-size="generatedFileSize"
+          @switch-to-original="showGeneratedPreview = false"
+          @download-ppt="handleDownloadPpt"
+          @export-video="handleExportVideo"
+          @play="onPlay"
+          @pause="onPause"
+        />
+
+        <!-- 预览操作按钮组（右下角） -->
+        <div class="preview-action-buttons">
+          <button class="preview-action-btn" title="返回原视频" @click="showGeneratedPreview = false">
+            <span>🔙</span>
+            <span>返回原视频</span>
+          </button>
+          <button class="preview-action-btn primary" title="下载PPT" @click="handleDownloadPpt">
+            <span>📥</span>
+            <span>下载PPT</span>
+          </button>
+          <button class="preview-action-btn primary" title="导出视频" @click="handleExportVideo">
+            <span>🎬</span>
+            <span>导出视频</span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- 生成预览区 -->
-    <GeneratedPreview
-      v-if="showGeneratedPreview"
-      :video-src="generatedVideoSrc"
-      :ppt-slides="generatedPptSlides"
-      :generation-time="generationTime"
-      :file-size="generatedFileSize"
-      @switch-to-original="showGeneratedPreview = false"
-      @download-ppt="handleDownloadPpt"
-      @export-video="handleExportVideo"
-    />
-
-    <!-- 内嵌时间轴 -->
-    <div v-if="videoSrc && !showGeneratedPreview" class="embedded-timeline">
+    <!-- 内嵌时间轴（始终显示） -->
+    <div v-if="videoSrc" class="embedded-timeline">
       <div class="timeline-header">
         <div class="timeline-controls">
           <button class="timeline-btn" title="播放/暂停" @click="togglePlayPause">
@@ -106,6 +136,7 @@
             >{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span
           >
         </div>
+
         <div class="timeline-zoom">
           <button class="zoom-btn" title="缩小" @click="zoomOut">−</button>
           <span class="zoom-level">{{ zoomLevel }}%</span>
@@ -159,10 +190,11 @@ const props = defineProps({
   }
 })
 
-defineEmits(['auto-generate'])
+const emit = defineEmits(['auto-generate', 'ppt-slides-updated'])
 
 const store = useWorkspaceStore()
 const videoElement = ref(null)
+const generatedPreviewElement = ref(null)
 
 // 时间轴状态
 const currentTime = ref(0)
@@ -253,12 +285,23 @@ const zoomOut = () => {
 
 // 切换播放/暂停
 const togglePlayPause = () => {
-  if (!videoElement.value) return
+  let currentVideo = null
+
+  // 根据当前模式选择正确的视频元素
+  if (showGeneratedPreview.value && generatedPreviewElement.value) {
+    // 预览模式：获取 GeneratedPreview 组件中的视频元素
+    currentVideo = generatedPreviewElement.value.$refs.videoElement
+  } else if (videoElement.value) {
+    // 原始视频模式
+    currentVideo = videoElement.value
+  }
+
+  if (!currentVideo) return
 
   if (isPlaying.value) {
-    videoElement.value.pause()
+    currentVideo.pause()
   } else {
-    videoElement.value.play()
+    currentVideo.play()
   }
 }
 
@@ -321,23 +364,70 @@ const updateOptimizations = optimizations => {
 
 // 下载PPT
 const handleDownloadPpt = () => {
-  ElMessage.info('PPT下载功能开发中...')
-  // TODO: 实现PPT下载逻辑
+  if (!generatedPptSlides.value || generatedPptSlides.value.length === 0) {
+    ElMessage.warning('没有可下载的PPT')
+    return
+  }
+
+  try {
+    // 创建一个简单的PPT下载链接
+    // 实际项目中，这里应该调用后端API生成真实的PPT文件
+    ElMessage.success({
+      message: `正在准备下载 ${generatedPptSlides.value.length} 页PPT...`,
+      duration: 2000
+    })
+
+    // 模拟下载延迟
+    setTimeout(() => {
+      // 这里应该触发真实的文件下载
+      // 例如：window.location.href = pptDownloadUrl
+      ElMessage.info('PPT下载功能需要后端支持，当前为演示模式')
+    }, 1000)
+  } catch (error) {
+    console.error('下载PPT失败:', error)
+    ElMessage.error('下载PPT失败')
+  }
 }
 
 // 导出视频
 const handleExportVideo = () => {
-  ElMessage.info('视频导出功能开发中...')
-  // TODO: 实现视频导出逻辑
+  if (!generatedVideoSrc.value) {
+    ElMessage.warning('没有可导出的视频')
+    return
+  }
+
+  try {
+    // 创建下载链接
+    const link = document.createElement('a')
+    link.href = generatedVideoSrc.value
+    link.download = `vidslide-generated-${Date.now()}.mp4`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    ElMessage.success('视频导出成功')
+  } catch (error) {
+    console.error('导出视频失败:', error)
+    ElMessage.error('导出视频失败')
+  }
 }
 
 // 显示生成预览（供外部调用）
 const showPreview = (videoSrc, pptSlides = [], time = '', fileSize = 0) => {
+  console.log('🎬 WorkspaceMainArea.showPreview 被调用')
+  console.log('  - videoSrc:', videoSrc)
+  console.log('  - pptSlides:', pptSlides)
+  console.log('  - 当前 showGeneratedPreview:', showGeneratedPreview.value)
+
   generatedVideoSrc.value = videoSrc
   generatedPptSlides.value = pptSlides
   generationTime.value = time
   generatedFileSize.value = fileSize
   showGeneratedPreview.value = true
+
+  console.log('  - 设置后 showGeneratedPreview:', showGeneratedPreview.value)
+  console.log('  - generatedVideoSrc:', generatedVideoSrc.value)
+  console.log('  - generatedPptSlides 数量:', generatedPptSlides.value.length)
 }
 
 // 暴露方法给父组件
@@ -349,6 +439,21 @@ defineExpose({
 watch(videoSrc, newSrc => {
   if (videoElement.value && newSrc) {
     videoElement.value.load()
+  }
+})
+
+// 监听生成预览状态变化，通知父组件更新 PPT 数据
+watch(showGeneratedPreview, (newValue) => {
+  if (newValue && generatedPptSlides.value.length > 0) {
+    emit('ppt-slides-updated', {
+      slides: generatedPptSlides.value,
+      showPptTab: true
+    })
+  } else {
+    emit('ppt-slides-updated', {
+      slides: [],
+      showPptTab: false
+    })
   }
 })
 </script>
@@ -384,6 +489,14 @@ watch(videoSrc, newSrc => {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 0; /* 重要：允许flex子元素收缩 */
+}
+
+.preview-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
   min-height: 0; /* 重要：允许flex子元素收缩 */
 }
 
@@ -476,6 +589,58 @@ watch(videoSrc, newSrc => {
     transform: scale(1.2) rotate(180deg);
     opacity: 0.8;
   }
+}
+
+/* 预览操作按钮组（右下角） */
+.preview-action-buttons {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 15;
+}
+
+.preview-action-btn {
+  padding: 10px 20px;
+  border: 1px solid #3a3a3a;
+  background: rgba(42, 42, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  color: #d4d4d4;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.preview-action-btn:hover {
+  background: rgba(58, 58, 58, 0.95);
+  border-color: #4a4a4a;
+  transform: translateX(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.preview-action-btn.primary {
+  background: linear-gradient(135deg, #4a9eff 0%, #4ec9b0 100%);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+}
+
+.preview-action-btn.primary:hover {
+  background: linear-gradient(135deg, #5aafff 0%, #5ed9c0 100%);
+  box-shadow: 0 6px 16px rgba(74, 158, 255, 0.5);
+}
+
+.preview-action-btn span:first-child {
+  font-size: 16px;
 }
 
 /* 生成中遮罩 */
@@ -605,6 +770,48 @@ watch(videoSrc, newSrc => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* 预览操作按钮组 */
+.preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  border: 1px solid #3a3a3a;
+  background: #2a2a2a;
+  border-radius: 6px;
+  color: #d4d4d4;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background: #3a3a3a;
+  border-color: #4a4a4a;
+  transform: translateY(-1px);
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #4a9eff 0%, #4ec9b0 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: linear-gradient(135deg, #5aafff 0%, #5ed9c0 100%);
+}
+
+.action-btn span:first-child {
+  font-size: 14px;
 }
 
 .timeline-btn {

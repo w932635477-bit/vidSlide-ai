@@ -291,19 +291,22 @@ export class VideoProcessingService {
       // 使用百度语音识别服务处理视频
       const result = await this.baiduSpeechService.transcribeVideo(this.videoFile, progress => {
         // 将百度服务的进度（0-100）映射到总进度的60-80区间
-        const mappedProgress = 60 + progress.progress * 0.2
+        const mappedProgress = 60 + progress * 0.2
         this.processingProgress = mappedProgress
 
         if (onProgress) {
           onProgress({
-            text: progress.text || '',
+            text: '',
             progress: mappedProgress
           })
         }
       })
 
-      this.transcript = result.text || ''
+      // transcribeVideo 返回的是字符串，不是对象
+      this.transcript = result || ''
       this.processingProgress = 80
+
+      console.log('✅ 语音识别完成，文本长度:', this.transcript.length)
 
       // 如果有文本内容，提取关键词
       if (this.transcript) {

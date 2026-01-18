@@ -16,6 +16,16 @@
   --tertiary-background: #2C2C2E;
   --quaternary-background: #3A3A3C;
 
+  /* 覆盖 theme.css 中的颜色变量 */
+  --color-bg-primary: #1C1C1E;
+  --color-bg-secondary: #2C2C2E;
+  --color-bg-tertiary: #3A3A3C;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #EBEBF599;
+  --color-text-tertiary: #EBEBF54D;
+  --color-divider: #38383A;
+  --color-border: #38383A;
+
   /* Text colors with proper contrast */
   --label-primary: #FFFFFF;
   --label-secondary: #EBEBF599;
@@ -42,6 +52,33 @@
   --timeline-track: #2C2C2E;
   --card-shadow: rgba(0, 0, 0, 0.1);
   --card-shadow-hover: rgba(0, 0, 0, 0.15);
+
+  /* 剪映风格圆角 */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* 间距 */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+
+  /* 动画时长 */
+  --duration-fast: 0.15s;
+  --duration-base: 0.2s;
+  --duration-slow: 0.3s;
+
+  /* 缓动函数 */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 全局深色主题覆盖 */
@@ -351,4 +388,258 @@ select:focus,
 
 .el-result__subtitle {
   color: var(--label-secondary) !important;
+}
+
+/* ========== 工作区组件样式覆盖 ========== */
+
+/* AssetPanel 和 WorkspaceSidebar */
+.asset-panel,
+.workspace-sidebar {
+  background: var(--color-bg-primary) !important;
+  border-right: 1px solid var(--color-divider) !important;
+}
+
+.asset-search {
+  background: var(--color-bg-primary) !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+.asset-tabs {
+  background: var(--color-bg-primary) !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+.asset-list {
+  background: var(--color-bg-primary) !important;
+}
+
+.asset-item,
+.project-item,
+.video-item,
+.image-item,
+.audio-item {
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-divider) !important;
+  border-radius: var(--radius-lg) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.asset-item:hover,
+.project-item:hover,
+.video-item:hover,
+.image-item:hover,
+.audio-item:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--system-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15) !important;
+}
+
+/* WorkspaceRightPanel */
+.workspace-right-panel {
+  background: var(--color-bg-primary) !important;
+  border-left: 1px solid var(--color-divider) !important;
+}
+
+.panel-tabs {
+  background: var(--color-bg-primary) !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+.panel-tab {
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--color-text-secondary) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.panel-tab:hover {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.panel-tab.active {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* 剪映风格按钮 */
+.jianying-btn,
+.jianying-btn-icon,
+.jianying-btn-primary {
+  border-radius: var(--radius-md) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.jianying-btn-icon {
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-divider) !important;
+}
+
+.jianying-btn-icon:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--system-blue) !important;
+  transform: scale(1.05) !important;
+}
+
+.jianying-btn-primary {
+  background: var(--system-blue) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.jianying-btn-primary:hover {
+  background: var(--primary-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3) !important;
+}
+
+/* 剪映风格输入框 */
+.jianying-input {
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-divider) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--color-text-primary) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.jianying-input:focus {
+  border-color: var(--system-blue) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1) !important;
+}
+
+.jianying-input::placeholder {
+  color: var(--color-text-tertiary) !important;
+}
+
+/* 剪映风格标签页 */
+.jianying-tab {
+  background: transparent !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--color-text-secondary) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.jianying-tab:hover {
+  background: var(--color-bg-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.jianying-tab-active {
+  background: var(--color-bg-tertiary) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* 剪映风格卡片 */
+.jianying-card {
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-divider) !important;
+  border-radius: var(--radius-lg) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.jianying-card:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--system-blue) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15) !important;
+}
+
+/* 滚动条样式 - 剪映风格 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-base) var(--ease-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--quaternary-background);
+}
+
+/* 视频上传区域 */
+.video-uploader,
+.upload-area {
+  background: var(--color-bg-secondary) !important;
+  border: 2px dashed var(--color-divider) !important;
+  border-radius: var(--radius-xl) !important;
+  transition: all var(--duration-base) var(--ease-out) !important;
+}
+
+.video-uploader:hover,
+.upload-area:hover {
+  background: var(--color-bg-tertiary) !important;
+  border-color: var(--system-blue) !important;
+}
+
+/* 工作流监控 */
+.workflow-monitor {
+  background: var(--color-bg-primary) !important;
+}
+
+.monitor-steps {
+  background: var(--color-bg-primary) !important;
+}
+
+.step-item {
+  background: var(--color-bg-secondary) !important;
+  border: 1px solid var(--color-divider) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.step-item.step-running {
+  border-color: var(--system-blue) !important;
+  box-shadow: 0 0 12px rgba(0, 122, 255, 0.3) !important;
+}
+
+.step-item.step-success {
+  border-color: var(--system-green) !important;
+}
+
+.step-item.step-error {
+  border-color: var(--system-red) !important;
+}
+
+/* 生成预览 */
+.generated-preview {
+  background: var(--color-bg-primary) !important;
+}
+
+.preview-header {
+  background: var(--color-bg-secondary) !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+.ppt-preview {
+  background: var(--color-bg-secondary) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* 确保所有文本颜色正确 */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-primary) !important;
+}
+
+p, span, div {
+  color: var(--color-text-primary);
+}
+
+a {
+  color: var(--system-blue) !important;
+}
+
+a:hover {
+  color: var(--primary-hover) !important;
 }

@@ -246,7 +246,7 @@ class VideoCompressor {
    * @returns {Array} 平台列表
    */
   getPlatforms() {
-    return Object.keys(this.platformPresets).map((key) => ({
+    return Object.keys(this.platformPresets).map(key => ({
       id: key,
       name: this.platformPresets[key].name,
       maxSize: this.platformPresets[key].maxSize

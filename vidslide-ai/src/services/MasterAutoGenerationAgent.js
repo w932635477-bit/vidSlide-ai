@@ -14,6 +14,8 @@
 import { VideoProcessingService } from './VideoProcessingService.js'
 import { getBaiduNLPService } from './BaiduNLPService.js'
 import TemplateArchitecture from '../utils/TemplateArchitecture.js'
+import MaterialService from './MaterialService.js'
+import remotionService from './RemotionService.js'
 
 /**
  * 主自动化生成引擎类
@@ -23,6 +25,7 @@ export class MasterAutoGenerationAgent {
     // 依赖的服务
     this.videoService = new VideoProcessingService()
     this.nlpService = getBaiduNLPService()
+    this.remotionService = remotionService // 使用导入的单例
 
     // 状态
     this.isProcessing = false
@@ -182,36 +185,29 @@ export class MasterAutoGenerationAgent {
 
     onProgress(50)
 
-    // 根据内容类型选择模板
+    // 使用TemplateArchitecture的智能推荐功能
+    const recommendations = templateEngine.recommendTemplates(analysisResult)
+
+    console.log('🎯 模板推荐结果:', recommendations.length, '个推荐')
+
+    // 选择评分最高的模板
     let selectedTemplate = null
 
-    // 根据内容类型匹配模板
-    if (analysisResult.contentType === 'data') {
-      // 数据展示类 -> 数据可视化模板
-      selectedTemplate = templates.find(t => t.id === 'data-visualization')
-    } else if (analysisResult.contentType === 'educational') {
-      // 教育类 -> 标准演示模板
-      selectedTemplate = templates.find(t => t.id === 'standard-presentation')
-    } else if (analysisResult.contentType === 'promotional') {
-      // 推广类 -> 营销漏斗模板
-      selectedTemplate = templates.find(t => t.id === 'marketing-funnel')
-    } else {
-      // 默认使用标准演示模板
-      selectedTemplate = templates.find(t => t.id === 'standard-presentation')
-    }
-
-    // 如果没找到特定模板，使用第一个可用模板
-    if (!selectedTemplate) {
-      selectedTemplate = templates[0]
-      console.log('⚠️ 未找到匹配模板，使用默认模板:', selectedTemplate.name || selectedTemplate.id)
-    } else {
+    if (recommendations.length > 0) {
+      selectedTemplate = recommendations[0].template
       console.log(
         '✅ 自动选择模板:',
         selectedTemplate.name || selectedTemplate.id,
-        '(类型:',
-        analysisResult.contentType,
-        ')'
+        '(评分:',
+        recommendations[0].score,
+        ')',
+        '-',
+        recommendations[0].reason
       )
+    } else {
+      // 如果推荐失败，使用第一个可用模板
+      selectedTemplate = templates[0]
+      console.log('⚠️ 推荐失败，使用默认模板:', selectedTemplate.name || selectedTemplate.id)
     }
 
     onProgress(100)
@@ -225,28 +221,66 @@ export class MasterAutoGenerationAgent {
     const keywords = analysisResult.keywords.slice(0, 5) // 取前5个关键词
     const materials = []
 
-    // 模拟素材搜索（实际应该调用 MaterialService）
+    console.log('🔍 开始搜索素材，关键词数量:', keywords.length)
+
+    // 确保MaterialService已初始化
+    if (!MaterialService.isInitialized) {
+      await MaterialService.initialize()
+    }
+
+    // 为每个关键词搜索素材
     for (let i = 0; i < keywords.length; i++) {
       const keyword = keywords[i]
+      const keywordText = keyword.text || keyword
 
       onProgress((i / keywords.length) * 100)
 
       try {
-        // 为每个关键词创建一个素材占位符
-        materials.push({
-          keyword: keyword.text || keyword,
-          material: {
-            type: 'placeholder',
-            keyword: keyword.text || keyword,
-            url: null
+        console.log(`🔍 搜索素材: ${keywordText}`)
+
+        // 调用MaterialService搜索素材
+        const searchResult = await MaterialService.searchMaterials(keywordText, {
+          limit: 3, // 每个关键词获取3个素材
+          context: {
+            contentType: analysisResult.contentType,
+            keywords: analysisResult.keywords
           }
         })
+
+        if (searchResult && searchResult.results && searchResult.results.length > 0) {
+          // 添加搜索到的素材
+          materials.push({
+            keyword: keywordText,
+            materials: searchResult.results,
+            source: searchResult.source || 'unknown'
+          })
+          console.log(`✅ 找到 ${searchResult.results.length} 个素材 (来源: ${searchResult.source})`)
+        } else {
+          console.log(`⚠️ 未找到素材: ${keywordText}`)
+          // 添加空占位符
+          materials.push({
+            keyword: keywordText,
+            materials: [],
+            source: 'none'
+          })
+        }
       } catch (error) {
-        console.warn(`素材搜索失败: ${keyword}`, error)
+        console.warn(`❌ 素材搜索失败: ${keywordText}`, error.message)
+        // 添加空占位符
+        materials.push({
+          keyword: keywordText,
+          materials: [],
+          source: 'error',
+          error: error.message
+        })
       }
     }
 
     onProgress(100)
+
+    const totalMaterials = materials.reduce((sum, m) => sum + (m.materials?.length || 0), 0)
+    console.log(`✅ 素材搜索完成，共找到 ${totalMaterials} 个素材`)
+
     return materials
   }
 
@@ -300,6 +334,13 @@ export class MasterAutoGenerationAgent {
   /**
    * 步骤5: 渲染最终视频
    */
+  /**
+   * 步骤5: 渲染最终视频
+   * @param {object} composition - 组合结果
+   * @param {File} videoFile - 原始视频文件
+   * @param {Function} onProgress - 进度回调
+   * @returns {Promise<object>} 渲染结果
+   */
   async renderFinal(composition, videoFile, onProgress) {
     onProgress(20)
 
@@ -319,17 +360,91 @@ export class MasterAutoGenerationAgent {
       keywords: composition.keywords
     }
 
-    onProgress(60)
+    onProgress(40)
 
-    // 模拟渲染延迟
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // 尝试调用 Remotion 服务进行实际渲染
+    try {
+      console.log('🎬 尝试调用 Remotion 服务渲染视频...')
+
+      // 准备 Remotion 渲染参数
+      const remotionProps = {
+        videoUrl: renderData.video.url,
+        scenes: composition.scenes.map((scene, index) => ({
+          id: index + 1,
+          title: scene.title || `场景 ${index + 1}`,
+          content: scene.content || scene.text || '',
+          duration: scene.duration || 3,
+          materials: scene.materials || []
+        })),
+        template: composition.template.id,
+        metadata: {
+          title: composition.metadata.title || '生成的视频',
+          duration: composition.metadata.duration
+        }
+      }
+
+      onProgress(60)
+
+      // 调用 Remotion 渲染服务
+      const renderResult = await this.remotionService.renderVideo(
+        composition.template.id,
+        remotionProps,
+        {
+          width: composition.metadata.width || 1920,
+          height: composition.metadata.height || 1080,
+          fps: 30
+        }
+      )
+
+      onProgress(90)
+
+      console.log('✅ Remotion 渲染成功:', renderResult)
+
+      // 如果渲染成功，返回渲染后的视频URL
+      // 注意：Remotion 渲染是异步的，可能只返回 renderId
+      if (renderResult.videoUrl) {
+        // 渲染已完成，有视频URL
+        return {
+          ...renderData,
+          video: {
+            ...renderData.video,
+            url: renderResult.videoUrl, // 使用渲染后的视频URL
+            renderedUrl: renderResult.videoUrl
+          },
+          renderResult,
+          canExport: true,
+          previewReady: true,
+          isRendered: true
+        }
+      } else if (renderResult.renderId) {
+        // 渲染任务已创建，但还在处理中
+        console.log('⏳ 渲染任务已创建，ID:', renderResult.renderId)
+        console.log('💡 使用预览模式，渲染完成后可以查看最终视频')
+
+        return {
+          ...renderData,
+          renderResult,
+          canExport: true,
+          previewReady: true,
+          isRendered: false,
+          isRendering: true, // 标记正在渲染
+          previewMode: true
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Remotion 渲染失败，使用预览模式:', error.message)
+      // 如果渲染失败，继续使用预览模式
+    }
 
     onProgress(100)
 
+    // 预览模式：返回原始视频 + 模板信息
     return {
       ...renderData,
       canExport: true,
-      previewReady: true
+      previewReady: true,
+      isRendered: false, // 标记为未渲染，仅预览
+      previewMode: true
     }
   }
 

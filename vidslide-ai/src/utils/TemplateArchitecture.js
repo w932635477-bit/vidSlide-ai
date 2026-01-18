@@ -1,21 +1,16 @@
 /**
- * TemplateArchitecture - 简化版核心架构
- * 从2,923行简化到~300行
- * 模板定义已拆分到独立文件
+ * TemplateArchitecture - Remotion模板架构
+ * 使用Remotion的30个专业视频模板
  */
 
-import {
-  templateRegistry,
-  getAllTemplates,
-  getTemplateById,
-  getTemplatesByCategory
-} from './templates/index.js'
+import RemotionService from '../services/RemotionService.js'
 
 class TemplateArchitecture {
   constructor() {
     this.templates = new Map()
     this.constraints = new Map()
     this.initialized = false
+    this.remotionService = RemotionService
   }
 
   /**
@@ -27,32 +22,65 @@ class TemplateArchitecture {
       return
     }
 
-    console.log('🚀 初始化 TemplateArchitecture...')
+    console.log('🚀 初始化 TemplateArchitecture (Remotion模板)...')
 
-    // 从注册表加载所有模板
-    this.loadTemplatesFromRegistry()
+    // 从Remotion服务加载所有模板
+    await this.loadRemotionTemplates()
 
     // 设置约束系统
     this.setupConstraints()
 
     this.initialized = true
-    console.log(`✅ TemplateArchitecture 初始化完成，共加载 ${this.templates.size} 个模板`)
+    console.log(`✅ TemplateArchitecture 初始化完成，共加载 ${this.templates.size} 个Remotion模板`)
   }
 
   /**
-   * 从注册表加载模板
+   * 从Remotion服务加载模板
    */
-  loadTemplatesFromRegistry() {
-    Object.entries(templateRegistry).forEach(([id, template]) => {
-      this.templates.set(id, template)
-    })
+  async loadRemotionTemplates() {
+    try {
+      // 获取Remotion模板列表
+      const remotionTemplates = await this.remotionService.getAvailableTemplates()
+
+      if (remotionTemplates && remotionTemplates.templates) {
+        remotionTemplates.templates.forEach(template => {
+          this.templates.set(template.id, {
+            ...template,
+            type: 'remotion',
+            renderer: 'remotion'
+          })
+        })
+        console.log(`📋 已加载 ${remotionTemplates.templates.length} 个Remotion模板`)
+      }
+    } catch (error) {
+      console.error('❌ 加载Remotion模板失败:', error)
+      // 使用默认模板列表
+      this.loadDefaultTemplates()
+    }
+  }
+
+  /**
+   * 加载默认模板列表（当Remotion服务不可用时）
+   */
+  loadDefaultTemplates() {
+    const defaultTemplates = this.remotionService.getDefaultTemplates()
+    if (defaultTemplates && defaultTemplates.templates) {
+      defaultTemplates.templates.forEach(template => {
+        this.templates.set(template.id, {
+          ...template,
+          type: 'remotion',
+          renderer: 'remotion'
+        })
+      })
+      console.log(`📋 已加载 ${defaultTemplates.templates.length} 个默认Remotion模板`)
+    }
   }
 
   /**
    * 设置约束系统
    */
   setupConstraints() {
-    // 全局约束规则
+    // Remotion模板的约束规则
     this.constraints.set('global', {
       maxLayers: 10,
       maxElementsPerLayer: 5,
@@ -108,174 +136,122 @@ class TemplateArchitecture {
    * 根据内容类型推荐模板
    */
   recommendTemplates(contentAnalysis) {
-    const { keywords = [], textDensity = 0, dataMentions = 0, hasVideo = false } = contentAnalysis
+    const { keywords = [], textDensity = 0, dataMentions = 0, contentType = '' } = contentAnalysis
     const recommendations = []
 
-    // 规则引擎匹配
-    if (hasVideo && keywords.some(k => ['演讲', '演示', '讲解'].includes(k))) {
-      const template = this.templates.get('picture-in-picture')
-      if (template) {
+    // 根据内容类型匹配Remotion模板
+    if (contentType === 'data' || dataMentions > 0.3) {
+      // 数据展示类 -> 数据可视化模板
+      const dataTemplates = this.getTemplatesByCategory('data')
+      if (dataTemplates.length > 0) {
         recommendations.push({
-          template,
+          template: dataTemplates[0], // AnimatedBarChart
           score: 0.9,
-          reason: '视频内容包含演讲元素，适合画中画模板'
+          reason: '内容包含数据信息，适合数据可视化模板'
         })
       }
     }
 
-    if (dataMentions > 0.3) {
-      const template = this.templates.get('info-card')
-      if (template) {
+    if (contentType === 'comparison' || keywords.some(k => ['对比', '区别', '比较', '优缺点', 'vs', 'VS'].includes(k))) {
+      // 对比类 -> 对比分析模板
+      const comparisonTemplates = this.getTemplatesByCategory('comparison')
+      if (comparisonTemplates.length > 0) {
         recommendations.push({
-          template,
-          score: 0.8,
-          reason: '内容包含大量数据信息，适合信息卡片展示'
-        })
-      }
-    }
-
-    if (keywords.some(k => ['时间', '发展', '历程', '阶段'].includes(k))) {
-      const template = this.templates.get('timeline')
-      if (template) {
-        recommendations.push({
-          template,
+          template: comparisonTemplates[0], // SplitComparison
           score: 0.85,
-          reason: '内容涉及时间发展，适合时间线展示'
+          reason: '内容包含对比元素，适合分屏对比模板'
         })
       }
     }
 
-    if (keywords.some(k => ['对比', '区别', '比较', '优缺点'].includes(k))) {
-      const template = this.templates.get('split-screen')
-      if (template) {
+    if (contentType === 'text' || textDensity > 0.7) {
+      // 文字密集 -> 文字动画模板
+      const textTemplates = this.getTemplatesByCategory('text')
+      if (textTemplates.length > 0) {
         recommendations.push({
-          template,
+          template: textTemplates[0], // KineticTypography
           score: 0.8,
-          reason: '内容包含对比元素，适合分屏展示'
+          reason: '内容文字密集，适合文字动画模板'
         })
       }
     }
 
-    if (keywords.length > 0) {
-      const template = this.templates.get('keyword-highlight')
-      if (template) {
+    if (contentType === 'showcase' || keywords.some(k => ['产品', '展示', '介绍', '推荐'].includes(k))) {
+      // 展示类 -> 产品展示模板
+      const showcaseTemplates = this.getTemplatesByCategory('showcase')
+      if (showcaseTemplates.length > 0) {
         recommendations.push({
-          template,
-          score: 0.7,
-          reason: '内容包含关键词，适合高亮展示'
+          template: showcaseTemplates[0], // GlassmorphismStack
+          score: 0.85,
+          reason: '内容适合产品展示，使用磨砂玻璃效果'
         })
       }
     }
 
-    // 按评分排序
+    // 如果没有匹配到特定类型，使用默认模板
+    if (recommendations.length === 0) {
+      const allTemplates = this.getAllTemplates()
+      if (allTemplates.length > 0) {
+        recommendations.push({
+          template: allTemplates[0],
+          score: 0.6,
+          reason: '使用默认模板'
+        })
+      }
+    }
+
+    // 按评分排序，返回前3个
     return recommendations.sort((a, b) => b.score - a.score).slice(0, 3)
   }
 
   /**
-   * 验证模板修改是否符合约束
+   * 渲染Remotion模板
+   * @param {string} templateId - 模板ID
+   * @param {Object} props - 模板属性
+   * @param {Function} onProgress - 进度回调
+   * @returns {Promise<{renderId: string, videoUrl: string}>}
    */
-  validateModification(templateId, layerId, property, value) {
-    const template = this.getTemplate(templateId)
-    if (!template) {
-      return { valid: false, reason: '模板不存在' }
-    }
+  async renderTemplate(templateId, props = {}, onProgress) {
+    try {
+      console.log(`🎬 开始渲染Remotion模板: ${templateId}`)
 
-    // 查找层定义
-    let layerDef = null
-    for (const layerType of Object.keys(template.layers)) {
-      const layer = template.layers[layerType].find(l => l.id === layerId)
-      if (layer) {
-        layerDef = { ...layer, layerType }
-        break
-      }
-    }
+      // 调用Remotion服务渲染
+      const result = await this.remotionService.renderVideo(templateId, props)
 
-    if (!layerDef) {
-      return { valid: false, reason: '层不存在' }
-    }
+      // 等待渲染完成
+      const progress = await this.remotionService.getRenderProgress(result.renderId)
 
-    // 检查层级约束
-    const layerConstraints = this.constraints.get(layerDef.layerType)
-    if (!layerConstraints) {
-      return { valid: false, reason: '层级约束未定义' }
-    }
+      // 轮询进度
+      while (progress.status !== 'done' && progress.status !== 'error') {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        const newProgress = await this.remotionService.getRenderProgress(result.renderId)
 
-    // 检查是否允许修改
-    if (!layerConstraints.modifiable) {
-      return {
-        valid: false,
-        reason: layerDef.constraints?.reason || `${layerDef.layerType}层不可修改`
-      }
-    }
+        if (onProgress) {
+          onProgress(newProgress)
+        }
 
-    // 检查属性是否允许调整
-    if (!layerConstraints.userAdjustable.includes(property)) {
-      return {
-        valid: false,
-        reason: `属性 ${property} 不允许用户调整`
-      }
-    }
+        if (newProgress.status === 'done') {
+          break
+        }
 
-    return { valid: true }
-  }
-
-  /**
-   * 创建新的模板实例
-   */
-  createTemplateInstance(templateId, customizations = {}) {
-    const template = this.getTemplate(templateId)
-    if (!template) {
-      throw new Error(`模板 ${templateId} 不存在`)
-    }
-
-    // 深拷贝模板定义
-    const instance = JSON.parse(JSON.stringify(template))
-
-    // 应用自定义选项
-    this.applyCustomizations(instance, customizations)
-
-    // 设置实例元数据
-    instance.instanceId = `instance_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    instance.createdAt = new Date().toISOString()
-    instance.version = '1.0'
-
-    return instance
-  }
-
-  /**
-   * 应用自定义选项
-   */
-  applyCustomizations(instance, customizations) {
-    if (customizations.theme) {
-      instance.theme = { ...instance.theme, ...customizations.theme }
-    }
-
-    if (customizations.layers) {
-      for (const [layerId, properties] of Object.entries(customizations.layers)) {
-        const layer = this.findLayer(instance, layerId)
-        if (layer && layer.type === 'adjustable') {
-          for (const [prop, value] of Object.entries(properties)) {
-            const validation = this.validateModification(instance.id, layerId, prop, value)
-            if (validation.valid) {
-              layer.properties[prop] = value
-            } else {
-              console.warn(`自定义选项被拒绝: ${validation.reason}`)
-            }
-          }
+        if (newProgress.status === 'error') {
+          throw new Error(newProgress.error || '渲染失败')
         }
       }
-    }
-  }
 
-  /**
-   * 查找层定义
-   */
-  findLayer(instance, layerId) {
-    for (const layerType of Object.keys(instance.layers)) {
-      const layer = instance.layers[layerType].find(l => l.id === layerId)
-      if (layer) return layer
+      const videoUrl = `${this.remotionService.baseURL}/download/${result.renderId}`
+
+      console.log(`✅ Remotion模板渲染完成: ${videoUrl}`)
+
+      return {
+        renderId: result.renderId,
+        videoUrl,
+        success: true
+      }
+    } catch (error) {
+      console.error('❌ Remotion模板渲染失败:', error)
+      throw error
     }
-    return null
   }
 
   /**
@@ -285,16 +261,12 @@ class TemplateArchitecture {
     const stats = {
       totalTemplates: this.templates.size,
       templatesByCategory: {},
-      layersByType: { fixed: 0, dynamic: 0, adjustable: 0 }
+      renderer: 'remotion'
     }
 
     for (const template of this.templates.values()) {
-      const category = template.category
+      const category = template.category || 'unknown'
       stats.templatesByCategory[category] = (stats.templatesByCategory[category] || 0) + 1
-
-      for (const [layerType, layers] of Object.entries(template.layers)) {
-        stats.layersByType[layerType] += layers.length
-      }
     }
 
     return stats

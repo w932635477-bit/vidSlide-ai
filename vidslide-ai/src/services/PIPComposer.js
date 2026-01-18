@@ -92,11 +92,7 @@ class PIPComposer {
       for (let i = 0; i < videoSegments.length; i++) {
         console.log(`📹 合成场景 ${i + 1}/${videoSegments.length}`)
 
-        const composed = await this.composePIP(
-          videoSegments[i],
-          templateVideos[i],
-          config
-        )
+        const composed = await this.composePIP(videoSegments[i], templateVideos[i], config)
 
         composedScenes.push(composed)
 

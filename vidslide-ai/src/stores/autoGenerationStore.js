@@ -100,8 +100,10 @@ export const useAutoGenerationStore = defineStore('autoGeneration', {
      */
     handleProgress({ step, progress }) {
       this.currentStep = step
-      this.progress = progress
-      console.log(`📊 进度: ${progress}% - ${step}`)
+      // 确保progress是有效数字
+      const validProgress = isNaN(progress) ? 0 : Math.max(0, Math.min(100, progress))
+      this.progress = validProgress
+      console.log(`📊 进度: ${validProgress}% - ${step}`)
     },
 
     /**
