@@ -5,6 +5,9 @@
 import React from 'react';
 import { Composition } from 'remotion';
 
+// 专用模板
+import { MultiLayerVertical } from './templates/MultiLayerVertical';
+
 // 基础展示类 (5个)
 import { GlassmorphismStack } from './templates/GlassmorphismStack';
 import { LuxuryProductShowcase } from './templates/LuxuryProductShowcase';
@@ -50,6 +53,25 @@ import { InkSpread } from './templates/InkSpread';
 export const RemotionRoot = () => {
   return (
     <>
+      {/* ========== 专用模板 - 多层竖版视频 ========== */}
+
+      <Composition
+        id="MultiLayerVertical"
+        component={MultiLayerVertical}
+        durationInFrames={150}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          title: '多层竖版模板',
+          subtitle: '专为抖音优化',
+          content: '',
+          backgroundMaterial: null,
+          chartData: null,
+          brandColor: '#3742FA',
+          accentColor: '#FF6B6B',
+        }}
+      />
       {/* ========== 基础展示类 (5个) ========== */}
 
       <Composition
@@ -229,8 +251,8 @@ export const RemotionRoot = () => {
         component={AnimatedBarChart}
         durationInFrames={150}
         fps={30}
-        width={1920}
-        height={1080}
+        width={1080}
+        height={1920}
         defaultProps={{
           title: '数据增长',
           subtitle: '季度对比',

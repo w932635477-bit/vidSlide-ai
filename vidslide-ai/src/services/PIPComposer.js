@@ -51,14 +51,24 @@ class PIPComposer {
     try {
       console.log('📦 加载 FFmpeg.wasm (PIPComposer)...')
 
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg')
+      // 动态导入FFmpeg (0.12.x 新版本API)
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg')
+      const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
 
-      this.ffmpeg = createFFmpeg({
-        log: true,
-        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+      this.ffmpeg = new FFmpeg()
+
+      // 设置日志
+      this.ffmpeg.on('log', ({ message }) => {
+        console.log('[FFmpeg PIPComposer]', message)
       })
 
-      await this.ffmpeg.load()
+      // 加载FFmpeg核心文件
+      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm'
+      await this.ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
+      })
+
       this.fetchFile = fetchFile
       this.isLoaded = true
 
@@ -129,14 +139,14 @@ class PIPComposer {
       const outputFileName = 'output.mp4'
 
       // 写入文件
-      this.ffmpeg.FS('writeFile', templateFileName, await this.fetchFile(templateVideo.blob))
-      this.ffmpeg.FS('writeFile', videoFileName, await this.fetchFile(videoSegment.blob))
+      await this.ffmpeg.writeFile(templateFileName, await this.fetchFile(templateVideo.blob))
+      await this.ffmpeg.writeFile(videoFileName, await this.fetchFile(videoSegment.blob))
 
       // 构建FFmpeg命令
       // overlay滤镜: [1:v]scale=480:270[pip];[0:v][pip]overlay=1400:770[out]
       const filterComplex = `[1:v]scale=${config.width}:${config.height}[pip];[0:v][pip]overlay=${config.x}:${config.y}[out]`
 
-      await this.ffmpeg.run(
+      await this.ffmpeg.exec([
         '-i',
         templateFileName, // 背景(PPT模板)
         '-i',
@@ -152,17 +162,17 @@ class PIPComposer {
         '-c:a',
         'aac',
         outputFileName
-      )
+      ])
 
       // 读取输出文件
-      const data = this.ffmpeg.FS('readFile', outputFileName)
+      const data = await this.ffmpeg.readFile(outputFileName)
       const blob = new Blob([data.buffer], { type: 'video/mp4' })
       const url = URL.createObjectURL(blob)
 
       // 清理
-      this.ffmpeg.FS('unlink', templateFileName)
-      this.ffmpeg.FS('unlink', videoFileName)
-      this.ffmpeg.FS('unlink', outputFileName)
+      await this.ffmpeg.deleteFile(templateFileName)
+      await this.ffmpeg.deleteFile(videoFileName)
+      await this.ffmpeg.deleteFile(outputFileName)
 
       return {
         index: videoSegment.index,

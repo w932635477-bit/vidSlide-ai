@@ -17,6 +17,7 @@ import TemplateArchitecture from '../utils/TemplateArchitecture.js'
 import MaterialService from './MaterialService.js'
 import remotionService from './RemotionService.js'
 import videoCompositionService from './VideoCompositionService.js'
+import SmartImageCropper from './SmartImageCropper.js'
 
 /**
  * 主自动化生成引擎类
@@ -300,22 +301,54 @@ export class MasterAutoGenerationAgent {
       template
     )
 
+    onProgress(30)
+
+    // 将素材扁平化为数组
+    const allMaterials = []
+    materials.forEach(m => {
+      if (m.materials && m.materials.length > 0) {
+        m.materials.forEach(material => {
+          allMaterials.push({
+            ...material,
+            keyword: m.keyword,
+            tags: [m.keyword, ...(material.tags || [])]
+          })
+        })
+      }
+    })
+
+    console.log('📦 可用素材总数:', allMaterials.length)
+
     onProgress(50)
 
-    // 生成场景序列
-    const scenes = segments.map((segment, index) => {
-      return {
-        id: `scene-${index}`,
+    // 生成场景序列并分配素材
+    const scenes = []
+    for (let index = 0; index < segments.length; index++) {
+      const segment = segments[index]
+
+      // 为每个场景分配和裁剪素材
+      const sceneMaterials = await this.assignMaterialsToScene(segment, allMaterials)
+
+      // 生成图表数据
+      const chartData = this.generateChartData(segment)
+
+      scenes.push({
+        id: index,
         title: segment.title,
+        subtitle: segment.subtitle || '',
         content: segment.content,
         keywords: segment.keywords,
         duration: segment.duration,
         startTime: segment.startTime,
         endTime: segment.endTime,
         template: template.id,
-        material: materials[index % materials.length] // 循环使用素材
-      }
-    })
+        // 新增: 素材数据
+        backgroundMaterial: sceneMaterials.background,
+        chartData: chartData
+      })
+
+      onProgress(50 + ((index + 1) / segments.length) * 30)
+    }
 
     onProgress(80)
 
@@ -332,6 +365,79 @@ export class MasterAutoGenerationAgent {
       transcript: analysisResult.transcript,
       keywords: analysisResult.keywords
     }
+  }
+
+  /**
+   * 为场景分配素材 (优化版 - 只需要背景)
+   */
+  async assignMaterialsToScene(scene, allMaterials) {
+    // 根据场景关键词匹配素材
+    const matchedMaterials = allMaterials.filter(m =>
+      scene.keywords.some(k => {
+        const keyword = k.text || k
+        return m.tags?.some(tag => tag.includes(keyword)) || m.title?.includes(keyword)
+      })
+    ).slice(0, 1) // 只取第一个作为背景
+
+    if (matchedMaterials.length === 0) {
+      console.warn(`⚠️ 场景 ${scene.id} 没有匹配到素材`)
+      return { background: null }
+    }
+
+    // 裁剪素材为竖版背景
+    console.log(`🖼️ 为场景 ${scene.id || scene.title} 裁剪背景素材`)
+    try {
+      const material = matchedMaterials[0]
+      const croppedUrl = await SmartImageCropper.cropForVertical(material, {
+        targetWidth: 1080,
+        targetHeight: 1920
+      })
+
+      return {
+        background: croppedUrl
+      }
+    } catch (error) {
+      console.error(`❌ 素材裁剪失败:`, error)
+      return { background: null }
+    }
+  }
+
+  /**
+   * 生成图表数据 (优化版 - 可选)
+   */
+  generateChartData(scene) {
+    // 判断是否需要数据可视化
+    const needsChart = this.shouldGenerateChart(scene)
+
+    if (!needsChart) {
+      return null
+    }
+
+    const keywords = scene.keywords.slice(0, 4)
+
+    if (keywords.length === 0) {
+      return null
+    }
+
+    return {
+      type: 'bar',
+      labels: keywords.map(k => k.text || k),
+      values: keywords.map(() => Math.floor(Math.random() * 40) + 60),
+      colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A']
+    }
+  }
+
+  /**
+   * 判断是否需要生成图表 (新增方法)
+   */
+  shouldGenerateChart(scene) {
+    const content = (scene.content || scene.text || '').toLowerCase()
+
+    // 包含数据相关关键词时生成图表
+    const dataKeywords = ['数据', '增长', '下降', '对比', '统计', '百分比', '%',
+                          'data', 'growth', 'increase', 'decrease', 'statistics']
+
+    return dataKeywords.some(keyword => content.includes(keyword))
   }
 
   /**

@@ -6,10 +6,16 @@
 import TemplateArchitecture from './src/utils/TemplateArchitecture.js'
 import MaterialService from './src/services/MaterialService.js'
 import RemotionService from './src/services/RemotionService.js'
-import { BAIDU_SPEECH_CONFIG, BAIDU_NLP_CONFIG, UNSPLASH_CONFIG, PEXELS_CONFIG, PIXABAY_CONFIG } from './src/config/api-keys.js'
+import {
+  BAIDU_SPEECH_CONFIG,
+  BAIDU_NLP_CONFIG,
+  UNSPLASH_CONFIG,
+  PEXELS_CONFIG,
+  PIXABAY_CONFIG
+} from './src/config/api-keys.js'
 
 console.log('🔍 VidSlide AI 综合代码检查\n')
-console.log('=' .repeat(60))
+console.log('='.repeat(60))
 
 let allChecksPass = true
 

@@ -86,14 +86,17 @@ class RemotionRenderer {
           content: scene.content || scene.text || '',
           duration: scene.duration || 5,
           materials: scene.materials || [],
-          keywords: scene.keywords || []
+          keywords: scene.keywords || [],
+          // 新增: 传递背景素材和图表数据
+          backgroundMaterial: scene.backgroundMaterial || null,
+          chartData: scene.chartData || null
         }
 
         const options = {
           codec: 'h264',
           fps: 30,
-          width: 1920,
-          height: 1080
+          width: 1080,  // 修改为竖版宽度
+          height: 1920  // 修改为竖版高度
         }
 
         console.log('  - 渲染参数:', props)
@@ -104,10 +107,10 @@ class RemotionRenderer {
         console.log('  - 渲染任务ID:', renderResult.renderId)
 
         // 轮询渲染进度
-        const videoUrl = await this.pollRenderProgress(renderResult.renderId)
+        const videoResult = await this.pollRenderProgress(renderResult.renderId)
 
         // 下载视频为Blob
-        const blob = await this.downloadVideoAsBlob(videoUrl)
+        const blob = await this.downloadVideoAsBlob(videoResult.url)
         const url = URL.createObjectURL(blob)
 
         return {
@@ -116,7 +119,8 @@ class RemotionRenderer {
           blob,
           url,
           duration: scene.duration || 5,
-          templateId: template.id
+          templateId: template.id,
+          path: videoResult.path // 保存服务器端路径，用于后续PIP合成
         }
       } catch (error) {
         retries++
@@ -151,14 +155,19 @@ class RemotionRenderer {
       try {
         const progress = await this.remotionService.getRenderProgress(renderId)
 
-        console.log(`  - 渲染进度: ${(progress.progress * 100).toFixed(1)}%`)
+        // 服务器返回的progress已经是0-100的整数，不需要再乘以100
+        console.log(`  - 渲染进度: ${progress.progress.toFixed(1)}%`)
 
-        if (progress.status === 'completed') {
-          console.log('  - 渲染完成,视频URL:', progress.videoUrl)
-          return progress.videoUrl
+        // 服务器返回的状态是 'done'，不是 'completed'
+        if (progress.status === 'done') {
+          // 服务器返回的是outputPath，需要转换为下载URL
+          const videoUrl = `/download/${renderId}`
+          console.log('  - 渲染完成,视频路径:', progress.outputPath)
+          console.log('  - 下载URL:', videoUrl)
+          return { url: videoUrl, path: progress.outputPath }
         }
 
-        if (progress.status === 'failed') {
+        if (progress.status === 'error') {
           throw new Error(`渲染失败: ${progress.error}`)
         }
 

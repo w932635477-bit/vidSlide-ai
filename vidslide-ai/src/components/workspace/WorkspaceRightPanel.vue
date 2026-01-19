@@ -99,14 +99,12 @@
 
             <!-- PPT控制按钮 -->
             <div class="ppt-controls">
-              <button
-                class="ppt-btn"
-                :disabled="currentSlide === 0"
-                @click="previousSlide"
-              >
+              <button class="ppt-btn" :disabled="currentSlide === 0" @click="previousSlide">
                 ◀ 上一页
               </button>
-              <span class="slide-counter">{{ currentSlide + 1 }} / {{ pptSlides?.length || 0 }}</span>
+              <span class="slide-counter"
+                >{{ currentSlide + 1 }} / {{ pptSlides?.length || 0 }}</span
+              >
               <button
                 class="ppt-btn"
                 :disabled="currentSlide >= (pptSlides?.length || 1) - 1"
@@ -138,11 +136,7 @@
                 :class="{ active: index === currentSlide }"
                 @click="currentSlide = index"
               >
-                <img
-                  v-if="slide.thumbnail"
-                  :src="slide.thumbnail"
-                  :alt="`幻灯片 ${index + 1}`"
-                />
+                <img v-if="slide.thumbnail" :src="slide.thumbnail" :alt="`幻灯片 ${index + 1}`" />
                 <div v-else class="slide-placeholder-small">
                   <span>{{ index + 1 }}</span>
                 </div>

@@ -20,6 +20,11 @@ export default defineConfig({
     strictPort: false,
     // 允许跨域访问
     cors: true,
+    // 添加FFmpeg.wasm所需的安全头
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp'
+    },
     // 代理百度API请求
     proxy: {
       // 百度AI开放平台 - 获取Token

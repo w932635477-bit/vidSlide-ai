@@ -85,14 +85,24 @@ class VideoCompressor {
     try {
       console.log('📦 加载 FFmpeg.wasm (VideoCompressor)...')
 
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg')
+      // 动态导入FFmpeg (0.12.x 新版本API)
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg')
+      const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
 
-      this.ffmpeg = createFFmpeg({
-        log: true,
-        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+      this.ffmpeg = new FFmpeg()
+
+      // 设置日志
+      this.ffmpeg.on('log', ({ message }) => {
+        console.log('[FFmpeg VideoCompressor]', message)
       })
 
-      await this.ffmpeg.load()
+      // 加载FFmpeg核心文件
+      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm'
+      await this.ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
+      })
+
       this.fetchFile = fetchFile
       this.isLoaded = true
 
@@ -126,7 +136,7 @@ class VideoCompressor {
       const outputFileName = 'output.mp4'
 
       // 写入输入文件
-      this.ffmpeg.FS('writeFile', inputFileName, await this.fetchFile(videoData.blob))
+      await this.ffmpeg.writeFile(inputFileName, await this.fetchFile(videoData.blob))
 
       if (onProgress) {
         onProgress(0.2)
@@ -134,7 +144,7 @@ class VideoCompressor {
 
       // 构建FFmpeg命令
       // 借鉴剪映的压缩参数
-      await this.ffmpeg.run(
+      await this.ffmpeg.exec([
         '-i',
         inputFileName,
         '-c:v',
@@ -164,21 +174,21 @@ class VideoCompressor {
         '-ar',
         '44100',
         outputFileName
-      )
+      ])
 
       if (onProgress) {
         onProgress(0.8)
       }
 
       // 读取输出文件
-      const data = this.ffmpeg.FS('readFile', outputFileName)
+      const data = await this.ffmpeg.readFile(outputFileName)
       const blob = new Blob([data.buffer], { type: 'video/mp4' })
       const url = URL.createObjectURL(blob)
       const size = blob.size
 
       // 清理
-      this.ffmpeg.FS('unlink', inputFileName)
-      this.ffmpeg.FS('unlink', outputFileName)
+      await this.ffmpeg.deleteFile(inputFileName)
+      await this.ffmpeg.deleteFile(outputFileName)
 
       if (onProgress) {
         onProgress(1.0)

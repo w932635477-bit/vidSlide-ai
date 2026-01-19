@@ -18,27 +18,21 @@
  * @version 1.0.0
  */
 
-import VideoSplitter from './VideoSplitter.js'
+import ServerVideoProcessor from './ServerVideoProcessor.js'
 import RemotionRenderer from './RemotionRenderer.js'
-import PIPComposer from './PIPComposer.js'
-import VideoMerger from './VideoMerger.js'
-import VideoCompressor from './VideoCompressor.js'
 
 class VideoCompositionService {
   constructor() {
-    // 初始化各个组件
-    this.videoSplitter = new VideoSplitter()
+    // 初始化服务器端视频处理器 (替代旧的多个服务)
+    this.videoProcessor = new ServerVideoProcessor()
     this.remotionRenderer = new RemotionRenderer()
-    this.pipComposer = new PIPComposer()
-    this.videoMerger = new VideoMerger()
-    this.videoCompressor = new VideoCompressor()
 
     // 状态
     this.isProcessing = false
     this.currentProgress = 0
     this.currentStep = ''
 
-    console.log('✅ VideoCompositionService 初始化完成')
+    console.log('✅ VideoCompositionService 初始化完成 (使用服务器端处理)')
   }
 
   /**
@@ -67,8 +61,8 @@ class VideoCompositionService {
 
       // 步骤1: 分割原视频 (0-20%)
       this.updateProgress('分割视频', 0, onProgress)
-      const videoSegments = await this.videoSplitter.splitVideo(videoFile, scenes, progress => {
-        this.updateProgress('分割视频', progress * 0.2, onProgress)
+      const videoSegments = await this.videoProcessor.splitVideo(videoFile, scenes, progress => {
+        this.updateProgress('分割视频', progress * 20, onProgress)
       })
       console.log('✅ 视频分割完成,片段数:', videoSegments.length)
 
@@ -85,30 +79,30 @@ class VideoCompositionService {
 
       // 步骤3: 合成画中画 (40-60%)
       this.updateProgress('合成画中画', 40, onProgress)
-      const composedScenes = await this.pipComposer.composeScenes(
+      const composedScenes = await this.videoProcessor.composeScenes(
         videoSegments,
         templateVideos,
         options.pipConfig,
         progress => {
-          this.updateProgress('合成画中画', 40 + progress * 0.2, onProgress)
+          this.updateProgress('合成画中画', 40 + progress * 20, onProgress)
         }
       )
       console.log('✅ 画中画合成完成,片段数:', composedScenes.length)
 
       // 步骤4: 拼接视频 (60-80%)
       this.updateProgress('拼接视频', 60, onProgress)
-      const mergedVideo = await this.videoMerger.mergeVideos(composedScenes, progress => {
-        this.updateProgress('拼接视频', 60 + progress * 0.2, onProgress)
+      const mergedVideo = await this.videoProcessor.mergeVideos(composedScenes, progress => {
+        this.updateProgress('拼接视频', 60 + progress * 20, onProgress)
       })
       console.log('✅ 视频拼接完成')
 
       // 步骤5: 智能压缩 (80-100%)
       this.updateProgress('智能压缩', 80, onProgress)
-      const finalVideo = await this.videoCompressor.compress(
+      const finalVideo = await this.videoProcessor.compress(
         mergedVideo,
         options.platform || 'douyin',
         progress => {
-          this.updateProgress('智能压缩', 80 + progress * 0.2, onProgress)
+          this.updateProgress('智能压缩', 80 + progress * 20, onProgress)
         }
       )
       console.log('✅ 视频压缩完成')

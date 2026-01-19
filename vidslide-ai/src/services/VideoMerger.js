@@ -37,14 +37,24 @@ class VideoMerger {
     try {
       console.log('📦 加载 FFmpeg.wasm (VideoMerger)...')
 
-      const { createFFmpeg, fetchFile } = await import('@ffmpeg/ffmpeg')
+      // 动态导入FFmpeg (0.12.x 新版本API)
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg')
+      const { fetchFile, toBlobURL } = await import('@ffmpeg/util')
 
-      this.ffmpeg = createFFmpeg({
-        log: true,
-        corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+      this.ffmpeg = new FFmpeg()
+
+      // 设置日志
+      this.ffmpeg.on('log', ({ message }) => {
+        console.log('[FFmpeg VideoMerger]', message)
       })
 
-      await this.ffmpeg.load()
+      // 加载FFmpeg核心文件
+      const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm'
+      await this.ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
+      })
+
       this.fetchFile = fetchFile
       this.isLoaded = true
 
@@ -73,7 +83,7 @@ class VideoMerger {
       const fileList = []
       for (let i = 0; i < videoSegments.length; i++) {
         const fileName = `segment_${i}.mp4`
-        this.ffmpeg.FS('writeFile', fileName, await this.fetchFile(videoSegments[i].blob))
+        await this.ffmpeg.writeFile(fileName, await this.fetchFile(videoSegments[i].blob))
         fileList.push(`file '${fileName}'`)
 
         if (onProgress) {
@@ -83,13 +93,13 @@ class VideoMerger {
 
       // 创建concat列表文件
       const concatList = fileList.join('\n')
-      this.ffmpeg.FS('writeFile', 'concat.txt', concatList)
+      await this.ffmpeg.writeFile('concat.txt', concatList)
 
       console.log('📝 Concat列表:')
       console.log(concatList)
 
       // 使用concat协议拼接
-      await this.ffmpeg.run(
+      await this.ffmpeg.exec([
         '-f',
         'concat',
         '-safe',
@@ -99,14 +109,14 @@ class VideoMerger {
         '-c',
         'copy',
         'merged.mp4'
-      )
+      ])
 
       if (onProgress) {
         onProgress(0.75) // 拼接占25%
       }
 
       // 读取合并后的文件
-      const data = this.ffmpeg.FS('readFile', 'merged.mp4')
+      const data = await this.ffmpeg.readFile('merged.mp4')
       const blob = new Blob([data.buffer], { type: 'video/mp4' })
       const url = URL.createObjectURL(blob)
 
@@ -115,10 +125,10 @@ class VideoMerger {
 
       // 清理临时文件
       for (let i = 0; i < videoSegments.length; i++) {
-        this.ffmpeg.FS('unlink', `segment_${i}.mp4`)
+        await this.ffmpeg.deleteFile(`segment_${i}.mp4`)
       }
-      this.ffmpeg.FS('unlink', 'concat.txt')
-      this.ffmpeg.FS('unlink', 'merged.mp4')
+      await this.ffmpeg.deleteFile('concat.txt')
+      await this.ffmpeg.deleteFile('merged.mp4')
 
       if (onProgress) {
         onProgress(1.0) // 完成

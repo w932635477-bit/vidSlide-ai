@@ -279,20 +279,42 @@ const handleAutoGenerate = async () => {
       console.log('📺 准备显示预览，结果:', result)
 
       // 使用生成结果中的场景数据生成PPT幻灯片
-      const pptSlides = result.scenes?.map((scene, index) => ({
-        id: index + 1,
-        title: scene.title || `场景 ${index + 1}`,
-        content: scene.content || '',
-        thumbnail: scene.material?.materials?.[0]?.thumbnail || '',
-        image: scene.material?.materials?.[0]?.url || ''
-      })) || []
+      const pptSlides =
+        result.scenes?.map((scene, index) => ({
+          id: index + 1,
+          title: scene.title || `场景 ${index + 1}`,
+          content: scene.content || '',
+          thumbnail: scene.material?.materials?.[0]?.thumbnail || '',
+          image: scene.material?.materials?.[0]?.url || ''
+        })) || []
 
       // 如果没有场景，使用mock数据
-      const slidesToShow = pptSlides.length > 0 ? pptSlides : [
-        { id: 1, title: '封面页', thumbnail: '', image: '', content: result.transcript?.substring(0, 50) || '' },
-        { id: 2, title: '内容概述', thumbnail: '', image: '', content: result.transcript?.substring(50, 100) || '' },
-        { id: 3, title: '详细分析', thumbnail: '', image: '', content: result.transcript?.substring(100, 150) || '' }
-      ]
+      const slidesToShow =
+        pptSlides.length > 0
+          ? pptSlides
+          : [
+              {
+                id: 1,
+                title: '封面页',
+                thumbnail: '',
+                image: '',
+                content: result.transcript?.substring(0, 50) || ''
+              },
+              {
+                id: 2,
+                title: '内容概述',
+                thumbnail: '',
+                image: '',
+                content: result.transcript?.substring(50, 100) || ''
+              },
+              {
+                id: 3,
+                title: '详细分析',
+                thumbnail: '',
+                image: '',
+                content: result.transcript?.substring(100, 150) || ''
+              }
+            ]
 
       console.log('📄 PPT幻灯片数据:', slidesToShow)
 
@@ -321,7 +343,7 @@ const handleAutoGenerate = async () => {
 }
 
 // 处理 PPT 幻灯片更新
-const handlePptSlidesUpdated = (data) => {
+const handlePptSlidesUpdated = data => {
   pptSlides.value = data.slides || []
   showPptTab.value = data.showPptTab || false
   console.log('PPT 幻灯片已更新:', pptSlides.value.length, '页')

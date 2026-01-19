@@ -152,7 +152,10 @@ class TemplateArchitecture {
       }
     }
 
-    if (contentType === 'comparison' || keywords.some(k => ['对比', '区别', '比较', '优缺点', 'vs', 'VS'].includes(k))) {
+    if (
+      contentType === 'comparison' ||
+      keywords.some(k => ['对比', '区别', '比较', '优缺点', 'vs', 'VS'].includes(k))
+    ) {
       // 对比类 -> 对比分析模板
       const comparisonTemplates = this.getTemplatesByCategory('comparison')
       if (comparisonTemplates.length > 0) {
@@ -176,7 +179,10 @@ class TemplateArchitecture {
       }
     }
 
-    if (contentType === 'showcase' || keywords.some(k => ['产品', '展示', '介绍', '推荐'].includes(k))) {
+    if (
+      contentType === 'showcase' ||
+      keywords.some(k => ['产品', '展示', '介绍', '推荐'].includes(k))
+    ) {
       // 展示类 -> 产品展示模板
       const showcaseTemplates = this.getTemplatesByCategory('showcase')
       if (showcaseTemplates.length > 0) {

@@ -109,7 +109,11 @@
 
         <!-- 预览操作按钮组（右下角） -->
         <div class="preview-action-buttons">
-          <button class="preview-action-btn" title="返回原视频" @click="showGeneratedPreview = false">
+          <button
+            class="preview-action-btn"
+            title="返回原视频"
+            @click="showGeneratedPreview = false"
+          >
             <span>🔙</span>
             <span>返回原视频</span>
           </button>
@@ -443,7 +447,7 @@ watch(videoSrc, newSrc => {
 })
 
 // 监听生成预览状态变化，通知父组件更新 PPT 数据
-watch(showGeneratedPreview, (newValue) => {
+watch(showGeneratedPreview, newValue => {
   if (newValue && generatedPptSlides.value.length > 0) {
     emit('ppt-slides-updated', {
       slides: generatedPptSlides.value,

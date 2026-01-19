@@ -701,7 +701,9 @@ export class BaiduSpeechService {
       })
 
       if (!response.ok) {
-        throw new Error(`API请求失败: ${response.status}`)
+        const errorText = await response.text()
+        console.error('API响应错误:', response.status, errorText)
+        throw new Error(`API请求失败: ${response.status} - ${errorText}`)
       }
 
       const result = await response.json()
@@ -718,11 +720,13 @@ export class BaiduSpeechService {
           3307: '语音服务器后端识别出错问题',
           3308: '音频过长',
           3309: '音频数据问题',
-          3310: '输入的音频文件过大',
+          3310: '输入的音频文件过大(单次请求不能超过10MB)',
           3311: '采样率rate参数不在选项里',
           3312: '音频格式format参数不在选项里'
         }
-        throw new Error(errorMessages[result.err_no] || `识别失败: ${result.err_msg}`)
+        const errorMsg = errorMessages[result.err_no] || `识别失败: ${result.err_msg}`
+        console.error(`百度语音识别错误 [${result.err_no}]:`, errorMsg)
+        throw new Error(errorMsg)
       }
 
       // 返回识别结果
@@ -743,23 +747,27 @@ export class BaiduSpeechService {
   async recognizeLongAudio(pcmData, onProgress = null) {
     const sampleRate = 16000
     const bytesPerSample = 2 // 16位
-    // 减小每段时长到30秒，确保Base64编码后不超过2MB
-    // 30秒 * 16000Hz * 2字节 = 960,000字节 ≈ 0.96MB，Base64后约1.28MB
-    const maxDuration = 30 // 每段最大30秒
+    // 减小每段时长到15秒，避免Base64编码后超过API限制
+    // 15秒 * 16000Hz * 2字节 = 480,000字节 ≈ 0.48MB，Base64后约0.64MB
+    const maxDuration = 15 // 每段最大15秒
     const maxBytes = maxDuration * sampleRate * bytesPerSample
 
     const totalBytes = pcmData.byteLength
     const segments = Math.ceil(totalBytes / maxBytes)
     const results = []
 
-    console.log(`📊 音频总大小: ${(totalBytes / 1024 / 1024).toFixed(2)}MB，将分为 ${segments} 段处理`)
+    console.log(
+      `📊 音频总大小: ${(totalBytes / 1024 / 1024).toFixed(2)}MB，将分为 ${segments} 段处理`
+    )
 
     for (let i = 0; i < segments; i++) {
       const start = i * maxBytes
       const end = Math.min(start + maxBytes, totalBytes)
       const segment = pcmData.slice(start, end)
 
-      console.log(`🎤 处理第 ${i + 1}/${segments} 段，大小: ${(segment.byteLength / 1024).toFixed(2)}KB`)
+      console.log(
+        `🎤 处理第 ${i + 1}/${segments} 段，大小: ${(segment.byteLength / 1024).toFixed(2)}KB`
+      )
 
       if (onProgress) {
         onProgress((i + 0.5) / segments)
