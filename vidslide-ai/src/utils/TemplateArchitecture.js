@@ -1,16 +1,13 @@
 /**
- * TemplateArchitecture - Remotion模板架构
- * 使用Remotion的30个专业视频模板
+ * TemplateArchitecture - 模板架构（简化版）
+ * 注意：Remotion 已被移除，此文件保留用于兼容性
  */
-
-import RemotionService from '../services/RemotionService.js'
 
 class TemplateArchitecture {
   constructor() {
     this.templates = new Map()
     this.constraints = new Map()
     this.initialized = false
-    this.remotionService = RemotionService
   }
 
   /**
@@ -22,58 +19,55 @@ class TemplateArchitecture {
       return
     }
 
-    console.log('🚀 初始化 TemplateArchitecture (Remotion模板)...')
+    console.log('🚀 初始化 TemplateArchitecture (简化版)...')
 
-    // 从Remotion服务加载所有模板
-    await this.loadRemotionTemplates()
+    // 加载默认模板
+    this.loadDefaultTemplates()
 
     // 设置约束系统
     this.setupConstraints()
 
     this.initialized = true
-    console.log(`✅ TemplateArchitecture 初始化完成，共加载 ${this.templates.size} 个Remotion模板`)
+    console.log(`✅ TemplateArchitecture 初始化完成，共加载 ${this.templates.size} 个模板`)
   }
 
   /**
-   * 从Remotion服务加载模板
-   */
-  async loadRemotionTemplates() {
-    try {
-      // 获取Remotion模板列表
-      const remotionTemplates = await this.remotionService.getAvailableTemplates()
-
-      if (remotionTemplates && remotionTemplates.templates) {
-        remotionTemplates.templates.forEach(template => {
-          this.templates.set(template.id, {
-            ...template,
-            type: 'remotion',
-            renderer: 'remotion'
-          })
-        })
-        console.log(`📋 已加载 ${remotionTemplates.templates.length} 个Remotion模板`)
-      }
-    } catch (error) {
-      console.error('❌ 加载Remotion模板失败:', error)
-      // 使用默认模板列表
-      this.loadDefaultTemplates()
-    }
-  }
-
-  /**
-   * 加载默认模板列表（当Remotion服务不可用时）
+   * 加载默认模板列表
    */
   loadDefaultTemplates() {
-    const defaultTemplates = this.remotionService.getDefaultTemplates()
-    if (defaultTemplates && defaultTemplates.templates) {
-      defaultTemplates.templates.forEach(template => {
-        this.templates.set(template.id, {
-          ...template,
-          type: 'remotion',
-          renderer: 'remotion'
-        })
-      })
-      console.log(`📋 已加载 ${defaultTemplates.templates.length} 个默认Remotion模板`)
-    }
+    // 简化的默认模板
+    const defaultTemplates = [
+      {
+        id: 'modern-business',
+        name: 'Modern Business',
+        category: 'business',
+        description: '现代商务风格',
+        type: 'composition',
+        renderer: 'ffmpeg'
+      },
+      {
+        id: 'tech-style',
+        name: 'Tech Style',
+        category: 'technology',
+        description: '科技风格',
+        type: 'composition',
+        renderer: 'ffmpeg'
+      },
+      {
+        id: 'data-visualization',
+        name: 'Data Visualization',
+        category: 'data',
+        description: '数据可视化',
+        type: 'composition',
+        renderer: 'ffmpeg'
+      }
+    ];
+
+    defaultTemplates.forEach(template => {
+      this.templates.set(template.id, template)
+    })
+
+    console.log(`📋 已加载 ${defaultTemplates.length} 个默认模板`)
   }
 
   /**
@@ -134,76 +128,66 @@ class TemplateArchitecture {
 
   /**
    * 根据内容类型推荐模板
+   * 注意：新的黑底模板系统只有4个模板，推荐逻辑已简化
+   * 实际的场景级模板选择由 MicroSceneGenerator 负责
    */
   recommendTemplates(contentAnalysis) {
-    const { keywords = [], textDensity = 0, dataMentions = 0, contentType = '' } = contentAnalysis
+    const { keywords = [], dataMentions = 0, contentType = '' } = contentAnalysis
     const recommendations = []
 
-    // 根据内容类型匹配Remotion模板
+    // 获取所有可用模板
+    const allTemplates = this.getAllTemplates()
+
+    if (allTemplates.length === 0) {
+      console.warn('⚠️ 没有可用的模板')
+      return []
+    }
+
+    // 根据内容类型推荐黑底模板
     if (contentType === 'data' || dataMentions > 0.3) {
-      // 数据展示类 -> 数据可视化模板
-      const dataTemplates = this.getTemplatesByCategory('data')
-      if (dataTemplates.length > 0) {
+      // 数据展示类 -> 黑底图表模板
+      const chartTemplate = allTemplates.find(t => t.id === 'BlackBackgroundChart')
+      if (chartTemplate) {
         recommendations.push({
-          template: dataTemplates[0], // AnimatedBarChart
+          template: chartTemplate,
           score: 0.9,
-          reason: '内容包含数据信息，适合数据可视化模板'
+          reason: '内容包含数据信息，适合图表模板'
         })
       }
     }
 
     if (
-      contentType === 'comparison' ||
-      keywords.some(k => ['对比', '区别', '比较', '优缺点', 'vs', 'VS'].includes(k))
+      contentType === 'emphasis' ||
+      keywords.some(k => k.score && k.score > 0.8)
     ) {
-      // 对比类 -> 对比分析模板
-      const comparisonTemplates = this.getTemplatesByCategory('comparison')
-      if (comparisonTemplates.length > 0) {
+      // 强调类 -> 黑底强调模板
+      const emphasisTemplate = allTemplates.find(t => t.id === 'BlackBackgroundEmphasis')
+      if (emphasisTemplate) {
         recommendations.push({
-          template: comparisonTemplates[0], // SplitComparison
+          template: emphasisTemplate,
           score: 0.85,
-          reason: '内容包含对比元素，适合分屏对比模板'
+          reason: '内容包含重点强调，适合强调模板'
         })
       }
     }
 
-    if (contentType === 'text' || textDensity > 0.7) {
-      // 文字密集 -> 文字动画模板
-      const textTemplates = this.getTemplatesByCategory('text')
-      if (textTemplates.length > 0) {
-        recommendations.push({
-          template: textTemplates[0], // KineticTypography
-          score: 0.8,
-          reason: '内容文字密集，适合文字动画模板'
-        })
-      }
+    // 默认使用黑底基础模板（80%的场景）
+    const basicTemplate = allTemplates.find(t => t.id === 'BlackBackgroundBasic')
+    if (basicTemplate) {
+      recommendations.push({
+        template: basicTemplate,
+        score: 0.8,
+        reason: '通用场景，使用基础模板'
+      })
     }
 
-    if (
-      contentType === 'showcase' ||
-      keywords.some(k => ['产品', '展示', '介绍', '推荐'].includes(k))
-    ) {
-      // 展示类 -> 产品展示模板
-      const showcaseTemplates = this.getTemplatesByCategory('showcase')
-      if (showcaseTemplates.length > 0) {
-        recommendations.push({
-          template: showcaseTemplates[0], // GlassmorphismStack
-          score: 0.85,
-          reason: '内容适合产品展示，使用磨砂玻璃效果'
-        })
-      }
-    }
-
-    // 如果没有匹配到特定类型，使用默认模板
-    if (recommendations.length === 0) {
-      const allTemplates = this.getAllTemplates()
-      if (allTemplates.length > 0) {
-        recommendations.push({
-          template: allTemplates[0],
-          score: 0.6,
-          reason: '使用默认模板'
-        })
-      }
+    // 如果没有匹配到任何模板，使用第一个可用模板
+    if (recommendations.length === 0 && allTemplates.length > 0) {
+      recommendations.push({
+        template: allTemplates[0],
+        score: 0.6,
+        reason: '使用默认模板'
+      })
     }
 
     // 按评分排序，返回前3个

@@ -6,18 +6,16 @@
  * 工作流程：
  * 1. 视频分析 (0-40%): 语音识别、关键帧提取、场景检测、内容分析
  * 2. 智能推荐 (40-50%): 自动选择最佳模板
- * 3. 素材匹配 (50-70%): 自动搜索和选择匹配素材
- * 4. 内容组合 (70-85%): 自动填充模板、生成场景序列
- * 5. 渲染合成 (85-100%): 渲染场景、生成预览
+ * 3. 内容组合 (50-85%): 使用豆包生图、自动填充模板、生成场景序列
+ * 4. 渲染合成 (85-100%): 渲染场景、生成预览
  */
 
 import { VideoProcessingService } from './VideoProcessingService.js'
 import { getBaiduNLPService } from './BaiduNLPService.js'
 import TemplateArchitecture from '../utils/TemplateArchitecture.js'
-import MaterialService from './MaterialService.js'
-import remotionService from './RemotionService.js'
 import videoCompositionService from './VideoCompositionService.js'
-import SmartImageCropper from './SmartImageCropper.js'
+import { getInstance as getMicroSceneGenerator } from './MicroSceneGeneratorV3.js'
+import config from '../config/app.config.js'
 
 /**
  * 主自动化生成引擎类
@@ -27,7 +25,11 @@ export class MasterAutoGenerationAgent {
     // 依赖的服务
     this.videoService = new VideoProcessingService()
     this.nlpService = getBaiduNLPService()
-    this.remotionService = remotionService // 使用导入的单例
+
+    // 服务器端 API 配置（从配置文件读取）
+    this.serverURL = config.server.url
+    this.useServerAPI = config.server.useServerAPI
+    this.pollInterval = config.server.pollInterval
 
     // 状态
     this.isProcessing = false
@@ -43,6 +45,119 @@ export class MasterAutoGenerationAgent {
    * @returns {Promise<GenerationResult>}
    */
   async autoGenerate(videoFile, onProgress) {
+    // 检测是否在浏览器环境且启用服务器端 API
+    if (typeof window !== 'undefined' && this.useServerAPI) {
+      console.log('🌐 使用服务器端 API 进行一键生成');
+      return await this.autoGenerateViaServer(videoFile, onProgress);
+    }
+
+    // 原有的浏览器端流程
+    return await this.autoGenerateLocally(videoFile, onProgress);
+  }
+
+  /**
+   * 通过服务器端 API 进行一键生成
+   */
+  async autoGenerateViaServer(videoFile, onProgress) {
+    this.isProcessing = true
+    this.progress = 0
+
+    try {
+      console.log('🚀 开始服务器端一键自动生成...')
+      this.updateProgress('正在上传视频到服务器...', 5, onProgress)
+
+      // 1. 上传视频并创建任务
+      const formData = new FormData()
+      formData.append('video', videoFile)
+      formData.append('platform', 'douyin')
+
+      const response = await fetch(`${this.serverURL}/api/auto-generate`, {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error(`服务器错误: ${response.statusText}`)
+      }
+
+      const { taskId, message } = await response.json()
+      console.log(`✅ 任务创建成功: ${taskId}`)
+
+      this.updateProgress('服务器正在处理...', 10, onProgress)
+
+      // 2. 轮询任务状态
+      let lastProgress = 10
+      while (true) {
+        await new Promise(resolve => setTimeout(resolve, this.pollInterval))
+
+        const statusResponse = await fetch(`${this.serverURL}/api/auto-generate/${taskId}/status`)
+        if (!statusResponse.ok) {
+          throw new Error('查询任务状态失败')
+        }
+
+        const statusData = await statusResponse.json()
+        const { progress, message: statusMessage, status, videoUrl, videoPath } = statusData
+
+        // 更新进度
+        if (progress > lastProgress) {
+          this.updateProgress(statusMessage || '处理中...', progress, onProgress)
+          lastProgress = progress
+        }
+
+        // 检查任务状态
+        if (status === 'completed') {
+          console.log('✅ 服务器端处理完成')
+          this.updateProgress('下载生成的视频...', 95, onProgress)
+
+          // 3. 下载生成的视频
+          const videoResponse = await fetch(`${this.serverURL}${videoUrl}`)
+          if (!videoResponse.ok) {
+            throw new Error('下载视频失败')
+          }
+
+          const videoBlob = await videoResponse.blob()
+          const localVideoUrl = URL.createObjectURL(videoBlob)
+
+          this.updateProgress('生成完成!', 100, onProgress)
+          this.isProcessing = false
+
+          // 返回结果（格式与本地流程一致）
+          return {
+            video: {
+              url: localVideoUrl,
+              blob: videoBlob,
+              duration: 0, // 服务器端暂不返回
+              fileSize: videoBlob.size
+            },
+            template: {
+              id: 'modern-business',
+              name: 'Modern Business',
+              category: 'business'
+            },
+            scenes: [], // 服务器端暂不返回详细场景
+            transcript: '',
+            keywords: [],
+            serverGenerated: true // 标记为服务器端生成
+          }
+        }
+
+        if (status === 'failed') {
+          throw new Error(statusData.error || '服务器端处理失败')
+        }
+
+        // 继续轮询
+      }
+    } catch (error) {
+      console.error('❌ 服务器端生成失败:', error)
+      this.isProcessing = false
+      throw new Error(`服务器端生成失败: ${error.message}`)
+    }
+  }
+
+  /**
+   * 本地浏览器端一键生成（原有流程）
+   */
+  async autoGenerateLocally(videoFile, onProgress) {
     this.isProcessing = true
     this.progress = 0
 
@@ -67,30 +182,20 @@ export class MasterAutoGenerationAgent {
 
       console.log('✅ 模板推荐完成:', template)
 
-      // === 步骤3: 素材匹配 (50% - 70%) ===
-      this.updateProgress('正在搜索匹配素材...', 50, onProgress)
-
-      const materials = await this.matchMaterials(analysisResult, progress => {
-        this.updateProgress('搜索素材中...', 50 + progress * 0.2, onProgress)
-      })
-
-      console.log('✅ 素材匹配完成:', materials.length, '个素材')
-
-      // === 步骤4: 内容组合 (70% - 85%) ===
-      this.updateProgress('正在组合内容...', 70, onProgress)
+      // === 步骤3: 内容组合 (50% - 85%) ===
+      this.updateProgress('正在组合内容...', 50, onProgress)
 
       const composition = await this.composeContent(
         analysisResult,
         template,
-        materials,
         progress => {
-          this.updateProgress('组合内容中...', 70 + progress * 0.15, onProgress)
+          this.updateProgress('组合内容中...', 50 + progress * 0.35, onProgress)
         }
       )
 
       console.log('✅ 内容组合完成:', composition)
 
-      // === 步骤5: 渲染合成 (85% - 100%) ===
+      // === 步骤4: 渲染合成 (85% - 100%) ===
       this.updateProgress('正在渲染最终视频...', 85, onProgress)
 
       const finalResult = await this.renderFinal(composition, videoFile, progress => {
@@ -219,79 +324,10 @@ export class MasterAutoGenerationAgent {
   /**
    * 步骤3: 匹配素材
    */
-  async matchMaterials(analysisResult, onProgress) {
-    const keywords = analysisResult.keywords.slice(0, 5) // 取前5个关键词
-    const materials = []
-
-    console.log('🔍 开始搜索素材，关键词数量:', keywords.length)
-
-    // 确保MaterialService已初始化
-    if (!MaterialService.isInitialized) {
-      await MaterialService.initialize()
-    }
-
-    // 为每个关键词搜索素材
-    for (let i = 0; i < keywords.length; i++) {
-      const keyword = keywords[i]
-      const keywordText = keyword.text || keyword
-
-      onProgress((i / keywords.length) * 100)
-
-      try {
-        console.log(`🔍 搜索素材: ${keywordText}`)
-
-        // 调用MaterialService搜索素材
-        const searchResult = await MaterialService.searchMaterials(keywordText, {
-          limit: 3, // 每个关键词获取3个素材
-          context: {
-            contentType: analysisResult.contentType,
-            keywords: analysisResult.keywords
-          }
-        })
-
-        if (searchResult && searchResult.results && searchResult.results.length > 0) {
-          // 添加搜索到的素材
-          materials.push({
-            keyword: keywordText,
-            materials: searchResult.results,
-            source: searchResult.source || 'unknown'
-          })
-          console.log(
-            `✅ 找到 ${searchResult.results.length} 个素材 (来源: ${searchResult.source})`
-          )
-        } else {
-          console.log(`⚠️ 未找到素材: ${keywordText}`)
-          // 添加空占位符
-          materials.push({
-            keyword: keywordText,
-            materials: [],
-            source: 'none'
-          })
-        }
-      } catch (error) {
-        console.warn(`❌ 素材搜索失败: ${keywordText}`, error.message)
-        // 添加空占位符
-        materials.push({
-          keyword: keywordText,
-          materials: [],
-          source: 'error',
-          error: error.message
-        })
-      }
-    }
-
-    onProgress(100)
-
-    const totalMaterials = materials.reduce((sum, m) => sum + (m.materials?.length || 0), 0)
-    console.log(`✅ 素材搜索完成，共找到 ${totalMaterials} 个素材`)
-
-    return materials
-  }
-
   /**
    * 步骤4: 组合内容
    */
-  async composeContent(analysisResult, template, materials, onProgress) {
+  async composeContent(analysisResult, template, onProgress) {
     onProgress(10)
 
     // 根据转录文本分段
@@ -303,64 +339,116 @@ export class MasterAutoGenerationAgent {
 
     onProgress(30)
 
-    // 将素材扁平化为数组
-    const allMaterials = []
-    materials.forEach(m => {
-      if (m.materials && m.materials.length > 0) {
-        m.materials.forEach(material => {
-          allMaterials.push({
-            ...material,
-            keyword: m.keyword,
-            tags: [m.keyword, ...(material.tags || [])]
-          })
-        })
-      }
-    })
+    // 为关键词生成图片（使用豆包生图服务）
+    console.log('🎨 开始生成图片...');
 
-    console.log('📦 可用素材总数:', allMaterials.length)
+    // 动态导入 DoubaoImageService（仅在 Node.js 环境）
+    let generatedImages = [];
+    if (typeof window === 'undefined') {
+      // Node.js 环境 - 使用豆包生图
+      const { getInstance: getDoubaoService } = await import('./DoubaoImageService.js');
+      const doubaoService = getDoubaoService();
+
+      const imageRequests = analysisResult.keywords.map(kw => ({
+        keyword: kw.text || kw,
+        context: {
+          stylePreset: 'tech',
+          sceneType: 'basic',
+          size: '1920x1920',
+          quality: 'standard',
+          useAdvancedPrompt: true
+        }
+      }));
+
+      generatedImages = await doubaoService.generateImages(imageRequests);
+      console.log(`✅ 生成 ${generatedImages.length} 张图片`);
+    } else {
+      // 浏览器环境 - 使用测试图片或跳过
+      console.warn('⚠️ 浏览器环境，跳过豆包生图');
+      generatedImages = analysisResult.keywords.map(() => null);
+    }
 
     onProgress(50)
 
-    // 生成场景序列并分配素材
+    // 生成场景序列 - 使用微场景生成器
     const scenes = []
     for (let index = 0; index < segments.length; index++) {
       const segment = segments[index]
 
-      // 为每个场景分配和裁剪素材
-      const sceneMaterials = await this.assignMaterialsToScene(segment, allMaterials)
+      // 为segment添加transcript属性（从analysisResult中获取对应时间段的字幕）
+      const segmentWithTranscript = {
+        ...segment,
+        transcript: this.getTranscriptForSegment(
+          analysisResult.transcript,
+          segment.startTime,
+          segment.endTime
+        ),
+        id: index
+      }
 
-      // 生成图表数据
-      const chartData = this.generateChartData(segment)
+      // 使用微场景生成器生成微场景（传递豆包生成的图片）
+      const microSceneGenerator = getMicroSceneGenerator();
+      const microScenes = await microSceneGenerator.generateMicroScenes(
+        segmentWithTranscript,
+        analysisResult.keywords,
+        generatedImages.slice(index, index + 1) // 为每个场景分配一张图片
+      )
 
-      scenes.push({
-        id: index,
-        title: segment.title,
-        subtitle: segment.subtitle || '',
-        content: segment.content,
-        keywords: segment.keywords,
-        duration: segment.duration,
-        startTime: segment.startTime,
-        endTime: segment.endTime,
-        template: template.id,
-        // 新增: 素材数据
-        backgroundMaterial: sceneMaterials.background,
-        chartData: chartData
-      })
+      console.log(`📊 场景 ${index} 生成了 ${microScenes.length} 个微场景`)
+
+      // 为每个微场景分配素材和模板
+      for (const microScene of microScenes) {
+        console.log(`  处理微场景: type=${microScene.type}, startTime=${microScene.startTime}, endTime=${microScene.endTime}`)
+
+        if (microScene.type === 'composition') {
+          // 组合场景 - 使用组合单元
+          const compositionScene = {
+            ...microScene,
+            id: `${index}-composition-${scenes.length}`,
+            compositionUnitPath: microScene.compositionUnitPath, // 组合单元路径
+            template: microScene.template,
+            type: 'composition'
+          }
+
+          console.log(`  ✅ 添加组合场景: id=${compositionScene.id}, type=${compositionScene.type}`)
+          scenes.push(compositionScene)
+        } else {
+          // 原视频片段
+          const originalScene = {
+            ...microScene,
+            id: `${index}-original-${scenes.length}`,
+            type: 'original'
+          }
+
+          console.log(`  ✅ 添加原视频场景: id=${originalScene.id}, type=${originalScene.type}`)
+          scenes.push(originalScene)
+        }
+      }
 
       onProgress(50 + ((index + 1) / segments.length) * 30)
     }
 
     onProgress(80)
 
+    // 打印最终场景列表
+    console.log(`📋 最终生成 ${scenes.length} 个场景:`)
+    scenes.forEach((scene, i) => {
+      console.log(`  ${i + 1}. ${scene.type === 'composition' ? '🎨 组合' : '📹 原视频'}: ${scene.startTime?.toFixed(1)}s - ${scene.endTime?.toFixed(1)}s (id: ${scene.id})`)
+    })
+
     // 优化时长分配
     const optimizedScenes = this.optimizeSceneTiming(scenes, analysisResult.metadata.duration)
+
+    console.log(`📋 优化后 ${optimizedScenes.length} 个场景:`)
+    optimizedScenes.forEach((scene, i) => {
+      console.log(`  ${i + 1}. ${scene.type === 'composition' ? '🎨 组合' : '📹 原视频'}: ${scene.startTime?.toFixed(1)}s - ${scene.endTime?.toFixed(1)}s (id: ${scene.id})`)
+    })
 
     onProgress(100)
 
     return {
       template,
       scenes: optimizedScenes,
-      materials,
       metadata: analysisResult.metadata,
       transcript: analysisResult.transcript,
       keywords: analysisResult.keywords
@@ -370,38 +458,6 @@ export class MasterAutoGenerationAgent {
   /**
    * 为场景分配素材 (优化版 - 只需要背景)
    */
-  async assignMaterialsToScene(scene, allMaterials) {
-    // 根据场景关键词匹配素材
-    const matchedMaterials = allMaterials.filter(m =>
-      scene.keywords.some(k => {
-        const keyword = k.text || k
-        return m.tags?.some(tag => tag.includes(keyword)) || m.title?.includes(keyword)
-      })
-    ).slice(0, 1) // 只取第一个作为背景
-
-    if (matchedMaterials.length === 0) {
-      console.warn(`⚠️ 场景 ${scene.id} 没有匹配到素材`)
-      return { background: null }
-    }
-
-    // 裁剪素材为竖版背景
-    console.log(`🖼️ 为场景 ${scene.id || scene.title} 裁剪背景素材`)
-    try {
-      const material = matchedMaterials[0]
-      const croppedUrl = await SmartImageCropper.cropForVertical(material, {
-        targetWidth: 1080,
-        targetHeight: 1920
-      })
-
-      return {
-        background: croppedUrl
-      }
-    } catch (error) {
-      console.error(`❌ 素材裁剪失败:`, error)
-      return { background: null }
-    }
-  }
-
   /**
    * 生成图表数据 (优化版 - 可选)
    */
@@ -464,14 +520,13 @@ export class MasterAutoGenerationAgent {
       },
       template: composition.template,
       scenes: composition.scenes,
-      materials: composition.materials,
       transcript: composition.transcript,
       keywords: composition.keywords
     }
 
     onProgress(40)
 
-    // 尝试调用视频合成服务进行完整合成
+    // 调用视频合成服务进行完整合成
     try {
       console.log('🎬 开始完整视频合成流程...')
 
@@ -508,86 +563,19 @@ export class MasterAutoGenerationAgent {
         metadata: compositionResult.metadata
       }
     } catch (error) {
-      console.warn('⚠️ 视频合成失败，尝试使用Remotion渲染:', error.message)
+      console.error('❌ 视频合成失败:', error)
 
-      // 如果视频合成失败，回退到Remotion渲染
-      try {
-        console.log('🎬 尝试调用 Remotion 服务渲染视频...')
+      // 返回预览模式
+      onProgress(100)
 
-        // 准备 Remotion 渲染参数
-        const remotionProps = {
-          videoUrl: renderData.video.url,
-          scenes: composition.scenes.map((scene, index) => ({
-            id: index + 1,
-            title: scene.title || `场景 ${index + 1}`,
-            content: scene.content || scene.text || '',
-            duration: scene.duration || 3,
-            materials: scene.materials || []
-          })),
-          template: composition.template.id,
-          metadata: {
-            title: composition.metadata.title || '生成的视频',
-            duration: composition.metadata.duration
-          }
-        }
-
-        onProgress(60)
-
-        // 调用 Remotion 渲染服务
-        const renderResult = await this.remotionService.renderVideo(
-          composition.template.id,
-          remotionProps,
-          {
-            width: composition.metadata.width || 1920,
-            height: composition.metadata.height || 1080,
-            fps: 30
-          }
-        )
-
-        onProgress(90)
-
-        console.log('✅ Remotion 渲染成功:', renderResult)
-
-        // 如果渲染成功，返回渲染后的视频URL
-        if (renderResult.videoUrl) {
-          return {
-            ...renderData,
-            video: {
-              ...renderData.video,
-              url: renderResult.videoUrl,
-              renderedUrl: renderResult.videoUrl
-            },
-            renderResult,
-            canExport: true,
-            previewReady: true,
-            isRendered: true
-          }
-        } else if (renderResult.renderId) {
-          console.log('⏳ 渲染任务已创建，ID:', renderResult.renderId)
-          return {
-            ...renderData,
-            renderResult,
-            canExport: true,
-            previewReady: true,
-            isRendered: false,
-            isRendering: true,
-            previewMode: true
-          }
-        }
-      } catch (remotionError) {
-        console.warn('⚠️ Remotion 渲染也失败，使用预览模式:', remotionError.message)
+      return {
+        ...renderData,
+        canExport: true,
+        previewReady: true,
+        isRendered: false,
+        previewMode: true,
+        error: error.message
       }
-    }
-
-    onProgress(100)
-
-    // 预览模式：返回原始视频 + 模板信息
-    return {
-      ...renderData,
-      canExport: true,
-      previewReady: true,
-      isRendered: false,
-      previewMode: true
     }
   }
 
@@ -656,6 +644,38 @@ export class MasterAutoGenerationAgent {
   }
 
   /**
+   * 获取指定时间段的字幕
+   * @param {Array|string} transcript - 字幕数组或字符串
+   * @param {number} startTime - 开始时间
+   * @param {number} endTime - 结束时间
+   * @returns {Array} 字幕片段数组
+   */
+  getTranscriptForSegment(transcript, startTime, endTime) {
+    // 如果transcript是字符串，转换为简单的字幕数组格式
+    if (typeof transcript === 'string') {
+      const sentences = transcript.split(/[。！？.!?]+/).filter(s => s.trim().length > 0)
+      const duration = endTime - startTime
+      const timePerSentence = duration / sentences.length
+
+      return sentences.map((text, index) => ({
+        text: text.trim(),
+        startTime: startTime + index * timePerSentence,
+        endTime: startTime + (index + 1) * timePerSentence
+      }))
+    }
+
+    // 如果transcript已经是数组，过滤出时间范围内的字幕
+    if (Array.isArray(transcript)) {
+      return transcript.filter(
+        item => item.startTime >= startTime && item.endTime <= endTime
+      )
+    }
+
+    // 兜底：返回空数组
+    return []
+  }
+
+  /**
    * 优化场景时长
    */
   optimizeSceneTiming(scenes, totalDuration) {
@@ -704,6 +724,7 @@ export class MasterAutoGenerationAgent {
       // 准备场景数据
       const scenes = generationResult.scenes.map((scene, index) => ({
         id: index + 1,
+        type: scene.type || 'original', // 🔥 保留场景类型！
         title: scene.title || `场景 ${index + 1}`,
         content: scene.content || scene.text || '',
         subtitle: scene.subtitle || '',
@@ -711,7 +732,8 @@ export class MasterAutoGenerationAgent {
         startTime: scene.startTime || index * 5,
         endTime: scene.endTime || (index + 1) * 5,
         materials: scene.materials || [],
-        keywords: scene.keywords || []
+        keywords: scene.keywords || [],
+        templateId: scene.templateId // 🔥 保留模板ID
       }))
 
       // 准备模板配置
@@ -725,14 +747,12 @@ export class MasterAutoGenerationAgent {
       const compositionOptions = {
         platform: options.platform || 'douyin',
         pipConfig: {
-          position: 'bottom-right',
-          width: 480,
-          height: 270,
-          x: 1400,
-          y: 770,
-          borderRadius: 50,
-          borderWidth: 4,
-          borderColor: '#FFFFFF'
+          position: 'auto', // 自动选择位置（会使用人脸识别）
+          useFaceDetection: true, // 启用人脸识别（默认值）
+          pipWidth: 280, // PIP 宽度
+          pipHeight: 280, // PIP 高度
+          shape: 'rounded-square', // 圆角方形
+          cornerRadius: 20 // 圆角半径
         },
         ...options
       }

@@ -3,29 +3,27 @@
  *
  * 核心功能:
  * - 协调整个视频合成流程
- * - 原视频 + PPT模板 → 合成视频
+ * - 原视频 + 组合单元图片 → 合成视频
  * - 支持画中画(PIP)效果
  * - 优化输出以满足社交媒体平台要求
  *
  * 处理流程:
  * 1. 场景分割: 按场景时间点精确分割原视频
- * 2. 模板渲染: 使用Remotion渲染每个场景的PPT模板
- * 3. 画中画合成: 将原视频叠加到PPT模板上
+ * 2. 组合单元叠加: 使用FFmpeg将组合单元图片叠加到视频上
+ * 3. 画中画合成: 将原视频叠加到组合单元上
  * 4. 视频拼接: 将所有片段无缝拼接
  * 5. 智能压缩: 压缩以满足平台限制
  *
  * @author VidSlide AI Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import ServerVideoProcessor from './ServerVideoProcessor.js'
-import RemotionRenderer from './RemotionRenderer.js'
 
 class VideoCompositionService {
   constructor() {
-    // 初始化服务器端视频处理器 (替代旧的多个服务)
+    // 初始化服务器端视频处理器
     this.videoProcessor = new ServerVideoProcessor()
-    this.remotionRenderer = new RemotionRenderer()
 
     // 状态
     this.isProcessing = false
@@ -66,28 +64,59 @@ class VideoCompositionService {
       })
       console.log('✅ 视频分割完成,片段数:', videoSegments.length)
 
-      // 步骤2: 渲染PPT模板 (20-40%)
-      this.updateProgress('渲染PPT模板', 20, onProgress)
-      const templateVideos = await this.remotionRenderer.renderScenes(
-        scenes,
-        template,
-        progress => {
-          this.updateProgress('渲染PPT模板', 20 + progress * 0.2, onProgress)
-        }
-      )
-      console.log('✅ PPT模板渲染完成,数量:', templateVideos.length)
+      // 步骤2: 处理场景 - 区分组合场景和原视频场景 (20-60%)
+      this.updateProgress('处理场景', 20, onProgress)
+      const composedScenes = []
 
-      // 步骤3: 合成画中画 (40-60%)
-      this.updateProgress('合成画中画', 40, onProgress)
-      const composedScenes = await this.videoProcessor.composeScenes(
-        videoSegments,
-        templateVideos,
-        options.pipConfig,
-        progress => {
-          this.updateProgress('合成画中画', 40 + progress * 20, onProgress)
+      console.log('📋 VideoCompositionService 收到的场景列表:')
+      scenes.forEach((scene, i) => {
+        console.log(`  场景 ${i + 1}: type="${scene.type}", id=${scene.id}`)
+      })
+
+      for (let i = 0; i < scenes.length; i++) {
+        const scene = scenes[i]
+        const progress = 20 + (i / scenes.length) * 40
+
+        console.log(`\n🔍 处理场景 ${i + 1}: type="${scene.type}", 判断: ${scene.type === 'composition'}`)
+
+        if (scene.type === 'composition') {
+          // 组合场景: 使用组合单元图片 + FFmpeg合成
+          this.updateProgress(`合成场景 ${i + 1}/${scenes.length}`, progress, onProgress)
+
+          // 检查是否有组合单元路径
+          if (!scene.compositionUnitPath) {
+            console.warn(`⚠️ 场景 ${i + 1} 缺少组合单元路径，使用原视频`)
+            const originalSegment = videoSegments[i]
+            composedScenes.push(originalSegment)
+            continue
+          }
+
+          // 提取对应的原视频片段
+          const originalSegment = videoSegments[i]
+
+          // 使用FFmpeg叠加组合单元
+          const composed = await this.overlayCompositionUnit(
+            scene.compositionUnitPath,
+            originalSegment,
+            {
+              ...options.pipConfig,
+              pipConfig: scene.pipConfig,
+              duration: scene.endTime - scene.startTime
+            }
+          )
+          console.log(`✅ 场景 ${i + 1} 组合单元叠加完成`)
+
+          composedScenes.push(composed)
+        } else {
+          // 原视频场景: 直接使用原视频片段
+          this.updateProgress(`处理场景 ${i + 1}/${scenes.length}`, progress, onProgress)
+          const originalSegment = videoSegments[i]
+          composedScenes.push(originalSegment)
+          console.log(`✅ 场景 ${i + 1} 使用原视频`)
         }
-      )
-      console.log('✅ 画中画合成完成,片段数:', composedScenes.length)
+      }
+
+      console.log('✅ 所有场景处理完成,片段数:', composedScenes.length)
 
       // 步骤4: 拼接视频 (60-80%)
       this.updateProgress('拼接视频', 60, onProgress)
@@ -130,6 +159,37 @@ class VideoCompositionService {
       throw error
     } finally {
       this.isProcessing = false
+    }
+  }
+
+  /**
+   * 叠加组合单元到视频片段
+   *
+   * @param {string} compositionUnitPath - 组合单元图片路径
+   * @param {string} videoSegmentPath - 视频片段路径
+   * @param {Object} options - 合成选项
+   * @returns {Promise<string>} 合成后的视频路径
+   */
+  async overlayCompositionUnit(compositionUnitPath, videoSegmentPath, options = {}) {
+    console.log(`🎨 叠加组合单元: ${compositionUnitPath}`)
+
+    try {
+      // 使用 ServerVideoProcessor 的 overlayImage 方法
+      const result = await this.videoProcessor.overlayImage(
+        videoSegmentPath,
+        compositionUnitPath,
+        {
+          position: 'center',
+          scale: 1.0,
+          duration: options.duration,
+          ...options
+        }
+      )
+
+      return result
+    } catch (error) {
+      console.error('❌ 组合单元叠加失败:', error)
+      throw error
     }
   }
 
@@ -186,14 +246,13 @@ class VideoCompositionService {
    * @returns {number} 预估时间(秒)
    */
   estimateProcessingTime(videoDuration, sceneCount) {
-    // 基于性能指标预估
+    // 基于性能指标预估（使用FFmpeg直接合成，速度更快）
     const splitTime = 10 // 视频分割: 10秒
-    const renderTime = sceneCount * 60 // Remotion渲染: 60秒/场景
-    const composeTime = sceneCount * 20 // 画中画合成: 20秒/场景
+    const overlayTime = sceneCount * 5 // 组合单元叠加: 5秒/场景（比Remotion快12倍）
     const mergeTime = 10 // 视频拼接: 10秒
-    const compressTime = 60 // 智能压缩: 60秒
+    const compressTime = 30 // 智能压缩: 30秒
 
-    const totalTime = splitTime + renderTime + composeTime + mergeTime + compressTime
+    const totalTime = splitTime + overlayTime + mergeTime + compressTime
 
     return totalTime
   }

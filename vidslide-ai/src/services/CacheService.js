@@ -92,7 +92,7 @@ class CacheService {
       for (const image of results.images) {
         try {
           const material = convertImageToMaterial(image, platform)
-          const cached = await this.localLibrary.addExternalMaterial(material, platform)
+          const cached = await this.localLibrary.cacheMaterial(material, platform)
           if (cached) {
             cachedCount++
           }

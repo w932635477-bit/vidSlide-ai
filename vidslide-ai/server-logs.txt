@@ -1,0 +1,432 @@
+[dotenv@17.2.3] injecting env (3) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+🚀 VidSlide AI 后端服务器启动成功
+  - 地址: http://localhost:3002
+  - 上传目录: /Users/weilei/VidSlide AI/uploads
+  - 输出目录: /Users/weilei/VidSlide AI/output
+
+📋 可用的 API 端点:
+  - GET  /health
+  - POST /api/video/split
+  - POST /api/video/merge
+  - POST /api/video/overlay
+  - POST /api/video/compress
+  - POST /api/auto-generate
+  - GET  /api/auto-generate/:taskId/status
+📥 收到一键自动生成请求
+  - 视频文件: segment_1768908825394_25.mp4
+  - 目标平台: douyin
+  - 任务ID: autogen_1768914431544_qswo9ojn8
+  📊 autogen_1768914431544_qswo9ojn8: 0% - 开始处理...
+✅ FaceDetectionService 初始化完成
+  - Python 脚本路径: /Users/weilei/VidSlide AI/vidslide-ai/scripts/face_detector.py
+✅ ServerAutoGenerationAgent 初始化完成
+🚀 开始服务器端一键自动生成
+  - 视频路径: /Users/weilei/VidSlide AI/uploads/2de690441a1ecfa7266bb341637cc688
+  - 目标平台: douyin
+  📊 autogen_1768914431544_qswo9ojn8: 10% - 分析视频中...
+📊 分析视频...
+📊 开始视频分析...
+  - 视频路径: /Users/weilei/VidSlide AI/uploads/2de690441a1ecfa7266bb341637cc688
+  1️⃣ 提取视频元数据...
+  2️⃣ 提取关键帧...
+  3️⃣ 场景检测...
+✅ 视频分析完成
+  🔍 检测人脸...
+🔍 开始人脸检测
+  - 视频路径: /Users/weilei/VidSlide AI/uploads/2de690441a1ecfa7266bb341637cc688
+  - 采样帧数: 5
+✅ 检测到人脸:
+  - 位置: (219, 858)
+  - 大小: 615x615
+  - 采样帧数: 1
+  ✅ 人脸检测完成
+  📊 autogen_1768914431544_qswo9ojn8: 30% - 推荐模板中...
+🎯 推荐模板...
+  📊 autogen_1768914431544_qswo9ojn8: 50% - 组合内容中...
+🎨 组合内容...
+  📊 autogen_1768914431544_qswo9ojn8: 70% - 生成图片中...
+🖼️ 生成图片...
+✅ DoubaoImageService 初始化完成
+📍 计算 PIP 安全位置
+  - PIP 尺寸: 280x280
+  - 视频尺寸: 1080x1920
+  - 人脸位置: (219, 858)
+  - 人脸大小: 615x615
+  - 人脸安全区域: (127, 766) 800x800
+  ❌ 位置 center-top 与人脸重叠
+  ✅ 选择安全位置: left-top (80, 300)
+  📍 使用智能位置: left-top (80, 300)
+  - 生成图片 1/1: 视频
+[DoubaoImageService] 开始生成图片: 视频
+[DoubaoImageService] 缓存命中: 视频
+    - 下载图片...
+    - 图片已下载: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768914431789_yja4dpqv9.jpg
+    - 智能裁剪...
+  [裁剪] 原始尺寸: 1920x1920
+  [裁剪] 目标尺寸: 1080x1920
+  [裁剪] 策略: attention
+  [裁剪] 安全尺寸: 1026x1824
+  [裁剪] ✓ 完成
+    - 裁剪完成: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768914431789_yja4dpqv9_cropped.jpg
+    ✅ 图片 1 生成成功
+✅ 图片生成完成，共 1 张
+  📊 autogen_1768914431544_qswo9ojn8: 85% - 合成视频中...
+🎬 合成视频...
+🎬 开始视频合成流程
+  - 原视频: /Users/weilei/VidSlide AI/uploads/2de690441a1ecfa7266bb341637cc688
+  - 场景数量: 1
+  - 图片数量: 1
+  1️⃣ 分割视频...
+    - 分割成 1 个片段...
+    ✅ 分割完成，共 1 个片段
+  2️⃣ 合并视频...
+    - 合并 1 个片段...
+    ✅ 合并完成: /Users/weilei/VidSlide AI/output/merged_1768914432457.mp4
+  3️⃣ 叠加图片...
+    - 叠加 1 张图片...
+      - 叠加图片 1/1: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768914431789_yja4dpqv9_cropped.jpg
+      ✅ 图片 1 叠加完成
+    ✅ 图片叠加完成: /Users/weilei/VidSlide AI/output/overlay_1768914432471.mp4
+  4️⃣ 压缩视频...
+    - 压缩视频（平台: douyin）...
+    ✅ 压缩完成: /Users/weilei/VidSlide AI/output/compressed_1768914432571.mp4
+✅ 视频合成完成
+  📊 autogen_1768914431544_qswo9ojn8: 95% - 压缩视频中...
+🗜️ 压缩视频...
+  📊 autogen_1768914431544_qswo9ojn8: 100% - 处理完成!
+  📊 autogen_1768914431544_qswo9ojn8: 100% - 处理完成!
+📥 收到视频分割请求
+  - 任务ID: task_1768914608735_jxfong65m
+  - 视频文件: ScreenRecording_01-05-2026 14-41-54_1.MP4
+  - 场景数量: 60
+  ✓ 分割片段 1/60
+  ✓ 分割片段 2/60
+  ✓ 分割片段 3/60
+  ✓ 分割片段 4/60
+  ✓ 分割片段 5/60
+  ✓ 分割片段 6/60
+  ✓ 分割片段 7/60
+  ✓ 分割片段 8/60
+  ✓ 分割片段 9/60
+  ✓ 分割片段 10/60
+  ✓ 分割片段 11/60
+  ✓ 分割片段 12/60
+  ✓ 分割片段 13/60
+  ✓ 分割片段 14/60
+  ✓ 分割片段 15/60
+  ✓ 分割片段 16/60
+  ✓ 分割片段 17/60
+  ✓ 分割片段 18/60
+  ✓ 分割片段 19/60
+  ✓ 分割片段 20/60
+  ✓ 分割片段 21/60
+  ✓ 分割片段 22/60
+  ✓ 分割片段 23/60
+  ✓ 分割片段 24/60
+  ✓ 分割片段 25/60
+  ✓ 分割片段 26/60
+  ✓ 分割片段 27/60
+  ✓ 分割片段 28/60
+  ✓ 分割片段 29/60
+  ✓ 分割片段 30/60
+  ✓ 分割片段 31/60
+  ✓ 分割片段 32/60
+  ✓ 分割片段 33/60
+  ✓ 分割片段 34/60
+  ✓ 分割片段 35/60
+  ✓ 分割片段 36/60
+  ✓ 分割片段 37/60
+  ✓ 分割片段 38/60
+  ✓ 分割片段 39/60
+  ✓ 分割片段 40/60
+  ✓ 分割片段 41/60
+  ✓ 分割片段 42/60
+  ✓ 分割片段 43/60
+  ✓ 分割片段 44/60
+  ✓ 分割片段 45/60
+  ✓ 分割片段 46/60
+  ✓ 分割片段 47/60
+  ✓ 分割片段 48/60
+  ✓ 分割片段 49/60
+  ✓ 分割片段 50/60
+  ✓ 分割片段 51/60
+  ✓ 分割片段 52/60
+  ✓ 分割片段 53/60
+  ✓ 分割片段 54/60
+  ✓ 分割片段 55/60
+  ✓ 分割片段 56/60
+  ✓ 分割片段 57/60
+  ✓ 分割片段 58/60
+  ✓ 分割片段 59/60
+  ✓ 分割片段 60/60
+  ✅ 分割完成，任务ID: task_1768914608735_jxfong65m
+📥 下载请求: task_1768914608735_jxfong65m/segment_0.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_0.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_1.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_1.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_2.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_2.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_3.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_3.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_4.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_4.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_5.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_5.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_6.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_6.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_7.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_7.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_8.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_8.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_9.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_9.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_10.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_10.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_11.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_11.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_12.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_12.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_13.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_13.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_14.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_14.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_15.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_15.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_16.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_16.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_17.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_17.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_18.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_18.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_19.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_19.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_20.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_20.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_21.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_21.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_22.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_22.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_23.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_23.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_24.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_24.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_25.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_25.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_26.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_26.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_27.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_27.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_28.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_28.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_29.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_29.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_30.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_30.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_31.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_31.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_32.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_32.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_33.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_33.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_34.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_34.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_35.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_35.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_36.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_36.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_37.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_37.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_38.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_38.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_39.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_39.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_40.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_40.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_41.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_41.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_42.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_42.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_43.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_43.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_44.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_44.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_45.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_45.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_46.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_46.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_47.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_47.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_48.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_48.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_49.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_49.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_50.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_50.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_51.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_51.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_52.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_52.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_53.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_53.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_54.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_54.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_55.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_55.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_56.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_56.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_57.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_57.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_58.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_58.mp4
+📥 下载请求: task_1768914608735_jxfong65m/segment_59.mp4
+  ✓ 发送文件: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_59.mp4
+📥 收到视频合并请求
+  - 请求体: {"segmentPaths":["task_1768914608735_jxfong65m/segment_0.mp4","task_1768914608735_jxfong65m/segment_1.mp4","task_1768914608735_jxfong65m/segment_2.mp4","task_1768914608735_jxfong65m/segment_3.mp4","ta
+  - 片段数量: 60
+  - 第一个片段: task_1768914608735_jxfong65m/segment_0.mp4
+  - 第一个绝对路径: /Users/weilei/VidSlide AI/output/task_1768914608735_jxfong65m/segment_0.mp4
+  - 合并列表文件: /Users/weilei/VidSlide AI/cache/concat_1768914615416.txt
+  - 执行命令: ffmpeg -f concat -safe 0 -i "/Users/weilei/VidSlide AI/cache/concat_1768914615416.txt" -c copy "/Use...
+  ✓ 视频合并完成
+  - 输出文件: /Users/weilei/VidSlide AI/output/merged_1768914615416.mp4
+📥 收到视频压缩请求
+  - 请求体: {"inputPath":"merged_1768914615416.mp4","platform":"douyin"}
+  - 视频路径: merged_1768914615416.mp4
+  - 目标平台: douyin
+  - 绝对路径: /Users/weilei/VidSlide AI/output/merged_1768914615416.mp4
+  - 输出路径: /Users/weilei/VidSlide AI/output/compressed_1768914620644.mp4
+  - 比特率: 7M
+  - 执行命令: ffmpeg -i "/Users/weilei/VidSlide AI/output/merged_1768914615416.mp4" -c:v libx264 -b:v 7M -c:a aac ...
+  ✓ 视频压缩完成
+  - 输出文件: /Users/weilei/VidSlide AI/output/compressed_1768914620644.mp4
+📥 收到一键自动生成请求
+  - 视频文件: ScreenRecording_01-05-2026 14-41-54_1.MP4
+  - 目标平台: douyin
+  - 任务ID: autogen_1768915139973_g7efzdq1x
+  📊 autogen_1768915139973_g7efzdq1x: 0% - 开始处理...
+✅ FaceDetectionService 初始化完成
+  - Python 脚本路径: /Users/weilei/VidSlide AI/vidslide-ai/scripts/face_detector.py
+✅ ServerAutoGenerationAgent 初始化完成
+🚀 开始服务器端一键自动生成
+  - 视频路径: /Users/weilei/VidSlide AI/uploads/e9c3ee071bf855eb9f1a73c7c2f3594c
+  - 目标平台: douyin
+  📊 autogen_1768915139973_g7efzdq1x: 10% - 分析视频中...
+📊 分析视频...
+📊 开始视频分析...
+  - 视频路径: /Users/weilei/VidSlide AI/uploads/e9c3ee071bf855eb9f1a73c7c2f3594c
+  1️⃣ 提取视频元数据...
+  2️⃣ 提取关键帧...
+  3️⃣ 场景检测...
+✅ 视频分析完成
+  🔍 检测人脸...
+🔍 开始人脸检测
+  - 视频路径: /Users/weilei/VidSlide AI/uploads/e9c3ee071bf855eb9f1a73c7c2f3594c
+  - 采样帧数: 5
+✅ 检测到人脸:
+  - 位置: (57, 858)
+  - 大小: 1009x1009
+  - 采样帧数: 5
+  ✅ 人脸检测完成
+  📊 autogen_1768915139973_g7efzdq1x: 30% - 推荐模板中...
+🎯 推荐模板...
+  📊 autogen_1768915139973_g7efzdq1x: 50% - 组合内容中...
+🎨 组合内容...
+  📊 autogen_1768915139973_g7efzdq1x: 70% - 生成图片中...
+🖼️ 生成图片...
+✅ DoubaoImageService 初始化完成
+📍 计算 PIP 安全位置
+  - PIP 尺寸: 280x280
+  - 视频尺寸: 1080x1920
+  - 人脸位置: (57, 858)
+  - 人脸大小: 1009x1009
+  - 人脸安全区域: (-94, 707) 1312x1312
+  ❌ 位置 center-top 与人脸重叠
+  ✅ 选择安全位置: left-top (80, 300)
+  📍 使用智能位置: left-top (80, 300)
+  - 生成图片 1/4: 视频
+[DoubaoImageService] 开始生成图片: 视频
+[DoubaoImageService] 缓存命中: 视频
+    - 下载图片...
+    - 图片已下载: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915140798_6dsonz9aj.jpg
+    - 智能裁剪...
+  [裁剪] 原始尺寸: 1920x1920
+  [裁剪] 目标尺寸: 1080x1920
+  [裁剪] 策略: attention
+  [裁剪] 安全尺寸: 1026x1824
+  [裁剪] ✓ 完成
+    - 裁剪完成: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915140798_6dsonz9aj_cropped.jpg
+    ✅ 图片 1 生成成功
+  - 生成图片 2/4: 内容
+[DoubaoImageService] 开始生成图片: 内容
+[DoubaoImageService] 优化后的Prompt (Advanced): 内容，未来感，科技蓝主色调，虚线边框（白色），圆角24px，发光阴影（蓝色光晕），金色发光效果，粒子效果背景，黄金分割构图，数字流，电影级渲染，简洁现代，专业设计
+[DoubaoImageService] 图片生成成功: https://ark-content-generation-v2-cn-beijing.tos-cn-beijing.volces.com/doubao-seedream-4-5/021768915...
+    - 下载图片...
+    - 图片已下载: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915152677_15e6d69ib.jpg
+    - 智能裁剪...
+  [裁剪] 原始尺寸: 1920x1920
+  [裁剪] 目标尺寸: 1080x1920
+  [裁剪] 策略: attention
+  [裁剪] 安全尺寸: 1026x1824
+  [裁剪] ✓ 完成
+    - 裁剪完成: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915152677_15e6d69ib_cropped.jpg
+    ✅ 图片 2 生成成功
+  - 生成图片 3/4: 精彩
+[DoubaoImageService] 开始生成图片: 精彩
+[DoubaoImageService] 优化后的Prompt (Advanced): 精彩，数字化，电光蓝主色调，无边框，圆角16px，无阴影，青色霓虹发光，粒子效果背景，黄金分割构图，发光，电影级渲染，简洁现代，专业设计
+[DoubaoImageService] 图片生成成功: https://ark-content-generation-v2-cn-beijing.tos-cn-beijing.volces.com/doubao-seedream-4-5/021768915...
+    - 下载图片...
+    - 图片已下载: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915164915_g52r1d1km.jpg
+    - 智能裁剪...
+  [裁剪] 原始尺寸: 1920x1920
+  [裁剪] 目标尺寸: 1080x1920
+  [裁剪] 策略: attention
+  [裁剪] 安全尺寸: 1026x1824
+  [裁剪] ✓ 完成
+    - 裁剪完成: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915164915_g52r1d1km_cropped.jpg
+    ✅ 图片 3 生成成功
+  - 生成图片 4/4: 推荐
+[DoubaoImageService] 开始生成图片: 推荐
+[DoubaoImageService] 优化后的Prompt (Advanced): 推荐，未来感，科技蓝主色调，虚线边框（白色），圆角16px，多层阴影（3层渐变），青色霓虹发光，深色渐变背景，对称构图，数字流，精细细节，简洁现代，专业设计
+[DoubaoImageService] 图片生成成功: https://ark-content-generation-v2-cn-beijing.tos-cn-beijing.volces.com/doubao-seedream-4-5/021768915...
+    - 下载图片...
+    - 图片已下载: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915183766_2mm6wo9au.jpg
+    - 智能裁剪...
+  [裁剪] 原始尺寸: 1920x1920
+  [裁剪] 目标尺寸: 1080x1920
+  [裁剪] 策略: attention
+  [裁剪] 安全尺寸: 1026x1824
+  [裁剪] ✓ 完成
+    - 裁剪完成: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915183766_2mm6wo9au_cropped.jpg
+    ✅ 图片 4 生成成功
+✅ 图片生成完成，共 4 张
+  📊 autogen_1768915139973_g7efzdq1x: 85% - 合成视频中...
+🎬 合成视频...
+🎬 开始视频合成流程
+  - 原视频: /Users/weilei/VidSlide AI/uploads/e9c3ee071bf855eb9f1a73c7c2f3594c
+  - 场景数量: 4
+  - 图片数量: 4
+  1️⃣ 分割视频...
+    - 分割成 4 个片段...
+    ✅ 分割完成，共 4 个片段
+  2️⃣ 合并视频...
+    - 合并 4 个片段...
+    ✅ 合并完成: /Users/weilei/VidSlide AI/output/merged_1768915184557.mp4
+  3️⃣ 叠加图片...
+    - 叠加 4 张图片...
+      - 叠加图片 1/4: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915140798_6dsonz9aj_cropped.jpg
+      ✅ 图片 1 叠加完成
+      - 叠加图片 2/4: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915152677_15e6d69ib_cropped.jpg
+      ✅ 图片 2 叠加完成
+      - 叠加图片 3/4: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915164915_g52r1d1km_cropped.jpg
+      ✅ 图片 3 叠加完成
+      - 叠加图片 4/4: /Users/weilei/VidSlide AI/cache/doubao-images/doubao_1768915183766_2mm6wo9au_cropped.jpg
+      ✅ 图片 4 叠加完成
+    ✅ 图片叠加完成: /Users/weilei/VidSlide AI/output/overlay_1768915184603.mp4
+  4️⃣ 压缩视频...
+    - 压缩视频（平台: douyin）...
+    ✅ 压缩完成: /Users/weilei/VidSlide AI/output/compressed_1768915287441.mp4
+✅ 视频合成完成
+  📊 autogen_1768915139973_g7efzdq1x: 95% - 压缩视频中...
+🗜️ 压缩视频...
+  📊 autogen_1768915139973_g7efzdq1x: 100% - 处理完成!
+  📊 autogen_1768915139973_g7efzdq1x: 100% - 处理完成!

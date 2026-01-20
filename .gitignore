@@ -55,6 +55,7 @@ temp/
 .parcel-cache/
 .next/
 .nuxt/
+vidslide-ai/cache/
 
 # Remotion specific
 remotion-templates/node_modules/
@@ -96,3 +97,27 @@ v2ray-arm64
 *.pdf
 *.docx
 *.xlsx
+
+# Large output files
+output/
+uploads/
+cache/
+layout-previews/
+test-output/
+test-output-composition/
+
+# Bundle files
+*.bundle
+
+# Debug images
+debug-*.png
+debug-*.jpg
+
+# Large generated files
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Backup directories
+backup/
