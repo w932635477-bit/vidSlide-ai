@@ -1,0 +1,62 @@
+{
+  "多模态": {
+    "description": "multimodal AI system with text, image, and audio icons arranged in a circle",
+    "style": "3D isometric",
+    "color": "blue and purple gradient",
+    "mood": "futuristic, tech, innovative"
+  },
+  "智能体": {
+    "description": "AI agent robot with thinking circuits and gears",
+    "style": "3D isometric",
+    "color": "orange and yellow gradient",
+    "mood": "intelligent, autonomous, active"
+  },
+  "AI": {
+    "description": "artificial intelligence brain with neural network connections",
+    "style": "3D isometric",
+    "color": "cyan and blue gradient",
+    "mood": "smart, digital, connected"
+  },
+  "Claude": {
+    "description": "Claude AI logo with modern geometric design",
+    "style": "flat design",
+    "color": "orange brand color #FF6B35",
+    "mood": "professional, friendly, approachable"
+  },
+  "机器学习": {
+    "description": "machine learning algorithm with data flow and neural nodes",
+    "style": "3D isometric",
+    "color": "green and teal gradient",
+    "mood": "analytical, data-driven"
+  },
+  "深度学习": {
+    "description": "deep neural network layers with connections",
+    "style": "3D isometric",
+    "color": "purple and pink gradient",
+    "mood": "complex, powerful, deep"
+  },
+  "自然语言处理": {
+    "description": "NLP concept with text bubbles and language symbols",
+    "style": "3D isometric",
+    "color": "blue and cyan gradient",
+    "mood": "communicative, linguistic"
+  },
+  "计算机视觉": {
+    "description": "computer vision with camera lens and image recognition",
+    "style": "3D isometric",
+    "color": "red and orange gradient",
+    "mood": "visual, perceptive"
+  },
+  "语音识别": {
+    "description": "speech recognition with sound waves and microphone",
+    "style": "3D isometric",
+    "color": "green and blue gradient",
+    "mood": "audio, listening, responsive"
+  },
+  "大模型": {
+    "description": "large language model with massive neural network",
+    "style": "3D isometric",
+    "color": "purple and blue gradient",
+    "mood": "powerful, comprehensive, advanced"
+  }
+}

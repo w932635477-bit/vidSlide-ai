@@ -43,6 +43,7 @@
     "@ffmpeg/ffmpeg": "^0.12.6",
     "@ffmpeg/util": "^0.12.2",
     "@vueuse/core": "^10.7.0",
+    "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "element-plus": "^2.4.4",

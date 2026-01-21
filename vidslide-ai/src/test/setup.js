@@ -4,55 +4,47 @@
  * 提供完整的浏览器API模拟
  */
 
+// 检测是否在浏览器环境中
+const isBrowser = typeof window !== 'undefined'
+
 // 浏览器存储API模拟
-Object.defineProperty(window, 'localStorage', {
-  value: {
-    getItem: vi.fn(key => {
-      if (key === 'vidslide_dispatcher_strategy') return 'balanced'
-      return null
-    }),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-    key: vi.fn(),
-    length: 0
-  },
-  writable: true
-})
+if (isBrowser) {
+  Object.defineProperty(window, 'localStorage', {
+    value: {
+      getItem: vi.fn(key => {
+        if (key === 'vidslide_dispatcher_strategy') return 'balanced'
+        return null
+      }),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      key: vi.fn(),
+      length: 0
+    },
+    writable: true
+  })
 
-Object.defineProperty(window, 'sessionStorage', {
-  value: {
-    getItem: vi.fn(() => null),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-    key: vi.fn(),
-    length: 0
-  },
-  writable: true
-})
+  Object.defineProperty(window, 'sessionStorage', {
+    value: {
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      key: vi.fn(),
+      length: 0
+    },
+    writable: true
+  })
 
-// IndexedDB模拟
-const indexedDBMock = {
-  open: vi.fn(() => ({
-    onsuccess: null,
-    onerror: null,
-    onupgradeneeded: null,
-    result: {
-      createObjectStore: vi.fn(() => ({
-        createIndex: vi.fn(),
-        put: vi.fn(),
-        get: vi.fn(),
-        delete: vi.fn(),
-        clear: vi.fn(),
-        openCursor: vi.fn(() => ({
-          onsuccess: null,
-          onerror: null,
-          result: null
-        }))
-      })),
-      transaction: vi.fn(() => ({
-        objectStore: vi.fn(() => ({
+  // IndexedDB模拟
+  const indexedDBMock = {
+    open: vi.fn(() => ({
+      onsuccess: null,
+      onerror: null,
+      onupgradeneeded: null,
+      result: {
+        createObjectStore: vi.fn(() => ({
+          createIndex: vi.fn(),
           put: vi.fn(),
           get: vi.fn(),
           delete: vi.fn(),
@@ -62,16 +54,29 @@ const indexedDBMock = {
             onerror: null,
             result: null
           }))
+        })),
+        transaction: vi.fn(() => ({
+          objectStore: vi.fn(() => ({
+            put: vi.fn(),
+            get: vi.fn(),
+            delete: vi.fn(),
+            clear: vi.fn(),
+            openCursor: vi.fn(() => ({
+              onsuccess: null,
+              onerror: null,
+              result: null
+            }))
+          }))
         }))
-      }))
-    }
-  }))
-}
+      }
+    }))
+  }
 
-Object.defineProperty(window, 'indexedDB', {
-  value: indexedDBMock,
-  writable: true
-})
+  Object.defineProperty(window, 'indexedDB', {
+    value: indexedDBMock,
+    writable: true
+  })
+}
 
 // IDBDatabase构造函数模拟
 global.IDBDatabase = vi.fn()
@@ -143,18 +148,20 @@ global.performance = {
   clearMeasures: vi.fn()
 }
 
-// URL构造函数模拟
-global.URL = class URL {
-  constructor(url) {
-    this.href = url
-    this.origin = 'http://localhost:3000'
-    this.pathname = '/'
-    this.search = ''
-    this.hash = ''
-  }
+// URL构造函数模拟（仅在没有原生URL时）
+if (typeof global.URL === 'undefined') {
+  global.URL = class URL {
+    constructor(url) {
+      this.href = url
+      this.origin = 'http://localhost:3000'
+      this.pathname = '/'
+      this.search = ''
+      this.hash = ''
+    }
 
-  static createObjectURL = vi.fn(() => 'blob:mock-url')
-  static revokeObjectURL = vi.fn()
+    static createObjectURL = vi.fn(() => 'blob:mock-url')
+    static revokeObjectURL = vi.fn()
+  }
 }
 
 global.Blob = vi.fn((content, options) => ({

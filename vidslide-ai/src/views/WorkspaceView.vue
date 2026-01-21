@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
 // Store和Composables
@@ -163,7 +163,7 @@ const workspaceMainArea = ref(null)
 
 // Composables
 const { handleVideoUpload } = useVideoProcessing()
-const { autoSave, restoreAutoSave } = useProjectManagement()
+const { autoSave, debouncedAutoSave, restoreAutoSave } = useProjectManagement()
 const {
   showAuthDialog,
   showMaterialDialog,
@@ -602,11 +602,21 @@ onMounted(async () => {
     console.log('没有自动保存的项目')
   }
 
-  // 设置自动保存定时器（每30秒）
+  // 设置自动保存定时器（每60秒检查一次）
   autoSaveInterval = setInterval(() => {
     autoSave()
-  }, 30000)
+  }, 60000) // 改为60秒
 })
+
+// 监听 store 变化，使用防抖自动保存
+watch(
+  () => store.project.isDirty,
+  isDirty => {
+    if (isDirty) {
+      debouncedAutoSave()
+    }
+  }
+)
 
 // 清理定时器
 onUnmounted(() => {

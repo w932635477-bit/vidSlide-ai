@@ -2,12 +2,16 @@
  * useProjectManagement - 项目管理Composable
  * 处理项目的新建、打开、保存等功能
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 
 export function useProjectManagement() {
   const store = useWorkspaceStore()
+
+  // 自动保存防抖定时器
+  let autoSaveTimer = null
+  const lastAutoSaveTime = ref(0)
 
   // 新建项目
   const newProject = async () => {
@@ -110,9 +114,15 @@ export function useProjectManagement() {
     }
   }
 
-  // 自动保存
+  // 自动保存（带防抖）
   const autoSave = async () => {
     if (!store.project.isDirty) return
+
+    // 防抖：如果距离上次保存不到 5 秒，则跳过
+    const now = Date.now()
+    if (now - lastAutoSaveTime.value < 5000) {
+      return
+    }
 
     try {
       const state = store.exportState()
@@ -126,10 +136,21 @@ export function useProjectManagement() {
 
       // 保存到localStorage
       localStorage.setItem('vidslide_autosave', JSON.stringify(projectData))
+      lastAutoSaveTime.value = now
       console.log('✅ 自动保存成功')
     } catch (error) {
       console.error('自动保存失败:', error)
     }
+  }
+
+  // 带延迟的自动保存（用于替代定时器调用）
+  const debouncedAutoSave = () => {
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer)
+    }
+    autoSaveTimer = setTimeout(() => {
+      autoSave()
+    }, 3000) // 3秒延迟
   }
 
   // 恢复自动保存
@@ -172,6 +193,7 @@ export function useProjectManagement() {
     openProject,
     saveProject,
     autoSave,
+    debouncedAutoSave,
     restoreAutoSave
   }
 }

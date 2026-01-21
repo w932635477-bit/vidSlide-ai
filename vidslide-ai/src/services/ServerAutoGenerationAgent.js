@@ -14,6 +14,7 @@ import ServerVideoCompositionService from './ServerVideoCompositionService.js';
 import DoubaoImageService from './DoubaoImageService.js';
 import SmartCropServiceV2 from './SmartCropServiceV2.js';
 import FaceDetectionService from './FaceDetectionService.js';
+import { getInstance as getCompositionUnitGenerator } from './ServerCompositionUnitGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,7 @@ class ServerAutoGenerationAgent {
     this.doubaoImageService = new DoubaoImageService();
     this.smartCropService = new SmartCropServiceV2();
     this.faceDetectionService = new FaceDetectionService();
+    this.compositionUnitGenerator = getCompositionUnitGenerator();
     console.log('✅ ServerAutoGenerationAgent 初始化完成');
   }
 
@@ -139,15 +141,24 @@ class ServerAutoGenerationAgent {
   async composeContent(analysis, template) {
     console.log('🎨 组合内容...');
 
-    // TODO: 实现内容组合逻辑
-    // - 生成场景列表
-    // - 分配关键词
-    // - 生成微场景
+    // 生成标题（基于关键词）
+    const keywords = analysis.keywords || [];
+    let title = '精彩视频';
 
-    // 临时返回模拟数据
+    if (keywords.length > 0) {
+      // 使用前2个关键词生成标题
+      const mainKeywords = keywords.slice(0, 2);
+      title = mainKeywords.join(' · ');
+    }
+
+    console.log(`  - 生成标题: ${title}`);
+    console.log(`  - 关键词: ${keywords.join(', ')}`);
+
+    // 返回组合数据
     return {
       scenes: analysis.scenes,
-      keywords: analysis.keywords,
+      keywords: keywords,
+      title: title,
       template,
       faceDetection: analysis.faceDetection // 保存人脸检测结果
     };
@@ -199,18 +210,11 @@ class ServerAutoGenerationAgent {
       const scenes = composition.scenes || [];
       const faceDetection = composition.faceDetection || { detected: false };
 
-      // 计算智能位置（使用人脸检测结果）
-      const pipWidth = 280;
-      const pipHeight = 280;
-      const safePosition = this.faceDetectionService.calculateSafePIPPosition(
-        faceDetection,
-        pipWidth,
-        pipHeight,
-        1080, // 视频宽度
-        1920  // 视频高度
-      );
+      // 使用适中的尺寸（用于组合显示）
+      const imageWidth = 600;
+      const imageHeight = 600;
 
-      console.log(`  📍 使用智能位置: ${safePosition.label} (${safePosition.x}, ${safePosition.y})`);
+      console.log(`  📐 使用图片尺寸: ${imageWidth}x${imageHeight}`);
 
       // 为每个场景生成图片
       for (let i = 0; i < Math.min(scenes.length, keywords.length); i++) {
@@ -232,11 +236,11 @@ class ServerAutoGenerationAgent {
             const imagePath = await this.downloadImage(imageUrl);
             console.log(`    - 图片已下载: ${imagePath}`);
 
-            // 智能裁剪
+            // 智能裁剪到方形
             console.log(`    - 智能裁剪...`);
             const croppedBuffer = await this.smartCropService.smartCrop(imagePath, {
-              width: 1080,
-              height: 1920,
+              width: imageWidth,
+              height: imageHeight,
               strategy: 'attention'
             });
 
@@ -248,9 +252,8 @@ class ServerAutoGenerationAgent {
             images.push({
               path: croppedPath || imagePath,
               keyword,
-              position: safePosition, // 使用智能位置
-              width: pipWidth,
-              height: pipHeight,
+              width: imageWidth,
+              height: imageHeight,
               startTime: scene.startTime || 0,
               endTime: scene.endTime || 10
             });
@@ -281,11 +284,35 @@ class ServerAutoGenerationAgent {
   async composeVideo(videoPath, composition, images) {
     console.log('🎬 合成视频...');
 
-    // 使用视频合成服务
-    const finalVideo = await this.videoCompositionService.composeVideo(
+    // 准备数据
+    const faceDetection = composition.faceDetection || { detected: false };
+    const title = composition.title || '精彩视频';
+    const keywords = composition.keywords || [];
+
+    console.log(`  - 标题: ${title}`);
+    console.log(`  - 关键词: ${keywords.join(', ')}`);
+    console.log(`  - 人脸检测: ${faceDetection.detected ? '已检测' : '未检测'}`);
+    console.log(`  - 图片数量: ${images.length}`);
+
+    // 步骤 1: 生成组合单元图片
+    console.log('  📐 生成组合单元图片...');
+    const compositionUnitPath = await this.compositionUnitGenerator.generateCompositionUnit({
+      mainTitle: title,
+      subTitle: '',
+      keywords: keywords,
+      images: images.map(img => img.path),
+      stylePreset: 'tech',
+      layoutStyle: 'auto'
+    });
+
+    console.log(`  ✅ 组合单元生成完成: ${compositionUnitPath}`);
+
+    // 步骤 2: 使用视频合成服务合成最终视频
+    // 将组合单元图片作为背景，原视频作为 PIP
+    const finalVideo = await this.videoCompositionService.composeWithCompositionUnit(
       videoPath,
-      composition.scenes,
-      images,
+      compositionUnitPath,
+      faceDetection,
       'douyin'
     );
 

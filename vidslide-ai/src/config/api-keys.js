@@ -33,6 +33,15 @@ export const BAIDU_NLP_CONFIG = {
   secretKey: 'bhqnDHqT3ncpGbIBSGPCimE4gl8zW7Jz'
 }
 
+// 文心一言 API 配置（ERNIE 5.0）
+// 申请地址: https://cloud.baidu.com/product/wenxinworkshop
+export const WENXIN_CONFIG = {
+  apiKey: (typeof process !== 'undefined' && process.env && process.env.WENXIN_API_KEY) || 'A9iNGOCEuOe8UsD0cuDHIUgB',
+  secretKey: (typeof process !== 'undefined' && process.env && process.env.WENXIN_SECRET_KEY) || 'i39GrlnXInoWPwClMe9pjtB042GjpHsc',
+  model: 'ernie-5.0-8k', // 使用 ERNIE 5.0 模型
+  baseUrl: 'https://aip.baidubce.com'
+}
+
 // Unsplash API配置
 export const UNSPLASH_CONFIG = {
   accessKey: 'zPjqHo_L8Vx-gckbifgYM1bJxnYbFRgFXLXFwWcAN30',
@@ -104,6 +113,7 @@ export const API_CONFIGS = {
   baiduTranslate: BAIDU_TRANSLATE_CONFIG,
   baiduSpeech: BAIDU_SPEECH_CONFIG,
   baiduNlp: BAIDU_NLP_CONFIG,
+  wenxin: WENXIN_CONFIG,
   unsplash: UNSPLASH_CONFIG,
   pexels: PEXELS_CONFIG,
   pixabay: PIXABAY_CONFIG,
@@ -149,6 +159,8 @@ export function isAPIConfigured(apiName) {
     case 'baiduSpeech':
       return !!(config.apiKey && config.secretKey)
     case 'baiduNlp':
+      return !!(config.apiKey && config.secretKey)
+    case 'wenxin':
       return !!(config.apiKey && config.secretKey)
     case 'unsplash':
       return !!config.accessKey
