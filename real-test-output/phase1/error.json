@@ -1,0 +1,5 @@
+{
+  "error": "API错误 [6]: No permission to access data",
+  "stack": "Error: API错误 [6]: No permission to access data\n    at WenxinAPI.chat (file:///Users/weilei/VidSlide%20AI/src/services/WenxinAPI.js:113:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async ContentAnalyst.analyzeWithWenxin (file:///Users/weilei/VidSlide%20AI/src/agents/executors/ContentAnalyst.js:129:22)\n    at async runTest (file:///Users/weilei/VidSlide%20AI/scripts/test-phase2-content-analyst.js:61:28)",
+  "timestamp": "2026-01-23T03:25:58.172Z"
+}

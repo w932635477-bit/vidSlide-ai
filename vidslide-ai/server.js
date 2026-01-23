@@ -22,7 +22,7 @@ import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-// 导入服务器端自动生成代理
+// 导入ServerAutoGenerationAgent
 import ServerAutoGenerationAgent from './src/services/ServerAutoGenerationAgent.js';
 
 const execAsync = promisify(exec);

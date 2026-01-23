@@ -13,9 +13,17 @@ import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import BackgroundGeneratorService from './BackgroundGeneratorService.js';
-import FaceVideoExtractorService from './FaceVideoExtractorService.js';
-import TextRendererService from './TextRendererService.js';
+import FaceVideoExtractorServiceV2 from './FaceVideoExtractorServiceV2.js';
+import { DOUYIN_SPECS, getSafePIPPosition, getSafeCardPosition } from '../utils/douyinSpecs.js';
+
+// 使用V2版本作为默认
+const FaceVideoExtractorService = FaceVideoExtractorServiceV2;
+
+// 导入CommonJS模块（RoundedCornerService）
+const require = createRequire(import.meta.url);
+const RoundedCornerService = require('./RoundedCornerService.cjs');
 
 const execAsync = promisify(exec);
 
@@ -35,10 +43,17 @@ class ServerVideoCompositionService {
       }
     });
 
-    // 初始化新服务
+    // 初始化服务
     this.backgroundGenerator = new BackgroundGeneratorService();
     this.faceExtractor = new FaceVideoExtractorService();
-    this.textRenderer = new TextRendererService();
+    this.faceExtractorV2 = new FaceVideoExtractorServiceV2();
+    // TextRendererService暂时禁用
+    // this.textRenderer = new TextRendererService();
+    this.textRenderer = null;
+
+    // 初始化圆角服务
+    this.roundedCornerService = new RoundedCornerService();
+    console.log('✅ ServerVideoCompositionService 初始化完成（已集成圆角服务）');
   }
 
   /**
@@ -75,14 +90,28 @@ class ServerVideoCompositionService {
 
   /**
    * 使用全屏图片合成视频（新方法）
-   * 策略：将AI生成的图片作为主要内容，原视频作为背景或不使用
+   * 策略：将AI生成的图片作为全屏背景，人脸视频作为画中画
    */
   async composeWithFullscreenImages(videoPath, scenes, images, platform) {
-    console.log('  🎬 全屏图片合成模式');
+    console.log('  🎬 全屏图片合成模式（卡片背景 + 人脸画中画）');
 
     try {
-      // 步骤 1: 为每个场景创建图片视频片段
-      console.log('  1️⃣ 创建图片视频片段...');
+      // 步骤 1: 提取人脸视频（画中画）
+      console.log('  1️⃣ 提取人脸视频（画中画）...');
+      let faceVideo = null;
+      try {
+        faceVideo = await this.faceExtractorV2.extractVerticalFaceVideo(
+          videoPath,
+          null, // 暂时不传人脸检测结果，使用中心裁剪
+          platform
+        );
+        console.log(`    ✅ 人脸视频提取成功: ${faceVideo}`);
+      } catch (error) {
+        console.error('    ⚠️ 人脸视频提取失败，将跳过画中画:', error.message);
+      }
+
+      // 步骤 2: 为每个场景创建图片视频片段
+      console.log('  2️⃣ 创建图片视频片段...');
       const imageSegments = [];
 
       for (let i = 0; i < images.length; i++) {
@@ -109,16 +138,25 @@ class ServerVideoCompositionService {
         }
       }
 
-      // 步骤 2: 合并所有图片片段
-      console.log('  2️⃣ 合并图片片段...');
+      // 步骤 3: 合并所有图片片段
+      console.log('  3️⃣ 合并图片片段...');
       const mergedVideo = await this.mergeImageSegments(imageSegments);
 
-      // 步骤 3: 添加原视频音频（可选）
-      console.log('  3️⃣ 添加原视频音频...');
-      const videoWithAudio = await this.addAudioFromVideo(mergedVideo, videoPath);
+      // 步骤 4: 叠加人脸视频（画中画）到卡片背景
+      let videoWithFace = mergedVideo;
+      if (faceVideo) {
+        console.log('  4️⃣ 叠加人脸视频（画中画）到卡片背景...');
+        videoWithFace = await this.overlayFaceVideoPIP(mergedVideo, faceVideo, platform);
+      } else {
+        console.log('  4️⃣ 跳过人脸画中画（未提取到人脸视频）');
+      }
 
-      // 步骤 4: 压缩视频
-      console.log('  4️⃣ 压缩视频...');
+      // 步骤 5: 添加原视频音频
+      console.log('  5️⃣ 添加原视频音频...');
+      const videoWithAudio = await this.addAudioFromVideo(videoWithFace, videoPath);
+
+      // 步骤 6: 压缩视频
+      console.log('  6️⃣ 压缩视频...');
       const compressedVideo = await this.compressVideo(videoWithAudio, platform);
 
       // 清理临时文件
@@ -127,8 +165,11 @@ class ServerVideoCompositionService {
           fs.unlinkSync(seg.path);
         }
       });
+      if (faceVideo && fs.existsSync(faceVideo)) {
+        fs.unlinkSync(faceVideo);
+      }
 
-      console.log('✅ 全屏图片视频合成完成');
+      console.log('✅ 全屏图片视频合成完成（卡片背景 + 人脸画中画）');
       return compressedVideo;
 
     } catch (error) {
@@ -268,11 +309,21 @@ class ServerVideoCompositionService {
         const img = images[i];
         console.log(`      - 叠加图片 ${i + 1}/${images.length}: ${img.path}`);
 
-        // 计算叠加位置（使用默认位置或指定位置）
-        const x = img.position?.x || 100;
-        const y = img.position?.y || 100;
-        const width = img.width || 280;
-        const height = img.height || 280;
+        // 使用抖音安全区域规范计算位置
+        // 卡片位置：底部居中（符合理想效果）
+        const cardWidth = 600;  // 新的卡片宽度
+        const cardHeight = 300; // 新的卡片高度
+
+        // 计算底部居中位置
+        const videoWidth = DOUYIN_SPECS.width;  // 1080
+        const videoHeight = DOUYIN_SPECS.height; // 1920
+        const bottomMargin = 100; // 距离底部100像素
+
+        const x = (videoWidth - cardWidth) / 2;  // 水平居中
+        const y = videoHeight - cardHeight - bottomMargin;  // 底部位置
+
+        const width = cardWidth;
+        const height = cardHeight;
         const startTime = img.startTime || 0;
         const endTime = img.endTime || 999999; // 默认一直显示
 
@@ -281,9 +332,31 @@ class ServerVideoCompositionService {
           ? outputPath
           : path.join(this.cacheDir, `temp_overlay_${Date.now()}_${i}.mp4`);
 
+        // 计算淡入淡出时间
+        const fadeDuration = 0.3; // 淡入淡出持续时间（秒）
+        const sceneDuration = endTime - startTime;
+        const fadeOutStart = sceneDuration - fadeDuration;
+
         // 构建 FFmpeg overlay 滤镜
-        // 使用 scale 调整图片大小，然后叠加
-        const filterComplex = `[1:v]scale=${width}:${height}[scaled];[0:v][scaled]overlay=${x}:${y}:enable='between(t,${startTime},${endTime})'`;
+        // 1. 缩放图片
+        // 2. 添加圆角效果（使用geq滤镜）
+        // 3. 添加淡入淡出效果
+        // 4. 叠加到视频上
+        const cornerRadius = 20; // 圆角半径
+
+        const filterComplex = `[1:v]scale=${width}:${height}[scaled];` +
+          `[scaled]geq=` +
+          `lum='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),lum(X,Y),` +
+          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),lum(X,Y),0))':` +
+          `cb='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),cb(X,Y),` +
+          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),cb(X,Y),128))':` +
+          `cr='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),cr(X,Y),` +
+          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),cr(X,Y),128))':` +
+          `a='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),255,` +
+          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),255,0))'[rounded];` +
+          `[rounded]fade=t=in:st=${startTime}:d=${fadeDuration}:alpha=1,` +
+          `fade=t=out:st=${startTime + fadeOutStart}:d=${fadeDuration}:alpha=1[faded];` +
+          `[0:v][faded]overlay=${x}:${y}:enable='between(t,${startTime},${endTime})'`;
 
         // 执行 FFmpeg 命令
         const cmd = `ffmpeg -i "${currentVideo}" -i "${img.path}" -filter_complex "${filterComplex}" -c:a copy -preset fast "${tempOutput}" -y`;
@@ -534,7 +607,132 @@ class ServerVideoCompositionService {
   }
 
   /**
-   * 叠加人脸视频（画中画）
+   * 叠加人脸视频（画中画）- 用于卡片背景场景
+   * 位置：底部中央（符合抖音习惯）
+   * @param {string} videoPath - 背景视频路径（卡片）
+   * @param {string} faceVideoPath - 人脸视频路径
+   * @param {string} platform - 目标平台
+   * @param {string} position - 画中画位置 ('bottom' | 'center' | 'topRight')
+   * @returns {Promise<string>} 叠加后的视频路径
+   */
+  async overlayFaceVideoPIP(videoPath, faceVideoPath, platform = 'douyin', position = 'bottom') {
+    console.log(`    - 叠加人脸视频（画中画）到卡片背景...`);
+
+    const outputPath = path.join(this.outputDir, `with_face_pip_${Date.now()}.mp4`);
+
+    try {
+      // 获取平台配置
+      const pipConfig = this.faceExtractorV2.verticalPIPConfig[platform];
+      const style = pipConfig.style || {};
+
+      // 画中画位置选项：
+      let pipX, pipY;
+
+      if (position === 'topRight') {
+        pipX = 1080 - pipConfig.width - 80;
+        pipY = 200;
+        console.log(`    📍 画中画位置: 右上角`);
+      } else if (position === 'center') {
+        pipX = (1080 - pipConfig.width) / 2;
+        pipY = (1920 - pipConfig.height) / 2;
+        console.log(`    📍 画中画位置: 中央`);
+      } else {
+        pipX = pipConfig.position.x;
+        pipY = pipConfig.position.y;
+        console.log(`    📍 画中画位置: 底部中央`);
+      }
+
+      console.log(`    📐 坐标: x=${pipX}, y=${pipY}, 尺寸=${pipConfig.width}x${pipConfig.height}`);
+
+      // 样式参数
+      const borderWidth = style.borderWidth || 4;
+      const borderColor = style.borderColor || 'white';
+      const cornerRadius = style.borderRadius || 20;
+      const shadowEnabled = style.shadow || false;
+
+      console.log(`    🎨 应用圆角 (${cornerRadius}px) + 边框 (${borderWidth}px) + 阴影 (${shadowEnabled ? '启用' : '禁用'})...`);
+
+      // 使用新的圆角服务处理人脸视频
+      const roundedFaceVideoPath = await this.roundedCornerService.applyRoundedCornersToVideo(
+        faceVideoPath,
+        cornerRadius,
+        {
+          width: pipConfig.width,
+          height: pipConfig.height,
+          borderWidth: borderWidth,
+          borderColor: borderColor,
+          shadow: {
+            enabled: shadowEnabled,
+            offsetX: 2,
+            offsetY: 6,
+            blur: 4,
+            opacity: 0.3
+          },
+          useVP9: true  // 使用VP9编码器以支持透明度
+        }
+      );
+
+      // 将处理后的圆角视频叠加到背景视频
+      // 注意：由于圆角视频已经包含边框和阴影，我们需要调整叠加位置
+      const totalWidth = pipConfig.width + borderWidth * 2 + (shadowEnabled ? 16 : 0);
+      const totalHeight = pipConfig.height + borderWidth * 2 + (shadowEnabled ? 16 : 0);
+      const offsetX = shadowEnabled ? 8 : 0;
+      const offsetY = shadowEnabled ? 8 : 0;
+
+      const overlayX = pipX - borderWidth - offsetX;
+      const overlayY = pipY - borderWidth - offsetY;
+
+      // 使用FFmpeg叠加圆角视频到背景
+      const cmd = `ffmpeg -i "${videoPath}" -i "${roundedFaceVideoPath}" -filter_complex "[0:v][1:v]overlay=${overlayX}:${overlayY}:format=auto" -c:a copy -preset fast "${outputPath}" -y`;
+
+      await execAsync(cmd);
+
+      // 清理临时文件
+      if (fs.existsSync(roundedFaceVideoPath)) {
+        fs.unlinkSync(roundedFaceVideoPath);
+      }
+
+      console.log(`    ✅ 人脸画中画叠加完成（圆角+边框+阴影）: ${outputPath}`);
+      return outputPath;
+
+    } catch (error) {
+      console.error('    ❌ 人脸画中画叠加失败:', error);
+      console.error('    ⚠️ 尝试使用简化版本（仅边框）...');
+
+      // 降级方案：只添加边框，不添加圆角
+      try {
+        const pipConfig = this.faceExtractorV2.verticalPIPConfig[platform];
+        const style = pipConfig.style || {};
+        const borderWidth = style.borderWidth || 4;
+        const borderColor = style.borderColor || 'white';
+
+        let pipX, pipY;
+        if (position === 'topRight') {
+          pipX = 1080 - pipConfig.width - 80;
+          pipY = 200;
+        } else if (position === 'center') {
+          pipX = (1080 - pipConfig.width) / 2;
+          pipY = (1920 - pipConfig.height) / 2;
+        } else {
+          pipX = pipConfig.position.x;
+          pipY = pipConfig.position.y;
+        }
+
+        const simpleFilter = `[1:v]scale=${pipConfig.width}:${pipConfig.height},pad=${pipConfig.width + borderWidth * 2}:${pipConfig.height + borderWidth * 2}:${borderWidth}:${borderWidth}:${borderColor}[pip];[0:v][pip]overlay=${pipX - borderWidth}:${pipY - borderWidth}`;
+        const simpleCmd = `ffmpeg -i "${videoPath}" -i "${faceVideoPath}" -filter_complex "${simpleFilter}" -c:a copy -preset fast "${outputPath}" -y`;
+
+        await execAsync(simpleCmd);
+        console.log(`    ✅ 使用简化版本完成（仅边框）`);
+        return outputPath;
+      } catch (fallbackError) {
+        console.error('    ❌ 简化版本也失败:', fallbackError);
+        return videoPath;
+      }
+    }
+  }
+
+  /**
+   * 叠加人脸视频（画中画）- 旧方法（保留兼容性）
    * @param {string} videoPath - 背景视频路径
    * @param {string} faceVideoPath - 人脸视频路径
    * @param {Object} faceDetection - 人脸检测结果
@@ -567,21 +765,27 @@ class ServerVideoCompositionService {
   }
 
   /**
-   * 压缩视频
+   * 压缩视频并确保符合平台规范
    */
   async compressVideo(videoPath, platform) {
     console.log(`    - 压缩视频（平台: ${platform}）...`);
 
     const outputPath = path.join(this.outputDir, `compressed_${Date.now()}.mp4`);
 
-    // 根据平台选择压缩参数
-    let bitrate = '7M';
+    // 根据平台选择参数
+    let bitrate = '12M';
+    let preset = 'medium';
+    let scaleFilter = '';
+
     if (platform === 'douyin') {
-      bitrate = '7M';
+      bitrate = '12M';  // 抖音高质量
+      preset = 'medium';
+      // 确保视频尺寸符合抖音规范：1080x1920
+      scaleFilter = `-vf "scale=${DOUYIN_SPECS.width}:${DOUYIN_SPECS.height}:force_original_aspect_ratio=decrease,pad=${DOUYIN_SPECS.width}:${DOUYIN_SPECS.height}:(ow-iw)/2:(oh-ih)/2:black"`;
     }
 
-    // 使用 FFmpeg 压缩视频
-    const cmd = `ffmpeg -i "${videoPath}" -c:v libx264 -b:v ${bitrate} -c:a aac -b:a 128k "${outputPath}" -y`;
+    // 使用 FFmpeg 压缩视频，确保尺寸正确
+    const cmd = `ffmpeg -i "${videoPath}" ${scaleFilter} -c:v libx264 -preset ${preset} -crf 20 -b:v ${bitrate} -maxrate ${bitrate} -bufsize ${parseInt(bitrate) * 2}M -c:a aac -b:a 192k "${outputPath}" -y`;
 
     await execAsync(cmd);
 
@@ -603,22 +807,27 @@ class ServerVideoCompositionService {
    * @returns {Promise<string>} 最终视频路径
    */
   async composeWithCompositionUnit(videoPath, compositionUnitPath, faceDetection = null, platform = 'douyin') {
-    console.log('🎬 使用组合单元合成视频');
+    console.log('🎬 使用组合单元合成视频（竖版画中画优化版）');
     console.log(`  - 原视频: ${videoPath}`);
     console.log(`  - 组合单元: ${compositionUnitPath}`);
+    console.log(`  - 目标平台: ${platform}`);
 
     try {
-      // 步骤 1: 提取人脸视频（画中画）
-      console.log('  1️⃣ 提取人脸视频...');
-      const faceVideo = await this.faceExtractor.extractFaceVideo(videoPath, faceDetection, 320, 180);
+      // 步骤 1: 提取竖版人脸视频（画中画）- 使用V2优化版
+      console.log('  1️⃣ 提取竖版人脸视频...');
+      const faceVideo = await this.faceExtractorV2.extractVerticalFaceVideo(
+        videoPath,
+        faceDetection,
+        platform
+      );
 
       // 步骤 2: 从组合单元图片创建视频
       console.log('  2️⃣ 从组合单元创建视频...');
       const compositionVideo = await this.createVideoFromImage(compositionUnitPath, 10); // 10秒
 
-      // 步骤 3: 叠加人脸视频到组合单元视频的 PIP 位置
-      console.log('  3️⃣ 叠加人脸视频到 PIP 位置...');
-      const videoWithPIP = await this.overlayFaceVideoToPIP(compositionVideo, faceVideo);
+      // 步骤 3: 叠加竖版人脸视频到组合单元视频的 PIP 位置
+      console.log('  3️⃣ 叠加竖版人脸视频到 PIP 位置...');
+      const videoWithPIP = await this.overlayVerticalFaceVideoToPIP(compositionVideo, faceVideo, platform);
 
       // 步骤 4: 添加原视频音频
       console.log('  4️⃣ 添加原视频音频...');
@@ -639,7 +848,7 @@ class ServerVideoCompositionService {
         }
       });
 
-      console.log('✅ 组合单元视频合成完成');
+      console.log('✅ 组合单元视频合成完成（竖版画中画）');
       return finalVideo;
 
     } catch (error) {
@@ -649,33 +858,33 @@ class ServerVideoCompositionService {
   }
 
   /**
-   * 叠加人脸视频到 PIP 位置（右上角）
+   * 叠加竖版人脸视频到 PIP 位置（优化版）
    * @param {string} videoPath - 背景视频路径
-   * @param {string} faceVideoPath - 人脸视频路径
+   * @param {string} faceVideoPath - 竖版人脸视频路径
+   * @param {string} platform - 目标平台
    * @returns {Promise<string>} 叠加后的视频路径
    */
-  async overlayFaceVideoToPIP(videoPath, faceVideoPath) {
-    console.log(`    - 叠加人脸视频到 PIP 位置...`);
+  async overlayVerticalFaceVideoToPIP(videoPath, faceVideoPath, platform = 'douyin') {
+    console.log(`    - 叠加竖版人脸视频到 PIP 位置...`);
 
-    const outputPath = path.join(this.outputDir, `with_pip_${Date.now()}.mp4`);
+    const outputPath = path.join(this.outputDir, `with_vertical_pip_${Date.now()}.mp4`);
 
     try {
-      // PIP 位置（右上角，与组合单元生成器中的 pipArea 一致）
-      const pipX = 720;
-      const pipY = 120;
+      // 获取平台配置
+      const pipConfig = this.faceExtractorV2.verticalPIPConfig[platform];
 
-      // 使用 FFmpeg overlay 叠加人脸视频
-      const filterComplex = `[1:v]scale=320:180[pip];[0:v][pip]overlay=${pipX}:${pipY}`;
+      // 使用 FFmpeg overlay 叠加竖版人脸视频
+      const filterComplex = `[1:v]scale=${pipConfig.width}:${pipConfig.height}[pip];[0:v][pip]overlay=${pipConfig.position.x}:${pipConfig.position.y}`;
 
       const cmd = `ffmpeg -i "${videoPath}" -i "${faceVideoPath}" -filter_complex "${filterComplex}" -c:a copy -preset fast "${outputPath}" -y`;
 
       await execAsync(cmd);
 
-      console.log(`    ✅ PIP 叠加完成: ${outputPath}`);
+      console.log(`    ✅ 竖版 PIP 叠加完成: ${outputPath}`);
       return outputPath;
 
     } catch (error) {
-      console.error('    ❌ PIP 叠加失败:', error);
+      console.error('    ❌ 竖版 PIP 叠加失败:', error);
       return videoPath; // 返回原视频
     }
   }
