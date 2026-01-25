@@ -1192,111 +1192,39 @@
                         addTestResult(`切换到选项卡: ${tab.props.name}`, 'info');
                     };
 
-                    // 语音识别功能
-                    let recognition = null;
+                    // ===== 移除模拟AI功能，等待多智能体系统集成 =====
 
+                    // 语音识别功能 - 将由多智能体的ContentAnalyst处理
                     const startSpeechRecognition = () => {
-                        try {
-                            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                                addTestResult('❌ 浏览器不支持语音识别', 'error');
-                                return;
-                            }
-
-                            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                            recognition = new SpeechRecognition();
-
-                            recognition.continuous = true;
-                            recognition.interimResults = true;
-                            recognition.lang = 'zh-CN';
-
-                            recognition.onstart = () => {
-                                isRecording.value = true;
-                                speechText.value = '正在录音，请说话...';
-                                addTestResult('🎤 语音识别已启动', 'info');
-                            };
-
-                            recognition.onresult = (event) => {
-                                let finalTranscript = '';
-                                let interimTranscript = '';
-
-                                for (let i = event.resultIndex; i < event.results.length; i++) {
-                                    const transcript = event.results[i][0].transcript;
-                                    if (event.results[i].isFinal) {
-                                        finalTranscript += transcript;
-                                    } else {
-                                        interimTranscript += transcript;
-                                    }
-                                }
-
-                                if (finalTranscript) {
-                                    transcriptionResult.value = finalTranscript;
-                                    speechText.value = finalTranscript;
-                                    addTestResult(`✅ 语音识别完成: ${finalTranscript}`, 'success');
-                                } else if (interimTranscript) {
-                                    speechText.value = interimTranscript + ' (识别中...)';
-                                }
-                            };
-
-                            recognition.onerror = (event) => {
-                                addTestResult(`❌ 语音识别错误: ${event.error}`, 'error');
-                                isRecording.value = false;
-                            };
-
-                            recognition.onend = () => {
-                                isRecording.value = false;
-                                addTestResult('语音识别已结束', 'info');
-                            };
-
-                            recognition.start();
-
-                        } catch (error) {
-                            addTestResult(`❌ 启动语音识别失败: ${error.message}`, 'error');
-                        }
+                        addTestResult('语音识别功能将由多智能体系统处理', 'info');
                     };
 
                     const stopSpeechRecognition = () => {
-                        if (recognition && isRecording.value) {
-                            recognition.stop();
-                        }
+                        addTestResult('停止语音识别', 'info');
                     };
 
-                    // 人脸跟踪功能 (模拟)
+                    // 人脸跟踪功能 - 将由多智能体的LayerOrchestrator处理
                     const initializeFaceTracking = () => {
-                        setTimeout(() => {
-                            faceTrackingInitialized.value = true;
-                            detectedFaces.value = Math.floor(Math.random() * 3) + 1;
-                            addTestResult(`✅ 人脸跟踪初始化完成，检测到 ${detectedFaces.value} 个人脸`, 'success');
-                        }, 2000);
-
-                        addTestResult('🚀 正在初始化人脸跟踪...', 'info');
+                        addTestResult('人脸跟踪功能将由多智能体系统处理', 'info');
+                        faceTrackingInitialized.value = false;
                     };
 
-                    // 画中画效果 (模拟)
+                    // 画中画效果 - 将由多智能体的VideoEngineer处理
                     const applyPictureInPicture = () => {
                         if (!currentVideoFile.value) {
                             addTestResult('❌ 请先选择视频文件', 'error');
                             return;
                         }
-
-                        pipApplied.value = true;
-                        addTestResult('✅ 画中画效果已应用', 'success');
+                        addTestResult('画中画效果将由多智能体系统处理', 'info');
                     };
 
-                    // 智能推荐 (模拟)
+                    // 智能推荐 - 将由多智能体的SceneDesigner处理
                     const generateRecommendations = () => {
                         if (!currentVideoFile.value) {
                             addTestResult('❌ 请先选择视频文件', 'error');
                             return;
                         }
-
-                        const mockRecommendations = [
-                            { id: 1, text: '建议在第15秒添加标题幻灯片' },
-                            { id: 2, text: '检测到图表需求，建议添加柱状图' },
-                            { id: 3, text: '视频内容适合制作3-5页PPT' }
-                        ];
-
-                        recommendations.value = mockRecommendations;
-                        addTestResult(`✅ 生成 ${mockRecommendations.length} 条智能推荐`, 'success');
+                        addTestResult('智能推荐功能将由多智能体系统处理', 'info');
                     };
 
                     // 兼容性检查

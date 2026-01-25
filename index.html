@@ -1152,26 +1152,8 @@
                     { id: 4, name: '特效包', icon: '✨', type: 'effect' }
                 ]);
 
-                const videoClips = ref([
-                    {
-                        id: 1,
-                        name: '片段 1',
-                        start: 0,
-                        duration: 10,
-                        opacity: 100,
-                        color: '#00d4aa',
-                        selected: false
-                    },
-                    {
-                        id: 2,
-                        name: '片段 2',
-                        start: 10,
-                        duration: 15,
-                        opacity: 100,
-                        color: '#6366f1',
-                        selected: false
-                    }
-                ]);
+                // 清空硬编码演示数据 - 准备集成多智能体系统
+                const videoClips = ref([]);
 
                 // 计算属性
                 const playheadPosition = computed(() => {
@@ -1327,11 +1309,7 @@
                 };
 
                 onMounted(() => {
-                    // 初始化第一个片段为选中状态
-                    if (videoClips.value.length > 0) {
-                        videoClips.value[0].selected = true;
-                        selectedClip.value = videoClips.value[0];
-                    }
+                    // 等待多智能体系统集成后加载Timeline数据
                 });
 
                 return {
