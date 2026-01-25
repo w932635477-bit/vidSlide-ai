@@ -119,7 +119,6 @@ class ProfessionalCardGenerator {
       height = 300, // 增大高度
       fontSize = 72,  // 增大主标题字体
       fontWeight = 'bold',
-      cornerRadius = 20,
       shadowBlur = 20
     } = options;
 
@@ -160,17 +159,16 @@ class ProfessionalCardGenerator {
 
         // 添加半透明遮罩以提高文字可读性
         ctx.fillStyle = styleConfig.overlayColor || 'rgba(0, 0, 0, 0.3)';
-        this.roundRect(ctx, 0, 0, width, height, cornerRadius);
-        ctx.fill();
+        ctx.fillRect(0, 0, width, height);
 
       } catch (error) {
         console.error('加载背景图片失败，使用渐变背景:', error);
         // 降级到渐变背景
-        this.drawGradientBackground(ctx, width, height, cornerRadius, styleConfig);
+        this.drawGradientBackground(ctx, width, height, styleConfig);
       }
     } else {
       // 使用渐变背景（降级方案）
-      this.drawGradientBackground(ctx, width, height, cornerRadius, styleConfig);
+      this.drawGradientBackground(ctx, width, height, styleConfig);
     }
 
     // 2. 绘制文字阴影
@@ -215,7 +213,18 @@ class ProfessionalCardGenerator {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
 
-    // 5. 保存图片
+    // 5. 绘制双边框美化卡片
+    // 外层边框 - 深色粗边框
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(4, 4, width - 8, height - 8);
+
+    // 内层边框 - 亮色细边框
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(10, 10, width - 20, height - 20);
+
+    // 6. 保存图片
     const filename = `card_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
     const filepath = path.join(this.outputDir, filename);
 
@@ -228,7 +237,7 @@ class ProfessionalCardGenerator {
   /**
    * 绘制渐变背景（降级方案）
    */
-  drawGradientBackground(ctx, width, height, cornerRadius, styleConfig) {
+  drawGradientBackground(ctx, width, height, styleConfig) {
     const gradient = ctx.createLinearGradient(0, 0, width, height);
 
     // 如果有渐变配置则使用，否则使用默认蓝色
@@ -241,25 +250,7 @@ class ProfessionalCardGenerator {
     }
 
     ctx.fillStyle = gradient;
-    this.roundRect(ctx, 0, 0, width, height, cornerRadius);
-    ctx.fill();
-  }
-
-  /**
-   * 绘制圆角矩形
-   */
-  roundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
+    ctx.fillRect(0, 0, width, height);
   }
 
   /**

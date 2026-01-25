@@ -2,15 +2,17 @@ import path from 'path';
 import fs from 'fs';
 import ProfessionalCardGenerator from '../../services/ProfessionalCardGenerator.js';
 import VisualEffectsService from '../../services/VisualEffectsService.js';
+import MaterialSearchService from '../../services/MaterialSearchService.js';
 
 /**
  * VisualDesigner - 视觉设计师
  *
  * 职责：
  * 1. 设计观点卡片（使用专业卡片生成器）
- * 2. 自动应用视觉特效（圆角、边框、阴影）
- * 3. 生成背景遮罩
- * 4. 创建动画效果
+ * 2. 搜索关键词相关素材（使用MaterialSearchService）
+ * 3. 自动应用视觉特效（圆角、边框、阴影）
+ * 4. 生成背景遮罩
+ * 5. 创建动画效果
  */
 class VisualDesigner {
   constructor(options = {}) {
@@ -26,6 +28,13 @@ class VisualDesigner {
     this.effectsService = new VisualEffectsService({
       cacheDir: path.join(this.outputDir, 'effects-cache'),
       logger: this.logger
+    });
+
+    // ⭐ 初始化素材搜索服务
+    this.materialSearch = new MaterialSearchService({
+      logger: this.logger,
+      unsplashKey: process.env.UNSPLASH_ACCESS_KEY,
+      pexelsKey: process.env.PEXELS_API_KEY
     });
 
     // 确保输出目录存在
@@ -64,6 +73,68 @@ class VisualDesigner {
   }
 
   /**
+   * ⭐ 新方法：设计完整的5层素材
+   * @param {Object} input - 输入参数
+   * @param {Object} input.task_1_2 - ContentAnalyst的输出（包含关键词）
+   * @returns {Promise<Object>} 包含materials数组
+   */
+  async designMaterials(input) {
+    const { task_1_2 } = input;
+    const keywords = task_1_2?.understanding?.keywords || [];
+
+    this.logger.info('🎨 VisualDesigner: 开始设计5层素材');
+    this.logger.info(`  关键词数量: ${keywords.length}`);
+
+    const materials = [];
+
+    for (let i = 0; i < keywords.length; i++) {
+      const keyword = keywords[i];
+      this.logger.info(`  [${i + 1}/${keywords.length}] 设计素材: "${keyword.text}"`);
+
+      try {
+        // Layer 2: ⭐ 搜索关键词相关素材（核心层）
+        const material = await this.materialSearch.searchMaterial(keyword.text);
+
+        // Layer 4: 生成亮色卡片
+        const card = await this.cardGenerator.generateCard(keyword, {
+          style: 'bright',
+          width: 600,
+          height: 300,
+          fontSize: 72,
+          fontWeight: 'bold',
+          shadowBlur: 20,
+          addDecoration: true
+        });
+
+        materials.push({
+          keyword: keyword.text,
+          keywordObj: keyword,
+          startTime: keyword.startTime,
+          endTime: keyword.endTime,
+          layers: {
+            // Layer 1: 黑色科技背景（由BackgroundGenerator提供）
+            // Layer 2: 关键词相关素材 ⭐
+            material: material,
+            // Layer 3: 遮罩/装饰（由渲染时添加）
+            // Layer 4: 亮色卡片
+            card: card
+            // Layer 5: 人脸画中画（由FaceVideoExtractor提供）
+          }
+        });
+
+        this.logger.info(`    ✓ 素材设计完成`);
+
+      } catch (error) {
+        this.logger.error(`    ✗ 素材设计失败: ${error.message}`);
+      }
+    }
+
+    this.logger.info('  ✅ 5层素材设计完成');
+
+    return { materials };
+  }
+
+  /**
    * 设计卡片
    * @param {Object} input - 输入参数
    * @param {Object} input.task_2_1 - 场景设计结果
@@ -90,26 +161,45 @@ class VisualDesigner {
 
     for (let i = 0; i < cardClips.length; i++) {
       const clip = cardClips[i];
-      const displayText = clip.content.text || '未知';
-      this.logger.info(`  [${i + 1}/${cardClips.length}] 设计卡片: ${displayText.substring(0, 20)}...`);
+
+      // 提取关键词和翻译（TikTok 2026标准：2-4字关键词+英文翻译）
+      const keyword = clip.content.keyword || clip.content.text || '未知';
+      const english = clip.content.english || keyword;
+      const fullText = clip.content.fullText || clip.content.text || keyword;
+
+      // 卡片序列信息
+      const groupInfo = clip.groupSize > 1
+        ? ` (序列${clip.groupIndex + 1}/${clip.groupSize})`
+        : '';
+
+      this.logger.info(`  [${i + 1}/${cardClips.length}] 设计卡片: "${keyword}" (${english})${groupInfo}`);
 
       try {
-        // 从clip构建scene对象
+        // 从clip构建scene对象（单个关键词）
         const scene = {
           id: clip.id,
           type: clip.type,
+          startTime: clip.startTime,  // 保留时间信息
+          endTime: clip.endTime,      // 保留时间信息
           keywordObj: {
-            text: clip.content.text,
-            english: clip.content.text,
+            text: keyword,        // 2-4字关键词
+            english: english,     // 英文翻译
+            fullText: fullText,   // 完整文本（备用）
             category: 'concept'
           },
-          importance: 'medium',
-          priority: 'medium'
+          importance: clip.metadata?.importance || 'medium',
+          priority: clip.content.priority || 'medium'
         };
 
         const card = await this.createCard(scene);
+
+        // 添加时间信息到card对象
+        card.startTime = clip.startTime;
+        card.endTime = clip.endTime;
+
         cards.push(card);
-        this.logger.info(`    ✓ 卡片设计完成`);
+
+        this.logger.info(`    ✓ 卡片设计完成: ${keyword}/${english}`);
 
       } catch (error) {
         this.logger.error(`    ✗ 卡片设计失败: ${error.message}`);
@@ -145,7 +235,6 @@ class VisualDesigner {
       height: 300,  // 增大高度
       fontSize: 72, // 增大字体
       fontWeight: 'bold',
-      cornerRadius: 20,
       shadowBlur: 20,
       addDecoration: true
     });
@@ -161,12 +250,9 @@ class VisualDesigner {
       height: 300
     };
 
-    // 自动应用视觉特效（圆角、边框、阴影）
-    const cardWithEffects = this.effectsService.generateCardEffectsConfig(cardConfig);
+    this.logger.info(`    ✓ 卡片设计完成: ${keywordObj.text}/${keywordObj.english}`);
 
-    this.logger.info(`    ✨ 特效已自动应用: 圆角=${cardWithEffects.effects.css.borderRadius}, 阴影=${cardWithEffects.effects.css.boxShadow}`);
-
-    return cardWithEffects;
+    return cardConfig;
   }
 
   /**

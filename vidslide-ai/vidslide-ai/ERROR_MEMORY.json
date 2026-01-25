@@ -1,0 +1,18 @@
+{
+  "errors": [
+    {
+      "id": "error_1769251257459_6bblnhay7",
+      "timestamp": 1769251257459,
+      "category": "UNKNOWN",
+      "violation": "缺少最终视频文件",
+      "severity": "LOW",
+      "fixed": false
+    }
+  ],
+  "corrections": {},
+  "statistics": {
+    "totalErrors": 1,
+    "fixedErrors": 0,
+    "unfixedErrors": 1
+  }
+}

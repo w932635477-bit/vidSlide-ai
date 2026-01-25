@@ -1,0 +1,45 @@
+{
+  "errors": [
+    {
+      "id": "error_1769250307381_tp7xt2gvj",
+      "timestamp": 1769250307381,
+      "category": "VISUAL_CONTENT",
+      "violation": "场景scene_1卡片内容错误: 期望'强化学习'，实际'未知'",
+      "severity": "CRITICAL",
+      "sceneId": "scene_1",
+      "fixed": false
+    },
+    {
+      "id": "error_1769250307381_650d50yx9",
+      "timestamp": 1769250307381,
+      "category": "VISUAL_POSITION",
+      "violation": "场景scene_2卡片位置不符合规范: y=1524, 应该y=1200",
+      "severity": "MEDIUM",
+      "sceneId": "scene_2",
+      "fixed": true
+    }
+  ],
+  "corrections": {
+    "VISUAL_CONTENT": [
+      {
+        "issue": "卡片内容显示未知",
+        "solution": "使用 scene.keywordObj?.text 而非 scene.keyword",
+        "timestamp": 1769250307381,
+        "successCount": 0
+      }
+    ],
+    "VISUAL_POSITION": [
+      {
+        "issue": "卡片位置被遮挡",
+        "solution": "计算位置时减去安全区域: y = height - cardHeight - 400 - 20",
+        "timestamp": 1769250307382,
+        "successCount": 0
+      }
+    ]
+  },
+  "statistics": {
+    "totalErrors": 2,
+    "fixedErrors": 1,
+    "unfixedErrors": 1
+  }
+}

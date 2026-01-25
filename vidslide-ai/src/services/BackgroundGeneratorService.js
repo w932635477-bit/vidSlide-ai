@@ -23,18 +23,63 @@ class BackgroundGeneratorService {
     if (!fs.existsSync(this.cacheDir)) {
       fs.mkdirSync(this.cacheDir, { recursive: true });
     }
+
+    // ⭐ 加载高质量深色科技背景图片
+    this.backgroundsDir = path.join(__dirname, '../../assets/backgrounds');
+    this.backgroundImages = [];
+    this.currentIndex = 0;
+
+    // 加载背景图片列表
+    if (fs.existsSync(this.backgroundsDir)) {
+      const files = fs.readdirSync(this.backgroundsDir);
+      this.backgroundImages = files
+        .filter(f => f.endsWith('.jpg') || f.endsWith('.png'))
+        .map(f => path.join(this.backgroundsDir, f));
+
+      console.log(`✅ 加载了 ${this.backgroundImages.length} 张背景图片`);
+    } else {
+      console.warn(`⚠️  背景图片目录不存在: ${this.backgroundsDir}`);
+    }
   }
 
   /**
-   * 生成深色科技背景
+   * 生成深色科技背景（使用预下载的高质量图片）
    * @param {number} width - 宽度
    * @param {number} height - 高度
-   * @param {string} style - 风格 (gradient, tech, dark)
+   * @param {string} style - 风格 (保留参数以兼容现有调用)
    * @returns {Promise<string>} 背景图片路径
    */
-  async generateBackground(width = 1080, height = 1920, style = 'tech') {
-    console.log(`🎨 生成深色科技背景: ${width}x${height}, 风格: ${style}`);
+  async generateBackground(width = 1080, height = 1920, style = 'dark') {
+    console.log(`🎨 使用高质量科技背景: ${width}x${height}, 风格: ${style}`);
 
+    // ⭐ 优先使用预下载的高质量背景图片
+    if (this.backgroundImages.length > 0) {
+      // 循环使用背景图片
+      const selectedBg = this.backgroundImages[this.currentIndex];
+      this.currentIndex = (this.currentIndex + 1) % this.backgroundImages.length;
+
+      console.log(`  → 选择背景 ${this.currentIndex}/${this.backgroundImages.length}: ${path.basename(selectedBg)}`);
+
+      // 使用FFmpeg调整图片尺寸到1080x1920（抖音规格）
+      const outputPath = path.join(this.cacheDir, `bg_${style}_${Date.now()}.png`);
+
+      try {
+        const cmd = `ffmpeg -i "${selectedBg}" -vf "scale=${width}:${height}:force_original_aspect_ratio=increase,crop=${width}:${height}" -frames:v 1 "${outputPath}" -y`;
+        await execAsync(cmd);
+
+        console.log(`✅ 背景生成完成: ${outputPath}`);
+        return outputPath;
+
+      } catch (error) {
+        console.error(`❌ 背景图片处理失败: ${error.message}`);
+        // 降级：直接返回原图
+        console.log(`  → 降级：直接使用原图`);
+        return selectedBg;
+      }
+    }
+
+    // 降级方案：使用FFmpeg生成纯色背景
+    console.warn(`⚠️  未找到预下载的背景图片，使用FFmpeg生成`);
     const outputPath = path.join(this.cacheDir, `bg_${style}_${Date.now()}.png`);
 
     try {
@@ -44,21 +89,18 @@ class BackgroundGeneratorService {
       switch (style) {
         case 'gradient':
           // 深蓝到黑色渐变
-          filterComplex = `color=c=#0a0e27:s=${width}x${height}:d=1[base];` +
-            `[base]drawbox=x=0:y=0:w=${width}:h=${height}:color=#1a1f3a@0.5:t=fill[bg]`;
+          filterComplex = `color=c=#0a0e27:s=${width}x${height}:d=1,drawbox=x=0:y=0:w=${width}:h=${height}:color=#1a1f3a@0.5:t=fill`;
           break;
 
         case 'tech':
           // 深色科技风格（带网格）
-          filterComplex = `color=c=#0d1117:s=${width}x${height}:d=1[base];` +
-            `[base]drawbox=x=0:y=0:w=${width}:h=${height/3}:color=#161b22@0.8:t=fill[top];` +
-            `[top]drawbox=x=0:y=${height*2/3}:w=${width}:h=${height/3}:color=#0d1117@0.9:t=fill[bg]`;
+          filterComplex = `color=c=#0d1117:s=${width}x${height}:d=1,drawbox=x=0:y=0:w=${width}:h=${height/3}:color=#161b22@0.8:t=fill,drawbox=x=0:y=${height*2/3}:w=${width}:h=${height/3}:color=#0d1117@0.9:t=fill`;
           break;
 
         case 'dark':
         default:
           // 纯深色背景
-          filterComplex = `color=c=#0a0a0a:s=${width}x${height}:d=1[bg]`;
+          filterComplex = `color=c=#0a0a0a:s=${width}x${height}:d=1`;
           break;
       }
 
@@ -89,28 +131,17 @@ class BackgroundGeneratorService {
     const outputPath = path.join(this.cacheDir, `bg_gradient_${Date.now()}.png`);
 
     try {
-      // 创建一个简单的渐变背景
-      // 由于 FFmpeg 的限制，我们使用多个 drawbox 来模拟渐变
-      const steps = 10;
-      let filterComplex = `color=c=${color1}:s=${width}x${height}:d=1[base]`;
-
-      // 添加渐变层
-      for (let i = 0; i < steps; i++) {
-        const y = Math.floor((height / steps) * i);
-        const h = Math.ceil(height / steps);
-        const alpha = 0.1 + (i / steps) * 0.5;
-        filterComplex += `;[base]drawbox=x=0:y=${y}:w=${width}:h=${h}:color=${color2}@${alpha}:t=fill[base]`;
-      }
-
-      const cmd = `ffmpeg -f lavfi -i "${filterComplex}" -frames:v 1 "${outputPath}" -y`;
+      // 创建一个简单的纯色背景（避免FFmpeg滤镜链的复杂性）
+      // 渐变效果留给前端或使用ImageMagick等更适合的工具
+      const cmd = `ffmpeg -f lavfi -i "color=c=${color1}:s=${width}x${height}:d=1" -frames:v 1 "${outputPath}" -y`;
 
       await execAsync(cmd);
 
-      console.log(`✅ 渐变背景生成完成: ${outputPath}`);
+      console.log(`✅ 背景生成完成: ${outputPath}`);
       return outputPath;
 
     } catch (error) {
-      console.error('❌ 渐变背景生成失败:', error);
+      console.error('❌ 背景生成失败:', error);
       // 如果失败，返回纯色背景
       return await this.generateBackground(width, height, 'dark');
     }

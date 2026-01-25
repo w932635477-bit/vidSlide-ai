@@ -1,0 +1,159 @@
+{
+  "errors": [
+    {
+      "id": "error_1769251953541_nyutaealc",
+      "timestamp": 1769251953541,
+      "category": "UNKNOWN",
+      "violation": "缺少最终视频文件",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769251953541_nyjdmeol5",
+      "timestamp": 1769251953541,
+      "category": "UNKNOWN",
+      "violation": "缺少最终视频文件",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769251953541_0xzb9xsjp",
+      "timestamp": 1769251953541,
+      "category": "UNKNOWN",
+      "violation": "缺少最终视频文件",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769256899680_rpxntm2zh",
+      "timestamp": 1769256899680,
+      "category": "UNKNOWN",
+      "violation": "缺少必需字段: intent",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769256899680_eiy0bbj2a",
+      "timestamp": 1769256899680,
+      "category": "CONTENT_ANALYSIS",
+      "violation": "观点数量不足（0个，需要至少1个）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769256899680_q4k89mvez",
+      "timestamp": 1769256899680,
+      "category": "UNKNOWN",
+      "violation": "素材平均准确性不足（0.00分，需要至少70分）",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769257036731_9tzzfkxhx",
+      "timestamp": 1769257036731,
+      "category": "UNKNOWN",
+      "violation": "缺少必需字段: intent",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769257036732_x8oh5b0c9",
+      "timestamp": 1769257036732,
+      "category": "CONTENT_ANALYSIS",
+      "violation": "观点数量不足（0个，需要至少1个）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769257036732_6mg01nw02",
+      "timestamp": 1769257036732,
+      "category": "UNKNOWN",
+      "violation": "素材平均准确性不足（0.00分，需要至少70分）",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769257172422_m3vgvq5wd",
+      "timestamp": 1769257172422,
+      "category": "UNKNOWN",
+      "violation": "缺少必需字段: intent",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769257172422_ekszc5dms",
+      "timestamp": 1769257172422,
+      "category": "CONTENT_ANALYSIS",
+      "violation": "观点数量不足（0个，需要至少1个）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769257172423_mokh2n6c1",
+      "timestamp": 1769257172423,
+      "category": "UNKNOWN",
+      "violation": "素材平均准确性不足（0.00分，需要至少70分）",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769311389790_3l0zolcl4",
+      "timestamp": 1769311389790,
+      "category": "UNKNOWN",
+      "violation": "缺少必需字段: intent",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769311389790_e4w9yhd0v",
+      "timestamp": 1769311389790,
+      "category": "CONTENT_ANALYSIS",
+      "violation": "观点数量不足（0个，需要至少1个）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769311389790_v9yms0v0j",
+      "timestamp": 1769311389790,
+      "category": "UNKNOWN",
+      "violation": "素材平均准确性不足（0.00分，需要至少70分）",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769311613283_o8u6gqwhy",
+      "timestamp": 1769311613283,
+      "category": "UNKNOWN",
+      "violation": "缺少必需字段: intent",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769311613283_3ciulm5qs",
+      "timestamp": 1769311613283,
+      "category": "CONTENT_ANALYSIS",
+      "violation": "观点数量不足（0个，需要至少1个）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769311613283_dua7xbx4o",
+      "timestamp": 1769311613283,
+      "category": "UNKNOWN",
+      "violation": "素材平均准确性不足（0.00分，需要至少70分）",
+      "severity": "LOW",
+      "fixed": false
+    }
+  ],
+  "corrections": {},
+  "statistics": {
+    "totalErrors": 18,
+    "fixedErrors": 0,
+    "unfixedErrors": 18
+  }
+}

@@ -1,15 +1,15 @@
 /**
- * SceneDesigner - 场景设计师
+ * SceneDesigner - 场景设计师（v2.0 - 基于TimelineEvent）
  *
  * 职责：
- * 1. 场景拆解（7条规则）
- * 2. 时间轴规划（基于约束系统）
+ * 1. 基于关键词时间戳生成场景
+ * 2. 使用TimelineEvent系统管理多层内容
  * 3. 原视频占比控制（≥25%）
  *
  * 新架构：
- * - 使用声明式序列定义（类似Remotion）
- * - 使用约束求解器自动布局（类似CSP）
- * - 生成MLT风格的playlist
+ * - 使用TimelineEvent替代固定时间规则
+ * - 关键词时间戳驱动场景分配
+ * - 统一管理多层画中画结构
  */
 
 import {
@@ -18,11 +18,18 @@ import {
   PlaylistGenerator
 } from '../../core/TimelineConstraintSystem.js';
 
+import MultiLayerTimelineManager from '../../core/TimelineEventSystem.js';
+
 class SceneDesigner {
   constructor(options = {}) {
     this.name = 'SceneDesigner';
     this.logger = options.logger || console;
     this.errorHandler = options.errorHandler;
+
+    // ⭐ 新增：TimelineEvent管理器
+    this.timelineManager = new MultiLayerTimelineManager({
+      logger: this.logger
+    });
 
     // 初始化约束系统
     this.constraintSolver = new TimelineConstraintSolver({
@@ -35,7 +42,7 @@ class SceneDesigner {
 
     this.playlistGenerator = new PlaylistGenerator();
 
-    // 场景拆解规则
+    // 场景拆解规则（保留用于兼容）
     this.rules = {
       minOriginalRatio: 25,  // 原视频最少占比25%
       transitionDuration: 1.5,  // 过渡场景时长1.5秒
@@ -76,9 +83,13 @@ class SceneDesigner {
       this.logger.info(`    - 卡片场景: ${stats.cardScenes}个`);
       this.logger.info(`    - 多层场景: ${stats.multiLayerScenes}个`);
 
+      // 4. 生成UI时间轴（简化版）
+      const uiTimeline = this.createSimpleUITimeline(scenes, understanding, videoDuration);
+
       return {
         scenes: scenes,
-        stats: stats
+        stats: stats,
+        uiTimeline: uiTimeline
       };
 
     } catch (error) {
@@ -88,12 +99,188 @@ class SceneDesigner {
   }
 
   /**
-   * 规划场景
-   * @param {Object} understanding - 内容理解结果
+   * 规划场景（v2.0 - 基于TimelineEvent）
+   * @param {Object} understanding - 内容理解结果（包含带时间戳的关键词）
    * @param {number} videoDuration - 视频时长
    * @returns {Array} 场景列表
    */
   planScenes(understanding, videoDuration) {
+    this.logger.info('🎬 SceneDesigner: 场景规划（基于关键词时间戳）');
+
+    // ⭐ 新架构：使用TimelineEvent系统
+    const keywords = understanding.keywords || [];
+
+    if (keywords.length === 0) {
+      this.logger.warn('  ⚠️  没有关键词，使用降级方案');
+      return this.planScenesLegacy(understanding, videoDuration);
+    }
+
+    // 1. 创建Timeline事件并生成场景列表
+    this.timelineManager.createEventsFromKeywords(keywords);
+    const scenes = this.timelineManager.generateScenes(videoDuration);
+
+    // 2. ⭐ 为每个场景初始化LayerManifest（LayerOrchestrator需要）
+    for (const scene of scenes) {
+      scene.layerManifest = this.initializeLayerManifest(scene);
+    }
+
+    // 3. 统计信息
+    const stats = {
+      total: scenes.length,
+      original: scenes.filter(s => s.type === 'original').length,
+      cardOnly: scenes.filter(s => s.type === 'video-with-card').length,
+      multiLayer: scenes.filter(s => s.type === 'multi-layer-composition').length
+    };
+
+    this.logger.info(`  ✅ 场景规划完成`);
+    this.logger.info(`    - 总场景数: ${stats.total}个`);
+    this.logger.info(`    - 原视频: ${stats.original}个`);
+    this.logger.info(`    - 卡片场景: ${stats.cardOnly}个`);
+    this.logger.info(`    - 多层场景: ${stats.multiLayer}个`);
+
+    // 4. 验证原视频占比
+    const originalDuration = scenes
+      .filter(s => s.type === 'original')
+      .reduce((sum, s) => sum + s.duration, 0);
+    const originalRatio = (originalDuration / videoDuration) * 100;
+
+    this.logger.info(`    - 原视频占比: ${originalRatio.toFixed(1)}%`);
+
+    if (originalRatio < this.rules.minOriginalRatio) {
+      this.logger.warn(`    ⚠️  原视频占比低于${this.rules.minOriginalRatio}%`);
+    }
+
+    return scenes;
+  }
+
+  /**
+   * ⭐ 初始化LayerManifest（为LayerOrchestrator准备）
+   * @param {Object} scene - 场景对象
+   * @returns {Object} LayerManifest对象
+   */
+  initializeLayerManifest(scene) {
+    const manifest = {};
+
+    if (scene.type === 'original') {
+      // 原视频场景：无层
+      return {};
+    }
+
+    if (scene.type === 'video-with-card') {
+      // 卡片场景：只有卡片层
+      manifest.layer4_card = {
+        type: 'card',
+        enabled: true,
+        agent: 'ProfessionalCardGenerator',
+        status: 'pending',
+        path: null,
+        zIndex: 3,
+        config: {
+          style: 'bright',
+          width: 600,
+          height: 300,
+          position: 'bottom',
+          animation: {
+            enabled: true,
+            type: 'slideInFromBottom',
+            duration: 0.5,
+            delay: 0.2
+          }
+        }
+      };
+    }
+
+    if (scene.type === 'multi-layer-composition') {
+      // 多层场景：完整5层结构
+
+      // Layer 1: 背景层
+      manifest.layer1_background = {
+        type: 'background',
+        enabled: true,
+        agent: 'BackgroundGeneratorService',
+        status: 'pending',
+        path: null,
+        zIndex: 0,
+        config: {
+          style: 'dark',
+          width: 1080,
+          height: 1920
+        }
+      };
+
+      // Layer 2: 素材层
+      manifest.layer2_material = {
+        type: 'material',
+        enabled: true,
+        agent: 'MaterialSearchService',
+        status: 'pending',
+        path: null,
+        zIndex: 1,
+        config: {
+          opacity: 0.7
+        }
+      };
+
+      // Layer 3: 遮罩层（磨砂玻璃效果）
+      manifest.layer3_mask = {
+        type: 'mask',
+        enabled: true,
+        agent: 'ServerVideoCompositionService',
+        status: 'pending',
+        path: null,
+        zIndex: 2,
+        config: {
+          blurStrength: 3,
+          opacity: 0.15,
+          color: 'white'
+        }
+      };
+
+      // Layer 4: 卡片层
+      manifest.layer4_card = {
+        type: 'card',
+        enabled: true,
+        agent: 'ProfessionalCardGenerator',
+        status: 'pending',
+        path: null,
+        zIndex: 3,
+        config: {
+          style: 'bright',
+          width: 600,
+          height: 300,
+          position: 'top',
+          animation: {
+            enabled: true,
+            type: 'slideInFromBottom',
+            duration: 0.5,
+            delay: 0.2
+          }
+        }
+      };
+
+      // Layer 5: PIP层
+      manifest.layer5_pip = {
+        type: 'pip',
+        enabled: true,
+        agent: 'FaceVideoExtractorServiceV2',
+        status: 'pending',
+        path: null,
+        zIndex: 4,
+        config: {
+          position: 'bottom',
+          width: 360,
+          height: 640
+        }
+      };
+    }
+
+    return manifest;
+  }
+
+  /**
+   * 降级方案：使用旧的固定规则（当没有关键词时）
+   */
+  planScenesLegacy(understanding, videoDuration) {
     const scenes = [];
     let currentTime = 0;
     let sceneId = 1;
@@ -336,6 +523,107 @@ class SceneDesigner {
   }
 
   /**
+   * 创建简单的UI时间轴（从scenes生成）
+   * @param {Array} scenes - 场景列表
+   * @param {Object} understanding - 内容理解结果
+   * @param {number} videoDuration - 视频时长
+   * @returns {Object} UI时间轴
+   */
+  createSimpleUITimeline(scenes, understanding, videoDuration) {
+    // 创建4个轨道
+    const tracks = [
+      { id: 'track_original', name: '原视频轨道', clips: [] },
+      { id: 'track_cards', name: '卡片轨道', clips: [] },
+      { id: 'track_pip', name: '画中画轨道', clips: [] },
+      { id: 'track_material', name: '素材轨道', clips: [] }
+    ];
+
+    // 从scenes中提取clips
+    scenes.forEach((scene, index) => {
+      if (scene.type === 'video-with-card') {
+        // 卡片场景：添加到卡片轨道
+        // 确保使用关键词对象中的text（最多5个字）
+        const keywordText = scene.keywordObj?.text || '关键词';
+        const keywordEnglish = scene.keywordObj?.english || 'Keyword';
+
+        // 只取前5个字作为卡片文字
+        const cardText = keywordText.substring(0, 5);
+
+        tracks[1].clips.push({
+          id: `card_${index}`,
+          type: 'card',
+          startTime: scene.startTime,
+          endTime: scene.endTime,
+          content: {
+            keyword: cardText,           // 只显示关键词（最多5字）
+            english: keywordEnglish,     // 英文翻译
+            text: cardText,              // 卡片主文字
+            fullText: keywordText,       // 保留完整关键词用于日志
+            priority: 'medium'
+          },
+          metadata: {
+            importance: 'medium',
+            sceneId: scene.id
+          },
+          groupSize: 1,
+          groupIndex: 0
+        });
+      } else if (scene.type === 'multi-layer-composition') {
+        // ⭐ Bug #7修复：多层场景需要同时添加卡片和素材
+        const keywordText = scene.keywordObj?.text || '素材';
+        const keywordEnglish = scene.keywordObj?.english || 'Material';
+        const cardText = keywordText.substring(0, 5); // 卡片最多5字
+
+        // 1. 添加卡片到卡片轨道（用于VisualDesigner生成）
+        tracks[1].clips.push({
+          id: `card_multi_${index}`,
+          type: 'card',
+          startTime: scene.startTime,
+          endTime: scene.endTime,
+          content: {
+            keyword: cardText,           // 卡片显示文字（最多5字）
+            english: keywordEnglish,     // 英文翻译
+            text: cardText,
+            fullText: keywordText,       // 完整关键词
+            priority: 'high'             // 多层场景优先级高
+          },
+          metadata: {
+            importance: 'high',
+            sceneId: scene.id,
+            isMultiLayer: true           // 标记为多层场景
+          },
+          groupSize: 1,
+          groupIndex: 0
+        });
+
+        // 2. 添加素材到素材轨道
+        tracks[3].clips.push({
+          id: `material_${index}`,
+          type: 'material',
+          startTime: scene.startTime,
+          endTime: scene.endTime,
+          content: {
+            keyword: keywordText,
+            text: keywordText,
+            english: keywordEnglish
+          },
+          metadata: {
+            sceneId: scene.id
+          }
+        });
+      }
+    });
+
+    return {
+      version: '1.0',
+      duration: videoDuration,
+      fps: 30,
+      tracks: tracks,
+      markers: []
+    };
+  }
+
+  /**
    * 生成UI时间轴（新方法，基于约束系统）
    * @param {Object} input - 输入参数
    * @param {Object} input.task_0 - TimelineBuilder的输出
@@ -381,59 +669,121 @@ class SceneDesigner {
   }
 
   /**
-   * 收集所有序列（声明式定义）
+   * 收集所有序列（声明式定义，使用关键词）
    * @param {Object} understanding - 内容理解结果
    * @returns {Array<SequenceDefinition>} 序列列表
    */
   collectSequences(understanding) {
     const sequences = [];
 
-    // 1. 收集观点序列
-    for (const viewpoint of understanding.viewpoints || []) {
-      if (viewpoint.insertionPoint) {
-        sequences.push(
-          new SequenceDefinition({
-            type: viewpoint.importance === 'high' ? 'pip' : 'card',
-            content: {
-              text: viewpoint.text,
-              insertionPoint: viewpoint.insertionPoint
-            },
-            insertionPoint: viewpoint.insertionPoint.time,
-            minDuration: 3,
-            maxDuration: 8,
-            preferredDuration: viewpoint.importance === 'high' ? 6 : 5,
-            canGroup: true,
-            priority: viewpoint.importance,
-            importance: viewpoint.importance,
-            category: 'viewpoint',
-            keywords: [viewpoint.text]
-          })
-        );
-      }
-    }
+    // 优先使用keywordResults（包含精炼的关键词）
+    if (understanding.keywordResults && understanding.keywordResults.length > 0) {
+      this.logger.info('  使用关键词结果生成序列');
 
-    // 2. 收集解释序列
-    for (const explanation of understanding.explanations || []) {
-      if (explanation.insertionPoint) {
-        sequences.push(
-          new SequenceDefinition({
-            type: 'card',
-            content: {
-              text: explanation.explanation,
-              keyword: explanation.keyword,
-              insertionPoint: explanation.insertionPoint
-            },
-            insertionPoint: explanation.insertionPoint.time,
-            minDuration: 4,
-            maxDuration: 8,
-            preferredDuration: 6,
-            canGroup: true,
-            priority: 'medium',
-            importance: 'medium',
-            category: 'explanation',
-            keywords: [explanation.keyword, ...explanation.relatedKeywords]
-          })
-        );
+      // 按组ID分组
+      const groups = new Map();
+      for (const result of understanding.keywordResults) {
+        if (!groups.has(result.groupId)) {
+          groups.set(result.groupId, []);
+        }
+        groups.get(result.groupId).push(result);
+      }
+
+      // 为每组生成卡片序列
+      for (const [groupId, groupResults] of groups) {
+        // 按groupIndex排序
+        groupResults.sort((a, b) => a.groupIndex - b.groupIndex);
+
+        // 为每个关键词创建序列
+        for (let i = 0; i < groupResults.length; i++) {
+          const result = groupResults[i];
+          const isFirst = i === 0;
+          const isLast = i === groupResults.length - 1;
+
+          sequences.push(
+            new SequenceDefinition({
+              type: result.type === 'viewpoint' && result.importance === 'high'
+                ? 'pip'
+                : 'card',
+              content: {
+                text: result.keyword,         // 单个关键词
+                keyword: result.keyword,      // 精炼的关键词（2-4字）
+                english: result.english,      // 英文翻译
+                fullText: result.fullText,    // 完整文本（备用）
+                insertionPoint: result.insertionPoint
+              },
+              insertionPoint: result.insertionPoint.time,
+              minDuration: 4,      // TikTok 2026: 最少4秒
+              maxDuration: 10,     // 最多10秒
+              preferredDuration: 6, // 优先6秒
+              canGroup: true,
+              priority: result.importance,
+              importance: result.importance,
+              category: result.type,
+              keywords: [result.keyword],
+              // 卡片序列元数据
+              groupId: groupId,
+              groupIndex: i,
+              groupSize: groupResults.length,
+              isFirstInGroup: isFirst,
+              isLastInGroup: isLast
+            })
+          );
+        }
+
+        this.logger.info(`  → 卡片序列组: ${groupResults.map(r => r.keyword).join(' → ')} (${groupResults.length}张)`);
+      }
+    } else {
+      // 降级：使用原始viewpoints和explanations
+      this.logger.info('  使用原始观点和解释生成序列（降级）');
+
+      // 1. 收集观点序列
+      for (const viewpoint of understanding.viewpoints || []) {
+        if (viewpoint.insertionPoint) {
+          sequences.push(
+            new SequenceDefinition({
+              type: viewpoint.importance === 'high' ? 'pip' : 'card',
+              content: {
+                text: viewpoint.text,
+                insertionPoint: viewpoint.insertionPoint
+              },
+              insertionPoint: viewpoint.insertionPoint.time,
+              minDuration: 4,
+              maxDuration: 10,
+              preferredDuration: 6,
+              canGroup: true,
+              priority: viewpoint.importance,
+              importance: viewpoint.importance,
+              category: 'viewpoint',
+              keywords: [viewpoint.text]
+            })
+          );
+        }
+      }
+
+      // 2. 收集解释序列
+      for (const explanation of understanding.explanations || []) {
+        if (explanation.insertionPoint) {
+          sequences.push(
+            new SequenceDefinition({
+              type: 'card',
+              content: {
+                text: explanation.explanation,
+                keyword: explanation.keyword,
+                insertionPoint: explanation.insertionPoint
+              },
+              insertionPoint: explanation.insertionPoint.time,
+              minDuration: 4,
+              maxDuration: 10,
+              preferredDuration: 6,
+              canGroup: true,
+              priority: 'medium',
+              importance: 'medium',
+              category: 'explanation',
+              keywords: [explanation.keyword, ...explanation.relatedKeywords]
+            })
+          );
+        }
       }
     }
 

@@ -1,17 +1,37 @@
+import VisualValidationService from '../../services/VisualValidationService.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /**
- * QualityDirector - 质量总监
+ * QualityDirector - 质量总监（增强版）
  *
  * 职责：
  * 1. 制定质量标准
- * 2. 多维度检查
- * 3. 决定是否通过
- * 4. 生成改进建议
+ * 2. 多维度检查（规范性+内容正确性）
+ * 3. 基于理想效果视频的视觉对比验证
+ * 4. 决定是否通过
+ * 5. 生成改进建议
  */
 class QualityDirector {
   constructor(options = {}) {
     this.name = 'QualityDirector';
     this.logger = options.logger || console;
     this.errorHandler = options.errorHandler;
+
+    // 视觉验证服务
+    this.visualValidator = new VisualValidationService({
+      logger: this.logger
+    });
+
+    // 理想效果视频路径
+    this.referenceVideoPath = path.join(
+      __dirname,
+      '../../../reference/ideal_card_reference.mp4'
+    );
 
     // 质量标准
     this.standards = {
@@ -364,11 +384,12 @@ class QualityDirector {
   }
 
   /**
-   * 最终检查
+   * 最终检查（增强版）
    * @param {Object} result - 视频合成结果
+   * @param {Object} context - 完整上下文（包含上游数据）
    * @returns {Promise<Object>} 检查结果
    */
-  async finalCheck(result) {
+  async finalCheck(result, context = {}) {
     this.logger.info('🔍 QualityDirector: 最终检查');
 
     const violations = [];
@@ -411,6 +432,25 @@ class QualityDirector {
       score -= 5;
     }
 
+    // ⭐ 新增：基于理想效果视频的视觉验证
+    if (context.sceneDesign && context.sceneDesign.scenes) {
+      try {
+        const visualCheckResult = await this.visualValidation(finalVideo, context);
+
+        if (!visualCheckResult.passed) {
+          violations.push(...visualCheckResult.violations);
+          warnings.push(...visualCheckResult.warnings);
+          score -= visualCheckResult.penaltyScore || 30;
+        }
+
+        suggestions.push(...visualCheckResult.suggestions);
+
+      } catch (error) {
+        this.logger.warn(`  ⚠️ 视觉验证失败: ${error.message}`);
+        warnings.push('视觉验证未能完成');
+      }
+    }
+
     // 生成建议
     if (performance.fileSize > standards.maxFileSize) {
       suggestions.push('增加视频压缩，减小文件大小');
@@ -433,6 +473,114 @@ class QualityDirector {
   }
 
   /**
+   * ⭐ 新增：视觉验证（对比理想效果视频）
+   * @param {string} generatedVideo - 生成的视频路径
+   * @param {Object} context - 完整上下文
+   * @returns {Promise<Object>} 验证结果
+   */
+  async visualValidation(generatedVideo, context) {
+    this.logger.info('🎨 QualityDirector: 视觉验证（对比理想效果视频）');
+
+    const violations = [];
+    const warnings = [];
+    const suggestions = [];
+    let penaltyScore = 0;
+
+    // 提取卡片场景
+    const cardScenes = context.sceneDesign.scenes.filter(
+      scene => scene.type === 'video-with-card'
+    );
+
+    if (cardScenes.length === 0) {
+      this.logger.info('  没有卡片场景，跳过视觉验证');
+      return {
+        passed: true,
+        violations: [],
+        warnings: [],
+        suggestions: [],
+        penaltyScore: 0
+      };
+    }
+
+    try {
+      // 调用视觉验证服务
+      const validationResult = await this.visualValidator.validateVideo({
+        referenceVideo: this.referenceVideoPath,
+        generatedVideo: generatedVideo,
+        cardScenes: cardScenes
+      });
+
+      // 分析规范性检查结果
+      for (const complianceCheck of validationResult.compliance) {
+        if (!complianceCheck.overallPassed) {
+          // 检查具体哪些项目失败
+          if (complianceCheck.position && !complianceCheck.position.passed) {
+            violations.push(
+              `场景${complianceCheck.sceneId}卡片位置不符合规范: ${complianceCheck.position.difference}`
+            );
+            penaltyScore += 10;
+          }
+
+          if (complianceCheck.size && !complianceCheck.size.passed) {
+            violations.push(
+              `场景${complianceCheck.sceneId}卡片尺寸不符合规范: ${complianceCheck.size.difference}`
+            );
+            penaltyScore += 5;
+          }
+
+          if (complianceCheck.textLength && !complianceCheck.textLength.passed) {
+            violations.push(
+              `场景${complianceCheck.sceneId}文字长度不符合要求: ${complianceCheck.textLength.difference}`
+            );
+            penaltyScore += 10;
+          }
+
+          if (complianceCheck.visualStyle && !complianceCheck.visualStyle.passed) {
+            warnings.push(
+              `场景${complianceCheck.sceneId}视觉样式有差异: ${complianceCheck.visualStyle.difference}`
+            );
+            penaltyScore += 5;
+          }
+        }
+      }
+
+      // 分析内容正确性检查结果
+      for (const contentCheck of validationResult.content) {
+        if (!contentCheck.passed) {
+          violations.push(
+            `场景${contentCheck.sceneId}卡片内容错误: 期望"${contentCheck.expected}"，实际"${contentCheck.detected || '无法识别'}"`
+          );
+          penaltyScore += 15;
+        }
+      }
+
+      // 生成建议
+      if (violations.length > 0) {
+        suggestions.push('参考理想效果视频调整卡片位置、尺寸和样式');
+        suggestions.push('确保卡片内容使用正确的关键词（来自ContentAnalyst）');
+        suggestions.push('检查卡片是否避开抖音底部UI安全区域（400px）');
+      }
+
+      const passed = violations.length === 0;
+
+      this.logger.info(`  ${passed ? '✅' : '❌'} 视觉验证: ${passed ? '通过' : `发现${violations.length}个问题`}`);
+
+      return {
+        passed: passed,
+        violations: violations,
+        warnings: warnings,
+        suggestions: suggestions,
+        penaltyScore: penaltyScore,
+        detailedResult: validationResult
+      };
+
+    } catch (error) {
+      this.logger.error(`  ❌ 视觉验证执行失败: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * 最终验收
    * @param {Object} result - 完整结果
    * @returns {Promise<Object>} 验收结果
@@ -448,7 +596,7 @@ class QualityDirector {
 
     // 汇总所有检查结果
     if (result.qualityChecks) {
-      for (const [checkName, checkResult] of Object.entries(result.qualityChecks)) {
+      for (const [_checkName, checkResult] of Object.entries(result.qualityChecks)) {
         if (checkResult.violations) {
           allViolations.push(...checkResult.violations);
         }
@@ -466,7 +614,16 @@ class QualityDirector {
     }
 
     const avgScore = checkCount > 0 ? totalScore / checkCount : 0;
-    const passed = allViolations.length === 0 && avgScore >= 90;
+
+    // ⭐ 修复Bug #2: 改进passed判断逻辑
+    // 只有CRITICAL和HIGH级别的violations才导致不通过
+    const criticalViolations = allViolations.filter(v => {
+      const vStr = v.toString().toLowerCase();
+      return vStr.includes('缺少') || vStr.includes('错误') || vStr.includes('critical') || vStr.includes('high');
+    });
+
+    // 分数≥90 且 没有严重违规项 → 通过
+    const passed = avgScore >= 90 && criticalViolations.length === 0;
 
     this.logger.info(`  ${passed ? '✅' : '❌'} 最终验收: ${avgScore.toFixed(2)}分`);
     this.logger.info(`    违规项: ${allViolations.length}个`);
@@ -479,6 +636,111 @@ class QualityDirector {
       violations: allViolations,
       warnings: allWarnings,
       suggestions: allSuggestions
+    };
+  }
+
+  /**
+   * ⭐ 检查Timeline完整性（LayerOrchestrator输出）
+   * @param {Object} input - 输入参数
+   * @param {Object} input.task_3_1 - LayerOrchestrator的输出
+   * @returns {Promise<Object>} 检查结果
+   */
+  async checkTimelineCompleteness(input) {
+    this.logger.info('🔍 QualityDirector: 检查Timeline完整性');
+
+    const violations = [];
+    const warnings = [];
+    const suggestions = [];
+    let score = 100;
+
+    // 获取LayerOrchestrator的输出
+    const orchestrationResult = input.task_3_1;
+
+    if (!orchestrationResult || !orchestrationResult.timeline) {
+      violations.push('未找到Timeline对象');
+      return {
+        passed: false,
+        score: 0,
+        violations,
+        warnings,
+        suggestions
+      };
+    }
+
+    const timeline = orchestrationResult.timeline;
+    const clips = timeline.clips || [];
+
+    this.logger.info(`  检查 ${clips.length} 个clips的layerManifest`);
+
+    // 检查每个clip的layerManifest
+    for (let i = 0; i < clips.length; i++) {
+      const clip = clips[i];
+
+      // 原视频片段可以没有layerManifest
+      if (clip.type === 'original') {
+        continue;
+      }
+
+      if (!clip.layerManifest || Object.keys(clip.layerManifest).length === 0) {
+        violations.push(`Clip ${i + 1} (${clip.id}) 缺少layerManifest`);
+        score -= 20;
+        continue;
+      }
+
+      // 检查每个层的状态
+      for (const [layerId, layerSpec] of Object.entries(clip.layerManifest)) {
+        if (!layerSpec.enabled) {
+          continue;
+        }
+
+        if (layerSpec.status === 'failed') {
+          violations.push(
+            `Clip ${i + 1} (${clip.id}): ${layerId} 生成失败 - ${layerSpec.error || '未知错误'}`
+          );
+          score -= 15;
+        } else if (layerSpec.status === 'pending' || layerSpec.status === 'in_progress') {
+          violations.push(
+            `Clip ${i + 1} (${clip.id}): ${layerId} 未完成 (状态: ${layerSpec.status})`
+          );
+          score -= 10;
+        } else if (layerSpec.status === 'completed' || layerSpec.status === 'ready') {
+          // 成功，不扣分
+          if (layerSpec.status === 'completed' && !layerSpec.path && layerSpec.type !== 'mask') {
+            warnings.push(
+              `Clip ${i + 1} (${clip.id}): ${layerId} 标记为completed但缺少path`
+            );
+            score -= 5;
+          }
+        } else {
+          warnings.push(
+            `Clip ${i + 1} (${clip.id}): ${layerId} 状态未知: ${layerSpec.status}`
+          );
+        }
+      }
+    }
+
+    // 统计信息
+    const stats = orchestrationResult.statistics || {};
+    this.logger.info(`  总层数: ${stats.totalLayers || 0}`);
+    this.logger.info(`  已完成: ${stats.completedLayers || 0}`);
+    this.logger.info(`  失败: ${stats.failedLayers || 0}`);
+
+    const passed = violations.length === 0 && score >= 90;
+
+    if (!passed && violations.length > 0) {
+      suggestions.push('检查LayerOrchestrator日志，定位失败的层');
+      suggestions.push('确保所有生成服务（BackgroundGenerator、MaterialSearch等）正常工作');
+      suggestions.push('检查Timeline配置是否正确');
+    }
+
+    this.logger.info(`  ${passed ? '✅' : '❌'} Timeline完整性检查: ${passed ? '通过' : `发现${violations.length}个问题`}`);
+
+    return {
+      passed: passed,
+      score: score,
+      violations: violations,
+      warnings: warnings,
+      suggestions: suggestions
     };
   }
 

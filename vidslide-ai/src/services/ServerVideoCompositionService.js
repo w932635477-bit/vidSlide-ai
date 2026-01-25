@@ -89,6 +89,291 @@ class ServerVideoCompositionService {
   }
 
   /**
+   * ⭐ 新方法：基于layers的多层视频合成
+   * 区分背景层、PIP层、卡片层
+   * @param {string} videoPath - 原视频路径
+   * @param {Array} scenes - 场景列表
+   * @param {Array} renderData - 渲染数据列表（包含layerType）
+   * @param {string} platform - 目标平台
+   * @returns {Promise<string>} 最终视频路径
+   */
+  async composeVideoWithLayers(videoPath, scenes, renderData, platform = 'douyin') {
+    console.log('🎬 开始多层视频合成（基于scene.layers）');
+    console.log(`  - 原视频: ${videoPath}`);
+    console.log(`  - 场景数量: ${scenes.length}`);
+    console.log(`  - 渲染层数: ${renderData.length}`);
+
+    // 统计各层
+    const bgLayers = renderData.filter(item => item.layerType === 'background');
+    const maskLayers = renderData.filter(item => item.layerType === 'mask');
+    const pipLayers = renderData.filter(item => item.layerType === 'pip');
+    const cardLayers = renderData.filter(item => item.layerType === 'card');
+
+    console.log(`  - 背景层: ${bgLayers.length}个 (全屏)`);
+    console.log(`  - 遮罩层: ${maskLayers.length}个 (磨砂玻璃)`);
+    console.log(`  - PIP层: ${pipLayers.length}个 (画中画)`);
+    console.log(`  - 卡片层: ${cardLayers.length}个 (底部)`);
+
+    try {
+      // 步骤1: 分割原视频
+      console.log('  1️⃣ 分割原视频...');
+      const segments = await this.splitVideo(videoPath, scenes);
+
+      // 步骤2: 为每个片段添加多层内容
+      console.log('  2️⃣ 为每个片段添加多层内容...');
+      const composedSegments = [];
+
+      for (let i = 0; i < scenes.length; i++) {
+        const scene = scenes[i];
+        const segment = segments[i];
+
+        console.log(`    - 处理片段 ${i + 1}/${scenes.length} (${scene.type})`);
+
+        // 查找这个场景对应的所有渲染层
+        const sceneLayers = renderData.filter(item => item.sceneId === scene.id);
+
+        if (sceneLayers.length === 0) {
+          // 原视频场景，直接使用
+          console.log(`      → 原视频场景，无图层`);
+          composedSegments.push(segment.path);
+          continue;
+        }
+
+        // 按zIndex排序（从底层到顶层）
+        sceneLayers.sort((a, b) => a.zIndex - b.zIndex);
+
+        console.log(`      → 有 ${sceneLayers.length} 个层（zIndex: ${sceneLayers.map(l => l.zIndex).join(' → ')}）`);
+
+        // 依次叠加各层
+        let currentVideo = segment.path;
+
+        for (let j = 0; j < sceneLayers.length; j++) {
+          const layer = sceneLayers[j];
+          console.log(`        - 叠加层 ${j + 1}: ${layer.layerType} (zIndex=${layer.zIndex})`);
+
+          if (layer.layerType === 'background') {
+            // 背景层：全屏显示
+            currentVideo = await this.overlayBackgroundLayer(currentVideo, layer, platform);
+          } else if (layer.layerType === 'mask') {
+            // 遮罩层：磨砂玻璃效果
+            currentVideo = await this.overlayMaskLayer(currentVideo, layer);
+          } else if (layer.layerType === 'pip') {
+            // PIP层：画中画（右上角或底部）
+            const position = layer.content?.position || 'top-right';
+            currentVideo = await this.overlayPIPLayer(currentVideo, layer, platform, position);
+          } else if (layer.layerType === 'card') {
+            // 卡片层：底部显示
+            const position = layer.content?.position || 'top';
+            const animationDelay = layer.content?.animationDelay || 0;
+            currentVideo = await this.overlayCardLayer(currentVideo, layer, position, animationDelay);
+          }
+        }
+
+        composedSegments.push(currentVideo);
+      }
+
+      // 步骤3: 合并所有片段
+      console.log('  3️⃣ 合并所有片段...');
+      const mergedVideo = await this.mergeComposedSegments(composedSegments);
+
+      // 步骤4: 最终压缩
+      console.log('  4️⃣ 最终压缩...');
+      const finalVideo = await this.finalCompress(mergedVideo);
+
+      // 清理临时文件
+      segments.forEach(s => {
+        if (fs.existsSync(s.path)) fs.unlinkSync(s.path);
+      });
+      composedSegments.forEach(path => {
+        if (path !== finalVideo && fs.existsSync(path)) fs.unlinkSync(path);
+      });
+
+      console.log('✅ 多层视频合成完成');
+      return finalVideo;
+
+    } catch (error) {
+      console.error('❌ 多层视频合成失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 叠加背景层（全屏）
+   */
+  async overlayBackgroundLayer(videoPath, layer, platform) {
+    const outputPath = path.join(this.cacheDir, `bg_${Date.now()}_${layer.sceneId}.mp4`);
+
+    console.log(`        → 背景层: 全屏显示 ${layer.path}`);
+
+    try {
+      // ⭐ 修复：确保背景图片缩放到偶数尺寸（避免libx264编码失败）
+      // 使用scale + pad确保最终尺寸是精确的1080x1920
+      const filterComplex =
+        `[0:v]scale=${DOUYIN_SPECS.width}:${DOUYIN_SPECS.height}:force_original_aspect_ratio=decrease,` +
+        `pad=${DOUYIN_SPECS.width}:${DOUYIN_SPECS.height}:(ow-iw)/2:(oh-ih)/2:color=black[bg];` +
+        `[1:v]scale=${DOUYIN_SPECS.width}:${DOUYIN_SPECS.height}[scaled];` +
+        `[bg][scaled]overlay=(W-w)/2:(H-h)/2:format=auto,setsar=1`;
+
+      const cmd = `ffmpeg -i "${layer.path}" -i "${videoPath}" -filter_complex "${filterComplex}" -map 0:a? -c:v libx264 -preset fast -pix_fmt yuv420p -shortest "${outputPath}" -y`;
+
+      await execAsync(cmd);
+      return outputPath;
+    } catch (error) {
+      console.error(`        ❌ 背景层叠加失败:`, error.message);
+      return videoPath; // 失败则返回原视频
+    }
+  }
+
+  /**
+   * 叠加PIP层（画中画）
+   */
+  async overlayPIPLayer(videoPath, layer, platform, position = 'top-right') {
+    const outputPath = path.join(this.cacheDir, `pip_${Date.now()}_${layer.sceneId}.mp4`);
+
+    console.log(`        → PIP层: 位置=${position} ${layer.path}`);
+
+    try {
+      // 获取PIP配置
+      const pipConfig = this.faceExtractorV2?.verticalPIPConfig?.[platform];
+      const pipWidth = pipConfig?.width || 324;
+      const pipHeight = pipConfig?.height || 576;
+
+      // 计算位置
+      let pipX, pipY;
+      if (position === 'top-right') {
+        pipX = 1080 - pipWidth - 80;
+        pipY = 200;
+      } else if (position === 'bottom') {
+        pipX = pipConfig?.position?.x || 378;
+        pipY = pipConfig?.position?.y || 1200;
+      } else if (position === 'center') {
+        pipX = (1080 - pipWidth) / 2;
+        pipY = (1920 - pipHeight) / 2;
+      }
+
+      console.log(`          坐标: x=${pipX}, y=${pipY}, 尺寸=${pipWidth}x${pipHeight}`);
+
+      // 叠加PIP视频
+      const filterComplex = `[1:v]scale=${pipWidth}:${pipHeight}[pip];[0:v][pip]overlay=${pipX}:${pipY}:format=auto`;
+      const cmd = `ffmpeg -i "${videoPath}" -i "${layer.path}" -filter_complex "${filterComplex}" -map 0:a? -c:v libx264 -preset fast -pix_fmt yuv420p -shortest "${outputPath}" -y`;
+
+      await execAsync(cmd);
+      return outputPath;
+    } catch (error) {
+      console.error(`        ❌ PIP层叠加失败:`, error.message);
+      return videoPath;
+    }
+  }
+
+  /**
+   * 叠加遮罩层（磨砂玻璃效果）
+   */
+  async overlayMaskLayer(videoPath, layer) {
+    const outputPath = path.join(this.cacheDir, `mask_${Date.now()}_${layer.sceneId}.mp4`);
+
+    console.log(`        → 遮罩层: 磨砂玻璃效果`);
+
+    try {
+      // 磨砂玻璃效果参数
+      const blurStrength = layer.content?.blurStrength || 3; // 模糊强度 (1-10)
+      const opacity = layer.content?.opacity || 0.15; // 遮罩透明度 (0.1-0.3)
+      const maskColor = layer.content?.color || 'white'; // 遮罩颜色
+
+      console.log(`          模糊强度: ${blurStrength}, 透明度: ${opacity}, 颜色: ${maskColor}`);
+
+      // 创建磨砂玻璃效果：
+      // 1. 对视频应用轻微的高斯模糊
+      // 2. 叠加一个半透明的白色遮罩
+      const filterComplex = `[0:v]boxblur=${blurStrength}:${blurStrength}[blurred];` +
+        `[blurred]drawbox=x=0:y=0:w=iw:h=ih:color=${maskColor}@${opacity}:t=fill[masked]`;
+
+      const cmd = `ffmpeg -i "${videoPath}" -filter_complex "${filterComplex}" -map "[masked]" -map 0:a? -c:v libx264 -preset fast -pix_fmt yuv420p -shortest "${outputPath}" -y`;
+
+      await execAsync(cmd);
+      console.log(`          ✅ 磨砂玻璃效果已应用`);
+      return outputPath;
+    } catch (error) {
+      console.error(`        ❌ 遮罩层叠加失败:`, error.message);
+      return videoPath;
+    }
+  }
+
+  /**
+   * 叠加卡片层（底部）
+   */
+  async overlayCardLayer(videoPath, layer, position = 'top', animationDelay = 0) {
+    const outputPath = path.join(this.cacheDir, `card_${Date.now()}_${layer.sceneId}_${layer.zIndex}.mp4`);
+
+    console.log(`        → 卡片层: 位置=${position}, 延迟=${animationDelay}s ${layer.path}`);
+
+    try {
+      // 卡片尺寸
+      const cardWidth = 600;
+      const cardHeight = 300;
+
+      // 计算位置
+      const douyinBottomSafeArea = DOUYIN_SPECS.safeArea.bottom; // 400px
+      const bottomMargin = 20;
+
+      let x, y;
+      if (position === 'bottom') {
+        // 第二张卡片在更下方
+        x = Math.round((1080 - cardWidth) / 2);
+        y = Math.round(1920 - cardHeight - douyinBottomSafeArea - bottomMargin - 150);
+      } else {
+        // 第一张卡片在上方
+        x = Math.round((1080 - cardWidth) / 2);
+        y = Math.round(1920 - cardHeight - douyinBottomSafeArea - bottomMargin - 350);
+      }
+
+      console.log(`          坐标: x=${x}, y=${y}, 尺寸=${cardWidth}x${cardHeight}`);
+
+      // 计算时间（考虑动画延迟）
+      const startTime = layer.startTime + animationDelay;
+      const endTime = layer.endTime;
+
+      // 叠加卡片
+      const filterComplex = `[1:v]scale=${cardWidth}:${cardHeight}[card];[0:v][card]overlay=${x}:${y}:enable='between(t,${startTime},${endTime})':format=auto`;
+      const cmd = `ffmpeg -i "${videoPath}" -i "${layer.path}" -filter_complex "${filterComplex}" -map 0:a? -c:v libx264 -preset fast -pix_fmt yuv420p -shortest "${outputPath}" -y`;
+
+      await execAsync(cmd);
+      return outputPath;
+    } catch (error) {
+      console.error(`        ❌ 卡片层叠加失败:`, error.message);
+      return videoPath;
+    }
+  }
+
+  /**
+   * 合并已合成的片段
+   */
+  async mergeComposedSegments(segments) {
+    console.log(`    - 合并 ${segments.length} 个已合成片段...`);
+
+    if (segments.length === 1) {
+      console.log(`    ✅ 只有一个片段，直接返回`);
+      return segments[0];
+    }
+
+    // 创建合并列表文件
+    const listPath = path.join(this.cacheDir, `concat_composed_${Date.now()}.txt`);
+    const listContent = segments.map(s => `file '${s}'`).join('\n');
+    fs.writeFileSync(listPath, listContent);
+
+    // 合并视频
+    const outputPath = path.join(this.outputDir, `merged_composed_${Date.now()}.mp4`);
+    const cmd = `ffmpeg -f concat -safe 0 -i "${listPath}" -c copy "${outputPath}" -y`;
+
+    await execAsync(cmd);
+
+    // 清理列表文件
+    fs.unlinkSync(listPath);
+
+    console.log(`    ✅ 片段合并完成: ${outputPath}`);
+    return outputPath;
+  }
+
+  /**
    * 使用全屏图片合成视频（新方法）
    * 策略：将AI生成的图片作为全屏背景，人脸视频作为画中画
    */
@@ -193,16 +478,20 @@ class ServerVideoCompositionService {
       console.log('  2️⃣ 合并视频...');
       const mergedVideo = await this.mergeVideos(segments);
 
-      // 步骤 3: 图片叠加（如果有图片）
-      let finalVideo = mergedVideo;
+      // 步骤 3: 先缩放到目标平台尺寸（1080x1920）
+      console.log('  3️⃣ 缩放视频到目标尺寸...');
+      const scaledVideo = await this.scaleVideoToTargetSize(mergedVideo, platform);
+
+      // 步骤 4: 图片叠加（在正确的尺寸上叠加）
+      let finalVideo = scaledVideo;
       if (images.length > 0) {
-        console.log('  3️⃣ 叠加图片...');
-        finalVideo = await this.overlayImages(mergedVideo, images);
+        console.log('  4️⃣ 叠加图片...');
+        finalVideo = await this.overlayImages(scaledVideo, images);
       }
 
-      // 步骤 4: 压缩视频
-      console.log('  4️⃣ 压缩视频...');
-      const compressedVideo = await this.compressVideo(finalVideo, platform);
+      // 步骤 5: 最终压缩（不再改变尺寸）
+      console.log('  5️⃣ 最终压缩...');
+      const compressedVideo = await this.finalCompress(finalVideo);
 
       console.log('✅ 画中画视频合成完成');
       return compressedVideo;
@@ -235,8 +524,9 @@ class ServerVideoCompositionService {
       const startTime = scene.startTime || 0;
       const duration = (scene.endTime || 0) - startTime;
 
-      // 使用 FFmpeg 分割视频
-      const cmd = `ffmpeg -i "${videoPath}" -ss ${startTime} -t ${duration} -c copy "${outputPath}" -y`;
+      // 使用重新编码来避免音画不同步
+      // 移除 -c copy，使用 libx264 + aac 重新编码
+      const cmd = `ffmpeg -i "${videoPath}" -ss ${startTime} -t ${duration} -c:v libx264 -preset fast -c:a aac "${outputPath}" -y`;
 
       try {
         await execAsync(cmd);
@@ -285,9 +575,9 @@ class ServerVideoCompositionService {
   }
 
   /**
-   * 叠加图片
+   * 叠加图片（简化版 - 移除复杂的geq圆角滤镜）
    * @param {string} videoPath - 视频路径
-   * @param {Array} images - 图片列表，每个图片包含 {path, position, startTime, endTime, width, height}
+   * @param {Array} images - 图片列表，每个图片包含 {path, startTime, endTime}
    * @returns {Promise<string>} 叠加后的视频路径
    */
   async overlayImages(videoPath, images) {
@@ -299,9 +589,14 @@ class ServerVideoCompositionService {
     }
 
     try {
+      // 使用固定的1080x1920尺寸（视频已经缩放到这个尺寸）
+      const videoWidth = DOUYIN_SPECS.width;   // 1080
+      const videoHeight = DOUYIN_SPECS.height; // 1920
+
+      console.log(`    - 视频尺寸: ${videoWidth}x${videoHeight}`);
+
       const outputPath = path.join(this.outputDir, `overlay_${Date.now()}.mp4`);
 
-      // 构建 FFmpeg 命令
       // 策略：逐个叠加图片，每次生成一个中间视频
       let currentVideo = videoPath;
 
@@ -309,60 +604,46 @@ class ServerVideoCompositionService {
         const img = images[i];
         console.log(`      - 叠加图片 ${i + 1}/${images.length}: ${img.path}`);
 
-        // 使用抖音安全区域规范计算位置
-        // 卡片位置：底部居中（符合理想效果）
-        const cardWidth = 600;  // 新的卡片宽度
-        const cardHeight = 300; // 新的卡片高度
+        // 卡片尺寸
+        const cardWidth = 600;
+        const cardHeight = 300;
 
-        // 计算底部居中位置
-        const videoWidth = DOUYIN_SPECS.width;  // 1080
-        const videoHeight = DOUYIN_SPECS.height; // 1920
-        const bottomMargin = 100; // 距离底部100像素
+        // 抖音底部安全区域约400px（包含文字、点赞、评论、分享等UI）
+        // 卡片应该放在安全区域之上
+        const douyinBottomSafeArea = DOUYIN_SPECS.safeArea.bottom; // 400px
+        const bottomMargin = 20; // 额外留20px边距
 
-        const x = (videoWidth - cardWidth) / 2;  // 水平居中
-        const y = videoHeight - cardHeight - bottomMargin;  // 底部位置
+        // 根据1080x1920尺寸计算位置（底部居中，避开抖音UI）
+        const x = Math.round((videoWidth - cardWidth) / 2);
+        const y = Math.round(videoHeight - cardHeight - douyinBottomSafeArea - bottomMargin);
 
         const width = cardWidth;
         const height = cardHeight;
         const startTime = img.startTime || 0;
-        const endTime = img.endTime || 999999; // 默认一直显示
+        const endTime = img.endTime || 999999;
+
+        console.log(`        → 时间: ${startTime}s - ${endTime}s`);
+        console.log(`        → 位置: x=${x}, y=${y} (避开抖音底部UI)`);
+        console.log(`        → 尺寸: ${width}x${height}`);
 
         // 生成输出路径
         const tempOutput = i === images.length - 1
           ? outputPath
           : path.join(this.cacheDir, `temp_overlay_${Date.now()}_${i}.mp4`);
 
-        // 计算淡入淡出时间
-        const fadeDuration = 0.3; // 淡入淡出持续时间（秒）
-        const sceneDuration = endTime - startTime;
-        const fadeOutStart = sceneDuration - fadeDuration;
-
-        // 构建 FFmpeg overlay 滤镜
-        // 1. 缩放图片
-        // 2. 添加圆角效果（使用geq滤镜）
-        // 3. 添加淡入淡出效果
-        // 4. 叠加到视频上
-        const cornerRadius = 20; // 圆角半径
-
-        const filterComplex = `[1:v]scale=${width}:${height}[scaled];` +
-          `[scaled]geq=` +
-          `lum='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),lum(X,Y),` +
-          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),lum(X,Y),0))':` +
-          `cb='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),cb(X,Y),` +
-          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),cb(X,Y),128))':` +
-          `cr='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),cr(X,Y),` +
-          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),cr(X,Y),128))':` +
-          `a='if(lt(abs(X-(W/2)),W/2-${cornerRadius})+lt(abs(Y-(H/2)),H/2-${cornerRadius}),255,` +
-          `if(lte(hypot(${cornerRadius}-(W/2-abs(X-(W/2))),${cornerRadius}-(H/2-abs(Y-(H/2)))),${cornerRadius}),255,0))'[rounded];` +
-          `[rounded]fade=t=in:st=${startTime}:d=${fadeDuration}:alpha=1,` +
-          `fade=t=out:st=${startTime + fadeOutStart}:d=${fadeDuration}:alpha=1[faded];` +
-          `[0:v][faded]overlay=${x}:${y}:enable='between(t,${startTime},${endTime})'`;
+        // 简化的FFmpeg overlay滤镜（移除geq圆角和淡入淡出）
+        // 只做：1. 缩放图片  2. 叠加到视频上
+        const filterComplex =
+          `[1:v]scale=${width}:${height}[scaled];` +
+          `[0:v][scaled]overlay=${x}:${y}:enable='between(t,${startTime},${endTime})'`;
 
         // 执行 FFmpeg 命令
         const cmd = `ffmpeg -i "${currentVideo}" -i "${img.path}" -filter_complex "${filterComplex}" -c:a copy -preset fast "${tempOutput}" -y`;
 
+        console.log(`        → FFmpeg命令: ${cmd.substring(0, 200)}...`);
+
         try {
-          await execAsync(cmd);
+          const result = await execAsync(cmd);
           console.log(`      ✅ 图片 ${i + 1} 叠加完成`);
 
           // 清理上一个临时文件（如果不是原始视频）
@@ -375,13 +656,9 @@ class ServerVideoCompositionService {
 
         } catch (error) {
           console.error(`      ❌ 图片 ${i + 1} 叠加失败:`, error.message);
+          console.error(`      FFmpeg错误输出:`, error.stderr || error.stdout);
           throw error;
         }
-      }
-
-      // 清理原始视频（如果不是输入视频）
-      if (videoPath !== currentVideo && fs.existsSync(videoPath)) {
-        fs.unlinkSync(videoPath);
       }
 
       console.log(`    ✅ 图片叠加完成: ${outputPath}`);
@@ -765,6 +1042,40 @@ class ServerVideoCompositionService {
   }
 
   /**
+   * 获取视频信息（宽度、高度、时长等）
+   * @param {string} videoPath - 视频路径
+   * @returns {Promise<Object>} 视频信息 {width, height, duration}
+   */
+  async getVideoInfo(videoPath) {
+    try {
+      const cmd = `ffprobe -v quiet -print_format json -show_streams "${videoPath}"`;
+      const { stdout } = await execAsync(cmd);
+      const info = JSON.parse(stdout);
+
+      // 查找视频流
+      const videoStream = info.streams.find(s => s.codec_type === 'video');
+
+      if (!videoStream) {
+        throw new Error('未找到视频流');
+      }
+
+      return {
+        width: videoStream.width,
+        height: videoStream.height,
+        duration: parseFloat(videoStream.duration || 0)
+      };
+    } catch (error) {
+      console.error('获取视频信息失败:', error.message);
+      // 返回默认值（假设是竖屏视频）
+      return {
+        width: 1080,
+        height: 1920,
+        duration: 0
+      };
+    }
+  }
+
+  /**
    * 压缩视频并确保符合平台规范
    */
   async compressVideo(videoPath, platform) {
@@ -795,6 +1106,71 @@ class ServerVideoCompositionService {
     }
 
     console.log(`    ✅ 压缩完成: ${outputPath}`);
+    return outputPath;
+  }
+
+  /**
+   * 缩放视频到目标平台尺寸（不压缩）
+   * @param {string} videoPath - 视频路径
+   * @param {string} platform - 目标平台
+   * @returns {Promise<string>} 缩放后的视频路径
+   */
+  async scaleVideoToTargetSize(videoPath, platform) {
+    console.log(`    - 缩放视频到目标尺寸...`);
+
+    const outputPath = path.join(this.outputDir, `scaled_${Date.now()}.mp4`);
+
+    // 根据平台获取目标尺寸
+    let targetWidth = DOUYIN_SPECS.width;   // 1080
+    let targetHeight = DOUYIN_SPECS.height; // 1920
+
+    if (platform === 'douyin') {
+      targetWidth = DOUYIN_SPECS.width;
+      targetHeight = DOUYIN_SPECS.height;
+    }
+
+    console.log(`    - 目标尺寸: ${targetWidth}x${targetHeight}`);
+
+    // 缩放并填充黑边以保持纵横比
+    const scaleFilter = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=decrease,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2:black`;
+    const cmd = `ffmpeg -i "${videoPath}" -vf "${scaleFilter}" -c:v libx264 -preset fast -c:a aac "${outputPath}" -y`;
+
+    await execAsync(cmd);
+
+    // 清理原始文件
+    if (fs.existsSync(videoPath)) {
+      fs.unlinkSync(videoPath);
+    }
+
+    console.log(`    ✅ 缩放完成: ${outputPath}`);
+    return outputPath;
+  }
+
+  /**
+   * 最终压缩（不改变尺寸）
+   * @param {string} videoPath - 视频路径
+   * @returns {Promise<string>} 压缩后的视频路径
+   */
+  async finalCompress(videoPath) {
+    console.log(`    - 最终压缩...`);
+
+    const outputPath = path.join(this.outputDir, `final_${Date.now()}.mp4`);
+
+    // 使用高质量压缩参数
+    const bitrate = '12M';
+    const preset = 'medium';
+
+    // 只压缩，不改变尺寸
+    const cmd = `ffmpeg -i "${videoPath}" -c:v libx264 -preset ${preset} -crf 20 -b:v ${bitrate} -maxrate ${bitrate} -bufsize ${parseInt(bitrate) * 2}M -c:a aac -b:a 192k "${outputPath}" -y`;
+
+    await execAsync(cmd);
+
+    // 清理原始文件
+    if (fs.existsSync(videoPath)) {
+      fs.unlinkSync(videoPath);
+    }
+
+    console.log(`    ✅ 最终压缩完成: ${outputPath}`);
     return outputPath;
   }
 

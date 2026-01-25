@@ -1,13 +1,16 @@
 import ContentAnalyst from '../executors/ContentAnalyst.js';
 import SceneDesigner from '../executors/SceneDesigner.js';
-import MaterialExpert from '../executors/MaterialExpert.js';
-import VisualDesigner from '../executors/VisualDesigner.js';
 import VideoEngineer from '../executors/VideoEngineer.js';
 import QualityDirector from '../quality/QualityDirector.js';
+import LayerOrchestrator from './LayerOrchestrator.js';
 import DataManager from '../../core/DataManager.js';
 import Logger from '../../core/Logger.js';
 import ErrorHandler from '../../core/ErrorHandler.js';
 import CacheManager from '../../core/CacheManager.js';
+import ReworkEngine from '../../core/ReworkEngine.js';
+import ImprovedRetryHandler from '../../core/ImprovedRetryHandler.js';
+import ErrorMemory from '../../core/ErrorMemory.js';
+import ViolationClassifier from '../../core/ViolationClassifier.js';
 import { execSync } from 'child_process';
 
 /**
@@ -30,7 +33,24 @@ class ProjectManager {
     this.errorHandler = new ErrorHandler({ logger: this.logger });
     this.cacheManager = new CacheManager(options.cacheManager);
 
-    // 初始化所有智能体
+    // ⭐ 新增：初始化错误处理系统
+    this.reworkEngine = new ReworkEngine({
+      logger: this.logger,
+      maxReworkCycles: options.maxReworkCycles || 3
+    });
+
+    this.retryHandler = new ImprovedRetryHandler({
+      logger: this.logger,
+      baseDelay: 1000,
+      maxDelay: 30000,
+      jitterFactor: 0.1
+    });
+
+    this.errorMemory = new ErrorMemory({
+      logger: this.logger
+    });
+
+    // 初始化所有智能体（清理后：4个核心智能体）
     this.agents = {
       contentAnalyst: new ContentAnalyst({
         logger: this.logger,
@@ -40,12 +60,7 @@ class ProjectManager {
         logger: this.logger,
         errorHandler: this.errorHandler
       }),
-      materialExpert: new MaterialExpert({
-        logger: this.logger,
-        errorHandler: this.errorHandler,
-        cacheManager: this.cacheManager
-      }),
-      visualDesigner: new VisualDesigner({
+      layerOrchestrator: new LayerOrchestrator({
         logger: this.logger,
         errorHandler: this.errorHandler
       }),
@@ -100,10 +115,10 @@ class ProjectManager {
         this.logger.warn('⚠️ ProjectManager: 质量不合格');
         this.logger.warn(`  违规项: ${finalCheck.violations.length}个`);
 
-        // 如果允许返工，启动返工流程
-        if (options.allowRework) {
-          this.logger.info('  → 启动返工流程...');
-          return await this.handleRework(finalCheck.violations, plan);
+        // ⭐ 默认启用返工流程（除非明确禁用）
+        if (options.allowRework !== false) {
+          this.logger.info('  → 启动智能返工流程...');
+          return await this.handleRework(finalCheck.violations, plan, result);
         }
 
         return {
@@ -156,9 +171,10 @@ class ProjectManager {
           },
           {
             id: 'task_1_2',
-            name: '文心一言分析',
+            name: '本地关键词提取',
             agent: 'contentAnalyst',
             method: 'analyzeWithWenxin',
+            input: { videoPath },  // ⭐ 添加videoPath参数
             dependsOn: ['task_1_1'],
             critical: true,
             retryLimit: 3,
@@ -202,44 +218,22 @@ class ProjectManager {
         ]
       },
 
-      // 阶段3: 素材生成（并行）
+      // 阶段3: 层协调与素材生成（串行）⭐ 新架构
       phase3: {
-        name: 'AssetGeneration',
-        type: 'parallel',
+        name: 'LayerOrchestration',
+        type: 'sequential',
         tasks: [
           {
             id: 'task_3_1',
-            name: '生成内容素材',
-            agent: 'materialExpert',
-            method: 'generateMaterials',
-            dependsOn: ['task_2_1', 'task_1_2'],
-            critical: true,
-            retryLimit: 3
-          },
-          {
-            id: 'task_3_2',
-            name: '设计卡片',
-            agent: 'visualDesigner',
-            method: 'designCards',
+            name: '层协调与生成',
+            agent: 'layerOrchestrator',
+            method: 'orchestrateLayers',
             dependsOn: ['task_2_1'],
-            critical: true,
-            retryLimit: 2
-          },
-          {
-            id: 'task_3_3',
-            name: '生成背景遮罩',
-            agent: 'visualDesigner',
-            method: 'generateBackgrounds',
-            dependsOn: ['task_2_1'],
-            critical: false
-          },
-          {
-            id: 'task_3_4',
-            name: '提取人脸',
-            agent: 'videoEngineer',
-            method: 'extractFace',
             input: { videoPath },
-            critical: false
+            critical: true,
+            retryLimit: 3,
+            timeout: 120000,
+            description: '协调所有层的生成，填充Timeline的layerManifest'
           }
         ]
       },
@@ -251,19 +245,12 @@ class ProjectManager {
         tasks: [
           {
             id: 'task_4_1',
-            name: '素材准确性检查',
+            name: 'Timeline完整性检查',
             agent: 'qualityDirector',
-            method: 'checkMaterialAccuracy',
+            method: 'checkTimelineCompleteness',
             dependsOn: ['task_3_1'],
-            critical: true
-          },
-          {
-            id: 'task_4_2',
-            name: '视觉质量检查',
-            agent: 'qualityDirector',
-            method: 'checkVisualQuality',
-            dependsOn: ['task_3_2', 'task_3_3'],
-            critical: true
+            critical: true,
+            description: '验证所有层都已生成'
           }
         ]
       },
@@ -278,7 +265,7 @@ class ProjectManager {
             name: '合成视频',
             agent: 'videoEngineer',
             method: 'composeVideo',
-            dependsOn: ['task_2_1', 'task_3_1', 'task_3_2', 'task_3_3', 'task_3_4'],
+            dependsOn: ['task_3_1', 'task_4_1'],
             input: { videoPath },
             critical: true,
             timeout: 90000
@@ -341,6 +328,13 @@ class ProjectManager {
 
     // 添加质量检查结果
     results.qualityChecks = qualityChecks;
+
+    // ⭐ 修复Bug #1 & Bug #6: 添加finalVideo字段（task_5_1是视频合成任务的输出）
+    // task_5_1返回的是对象 {finalVideo: string, performance: {}}
+    if (results.task_5_1) {
+      results.finalVideo = results.task_5_1?.finalVideo || results.task_5_1;
+      results.performance = results.task_5_1?.performance;
+    }
 
     return results;
   }
@@ -422,8 +416,10 @@ class ProjectManager {
 
     try {
       if (task.retryLimit && task.retryLimit > 0) {
-        return await this.errorHandler.retry(execute, {
+        // ⭐ 使用改进的重试处理器（支持指数退避）
+        return await this.retryHandler.retryWithBackoff(execute, {
           maxRetries: task.retryLimit,
+          strategy: 'exponential', // 指数退避策略
           context: { task: task.name, agent: task.agent }
         });
       } else {
@@ -457,26 +453,147 @@ class ProjectManager {
       }
     }
 
+    // ⭐ 特殊处理：为LayerOrchestrator准备timeline
+    if (task.method === 'orchestrateLayers') {
+      // LayerOrchestrator需要timeline对象（包含clips数组和layerManifest）
+      const sceneDesignResult = previousResults.task_2_1;
+
+      input.timeline = {
+        version: '2.0',
+        duration: plan.videoDuration,
+        clips: sceneDesignResult?.scenes || []
+      };
+
+      input.videoPath = plan.videoPath;
+    }
+
+    // ⭐ 特殊处理：为finalCheck添加完整上下文
+    if (task.method === 'finalCheck') {
+      // ⭐ Bug #5 & Bug #6修复：添加finalVideo和performance字段
+      // task_5_1返回的是对象 {finalVideo: string, performance: {}}
+      input.finalVideo = previousResults.task_5_1?.finalVideo || previousResults.task_5_1;
+      input.performance = previousResults.task_5_1?.performance || previousResults.task_5_1_performance || {
+        fileSize: 0,
+        duration: 0
+      };
+
+      input.context = {
+        // 内容分析结果
+        contentAnalysis: previousResults.task_1_2?.understanding,
+        // 场景设计结果
+        sceneDesign: previousResults.task_2_1,
+        // LayerOrchestrator结果（新架构）
+        layerOrchestration: previousResults.task_3_1,
+        // 原视频路径
+        videoPath: plan.videoPath
+      };
+    }
+
+    // ⭐ 特殊处理：为VideoEngineer的composeVideo准备Timeline
+    if (task.method === 'composeVideo') {
+      // 从LayerOrchestrator获取填充完整的Timeline
+      const orchestrationResult = previousResults.task_3_1;
+
+      input.timeline = orchestrationResult?.timeline;
+      input.uiState = orchestrationResult?.uiState;
+      input.videoPath = plan.videoPath;
+    }
+
     return input;
   }
 
   /**
-   * 处理返工
-   * @param {Array} violations - 违规项列表
+   * 处理返工（带重试循环）
+   * @param {Array<string>} violations - 违规项列表
    * @param {Object} plan - 原计划
+   * @param {Object} currentResults - 当前结果
    * @returns {Promise<Object>} 返工结果
    */
-  async handleRework(violations, plan) {
-    this.logger.info('🔄 ProjectManager: 处理返工');
+  async handleRework(violations, plan, currentResults = {}) {
+    this.logger.info('🔄 ProjectManager: 启动智能返工系统');
     this.logger.info(`  违规项: ${violations.length}个`);
 
-    // TODO: 实现智能返工逻辑
-    // 根据违规项类型，重新执行相关阶段
+    const maxCycles = this.reworkEngine.maxReworkCycles;
+
+    // 返工循环
+    for (let cycle = 1; cycle <= maxCycles; cycle++) {
+      this.logger.info(`\n🔄 返工周期 ${cycle}/${maxCycles}`);
+
+      // 记录错误到内存（标记为未修复）
+      violations.forEach(v => {
+        const classified = ViolationClassifier.classify(v);
+        this.errorMemory.recordError(classified, classified.category, false);
+      });
+
+      // 执行返工
+      const reworkResult = await this.reworkEngine.execute(
+        violations,
+        plan,
+        currentResults,
+        {
+          qualityDirector: this.qualityDirector,
+          agents: this.agents
+        }
+      );
+
+      if (!reworkResult.success) {
+        // 返工执行失败
+        this.logger.error(`  ❌ 返工执行失败: ${reworkResult.error}`);
+        return {
+          success: false,
+          error: reworkResult.error,
+          phase: reworkResult.phase,
+          details: reworkResult.details,
+          violations: violations
+        };
+      }
+
+      // 再次进行最终检查
+      this.logger.info(`\n🔍 重新进行质量检查...`);
+
+      // ⭐ 修复Bug #3: 直接传入reworkResult（已包含qualityChecks和finalVideo）
+      const recheckResult = await this.qualityDirector.finalReview(reworkResult);
+
+      if (recheckResult.passed) {
+        this.logger.info(`\n✅ 返工成功！（第${cycle}次尝试）`);
+
+        // 记录成功修正
+        violations.forEach(v => {
+          const classified = ViolationClassifier.classify(v);
+          this.errorMemory.recordError(classified, classified.category, true);
+        });
+
+        // 更新AGENTS.md
+        try {
+          this.errorMemory.updateAgentsDoc('vidslide-ai/AGENTS.md');
+        } catch (error) {
+          this.logger.warn(`  ⚠️ 更新AGENTS.md失败: ${error.message}`);
+        }
+
+        return {
+          success: true,
+          videoPath: reworkResult.results.task_5_1?.finalVideo || reworkResult.results.task_5_1,
+          reworkCycles: cycle,
+          qualityScore: recheckResult.score,
+          phasesReworked: reworkResult.phasesReworked
+        };
+      }
+
+      // 更新violations为新的违规项
+      violations = recheckResult.violations;
+      currentResults = reworkResult.results;
+
+      this.logger.warn(`  ⚠️ 第${cycle}次返工后仍有${violations.length}个违规项`);
+    }
+
+    // 达到最大返工次数
+    this.logger.error(`\n❌ 返工失败（已达${maxCycles}次上限）`);
 
     return {
       success: false,
-      error: '返工功能尚未实现',
-      violations: violations
+      error: `返工${maxCycles}次后仍未通过质量检查`,
+      violations: violations,
+      suggestions: ['请人工检查代码逻辑', '查看ERROR_MEMORY.json了解历史错误']
     };
   }
 

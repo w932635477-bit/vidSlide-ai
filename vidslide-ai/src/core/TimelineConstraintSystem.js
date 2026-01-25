@@ -24,16 +24,16 @@ export class SequenceDefinition {
     this.type = config.type;           // 'card', 'pip', 'material', 'explanation'
     this.content = config.content;     // 内容对象
 
-    // 约束配置
+    // 约束配置（TikTok 2026标准：4-10秒）
     this.constraints = {
       // 硬约束（必须满足）
       insertionPoint: config.insertionPoint,
-      minDuration: config.minDuration || 3,
-      maxDuration: config.maxDuration || 8,
+      minDuration: config.minDuration || 4,       // TikTok 2026: 最少4秒
+      maxDuration: config.maxDuration || 10,      // TikTok 2026: 最多10秒
       noOverlap: config.noOverlap !== false,
 
       // 软约束（优先满足）
-      preferredDuration: config.preferredDuration || 5,
+      preferredDuration: config.preferredDuration || 6,  // TikTok 2026: 优先6秒
       canGroup: config.canGroup !== false,
       priority: config.priority || 'medium',
 
@@ -59,10 +59,10 @@ export class TimelineConstraintSolver {
   constructor(options = {}) {
     this.logger = new Logger('TimelineConstraintSolver');
 
-    // 全局约束
+    // 全局约束（TikTok 2026标准）
     this.globalConstraints = {
-      minCardDuration: options.minCardDuration || 3,
-      maxCardDuration: options.maxCardDuration || 8,
+      minCardDuration: options.minCardDuration || 4,       // TikTok 2026: 最少4秒
+      maxCardDuration: options.maxCardDuration || 10,      // TikTok 2026: 最多10秒
       minSpacing: options.minSpacing || 0.5,
       groupingThreshold: options.groupingThreshold || 10,  // 10秒内算邻近
       transitionOverlap: options.transitionOverlap || 0.5  // 过渡重叠0.5秒
@@ -102,33 +102,64 @@ export class TimelineConstraintSolver {
   }
 
   /**
-   * 分析序列关系（自动分组）
+   * 分析序列关系（自动分组 + 识别卡片序列组）
    */
   analyzeSequenceRelationships(sequences) {
     if (sequences.length === 0) return [];
 
-    const groups = [];
-    let currentGroup = [sequences[0]];
+    // 首先识别卡片序列组（有groupId的序列）
+    const cardSequenceGroups = new Map();
+    const standaloneSequences = [];
 
-    for (let i = 1; i < sequences.length; i++) {
-      const prev = sequences[i - 1];
-      const curr = sequences[i];
-
-      // 计算关系得分
-      const score = this.calculateRelationshipScore(prev, curr);
-
-      this.logger.debug(`  序列${i-1} → 序列${i}: 关系得分=${score.toFixed(2)}`);
-
-      // 判断是否应该分组
-      if (score > 0.5 && prev.constraints.canGroup && curr.constraints.canGroup) {
-        currentGroup.push(curr);
+    for (const seq of sequences) {
+      if (seq.groupId) {
+        // 有groupId，属于卡片序列组
+        if (!cardSequenceGroups.has(seq.groupId)) {
+          cardSequenceGroups.set(seq.groupId, []);
+        }
+        cardSequenceGroups.get(seq.groupId).push(seq);
       } else {
-        groups.push(currentGroup);
-        currentGroup = [curr];
+        // 无groupId，独立序列
+        standaloneSequences.push(seq);
       }
     }
 
-    groups.push(currentGroup);
+    // 排序卡片序列组（按groupIndex）
+    for (const [groupId, group] of cardSequenceGroups) {
+      group.sort((a, b) => a.groupIndex - b.groupIndex);
+    }
+
+    // 合并：卡片序列组 + 独立序列分组
+    const groups = [];
+
+    // 1. 添加卡片序列组
+    for (const [groupId, group] of cardSequenceGroups) {
+      groups.push(group);
+    }
+
+    // 2. 对独立序列进行传统分组
+    if (standaloneSequences.length > 0) {
+      let currentGroup = [standaloneSequences[0]];
+
+      for (let i = 1; i < standaloneSequences.length; i++) {
+        const prev = standaloneSequences[i - 1];
+        const curr = standaloneSequences[i];
+
+        // 计算关系得分
+        const score = this.calculateRelationshipScore(prev, curr);
+
+        // 判断是否应该分组
+        if (score > 0.5 && prev.constraints.canGroup && curr.constraints.canGroup) {
+          currentGroup.push(curr);
+        } else {
+          groups.push(currentGroup);
+          currentGroup = [curr];
+        }
+      }
+
+      groups.push(currentGroup);
+    }
+
     return groups;
   }
 
@@ -271,10 +302,10 @@ export class TimelineConstraintSolver {
         constraints.maxDuration
       );
     } else {
-      // 组合序列的中间：较短
-      return Math.min(
-        3,
-        constraints.preferredDuration
+      // 组合序列的中间：较短（TikTok 2026: 最少4秒）
+      return Math.max(
+        4,
+        Math.min(constraints.preferredDuration, constraints.maxDuration)
       );
     }
   }
