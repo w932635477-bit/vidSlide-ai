@@ -73,12 +73,12 @@ export function useVideoProcessing() {
     })
   }
 
-  // 开始AI分析
+  // 开始多智能体处理
   const startAnalysis = async () => {
     const service = initService()
 
     try {
-      console.log('🧠 开始AI分析...')
+      console.log('🧠 开始多智能体处理...')
       store.showProgress('analyze')
 
       const videoFile = store.video.file
@@ -86,69 +86,93 @@ export function useVideoProcessing() {
         throw new Error('没有视频文件')
       }
 
-      // 加载视频
-      await service.loadVideo(videoFile)
-      store.updateProgress(10)
+      // 先检查服务健康状态
+      console.log('🔍 检查后端服务...')
+      const health = await service.checkHealth()
+      console.log('✅ 后端服务正常:', health)
 
-      // 提取关键帧
-      console.log('🎬 提取关键帧...')
-      const keyframes = await service.extractKeyframes({
-        onProgress: progress => {
-          store.updateProgress(10 + progress * 0.3)
+      // 上传视频到多智能体系统
+      console.log('📤 上传视频到多智能体系统...')
+      const uploadResult = await service.uploadVideo(videoFile, {
+        platform: 'douyin',
+        allowRework: true,
+        onProgress: (progress) => {
+          console.log(`📤 上传进度: ${progress}%`)
         }
       })
-      store.setKeyframes(keyframes)
-      console.log(`✅ 提取了 ${keyframes.length} 个关键帧`)
 
-      // 场景检测
-      console.log('🎭 检测场景...')
-      const scenes = await service.detectScenes({
-        onProgress: progress => {
-          store.updateProgress(40 + progress * 0.2)
+      const taskId = uploadResult.taskId
+      console.log(`✅ 任务已创建: ${taskId}`)
+
+      // 使用WebSocket监听实时更新
+      console.log('🔌 连接WebSocket监听实时更新...')
+      const socket = service.subscribeToUpdates(taskId, (taskData) => {
+        console.log(`📊 进度: ${taskData.progress}% - ${taskData.message}`)
+
+        // 更新进度
+        store.updateProgress(taskData.progress)
+
+        // 如果有Timeline数据，更新store
+        if (taskData.timeline) {
+          console.log('📋 收到Timeline数据:', taskData.timeline)
+          store.setTimeline(taskData.timeline)
+        }
+
+        // 任务完成
+        if (taskData.status === 'completed') {
+          console.log('✅ 多智能体处理完成')
+          store.hideProgress()
+          ElMessage.success('多智能体处理完成')
+
+          // 切换到下一步
+          store.setWorkflowStep('template')
+          store.setActiveTab('materials')
+
+          // 关闭WebSocket连接
+          if (socket) {
+            socket.disconnect()
+          }
+        }
+
+        // 任务失败
+        if (taskData.status === 'failed') {
+          console.error('❌ 多智能体处理失败:', taskData.error)
+          store.hideProgress()
+          ElMessage.error(`处理失败: ${taskData.error}`)
+
+          // 关闭WebSocket连接
+          if (socket) {
+            socket.disconnect()
+          }
         }
       })
-      console.log(`✅ 检测到 ${scenes.length} 个场景`)
 
-      // 语音识别
-      console.log('🎤 语音识别...')
-      const transcript = await service.recognizeSpeech({
-        onProgress: progress => {
-          store.updateProgress(60 + progress * 0.2)
-        }
-      })
-      store.updateTranscript(transcript)
-      console.log(`✅ 转录文本长度: ${transcript.length}`)
+      // 如果WebSocket连接失败，使用轮询作为备用方案
+      if (!socket) {
+        console.log('⚠️ WebSocket连接失败，使用轮询方式...')
+        await service.pollTaskStatus(taskId, (taskData) => {
+          console.log(`📊 进度: ${taskData.progress}% - ${taskData.message}`)
+          store.updateProgress(taskData.progress)
 
-      // 关键词提取
-      console.log('🔑 提取关键词...')
-      const keywords = await service.extractKeywords(transcript, {
-        onProgress: progress => {
-          store.updateProgress(80 + progress * 0.2)
-        }
-      })
-      store.updateKeywords(keywords)
-      console.log(`✅ 提取了 ${keywords.length} 个关键词`)
+          if (taskData.timeline) {
+            store.setTimeline(taskData.timeline)
+          }
+        })
 
-      // 完成
-      store.updateProgress(100)
-      store.hideProgress()
-
-      ElMessage.success('AI分析完成')
-
-      // 切换到下一步
-      store.setWorkflowStep('template')
-      store.setActiveTab('materials')
+        store.hideProgress()
+        ElMessage.success('多智能体处理完成')
+        store.setWorkflowStep('template')
+        store.setActiveTab('materials')
+      }
 
       return {
-        keyframes,
-        scenes,
-        transcript,
-        keywords
+        taskId,
+        socket
       }
     } catch (error) {
-      console.error('❌ AI分析失败:', error)
+      console.error('❌ 多智能体处理失败:', error)
       store.hideProgress()
-      ElMessage.error(`分析失败: ${error.message}`)
+      ElMessage.error(`处理失败: ${error.message}`)
       throw error
     }
   }

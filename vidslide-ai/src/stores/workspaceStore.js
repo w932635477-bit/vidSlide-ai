@@ -120,6 +120,14 @@ export const useWorkspaceStore = defineStore('workspace', {
         multiThreading: true,
         memoryOptimization: true
       }
+    },
+
+    // ========== 多智能体Timeline ==========
+    multiAgent: {
+      taskId: null,
+      timeline: null,
+      socket: null,
+      status: 'idle' // idle, processing, completed, failed
     }
   }),
 
@@ -360,6 +368,36 @@ export const useWorkspaceStore = defineStore('workspace', {
       if (state.preview) this.preview = state.preview
 
       this.project.isDirty = false
+    },
+
+    // ========== 多智能体Timeline操作 ==========
+    setTimeline(timeline) {
+      this.multiAgent.timeline = timeline
+      console.log('✅ Timeline已保存到store:', timeline)
+    },
+
+    setMultiAgentTaskId(taskId) {
+      this.multiAgent.taskId = taskId
+    },
+
+    setMultiAgentSocket(socket) {
+      this.multiAgent.socket = socket
+    },
+
+    setMultiAgentStatus(status) {
+      this.multiAgent.status = status
+    },
+
+    clearMultiAgentData() {
+      if (this.multiAgent.socket) {
+        this.multiAgent.socket.disconnect()
+      }
+      this.multiAgent = {
+        taskId: null,
+        timeline: null,
+        socket: null,
+        status: 'idle'
+      }
     }
   }
 })
