@@ -73,29 +73,29 @@ const emit = defineEmits(['cancel'])
 
 const steps = computed(() => [
   {
-    name: '分析视频内容',
+    name: 'Phase 1: 内容理解 (ContentAnalyst)',
+    completed: props.progress > 20,
+    current: props.progress <= 20 && props.progress > 0
+  },
+  {
+    name: 'Phase 2: 场景设计 (SceneDesigner)',
     completed: props.progress > 40,
-    current: props.progress <= 40 && props.progress > 0
+    current: props.progress > 20 && props.progress <= 40
   },
   {
-    name: '推荐最佳模板',
-    completed: props.progress > 50,
-    current: props.progress > 40 && props.progress <= 50
+    name: 'Phase 3: 层编排 (LayerOrchestrator)',
+    completed: props.progress > 60,
+    current: props.progress > 40 && props.progress <= 60
   },
   {
-    name: '搜索匹配素材',
-    completed: props.progress > 70,
-    current: props.progress > 50 && props.progress <= 70
+    name: 'Phase 4: 质量检查 (QualityDirector)',
+    completed: props.progress > 80,
+    current: props.progress > 60 && props.progress <= 80
   },
   {
-    name: '组合生成内容',
-    completed: props.progress > 85,
-    current: props.progress > 70 && props.progress <= 85
-  },
-  {
-    name: '渲染最终视频',
+    name: 'Phase 5: 视频合成 (VideoEngineer)',
     completed: props.progress >= 100,
-    current: props.progress > 85 && props.progress < 100
+    current: props.progress > 80 && props.progress < 100
   }
 ])
 

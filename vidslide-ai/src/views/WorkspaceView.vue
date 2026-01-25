@@ -8,6 +8,15 @@
     <!-- 全局组件 -->
     <ErrorHandler ref="errorHandler" />
 
+    <!-- 多智能体自动生成进度 -->
+    <AutoGenerationProgress
+      :visible="showProgress"
+      :current-step="currentStep"
+      :progress="progress"
+      :can-cancel="true"
+      @cancel="handleCancelGeneration"
+    />
+
     <AuthorizationDialog
       :visible="showAuthDialog"
       :search-keywords="pendingSearchKeywords"
@@ -151,6 +160,7 @@ import { useAutoGeneration } from '@/composables/useAutoGeneration'
 import ErrorHandler from '@/components/ErrorHandler.vue'
 import AuthorizationDialog from '@/components/AuthorizationDialog.vue'
 import MaterialSelectionDialog from '@/components/MaterialSelectionDialog.vue'
+import AutoGenerationProgress from '@/components/AutoGenerationProgress.vue'
 import VideoUploader from '@/components/VideoUploader.vue'
 import WorkspaceSidebar from '@/components/workspace/WorkspaceSidebar.vue'
 import WorkspaceMainArea from '@/components/workspace/WorkspaceMainArea.vue'
@@ -179,7 +189,14 @@ const {
 } = useMaterialManagement()
 
 // 自动化生成
-const { isProcessing: isAutoGenerating, autoGenerate } = useAutoGeneration()
+const {
+  isProcessing: isAutoGenerating,
+  progress,
+  currentStep,
+  showProgress,
+  autoGenerate,
+  cancelGeneration
+} = useAutoGeneration()
 
 // ========== 计算属性 ==========
 const hasVideo = computed(() => store.hasVideo)
@@ -340,6 +357,15 @@ const handleAutoGenerate = async () => {
       errorHandler.value.handleError(error)
     }
   }
+}
+
+// 取消生成
+const handleCancelGeneration = () => {
+  console.log('🛑 用户取消生成')
+  cancelGeneration()
+  isWorkflowRunning.value = false
+  hasWorkflowError.value = false
+  ElMessage.info('已取消生成')
 }
 
 // 处理 PPT 幻灯片更新
