@@ -11,13 +11,45 @@
       </div>
     </div>
 
-    <!-- 总体进度 -->
-    <div v-if="totalSteps > 0" class="monitor-progress">
-      <div class="progress-info">
-        <span class="progress-label">总体进度</span>
-        <span class="progress-text">{{ currentStepIndex + 1 }}/{{ totalSteps }}</span>
+    <!-- 多智能体5-Phase进度 -->
+    <div v-if="showMultiAgentProgress" class="multi-agent-progress">
+      <div class="progress-header">
+        <h4>🤖 多智能体生成进度</h4>
+        <span class="progress-percentage">{{ Math.round(multiAgentProgress) }}%</span>
       </div>
-      <el-progress :percentage="overallProgress" :status="progressStatus" :stroke-width="8" />
+
+      <el-progress
+        :percentage="multiAgentProgress"
+        :status="multiAgentProgress >= 100 ? 'success' : undefined"
+        :stroke-width="10"
+        class="main-progress"
+      />
+
+      <div v-if="multiAgentCurrentStep" class="current-step-info">
+        <span class="step-label">当前步骤:</span>
+        <span class="step-text">{{ multiAgentCurrentStep }}</span>
+      </div>
+
+      <!-- 5个Phase步骤 -->
+      <div class="phase-steps">
+        <div
+          v-for="(phase, index) in multiAgentPhases"
+          :key="index"
+          class="phase-item"
+          :class="{
+            'phase-completed': phase.completed,
+            'phase-current': phase.current,
+            'phase-pending': !phase.completed && !phase.current
+          }"
+        >
+          <div class="phase-icon">
+            <span v-if="phase.completed" class="icon-completed">✓</span>
+            <span v-else-if="phase.current" class="icon-current">⏳</span>
+            <span v-else class="icon-pending">○</span>
+          </div>
+          <div class="phase-name">{{ phase.name }}</div>
+        </div>
+      </div>
     </div>
 
     <!-- 步骤列表 -->
@@ -37,7 +69,7 @@
         <div class="step-header" @click="toggleStep(step.id)">
           <span class="step-icon">{{ getStepIcon(step.status) }}</span>
           <div class="step-info">
-            <span class="step-name">[步骤 {{ index + 1 }}/{{ totalSteps }}] {{ step.name }}</span>
+            <span class="step-name">[步骤 {{ index + 1 }}/{{ steps.length }}] {{ step.name }}</span>
             <span v-if="step.duration" class="step-duration">
               ⏱️ {{ formatDuration(step.duration) }}
             </span>
@@ -168,6 +200,19 @@ const props = defineProps({
   statistics: {
     type: Object,
     default: null
+  },
+  // 多智能体进度相关props
+  multiAgentProgress: {
+    type: Number,
+    default: 0
+  },
+  multiAgentCurrentStep: {
+    type: String,
+    default: ''
+  },
+  showMultiAgentProgress: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -184,20 +229,34 @@ onBeforeUpdate(() => {
   stepRefs.value = []
 })
 
-// 计算属性
-const totalSteps = computed(() => props.steps.length)
-
-const overallProgress = computed(() => {
-  if (totalSteps.value === 0) return 0
-  const completed = props.steps.filter(s => s.status === 'success').length
-  return Math.round((completed / totalSteps.value) * 100)
-})
-
-const progressStatus = computed(() => {
-  if (props.hasError) return 'exception'
-  if (props.isCompleted) return 'success'
-  return undefined
-})
+// 多智能体5个Phase
+const multiAgentPhases = computed(() => [
+  {
+    name: 'Phase 1: 内容理解 (ContentAnalyst)',
+    completed: props.multiAgentProgress > 20,
+    current: props.multiAgentProgress <= 20 && props.multiAgentProgress > 0
+  },
+  {
+    name: 'Phase 2: 场景设计 (SceneDesigner)',
+    completed: props.multiAgentProgress > 40,
+    current: props.multiAgentProgress > 20 && props.multiAgentProgress <= 40
+  },
+  {
+    name: 'Phase 3: 层编排 (LayerOrchestrator)',
+    completed: props.multiAgentProgress > 60,
+    current: props.multiAgentProgress > 40 && props.multiAgentProgress <= 60
+  },
+  {
+    name: 'Phase 4: 质量检查 (QualityDirector)',
+    completed: props.multiAgentProgress > 80,
+    current: props.multiAgentProgress > 60 && props.multiAgentProgress <= 80
+  },
+  {
+    name: 'Phase 5: 视频合成 (VideoEngineer)',
+    completed: props.multiAgentProgress >= 100,
+    current: props.multiAgentProgress > 80 && props.multiAgentProgress < 100
+  }
+])
 
 // 方法
 const getStepIcon = status => {
@@ -338,29 +397,6 @@ watch(
 
 .status-idle {
   color: #86868b;
-}
-
-/* 进度条 */
-.monitor-progress {
-  padding: 12px 16px;
-  background: #2d2d30;
-  border-bottom: 1px solid #333;
-}
-
-.progress-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 12px;
-}
-
-.progress-label {
-  color: #d4d4d4;
-}
-
-.progress-text {
-  color: #4a9eff;
-  font-weight: 600;
 }
 
 /* 步骤列表 */
@@ -679,4 +715,141 @@ watch(
 .code-block::-webkit-scrollbar-thumb:hover {
   background: #4e4e52;
 }
+
+/* 多智能体进度样式 */
+.multi-agent-progress {
+  padding: 16px;
+  background: #252526;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #3e3e42;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-header h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #d4d4d4;
+  font-weight: 600;
+}
+
+.progress-percentage {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4a9eff;
+}
+
+.main-progress {
+  margin-bottom: 12px;
+}
+
+.current-step-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #1e1e1e;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  border-left: 3px solid #4a9eff;
+}
+
+.step-label {
+  font-size: 12px;
+  color: #86868b;
+  font-weight: 600;
+}
+
+.step-text {
+  font-size: 12px;
+  color: #d4d4d4;
+  flex: 1;
+}
+
+.phase-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phase-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #1e1e1e;
+  border-radius: 6px;
+  border: 1px solid #3e3e42;
+  transition: all 0.3s ease;
+}
+
+.phase-item.phase-completed {
+  background: #1e3a1e;
+  border-color: #4ec9b0;
+}
+
+.phase-item.phase-current {
+  background: #1e2a3e;
+  border-color: #4a9eff;
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
+}
+
+.phase-item.phase-pending {
+  opacity: 0.6;
+}
+
+.phase-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.phase-completed .phase-icon {
+  background: #4ec9b0;
+  color: #1e1e1e;
+}
+
+.phase-current .phase-icon {
+  background: #4a9eff;
+  color: #1e1e1e;
+}
+
+.phase-pending .phase-icon {
+  background: #3e3e42;
+  color: #86868b;
+}
+
+.icon-completed,
+.icon-current,
+.icon-pending {
+  font-weight: bold;
+}
+
+.phase-name {
+  font-size: 12px;
+  color: #d4d4d4;
+  flex: 1;
+  font-weight: 500;
+}
+
+.phase-completed .phase-name {
+  color: #4ec9b0;
+}
+
+.phase-current .phase-name {
+  color: #4a9eff;
+  font-weight: 600;
+}
+
 </style>

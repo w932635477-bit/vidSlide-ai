@@ -8,15 +8,6 @@
     <!-- 全局组件 -->
     <ErrorHandler ref="errorHandler" />
 
-    <!-- 多智能体自动生成进度 -->
-    <AutoGenerationProgress
-      :visible="showProgress"
-      :current-step="currentStep"
-      :progress="progress"
-      :can-cancel="true"
-      @cancel="handleCancelGeneration"
-    />
-
     <AuthorizationDialog
       :visible="showAuthDialog"
       :search-keywords="pendingSearchKeywords"
@@ -125,7 +116,8 @@
       <!-- 右侧属性面板（使用 WorkspaceRightPanel 组件） -->
       <WorkspaceRightPanel
         :workflow-steps="workflowSteps"
-        :current-step-index="currentWorkflowStep"
+        :execution-steps="executionSteps"
+        :current-step-index="autoGenStepIndex"
         :is-running="isWorkflowRunning"
         :is-paused="isWorkflowPaused"
         :is-completed="isWorkflowCompleted"
@@ -136,6 +128,10 @@
         :video-format="videoFormat"
         :ppt-slides="pptSlides"
         :show-ppt-tab="showPptTab"
+        :multi-agent-progress="progress"
+        :multi-agent-current-step="currentStep"
+        :show-multi-agent-progress="showProgress"
+        :elapsed-time="elapsedTime"
         @workflow-pause="handleWorkflowPause"
         @workflow-resume="handleWorkflowResume"
         @workflow-cancel="handleWorkflowCancel"
@@ -160,7 +156,6 @@ import { useAutoGeneration } from '@/composables/useAutoGeneration'
 import ErrorHandler from '@/components/ErrorHandler.vue'
 import AuthorizationDialog from '@/components/AuthorizationDialog.vue'
 import MaterialSelectionDialog from '@/components/MaterialSelectionDialog.vue'
-import AutoGenerationProgress from '@/components/AutoGenerationProgress.vue'
 import VideoUploader from '@/components/VideoUploader.vue'
 import WorkspaceSidebar from '@/components/workspace/WorkspaceSidebar.vue'
 import WorkspaceMainArea from '@/components/workspace/WorkspaceMainArea.vue'
@@ -195,7 +190,12 @@ const {
   currentStep,
   showProgress,
   autoGenerate,
-  cancelGeneration
+  cancelGeneration,
+  // V0风格执行步骤
+  executionSteps,
+  currentStepIndex: autoGenStepIndex,
+  elapsedTime,
+  clearExecutionSteps
 } = useAutoGeneration()
 
 // ========== 计算属性 ==========
@@ -255,7 +255,12 @@ const handleVideoUploaded = async file => {
     console.error('视频上传失败:', error)
     ElMessage.error(`上传失败: ${error.message}`)
     if (errorHandler.value) {
-      errorHandler.value.handleError(error)
+      errorHandler.value.addError({
+        type: 'upload',
+        title: '视频上传失败',
+        message: error.message,
+        canRetry: true
+      })
     }
   }
 }
@@ -295,57 +300,62 @@ const handleAutoGenerate = async () => {
     if (workspaceMainArea.value && result) {
       console.log('📺 准备显示预览，结果:', result)
 
-      // 使用生成结果中的场景数据生成PPT幻灯片
-      const pptSlides =
-        result.scenes?.map((scene, index) => ({
-          id: index + 1,
-          title: scene.title || `场景 ${index + 1}`,
-          content: scene.content || '',
-          thumbnail: scene.material?.materials?.[0]?.thumbnail || '',
-          image: scene.material?.materials?.[0]?.url || ''
-        })) || []
+      // ⭐ 保存Timeline数据到store
+      if (result.timeline) {
+        console.log('✅ Timeline数据可用:', result.timeline)
+        store.setTimeline(result.timeline)
+        console.log('✅ Timeline已保存到workspaceStore')
+      } else {
+        console.warn('⚠️ 未收到Timeline数据')
+      }
 
-      // 如果没有场景，使用mock数据
-      const slidesToShow =
-        pptSlides.length > 0
-          ? pptSlides
-          : [
-              {
-                id: 1,
-                title: '封面页',
-                thumbnail: '',
-                image: '',
-                content: result.transcript?.substring(0, 50) || ''
-              },
-              {
-                id: 2,
-                title: '内容概述',
-                thumbnail: '',
-                image: '',
-                content: result.transcript?.substring(50, 100) || ''
-              },
-              {
-                id: 3,
-                title: '详细分析',
-                thumbnail: '',
-                image: '',
-                content: result.transcript?.substring(100, 150) || ''
-              }
-            ]
+      // 使用生成的视频路径（多智能体生成的最终视频）
+      let videoUrl = store.video.src // 默认使用原视频
 
-      console.log('📄 PPT幻灯片数据:', slidesToShow)
+      if (result.videoPath) {
+        // 使用后端生成的视频
+        videoUrl = `http://localhost:3002/api/multi-agent/download/${result.taskId}`
+        console.log('🎬 使用生成的视频:', videoUrl)
+      } else {
+        console.warn('⚠️ 未找到生成的视频，使用原视频')
+      }
 
-      // 使用生成结果中的视频URL（如果有渲染后的视频）或原始视频
-      const videoUrl = result.video?.renderedUrl || result.video?.url || store.video.src
+      // 从Timeline生成PPT幻灯片
+      const pptSlides = result.timeline?.clips?.map((clip, index) => ({
+        id: index + 1,
+        title: `场景 ${index + 1}`,
+        content: `时长: ${clip.duration.toFixed(2)}s`,
+        thumbnail: '',
+        image: ''
+      })) || []
 
+      console.log('📄 PPT幻灯片数据:', pptSlides)
       console.log('🎬 视频URL:', videoUrl)
-      console.log('📊 模板:', result.template?.name)
+
+      // 获取Remotion预览参数
+      let remotionProps = null
+      if (result.taskId) {
+        try {
+          console.log('🎬 获取Remotion预览参数...')
+          const remotionResponse = await fetch(`http://localhost:3002/api/multi-agent/remotion-props/${result.taskId}`)
+          if (remotionResponse.ok) {
+            const remotionData = await remotionResponse.json()
+            remotionProps = remotionData.defaultProps
+            console.log('✅ Remotion预览参数获取成功:', remotionProps)
+          } else {
+            console.warn('⚠️ 获取Remotion预览参数失败')
+          }
+        } catch (error) {
+          console.error('❌ 获取Remotion预览参数出错:', error)
+        }
+      }
 
       workspaceMainArea.value.showPreview(
         videoUrl,
-        slidesToShow,
+        pptSlides,
         new Date().toLocaleString(),
-        store.video.file?.size || 0
+        store.video.file?.size || 0,
+        remotionProps
       )
     }
   } catch (error) {
@@ -354,7 +364,13 @@ const handleAutoGenerate = async () => {
     hasWorkflowError.value = true
     isWorkflowRunning.value = false
     if (errorHandler.value) {
-      errorHandler.value.handleError(error)
+      errorHandler.value.addError({
+        type: 'processing',
+        title: '视频生成失败',
+        message: error.message,
+        details: error.stack,
+        canRetry: true
+      })
     }
   }
 }
@@ -388,7 +404,12 @@ const handleMaterialAuthorize = async platforms => {
   } catch (error) {
     console.error('授权搜索失败:', error)
     if (errorHandler.value) {
-      errorHandler.value.handleError(error)
+      errorHandler.value.addError({
+        type: 'permission',
+        title: '授权失败',
+        message: error.message,
+        canRetry: true
+      })
     }
   }
 }
@@ -405,7 +426,12 @@ const handleUseLocalOnly = async () => {
   } catch (error) {
     console.error('本地搜索失败:', error)
     if (errorHandler.value) {
-      errorHandler.value.handleError(error)
+      errorHandler.value.addError({
+        type: 'processing',
+        title: '本地搜索失败',
+        message: error.message,
+        canRetry: true
+      })
     }
   }
 }
@@ -431,6 +457,12 @@ const handleWorkflowResume = () => {
 // 取消工作流
 const handleWorkflowCancel = () => {
   console.log('⏹️ 取消工作流')
+
+  // 取消多智能体生成
+  if (isAutoGenerating.value) {
+    cancelGeneration()
+  }
+
   isWorkflowRunning.value = false
   isWorkflowPaused.value = false
   hasWorkflowError.value = true
@@ -445,6 +477,8 @@ const handleClearLogs = () => {
   isWorkflowCompleted.value = false
   hasWorkflowError.value = false
   workflowStatistics.value = null
+  // 清空V0风格执行步骤
+  clearExecutionSteps()
   ElMessage.success('日志已清空')
 }
 

@@ -146,20 +146,18 @@
           </div>
         </div>
 
-        <!-- 监控标签页 -->
+        <!-- 执行面板标签页 (V0风格) -->
         <div v-if="activeTab === 'monitor'" class="tab-pane monitor-pane">
-          <WorkflowMonitor
-            :steps="workflowSteps"
+          <AgentExecutionPanel
+            :steps="executionSteps"
             :current-step-index="currentStepIndex"
             :is-running="isRunning"
-            :is-paused="isPaused"
             :is-completed="isCompleted"
             :has-error="hasError"
-            :statistics="statistics"
-            @pause="$emit('workflow-pause')"
-            @resume="$emit('workflow-resume')"
-            @cancel="$emit('workflow-cancel')"
-            @clear-logs="$emit('clear-logs')"
+            :progress="multiAgentProgress"
+            :current-step="multiAgentCurrentStep"
+            :elapsed-time="elapsedTime"
+            @clear="$emit('clear-logs')"
           />
         </div>
       </div>
@@ -169,9 +167,14 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import WorkflowMonitor from '../WorkflowMonitor.vue'
+import AgentExecutionPanel from '../execution/AgentExecutionPanel.vue'
 
 const props = defineProps({
+  // 执行步骤（V0风格）
+  executionSteps: {
+    type: Array,
+    default: () => []
+  },
   workflowSteps: {
     type: Array,
     default: () => []
@@ -219,6 +222,24 @@ const props = defineProps({
   showPptTab: {
     type: Boolean,
     default: false
+  },
+  // 多智能体进度相关props
+  multiAgentProgress: {
+    type: Number,
+    default: 0
+  },
+  multiAgentCurrentStep: {
+    type: String,
+    default: ''
+  },
+  showMultiAgentProgress: {
+    type: Boolean,
+    default: false
+  },
+  // 已用时间
+  elapsedTime: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -233,7 +254,7 @@ const tabs = computed(() => {
     { id: 'properties', icon: '⚙️', label: '属性' },
     { id: 'effects', icon: '✨', label: '特效' },
     { id: 'animation', icon: '🎭', label: '动画' },
-    { id: 'monitor', icon: '📊', label: '监控' }
+    { id: 'monitor', icon: '⚡', label: '执行' }
   ]
 
   if (props.showPptTab && props.pptSlides?.length > 0) {
