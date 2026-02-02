@@ -67,7 +67,7 @@
           </svg>
           <span class="btn-label">重做</span>
         </button>
-        <button class="header-btn primary" title="保存 (⌘S)">
+        <button class="header-btn primary" title="保存 (⌘S)" @click="handleSaveProject">
           <svg
             width="20"
             height="20"
@@ -81,6 +81,19 @@
             <polyline points="7 3 7 8 15 8" />
           </svg>
           <span class="btn-label">保存</span>
+        </button>
+        <button class="header-btn primary" title="导出视频" @click="handleExportVideo">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          <span class="btn-label">导出</span>
         </button>
       </div>
     </header>
@@ -480,6 +493,35 @@ const handleClearLogs = () => {
   // 清空V0风格执行步骤
   clearExecutionSteps()
   ElMessage.success('日志已清空')
+}
+
+// 保存项目
+const handleSaveProject = () => {
+  console.log('💾 保存项目')
+  try {
+    // 保存当前项目状态到localStorage
+    const projectData = {
+      video: store.video,
+      timeline: store.timeline,
+      savedAt: new Date().toISOString()
+    }
+    localStorage.setItem('vidslide_project', JSON.stringify(projectData))
+    ElMessage.success('项目已保存')
+  } catch (error) {
+    console.error('保存项目失败:', error)
+    ElMessage.error('保存项目失败')
+  }
+}
+
+// 导出视频
+const handleExportVideo = () => {
+  console.log('📤 导出视频')
+  if (workspaceMainArea.value && workspaceMainArea.value.handleExportVideo) {
+    // 调用WorkspaceMainArea的导出功能
+    workspaceMainArea.value.handleExportVideo()
+  } else {
+    ElMessage.warning('请先生成视频')
+  }
 }
 
 // 初始化工作流监控

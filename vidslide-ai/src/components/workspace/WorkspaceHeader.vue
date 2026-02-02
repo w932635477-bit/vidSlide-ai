@@ -29,7 +29,7 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="jianying-btn-primary export-btn">
+        <button class="jianying-btn-primary export-btn" @click="handleExport">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
           </svg>
@@ -41,17 +41,27 @@
 </template>
 
 <script setup>
-// 事件处理 (临时测试版本)
+const emit = defineEmits(['new-project', 'open-project', 'save-project', 'export-video'])
+
+// 事件处理
 const handleNewProject = () => {
   console.log('新建项目')
+  emit('new-project')
 }
 
 const handleOpenProject = () => {
   console.log('打开项目')
+  emit('open-project')
 }
 
 const handleSaveProject = () => {
   console.log('保存项目')
+  emit('save-project')
+}
+
+const handleExport = () => {
+  console.log('导出视频')
+  emit('export-video')
 }
 </script>
 

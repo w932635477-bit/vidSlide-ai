@@ -100,11 +100,14 @@
           :ppt-slides="generatedPptSlides"
           :generation-time="generationTime"
           :file-size="generatedFileSize"
+          :remotion-props="generatedRemotionProps"
           @switch-to-original="showGeneratedPreview = false"
           @download-ppt="handleDownloadPpt"
           @export-video="handleExportVideo"
           @play="onPlay"
           @pause="onPause"
+          @timeupdate="onTimeUpdate"
+          @loadedmetadata="onVideoLoaded"
         />
 
         <!-- 预览操作按钮组（右下角） -->
@@ -129,54 +132,22 @@
       </div>
     </div>
 
-    <!-- 内嵌时间轴（始终显示） -->
-    <div v-if="videoSrc" class="embedded-timeline">
-      <div class="timeline-header">
-        <div class="timeline-controls">
-          <button class="timeline-btn" title="播放/暂停" @click="togglePlayPause">
-            <span>{{ isPlaying ? '⏸' : '▶' }}</span>
-          </button>
-          <span class="time-display"
-            >{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span
-          >
-        </div>
-
-        <div class="timeline-zoom">
-          <button class="zoom-btn" title="缩小" @click="zoomOut">−</button>
-          <span class="zoom-level">{{ zoomLevel }}%</span>
-          <button class="zoom-btn" title="放大" @click="zoomIn">+</button>
-        </div>
-      </div>
-
-      <div class="timeline-track">
-        <div class="timeline-ruler">
-          <div
-            v-for="mark in timeMarks"
-            :key="mark.time"
-            class="time-mark"
-            :style="{ left: mark.position + '%' }"
-          >
-            <span class="mark-label">{{ formatTime(mark.time) }}</span>
-          </div>
-        </div>
-
-        <div class="timeline-content">
-          <div class="video-track">
-            <div class="track-label">视频</div>
-            <div class="track-items">
-              <div class="track-item video-item" :style="{ width: '100%' }">
-                <span class="item-name">{{ videoFileName }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="playhead" :style="{ left: playheadPosition + '%' }">
-          <div class="playhead-line"></div>
-          <div class="playhead-handle"></div>
-        </div>
-      </div>
-    </div>
+    <!-- 简化Timeline（始终显示） -->
+    <SimplifiedTimeline
+      v-if="videoSrc"
+      :clips="timelineClips"
+      :current-time="currentTime"
+      :duration="duration"
+      :is-playing="isPlaying"
+      @seek-to-time="handleSeekToTime"
+      @toggle-play="togglePlayPause"
+      @add-effect="handleAddEffect"
+      @edit-effect="handleEditEffect"
+      @delete-effect="handleDeleteEffect"
+      @copy-effect="handleCopyEffect"
+      @apply-suggestion="handleApplySuggestion"
+      @toggle-effect="handleToggleEffect"
+    />
   </div>
 </template>
 
@@ -185,6 +156,7 @@ import { ref, computed, watch } from 'vue'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import PreviewQualityControl from '../PreviewQualityControl.vue'
 import GeneratedPreview from './GeneratedPreview.vue'
+import SimplifiedTimeline from './SimplifiedTimeline.vue'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
@@ -204,7 +176,6 @@ const generatedPreviewElement = ref(null)
 const currentTime = ref(0)
 const duration = ref(0)
 const isPlaying = ref(false)
-const zoomLevel = ref(100)
 const videoFileName = ref('当前视频')
 
 // 生成预览状态
@@ -213,6 +184,7 @@ const generatedVideoSrc = ref('')
 const generatedPptSlides = ref([])
 const generationTime = ref('')
 const generatedFileSize = ref(0)
+const generatedRemotionProps = ref(null) // 新增：Remotion预览参数
 
 // 计算属性
 const videoSrc = computed(() => store.video.src)
@@ -223,28 +195,6 @@ const previewResolution = computed(() => store.preview.resolution)
 const previewQuality = computed(() => store.preview.quality)
 const previewOptimizations = computed(() => store.preview.optimizations)
 const isGenerating = computed(() => store.isGenerating || false)
-
-// 播放头位置
-const playheadPosition = computed(() => {
-  if (duration.value === 0) return 0
-  return (currentTime.value / duration.value) * 100
-})
-
-// 时间刻度
-const timeMarks = computed(() => {
-  const marks = []
-  const totalSeconds = duration.value
-  const interval = totalSeconds > 60 ? 10 : 5 // 根据视频长度调整间隔
-
-  for (let i = 0; i <= totalSeconds; i += interval) {
-    marks.push({
-      time: i,
-      position: (i / totalSeconds) * 100
-    })
-  }
-
-  return marks
-})
 
 // 画中画样式
 const pipStyle = computed(() => {
@@ -266,25 +216,96 @@ const pipStyle = computed(() => {
   }
 })
 
-// 格式化时间
-const formatTime = seconds => {
-  if (!seconds || isNaN(seconds)) return '0:00'
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
-}
+// Timeline clips 数据（转换为简化格式）
+const timelineClips = computed(() => {
+  const timeline = store.multiAgent.timeline
+  if (!timeline || !timeline.clips) return []
 
-// 时间轴缩放
-const zoomIn = () => {
-  if (zoomLevel.value < 200) {
-    zoomLevel.value += 25
+  return timeline.clips.map((clip, index) => {
+    // ⭐ 修复：使用 clip.type 而不是 clip.sceneType（与新架构一致）
+    const clipType = clip.type || clip.sceneType || 'original'
+    const isMultiLayer = clipType === 'multi-layer-composition' ||
+                         clipType === 'card-group' ||
+                         clipType === 'video-with-card' ||
+                         (clip.layers && clip.layers.length > 0)
+
+    // 根据场景类型生成效果列表
+    let effects = []
+    if (clipType === 'multi-layer-composition') {
+      effects = [
+        { icon: '🖼️', name: '背景图片', enabled: true },
+        { icon: '📝', name: '文字卡片', enabled: true },
+        { icon: '👤', name: '画中画', enabled: true }
+      ]
+    } else if (clipType === 'card-group') {
+      effects = [
+        { icon: '📝', name: '卡片组', enabled: true, count: clip.cards?.length || 0 }
+      ]
+    } else if (clipType === 'video-with-card') {
+      effects = [
+        { icon: '📝', name: '文字卡片', enabled: true }
+      ]
+    }
+
+    return {
+      id: clip.id || `clip-${index}`,
+      start: clip.startTime || clip.start || 0,
+      duration: clip.duration || (clip.endTime - clip.startTime) || 0,
+      type: isMultiLayer ? 'effect' : 'original',
+      sceneType: clipType,  // ⭐ 保留原始场景类型
+      effects: effects,
+      keyword: clip.keyword || clip.keywordObj?.text || '',
+      cards: clip.cards || [],
+      suggestion: {
+        show: false,
+        message: ''
+      }
+    }
+  })
+})
+
+// Timeline 事件处理
+const handleSeekToTime = (time) => {
+  store.updateVideoTime(time)
+  if (store.video.element) {
+    store.video.element.currentTime = time
   }
 }
 
-const zoomOut = () => {
-  if (zoomLevel.value > 50) {
-    zoomLevel.value -= 25
-  }
+const handleAddEffect = (clip) => {
+  console.log('添加特效:', clip)
+  ElMessage.info('特效模板选择功能开发中...')
+  // TODO: 打开模板选择对话框
+}
+
+const handleEditEffect = (clip) => {
+  console.log('编辑特效:', clip)
+  ElMessage.info('特效编辑功能开发中...')
+  // TODO: 打开编辑面板
+}
+
+const handleDeleteEffect = (clip) => {
+  console.log('删除特效:', clip)
+  ElMessage.warning('确定要删除这个特效吗？')
+  // TODO: 确认并删除
+}
+
+const handleCopyEffect = (clip) => {
+  console.log('复制特效:', clip)
+  ElMessage.success('特效已复制')
+  // TODO: 复制到剪贴板
+}
+
+const handleApplySuggestion = (clip) => {
+  console.log('应用建议:', clip)
+  ElMessage.info('AI建议功能开发中...')
+  // TODO: 调用后端API应用建议
+}
+
+const handleToggleEffect = (clip, effect) => {
+  console.log('切换特效:', clip, effect)
+  ElMessage.success(`${effect.name} 已${effect.enabled ? '关闭' : '开启'}`)
+  // TODO: 更新特效开关状态
 }
 
 // 切换播放/暂停
@@ -394,49 +415,81 @@ const handleDownloadPpt = () => {
 }
 
 // 导出视频
-const handleExportVideo = () => {
+const handleExportVideo = async () => {
   if (!generatedVideoSrc.value) {
     ElMessage.warning('没有可导出的视频')
     return
   }
 
   try {
+    ElMessage.info('正在准备下载视频...')
+
+    let downloadUrl = generatedVideoSrc.value
+    let shouldRevoke = false
+
+    // 如果是HTTP URL，需要先fetch数据再创建blob URL
+    if (generatedVideoSrc.value.startsWith('http://') || generatedVideoSrc.value.startsWith('https://')) {
+      console.log('📥 从服务器获取视频数据:', generatedVideoSrc.value)
+
+      const response = await fetch(generatedVideoSrc.value)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const blob = await response.blob()
+      downloadUrl = URL.createObjectURL(blob)
+      shouldRevoke = true
+
+      console.log('✅ 视频数据获取成功，大小:', (blob.size / 1024 / 1024).toFixed(2), 'MB')
+    }
+
     // 创建下载链接
     const link = document.createElement('a')
-    link.href = generatedVideoSrc.value
+    link.href = downloadUrl
     link.download = `vidslide-generated-${Date.now()}.mp4`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
 
+    // 如果创建了临时blob URL，需要释放
+    if (shouldRevoke) {
+      setTimeout(() => {
+        URL.revokeObjectURL(downloadUrl)
+      }, 100)
+    }
+
     ElMessage.success('视频导出成功')
   } catch (error) {
     console.error('导出视频失败:', error)
-    ElMessage.error('导出视频失败')
+    ElMessage.error(`导出视频失败: ${error.message}`)
   }
 }
 
 // 显示生成预览（供外部调用）
-const showPreview = (videoSrc, pptSlides = [], time = '', fileSize = 0) => {
+const showPreview = (videoSrc, pptSlides = [], time = '', fileSize = 0, remotionProps = null) => {
   console.log('🎬 WorkspaceMainArea.showPreview 被调用')
   console.log('  - videoSrc:', videoSrc)
   console.log('  - pptSlides:', pptSlides)
+  console.log('  - remotionProps:', remotionProps)
   console.log('  - 当前 showGeneratedPreview:', showGeneratedPreview.value)
 
   generatedVideoSrc.value = videoSrc
   generatedPptSlides.value = pptSlides
   generationTime.value = time
   generatedFileSize.value = fileSize
+  generatedRemotionProps.value = remotionProps // 保存remotionProps
   showGeneratedPreview.value = true
 
   console.log('  - 设置后 showGeneratedPreview:', showGeneratedPreview.value)
   console.log('  - generatedVideoSrc:', generatedVideoSrc.value)
   console.log('  - generatedPptSlides 数量:', generatedPptSlides.value.length)
+  console.log('  - generatedRemotionProps:', generatedRemotionProps.value)
 }
 
 // 暴露方法给父组件
 defineExpose({
-  showPreview
+  showPreview,
+  handleExportVideo
 })
 
 // 监听视频源变化，更新视频元素
@@ -748,256 +801,5 @@ watch(showGeneratedPreview, newValue => {
   .auto-generate-btn .btn-icon {
     font-size: 14px;
   }
-}
-
-/* 内嵌时间轴 */
-.embedded-timeline {
-  height: 150px;
-  background: #2a2a2a;
-  border-top: 1px solid #3a3a3a;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.timeline-header {
-  height: 40px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #252525;
-  border-bottom: 1px solid #3a3a3a;
-}
-
-.timeline-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* 预览操作按钮组 */
-.preview-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-btn {
-  padding: 6px 12px;
-  border: 1px solid #3a3a3a;
-  background: #2a2a2a;
-  border-radius: 6px;
-  color: #d4d4d4;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.action-btn:hover {
-  background: #3a3a3a;
-  border-color: #4a4a4a;
-  transform: translateY(-1px);
-}
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #4a9eff 0%, #4ec9b0 100%);
-  border-color: transparent;
-  color: white;
-}
-
-.action-btn.primary:hover {
-  background: linear-gradient(135deg, #5aafff 0%, #5ed9c0 100%);
-}
-
-.action-btn span:first-child {
-  font-size: 14px;
-}
-
-.timeline-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: #3a3a3a;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.timeline-btn:hover {
-  background: #4a4a4a;
-}
-
-.time-display {
-  font-size: 13px;
-  color: #d4d4d4;
-  font-family: monospace;
-}
-
-.timeline-zoom {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.zoom-btn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: #3a3a3a;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.zoom-btn:hover {
-  background: #4a4a4a;
-}
-
-.zoom-level {
-  font-size: 12px;
-  color: #d4d4d4;
-  min-width: 45px;
-  text-align: center;
-}
-
-.timeline-track {
-  flex: 1;
-  position: relative;
-  overflow-x: auto;
-  overflow-y: hidden;
-  background: #1e1e1e;
-}
-
-.timeline-ruler {
-  height: 24px;
-  background: #252525;
-  border-bottom: 1px solid #3a3a3a;
-  position: relative;
-}
-
-.time-mark {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding-left: 4px;
-}
-
-.time-mark::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 1px;
-  height: 8px;
-  background: #5a5a5a;
-  transform: translateY(-50%);
-}
-
-.mark-label {
-  font-size: 10px;
-  color: #8a8a8a;
-  font-family: monospace;
-}
-
-.timeline-content {
-  padding: 8px 0;
-}
-
-.video-track {
-  display: flex;
-  align-items: center;
-  height: 60px;
-  padding: 0 16px;
-}
-
-.track-label {
-  width: 60px;
-  font-size: 12px;
-  color: #d4d4d4;
-  font-weight: 500;
-}
-
-.track-items {
-  flex: 1;
-  height: 40px;
-  position: relative;
-}
-
-.track-item {
-  position: absolute;
-  height: 100%;
-  background: #4a9eff;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.track-item:hover {
-  background: #5aafff;
-}
-
-.video-item {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.video-item:hover {
-  background: linear-gradient(135deg, #7c8ff0 0%, #8a5bb8 100%);
-}
-
-.item-name {
-  font-size: 12px;
-  color: white;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.playhead {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.playhead-line {
-  width: 2px;
-  height: 100%;
-  background: #ff4444;
-  box-shadow: 0 0 4px rgba(255, 68, 68, 0.5);
-}
-
-.playhead-handle {
-  position: absolute;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  background: #ff4444;
-  border: 2px solid white;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 </style>
