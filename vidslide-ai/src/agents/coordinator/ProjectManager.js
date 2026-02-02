@@ -11,10 +11,25 @@ import ReworkEngine from '../../core/ReworkEngine.js';
 import ImprovedRetryHandler from '../../core/ImprovedRetryHandler.js';
 import ErrorMemory from '../../core/ErrorMemory.js';
 import ViolationClassifier from '../../core/ViolationClassifier.js';
+import RemotionRenderServiceCLI from '../../services/RemotionRenderServiceCLI.js';
+import TemplateStyleAnalyzer from '../../services/TemplateStyleAnalyzer.js';
+import { globalCheckpointManager } from '../../core/CheckpointManager.js';
+import { globalTracer } from '../../core/AgentTracer.js';
 import { execSync } from 'child_process';
 
+// ⭐ 新增：导入规则驱动架构组件
+import { WorkflowStateMachine, WorkflowState, TransitionResult } from '../../core/WorkflowStateMachine.js';
+import { globalRuleEngine } from '../../core/RuleEngine.js';
+import { Gates } from '../../core/ValidationGate.js';
+
 /**
- * ProjectManager - 项目经理（总协调器）
+ * ProjectManager - 项目经理（总协调器）v3.0 - 规则驱动版本
+ *
+ * 最佳实践优化：
+ * - 集成CheckpointManager实现断点续传
+ * - 集成AgentTracer实现分布式追踪
+ * - ⭐ 集成WorkflowStateMachine实现规则驱动工作流
+ * - ⭐ 集成RuleEngine实现自动验证和修复
  *
  * 职责：
  * 1. 制定5阶段执行计划
@@ -22,6 +37,8 @@ import { execSync } from 'child_process';
  * 3. 监控执行进度
  * 4. 处理异常和重试
  * 5. 协调智能体之间的工作
+ * 6. 支持断点续传
+ * 7. ⭐ 规则驱动的状态转换和验证
  */
 class ProjectManager {
   constructor(options = {}) {
@@ -32,6 +49,33 @@ class ProjectManager {
     this.logger = new Logger(options.logger);
     this.errorHandler = new ErrorHandler({ logger: this.logger });
     this.cacheManager = new CacheManager(options.cacheManager);
+
+    // ⭐ 新增：检查点管理器（断点续传）
+    this.checkpointManager = globalCheckpointManager;
+
+    // ⭐ 新增：分布式追踪器
+    this.tracer = globalTracer;
+
+    // ⭐⭐⭐ 新增：规则驱动架构组件
+    this.ruleEngine = globalRuleEngine;
+    this.stateMachine = new WorkflowStateMachine({ ruleEngine: this.ruleEngine });
+
+    // 验证门实例
+    this.gates = {
+      content: Gates.content(),
+      scenes: Gates.scenes(),
+      layers: Gates.layers(),
+      output: Gates.output()
+    };
+
+    // 监听状态变化，用于UI更新
+    this.stateMachine.addListener('stateChange', (event) => {
+      this.logger.info(`📊 状态转换: ${event.fromState} → ${event.toState}`);
+      // 触发外部监听器（如果有）
+      if (this.onStateChange) {
+        this.onStateChange(event);
+      }
+    });
 
     // ⭐ 新增：初始化错误处理系统
     this.reworkEngine = new ReworkEngine({
@@ -75,28 +119,292 @@ class ProjectManager {
       logger: this.logger,
       errorHandler: this.errorHandler
     });
+
+    // ⭐ 新增：初始化Remotion渲染服务
+    this.remotionService = new RemotionRenderServiceCLI({ logger: this.logger });
+    this.useRemotion = process.env.USE_REMOTION === 'true';
+
+    // ⭐ 新增：初始化模板风格分析服务
+    this.templateStyleAnalyzer = new TemplateStyleAnalyzer({
+      logger: this.logger
+    });
+
+    this.logger.info(`✅ ProjectManager初始化完成（Remotion: ${this.useRemotion ? '启用' : '禁用'}, 断点续传: 启用, 规则引擎: 启用）`);
+    this.logger.info(`   - 硬性规则: ${this.ruleEngine.hardRules.size}条`);
+    this.logger.info(`   - 软性规则: ${this.ruleEngine.softRules.size}条`);
+    this.logger.info(`   - 验证门: ${Object.keys(this.gates).length}个`);
   }
 
   /**
-   * 主执行流程
+   * ⭐⭐⭐ 新增：基于状态机的执行流程（规则驱动版本）
+   *
+   * 工作流状态：
+   * INIT → ANALYZING → ANALYSIS_VALIDATED → DESIGNING → DESIGN_VALIDATED
+   *      → GENERATING → GENERATION_VALIDATED → RENDERING → COMPLETED
+   *
    * @param {string} videoPath - 视频路径
    * @param {Object} options - 选项
+   * @param {Function} options.onStateChange - 状态变化回调（用于UI更新）
+   * @returns {Promise<Object>} 执行结果
+   */
+  async executeWithStateMachine(videoPath, options = {}) {
+    const taskId = `project_sm_${Date.now()}`;
+
+    // 重置状态机
+    this.stateMachine.reset();
+
+    // 设置状态变化回调
+    if (options.onStateChange) {
+      this.onStateChange = options.onStateChange;
+    }
+
+    this.logger.info('🎯 ProjectManager: 开始规则驱动执行');
+    this.logger.info(`  任务ID: ${taskId}`);
+    this.logger.info(`  视频路径: ${videoPath}`);
+    this.logger.info(`  当前状态: ${this.stateMachine.getState()}`);
+
+    const trace = this.tracer.startTrace(`ProjectManager.executeWithStateMachine`);
+    const rootSpan = trace.getRootSpan();
+    rootSpan.setAttributes({
+      'project.taskId': taskId,
+      'project.videoPath': videoPath,
+      'project.mode': 'state_machine'
+    });
+
+    try {
+      // 获取视频时长
+      const videoDuration = await this.getVideoDuration(videoPath);
+
+      // ========== 阶段1: 内容分析 ==========
+      this.logger.info('\n📊 阶段1: 内容分析');
+
+      // 转换到 ANALYZING 状态
+      let result = await this.stateMachine.transition(WorkflowState.ANALYZING, {
+        videoPath
+      });
+      if (!result.success) {
+        throw new Error(`状态转换失败: ${result.error}`);
+      }
+
+      // 执行内容分析
+      const contentResult = await this.agents.contentAnalyst.run({ videoPath });
+      const keywords = contentResult?.keywords || [];
+      const transcript = contentResult?.transcript || '';
+
+      // 转换到 ANALYSIS_VALIDATED 状态（触发Gate1验证）
+      result = await this.stateMachine.transition(WorkflowState.ANALYSIS_VALIDATED, {
+        keywords,
+        transcript,
+        videoDuration
+      });
+      if (!result.success) {
+        throw new Error(`内容验证失败: ${result.error}`);
+      }
+      this.logger.info(`  ✅ Gate1通过: ${keywords.length}个关键词`);
+
+      // ========== 阶段2: 场景设计 ==========
+      this.logger.info('\n📊 阶段2: 场景设计');
+
+      // 转换到 DESIGNING 状态
+      result = await this.stateMachine.transition(WorkflowState.DESIGNING, {});
+      if (!result.success) {
+        throw new Error(`状态转换失败: ${result.error}`);
+      }
+
+      // 执行场景设计
+      const sceneResult = await this.agents.sceneDesigner.run({
+        keywords,
+        videoMetadata: { duration: videoDuration, path: videoPath, transcript }
+      });
+      const scenes = sceneResult?.scenes || [];
+
+      // 转换到 DESIGN_VALIDATED 状态（触发Gate2验证 - 核心规则验证）
+      result = await this.stateMachine.transition(WorkflowState.DESIGN_VALIDATED, {
+        scenes,
+        videoDuration
+      });
+
+      if (!result.success) {
+        // 检查是否有自动修复
+        if (result.result === TransitionResult.FIXED) {
+          this.logger.info(`  ⚠️ Gate2自动修复了场景设计`);
+        } else {
+          throw new Error(`场景验证失败: ${result.error}\n违规: ${JSON.stringify(result.violations)}`);
+        }
+      }
+      this.logger.info(`  ✅ Gate2通过: ${scenes.length}个场景`);
+
+      // ========== 阶段3: 层生成 ==========
+      this.logger.info('\n📊 阶段3: 层生成');
+
+      // 转换到 GENERATING 状态
+      result = await this.stateMachine.transition(WorkflowState.GENERATING, {});
+      if (!result.success) {
+        throw new Error(`状态转换失败: ${result.error}`);
+      }
+
+      // 执行层协调
+      const timeline = {
+        version: '3.0',
+        duration: videoDuration,
+        clips: scenes
+      };
+      const layerResult = await this.agents.layerOrchestrator.run({
+        timeline,
+        videoPath
+      });
+
+      // 转换到 GENERATION_VALIDATED 状态（触发Gate3验证）
+      result = await this.stateMachine.transition(WorkflowState.GENERATION_VALIDATED, {
+        timeline: layerResult?.timeline || timeline
+      });
+      if (!result.success) {
+        throw new Error(`层验证失败: ${result.error}`);
+      }
+      this.logger.info(`  ✅ Gate3通过: 层生成完成`);
+
+      // ========== 阶段4: 视频渲染 ==========
+      this.logger.info('\n📊 阶段4: 视频渲染');
+
+      // 转换到 RENDERING 状态
+      result = await this.stateMachine.transition(WorkflowState.RENDERING, {});
+      if (!result.success) {
+        throw new Error(`状态转换失败: ${result.error}`);
+      }
+
+      // 执行视频合成
+      const composeResult = await this.agents.videoEngineer.run({
+        timeline: layerResult?.timeline || timeline,
+        videoPath
+      });
+      const outputPath = composeResult?.finalVideo || composeResult;
+
+      // 转换到 COMPLETED 状态（触发Gate4验证）
+      result = await this.stateMachine.transition(WorkflowState.COMPLETED, {
+        outputPath,
+        videoDuration,
+        expectedDuration: videoDuration
+      });
+      if (!result.success) {
+        throw new Error(`输出验证失败: ${result.error}`);
+      }
+      this.logger.info(`  ✅ Gate4通过: 视频生成完成`);
+
+      // ========== 完成 ==========
+      this.tracer.endTrace(trace.traceId);
+
+      this.logger.info('\n✅ 规则驱动工作流执行完成');
+      this.logger.info(`  最终状态: ${this.stateMachine.getState()}`);
+      this.logger.info(`  状态转换历史: ${this.stateMachine.getHistory().length}次`);
+
+      return {
+        success: true,
+        taskId,
+        videoPath: outputPath,
+        timeline: layerResult?.timeline || timeline,
+        stateMachineHistory: this.stateMachine.getHistory(),
+        ruleValidations: {
+          hardRulesChecked: this.ruleEngine.getStats().hardRulesCount,
+          softRulesChecked: this.ruleEngine.getStats().softRulesCount
+        }
+      };
+
+    } catch (error) {
+      this.logger.error(`❌ 规则驱动工作流失败: ${error.message}`);
+
+      // 记录失败状态
+      rootSpan.recordError(error);
+      this.tracer.endTrace(trace.traceId);
+
+      return {
+        success: false,
+        taskId,
+        error: error.message,
+        currentState: this.stateMachine.getState(),
+        stateMachineHistory: this.stateMachine.getHistory()
+      };
+    }
+  }
+
+  /**
+   * 主执行流程（支持断点续传）
+   * @param {string} videoPath - 视频路径
+   * @param {Object} options - 选项
+   * @param {string} options.resumeTaskId - 恢复任务ID（可选）
    * @returns {Promise<Object>} 执行结果
    */
   async execute(videoPath, options = {}) {
+    // 生成任务ID
+    const taskId = options.resumeTaskId || `project_${Date.now()}`;
+
+    // ⭐⭐⭐ 重置所有Agent的熔断器，确保新任务不受之前失败的影响
+    this.resetAllAgents();
+
+    // 开始追踪
+    const trace = this.tracer.startTrace(`ProjectManager.execute`);
+    const rootSpan = trace.getRootSpan();
+    rootSpan.setAttributes({
+      'project.taskId': taskId,
+      'project.videoPath': videoPath,
+      'project.resume': !!options.resumeTaskId
+    });
+
     this.logger.info('🎯 ProjectManager: 开始执行');
+    this.logger.info(`  任务ID: ${taskId}`);
     this.logger.info(`  视频路径: ${videoPath}`);
 
     try {
+      // ⭐ 检查是否有可恢复的检查点
+      let resumeData = null;
+      if (options.resumeTaskId) {
+        const recovery = await this.checkpointManager.recoverTask(taskId);
+        if (recovery) {
+          resumeData = recovery.data;
+          this.logger.info(`  ✅ 从检查点恢复: ${recovery.resumeStep}`);
+          rootSpan.addEvent('checkpoint_recovered', { step: recovery.resumeStep });
+        }
+      }
+
+      // ⭐ 步骤0: 分析模板视频风格（如果提供了模板）
+      let styleConfig = resumeData?.styleConfig || null;
+      if (!styleConfig && options.templateVideoPath) {
+        this.logger.info('🎨 分析模板视频风格...');
+        try {
+          styleConfig = await this.templateStyleAnalyzer.analyzeTemplateStyle(options.templateVideoPath);
+          this.logger.info('  ✅ 模板风格分析完成');
+
+          // 保存检查点
+          this.checkpointManager.createCheckpoint(taskId, 'style_analyzed', { styleConfig });
+        } catch (error) {
+          this.logger.warn('  ⚠️  模板风格分析失败，使用默认风格', { error: error.message });
+        }
+      }
+
       // 步骤1: 制定执行计划
-      const plan = await this.createExecutionPlan(videoPath, options);
+      const plan = resumeData?.plan || await this.createExecutionPlan(videoPath, { ...options, styleConfig });
       this.logger.logPlan(plan);
 
-      // 步骤2: 执行计划
-      const result = await this.executePlan(plan);
+      // 保存检查点
+      if (!resumeData?.plan) {
+        this.checkpointManager.createCheckpoint(taskId, 'plan_created', { plan, styleConfig });
+      }
+
+      // 步骤2: 执行计划（支持从检查点恢复）
+      const result = await this.executePlanWithCheckpoint(plan, taskId, resumeData);
 
       // 步骤3: 最终验收
       const finalCheck = await this.qualityDirector.finalReview(result);
+
+      // 保存最终检查点
+      this.checkpointManager.createCheckpoint(taskId, 'completed', {
+        plan,
+        result,
+        finalCheck,
+        styleConfig
+      });
+
+      // 结束追踪
+      this.tracer.endTrace(trace.traceId);
 
       if (finalCheck.passed) {
         this.logger.info('✅ ProjectManager: 任务完成');
@@ -106,7 +414,9 @@ class ProjectManager {
 
         return {
           success: true,
+          taskId: taskId,
           videoPath: result.finalVideo,
+          timeline: result.timeline,
           report: report,
           qualityScore: finalCheck.score
         };
@@ -115,14 +425,51 @@ class ProjectManager {
         this.logger.warn('⚠️ ProjectManager: 质量不合格');
         this.logger.warn(`  违规项: ${finalCheck.violations.length}个`);
 
-        // ⭐ 默认启用返工流程（除非明确禁用）
-        if (options.allowRework !== false) {
-          this.logger.info('  → 启动智能返工流程...');
-          return await this.handleRework(finalCheck.violations, plan, result);
+        // ⭐ 过滤出需要返工的违规项（只处理CRITICAL和HIGH级别）
+        const criticalViolations = finalCheck.violations.filter(v =>
+          v.severity === 'CRITICAL' || v.severity === 'HIGH'
+        );
+        const lowViolations = finalCheck.violations.filter(v =>
+          v.severity === 'LOW' || v.severity === 'MEDIUM'
+        );
+
+        if (lowViolations.length > 0) {
+          this.logger.info(`  ℹ️ 低级别违规项: ${lowViolations.length}个（不触发返工）`);
+          lowViolations.forEach(v => {
+            this.logger.info(`    - ${v.message || v.violation} (${v.severity})`);
+          });
+        }
+
+        // ⭐ 只有CRITICAL和HIGH级别的违规才触发返工
+        if (criticalViolations.length > 0 && options.allowRework !== false) {
+          this.logger.info(`  → 启动智能返工流程（${criticalViolations.length}个关键违规）...`);
+          // ⭐ 修复：传递 allResults 而不是整个 result 对象
+          // ReworkEngine.preserveSuccessfulPhases 期望的是 { task_1_2: {...}, task_2_1: {...} } 格式
+          return await this.handleRework(criticalViolations, plan, result.allResults || result);
+        }
+
+        // ⭐ 如果只有LOW/MEDIUM级别违规，视为成功但带警告
+        if (criticalViolations.length === 0) {
+          this.logger.info('✅ ProjectManager: 执行成功（有低级别警告）');
+
+          // 生成报告
+          const report = this.logger.generateReport();
+
+          return {
+            success: true,
+            taskId: taskId,
+            videoPath: result.finalVideo,
+            timeline: result.timeline,
+            report: report,
+            qualityScore: finalCheck.score,
+            warnings: finalCheck.violations, // 将低级别违规作为警告返回
+            suggestions: finalCheck.suggestions
+          };
         }
 
         return {
           success: false,
+          taskId: taskId,
           error: '质量检查未通过',
           violations: finalCheck.violations,
           warnings: finalCheck.warnings,
@@ -132,8 +479,88 @@ class ProjectManager {
 
     } catch (error) {
       this.logger.error('❌ ProjectManager: 执行失败', { error: error.message });
+
+      // 保存失败检查点
+      this.checkpointManager.createCheckpoint(taskId, 'failed', {
+        error: error.message,
+        videoPath
+      });
+
+      // 结束追踪
+      rootSpan.recordError(error);
+      this.tracer.endTrace(trace.traceId);
+
       return await this.handleCriticalFailure(error);
     }
+  }
+
+  /**
+   * 执行计划（支持检查点恢复）
+   * @param {Object} plan - 执行计划
+   * @param {string} taskId - 任务ID
+   * @param {Object} resumeData - 恢复数据
+   * @returns {Promise<Object>} 执行结果
+   */
+  async executePlanWithCheckpoint(plan, taskId, resumeData = null) {
+    this.logger.info('🚀 ProjectManager: 开始执行计划');
+
+    const results = resumeData?.results || {};
+    const qualityChecks = resumeData?.qualityChecks || {};
+    const startPhase = resumeData?.currentPhase || 1;
+
+    // 执行5个阶段
+    for (let i = startPhase; i <= 5; i++) {
+      const phase = plan[`phase${i}`];
+      this.logger.startPhase(phase.name);
+
+      try {
+        const phaseResults = await this.executePhase(phase, results, plan);
+
+        // 合并结果
+        Object.assign(results, phaseResults);
+
+        // 保存质量检查结果
+        for (const [taskIdKey, result] of Object.entries(phaseResults)) {
+          if (taskIdKey.includes('quality') || taskIdKey.includes('check') ||
+              taskIdKey.startsWith('task_1_3') || taskIdKey.startsWith('task_2_2') ||
+              taskIdKey.startsWith('task_4_') || taskIdKey.startsWith('task_5_2')) {
+            qualityChecks[taskIdKey] = result;
+          }
+        }
+
+        // ⭐ 保存阶段检查点
+        this.checkpointManager.createCheckpoint(taskId, `phase_${i}_completed`, {
+          plan,
+          results,
+          qualityChecks,
+          currentPhase: i + 1
+        });
+
+        this.logger.endPhase('success', phaseResults);
+
+      } catch (error) {
+        this.logger.endPhase('failed', { error: error.message });
+
+        // ⭐ 保存失败检查点
+        this.checkpointManager.createCheckpoint(taskId, `phase_${i}_failed`, {
+          plan,
+          results,
+          qualityChecks,
+          currentPhase: i,
+          error: error.message
+        });
+
+        throw error;
+      }
+    }
+
+    // 返回最终结果
+    return {
+      finalVideo: results.task_5_1?.finalVideo,
+      timeline: results.task_3_1?.timeline,
+      qualityChecks: qualityChecks,
+      allResults: results
+    };
   }
 
   /**
@@ -153,6 +580,7 @@ class ProjectManager {
       videoPath: videoPath,
       videoDuration: videoDuration,
       options: options,
+      styleConfig: options.styleConfig || null,  // ⭐ 添加风格配置
 
       // 阶段1: 内容理解（串行）
       phase1: {
@@ -336,6 +764,11 @@ class ProjectManager {
       results.performance = results.task_5_1?.performance;
     }
 
+    // ⭐ 提取Timeline数据（从task_3_1 LayerOrchestrator）
+    if (results.task_3_1 && results.task_3_1.timeline) {
+      results.timeline = results.task_3_1.timeline;
+    }
+
     return results;
   }
 
@@ -397,6 +830,30 @@ class ProjectManager {
   async executeTask(task, previousResults, plan) {
     this.logger.logTask(task.name, { taskId: task.id, agent: task.agent });
 
+    // ⭐ 特殊处理：如果是视频合成任务且启用了Remotion，使用Remotion方案
+    if (task.id === 'task_5_1' && this.useRemotion) {
+      this.logger.info('  🎨 使用Remotion方案进行视频合成');
+
+      try {
+        // 获取内容分析结果
+        const contentAnalysis = previousResults.task_1_2;
+
+        // 使用Remotion生成视频
+        const finalVideo = await this.generateWithRemotion(contentAnalysis, plan.videoPath);
+
+        return {
+          finalVideo,
+          performance: {
+            fileSize: 0,
+            duration: 0
+          }
+        };
+      } catch (error) {
+        this.logger.error('⚠️ Remotion渲染失败，回退到传统方案', error);
+        // 继续使用传统方案
+      }
+    }
+
     // 准备输入
     const input = this.prepareTaskInput(task, previousResults, plan);
 
@@ -407,6 +864,13 @@ class ProjectManager {
 
     if (!agent) {
       throw new Error(`未找到智能体: ${task.agent}`);
+    }
+
+    // ⭐⭐⭐ 关键修复：在每次任务执行前重置该Agent的熔断器
+    // 防止同一请求中的重试导致熔断器累积失败次数
+    if (agent && typeof agent.reset === 'function') {
+      agent.reset();
+      this.logger.debug(`  🔄 已重置 ${task.agent} 的熔断器`);
     }
 
     // 执行任务（带重试）
@@ -446,11 +910,31 @@ class ProjectManager {
   prepareTaskInput(task, previousResults, plan) {
     const input = { ...task.input };
 
+    // ⭐ 添加风格配置到所有任务（如果存在）
+    if (plan.styleConfig) {
+      input.styleConfig = plan.styleConfig;
+    }
+
     // 添加依赖任务的结果
     if (task.dependsOn) {
       for (const depTaskId of task.dependsOn) {
         input[depTaskId] = previousResults[depTaskId];
       }
+    }
+
+    // ⭐ 特殊处理：为SceneDesigner准备输入（契约要求keywords和videoMetadata）
+    if (task.method === 'decomposeScenes') {
+      // 从ContentAnalyst的结果中获取keywords
+      const contentAnalysisResult = previousResults.task_1_2;
+
+      input.keywords = contentAnalysisResult?.keywords || [];
+      input.videoMetadata = {
+        duration: plan.videoDuration,
+        path: plan.videoPath,
+        // 从ContentAnalyst获取更多元数据
+        transcript: contentAnalysisResult?.transcript || '',
+        understanding: contentAnalysisResult?.understanding || {}
+      };
     }
 
     // ⭐ 特殊处理：为LayerOrchestrator准备timeline
@@ -617,6 +1101,30 @@ class ProjectManager {
   }
 
   /**
+   * ⭐ 重置所有Agent的状态和熔断器
+   * 在每次新任务开始时调用，确保不受之前失败的影响
+   */
+  resetAllAgents() {
+    this.logger.info('🔄 重置所有Agent状态和熔断器...');
+
+    // 重置所有核心Agent
+    for (const [name, agent] of Object.entries(this.agents)) {
+      if (agent && typeof agent.reset === 'function') {
+        agent.reset();
+        this.logger.debug(`  ✅ ${name} 已重置`);
+      }
+    }
+
+    // 重置QualityDirector
+    if (this.qualityDirector && typeof this.qualityDirector.reset === 'function') {
+      this.qualityDirector.reset();
+      this.logger.debug(`  ✅ qualityDirector 已重置`);
+    }
+
+    this.logger.info('  ✅ 所有Agent已重置');
+  }
+
+  /**
    * 获取视频时长
    * @param {string} videoPath - 视频路径
    * @returns {Promise<number>} 时长（秒）
@@ -659,10 +1167,132 @@ class ProjectManager {
       ready: true,
       agents: Object.keys(this.agents).map(key => ({
         name: key,
-        status: this.agents[key].getStatus()
+        status: typeof this.agents[key].getStatus === 'function'
+          ? this.agents[key].getStatus()
+          : { ready: true }
       })),
-      qualityDirector: this.qualityDirector.getStatus()
+      qualityDirector: typeof this.qualityDirector.getStatus === 'function'
+        ? this.qualityDirector.getStatus()
+        : { ready: true },
+      // ⭐ 新增：状态机和规则引擎状态
+      stateMachine: this.stateMachine.getStats(),
+      ruleEngine: this.ruleEngine.getStats(),
+      gates: Object.keys(this.gates)
     };
+  }
+
+  /**
+   * ⭐ 使用Remotion方案生成视频
+   * @param {Object} analysis - 内容分析结果
+   * @param {string} videoPath - 原视频路径
+   * @returns {Promise<string>} 最终视频路径
+   */
+  async generateWithRemotion(analysis, videoPath) {
+    this.logger.info('  🎨 使用Remotion渲染...');
+
+    try {
+      // 1. 转换为Remotion场景数据
+      const scenes = this.convertToRemotionScenes(analysis, videoPath);
+      this.logger.info(`  - 生成 ${scenes.length} 个场景`);
+
+      // 2. 渲染场景
+      const renderedVideos = await this.remotionService.renderScenes(scenes);
+      this.logger.info(`  - 渲染完成 ${renderedVideos.length} 个片段`);
+
+      // 3. 合并片段
+      const finalVideo = await this.remotionService.mergeVideos(renderedVideos);
+      this.logger.info(`  ✅ 最终视频: ${finalVideo}`);
+
+      return finalVideo;
+    } catch (error) {
+      this.logger.error('⚠️ Remotion渲染失败，回退到传统方案', error);
+      // 自动回退到传统方案
+      return await this.generateWithOldMethod(analysis, videoPath);
+    }
+  }
+
+  /**
+   * ⭐ 转换为Remotion场景数据
+   * @param {Object} analysis - 内容分析结果
+   * @param {string} videoPath - 原视频路径
+   * @returns {Array} Remotion场景数组
+   */
+  convertToRemotionScenes(analysis, videoPath) {
+    const scenes = [];
+
+    // 如果analysis有segments属性
+    if (analysis.segments && Array.isArray(analysis.segments)) {
+      for (const segment of analysis.segments) {
+        if (segment.type === 'original') {
+          scenes.push({
+            id: segment.id || `scene_${scenes.length}`,
+            template: 'OriginalVideo',
+            props: {
+              videoPath,
+              startTime: segment.startTime || 0,
+              duration: (segment.endTime || segment.duration || 3) - (segment.startTime || 0)
+            }
+          });
+        } else if (segment.type === 'withCards') {
+          scenes.push({
+            id: segment.id || `scene_${scenes.length}`,
+            template: 'VideoWithCards',
+            props: {
+              videoPath,
+              startTime: segment.startTime || 0,
+              duration: (segment.endTime || segment.duration || 3) - (segment.startTime || 0),
+              keywords: segment.keywords || []
+            }
+          });
+        } else if (segment.type === 'multiLayer') {
+          scenes.push({
+            id: segment.id || `scene_${scenes.length}`,
+            template: 'MultiLayer',
+            props: {
+              videoPath,
+              startTime: segment.startTime || 0,
+              duration: (segment.endTime || segment.duration || 3) - (segment.startTime || 0),
+              materialImage: segment.materialImage,
+              cardText: segment.keywords?.[0],
+              pipVideo: segment.pipVideo
+            }
+          });
+        }
+      }
+    } else {
+      // 如果没有segments，创建一个默认场景
+      this.logger.warn('  ⚠️ 分析结果中没有segments，创建默认场景');
+      scenes.push({
+        id: 'default_scene',
+        template: 'OriginalVideo',
+        props: {
+          videoPath,
+          startTime: 0,
+          duration: 10
+        }
+      });
+    }
+
+    return scenes;
+  }
+
+  /**
+   * ⭐ 使用传统方案生成视频（保持不变）
+   * @param {Object} analysis - 内容分析结果
+   * @param {string} videoPath - 原视频路径
+   * @returns {Promise<string>} 最终视频路径
+   */
+  async generateWithOldMethod(analysis, videoPath) {
+    this.logger.info('  📌 使用传统方案');
+    // 现有逻辑保持不变
+    const scenes = await this.agents.sceneDesigner.design(analysis);
+    const renderData = await this.agents.videoEngineer.prepare(scenes);
+    const finalVideo = await this.agents.layerOrchestrator.compose(
+      videoPath,
+      scenes,
+      renderData
+    );
+    return finalVideo;
   }
 }
 

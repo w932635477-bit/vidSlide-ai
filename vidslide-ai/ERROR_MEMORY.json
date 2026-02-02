@@ -148,12 +148,139 @@
       "violation": "素材平均准确性不足（0.00分，需要至少70分）",
       "severity": "LOW",
       "fixed": false
+    },
+    {
+      "id": "error_1769496424371_l6i5je2r8",
+      "timestamp": 1769496424371,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（78.7%，不应超过25%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769497772736_8h7m4gl3c",
+      "timestamp": 1769497772736,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（78.7%，不应超过25%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769831155554_yjymtxiae",
+      "timestamp": 1769831155554,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（35.6%，不应超过20%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769831155555_ioad5dm88",
+      "timestamp": 1769831155555,
+      "category": "UNKNOWN",
+      "violation": "Clip 5 (scene_original_final) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769831652927_4jcz48m00",
+      "timestamp": 1769831652927,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（35.5%，不应超过20%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769831652927_z5n7z3vn5",
+      "timestamp": 1769831652927,
+      "category": "UNKNOWN",
+      "violation": "Clip 5 (scene_original_final) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769832008073_5wrk92kfd",
+      "timestamp": 1769832008073,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（35.6%，不应超过20%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769832008073_zyqp105d4",
+      "timestamp": 1769832008073,
+      "category": "UNKNOWN",
+      "violation": "Clip 5 (scene_original_final) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769833110035_pwifpubas",
+      "timestamp": 1769833110035,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（35.5%，不应超过20%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769833110036_x84z17ihx",
+      "timestamp": 1769833110036,
+      "category": "UNKNOWN",
+      "violation": "Clip 5 (scene_original_final) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1769839979921_gkxh3g8zl",
+      "timestamp": 1769839979921,
+      "category": "SCENE_DESIGN",
+      "violation": "原视频占比过高（35.6%，不应超过20%）",
+      "severity": "HIGH",
+      "sceneId": null,
+      "fixed": false
+    },
+    {
+      "id": "error_1769839979921_iuq93m0sk",
+      "timestamp": 1769839979921,
+      "category": "UNKNOWN",
+      "violation": "Clip 5 (scene_original_final) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1770001198807_9ljgd2jev",
+      "timestamp": 1770001198807,
+      "category": "UNKNOWN",
+      "violation": "Clip 2 (scene_combined_0) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1770001198807_zl1qavfsi",
+      "timestamp": 1770001198807,
+      "category": "UNKNOWN",
+      "violation": "Clip 2 (scene_combined_0) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
+    },
+    {
+      "id": "error_1770001198807_y6yqe73gc",
+      "timestamp": 1770001198807,
+      "category": "UNKNOWN",
+      "violation": "Clip 2 (scene_combined_0) 缺少layerManifest",
+      "severity": "LOW",
+      "fixed": false
     }
   ],
   "corrections": {},
   "statistics": {
-    "totalErrors": 18,
+    "totalErrors": 33,
     "fixedErrors": 0,
-    "unfixedErrors": 18
+    "unfixedErrors": 33
   }
 }
