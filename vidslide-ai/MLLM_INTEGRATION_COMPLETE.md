@@ -137,8 +137,8 @@ const comparison = await wenxinService.compareImages(
 **.env文件**:
 ```bash
 # 千帆V2 - IAM认证
-QIANFAN_ACCESS_KEY=ALTAKi8Ba7q7gPeWS8LU6hdsFz
-QIANFAN_SECRET_KEY=7946663307e84c14991d39fffc6eb1bf
+QIANFAN_ACCESS_KEY=your_access_key_here
+QIANFAN_SECRET_KEY=your_secret_key_here
 ```
 
 ### 代码集成
