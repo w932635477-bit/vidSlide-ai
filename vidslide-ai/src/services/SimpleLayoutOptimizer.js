@@ -17,49 +17,49 @@ export class SimpleLayoutOptimizer {
   constructor(options = {}) {
     this.log = options.log || console.log;
 
-    // ⭐ 状态转移概率矩阵（核心）
-    // 基于经验调优，确保布局多样性
+    // ⭐ 状态转移概率矩阵（核心）v2.0 - 更多切换
+    // 降低原视频占比，增加场景多样性和切换频率
     this.transitionMatrix = {
       'original': {
-        'original': 0.05,           // 原视频后很少再接原视频
-        'card-group': 0.40,         // 40%概率接卡片组
-        'video-with-card': 0.25,    // 25%概率接单卡片
-        'multi-layer-composition': 0.30  // 30%概率接多层
+        'original': 0.01,           // 从0.05降低到0.01（几乎不连续）
+        'card-group': 0.45,         // 从0.40增加到0.45
+        'video-with-card': 0.24,    // 从0.25减少到0.24
+        'multi-layer-composition': 0.30  // 保持0.30
       },
       'card-group': {
-        'original': 0.20,           // 20%概率回到原视频（呼吸感）
-        'card-group': 0.15,         // 15%概率继续卡片组
-        'video-with-card': 0.25,    // 25%概率切换到单卡片
-        'multi-layer-composition': 0.40  // 40%概率切换到多层
+        'original': 0.10,           // 从0.20降低到0.10（减少回到原视频）
+        'card-group': 0.10,         // 从0.15降低到0.10
+        'video-with-card': 0.30,    // 从0.25增加到0.30
+        'multi-layer-composition': 0.50  // 从0.40增加到0.50（更多多层场景）
       },
       'video-with-card': {
-        'original': 0.25,           // 25%概率回到原视频
-        'card-group': 0.35,         // 35%概率切换到卡片组
-        'video-with-card': 0.10,    // 10%概率继续单卡片
-        'multi-layer-composition': 0.30  // 30%概率切换到多层
+        'original': 0.10,           // 从0.25降低到0.10
+        'card-group': 0.40,         // 从0.35增加到0.40
+        'video-with-card': 0.05,    // 从0.10降低到0.05
+        'multi-layer-composition': 0.45  // 从0.30增加到0.45
       },
       'multi-layer-composition': {
-        'original': 0.20,           // 20%概率回到原视频
-        'card-group': 0.40,         // 40%概率切换到卡片组
-        'video-with-card': 0.20,    // 20%概率切换到单卡片
-        'multi-layer-composition': 0.20  // 20%概率继续多层
+        'original': 0.10,           // 从0.20降低到0.10
+        'card-group': 0.45,         // 从0.40增加到0.45
+        'video-with-card': 0.25,    // 从0.20增加到0.25
+        'multi-layer-composition': 0.20  // 保持0.20
       }
     };
 
-    // 场景类型的基础时长配置（秒）
+    // ⭐ 场景类型的基础时长配置（秒）v2.0 - 缩短以增加切换频率
     this.baseDurations = {
-      'original': 3,
-      'card-group': 6,
-      'video-with-card': 4,
-      'multi-layer-composition': 7
+      'original': 2,                // 从3秒减少到2秒
+      'card-group': 4,              // 从6秒减少到4秒
+      'video-with-card': 3,         // 从4秒减少到3秒
+      'multi-layer-composition': 5  // 从7秒减少到5秒
     };
 
-    // 时长调整范围
+    // ⭐ 时长调整范围 v2.0 - 缩短以增加切换频率
     this.durationRanges = {
-      'original': { min: 2, max: 5 },
-      'card-group': { min: 4, max: 8 },
-      'video-with-card': { min: 3, max: 6 },
-      'multi-layer-composition': { min: 5, max: 10 }
+      'original': { min: 1.5, max: 3 },           // 从2-5秒缩短到1.5-3秒
+      'card-group': { min: 3, max: 5 },           // 从4-8秒缩短到3-5秒
+      'video-with-card': { min: 2, max: 4 },      // 从3-6秒缩短到2-4秒
+      'multi-layer-composition': { min: 4, max: 6 }  // 从5-10秒缩短到4-6秒
     };
   }
 
