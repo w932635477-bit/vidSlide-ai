@@ -3,7 +3,7 @@
  * v6.0 - 使用状态转移矩阵优化布局，打破机械化
  */
 
-import { SimpleLayoutOptimizer } from '../../services/SimpleLayoutOptimizer.js';
+import { SimpleLayoutOptimizer } from '../../../services/SimpleLayoutOptimizer.js';
 
 /**
  * 从多个场景创建卡片组

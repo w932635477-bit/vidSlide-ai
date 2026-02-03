@@ -770,18 +770,14 @@ ${keywords.map((kw, i) => `  ${i + 1}. "${kw.text}" (${(kw.startTime || 0).toFix
   mergeToCardGroups(scenes, videoDuration) {
     this.log('info', '  → 优化：使用状态转移矩阵生成自由组合布局 v6.0');
 
-    // 调用导入的优化器函数
-    const optimizedScenes = mergeToCardGroupsWithOptimizer(scenes, videoDuration, {
+    // 调用导入的优化器函数（函数会直接修改scenes数组）
+    mergeToCardGroupsWithOptimizer(scenes, videoDuration, {
       rules: this.rules,
       log: (level, message) => this.log(level, message),
       useOptimizer: true
     });
 
-    // 替换原场景列表
-    scenes.length = 0;
-    scenes.push(...optimizedScenes);
-
-    this.log('info', `    ✅ 布局优化完成，共生成 ${optimizedScenes.length} 个场景`);
+    this.log('info', `    ✅ 布局优化完成，共生成 ${scenes.length} 个场景`);
   }
 
   /**
