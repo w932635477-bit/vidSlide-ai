@@ -17,48 +17,48 @@ export class SimpleLayoutOptimizer {
   constructor(options = {}) {
     this.log = options.log || console.log;
 
-    // ⭐ 状态转移概率矩阵（核心）v2.1 - 平衡调整
-    // 增加卡片和原视频占比，减少过快切换
+    // ⭐ 状态转移概率矩阵（核心）v2.2 - 恢复优化配置
+    // 减少场景连续，增加多层效果，提升视觉冲击力
     this.transitionMatrix = {
       'original': {
-        'original': 0.05,           // 从0.01增加到0.05（允许适当连续）
+        'original': 0.01,           // 恢复到0.01（减少连续）
         'card-group': 0.45,         // 保持0.45
-        'video-with-card': 0.25,    // 从0.24增加到0.25
-        'multi-layer-composition': 0.25  // 从0.30降低到0.25
+        'video-with-card': 0.24,    // 恢复到0.24
+        'multi-layer-composition': 0.30  // 恢复到0.30（增加多层效果）
       },
       'card-group': {
-        'original': 0.15,           // 从0.10增加到0.15（更多原视频过渡）
-        'card-group': 0.15,         // 从0.10增加到0.15（允许卡片连续）
+        'original': 0.10,           // 恢复到0.10
+        'card-group': 0.10,         // 恢复到0.10（减少卡片连续）
         'video-with-card': 0.30,    // 保持0.30
-        'multi-layer-composition': 0.40  // 从0.50降低到0.40
+        'multi-layer-composition': 0.50  // 恢复到0.50（增加多层效果）
       },
       'video-with-card': {
-        'original': 0.15,           // 从0.10增加到0.15
+        'original': 0.10,           // 恢复到0.10
         'card-group': 0.40,         // 保持0.40
-        'video-with-card': 0.10,    // 从0.05增加到0.10
-        'multi-layer-composition': 0.35  // 从0.45降低到0.35
+        'video-with-card': 0.05,    // 恢复到0.05（减少连续）
+        'multi-layer-composition': 0.45  // 恢复到0.45（增加多层效果）
       },
       'multi-layer-composition': {
-        'original': 0.15,           // 从0.10增加到0.15
-        'card-group': 0.40,         // 从0.45降低到0.40
+        'original': 0.10,           // 恢复到0.10
+        'card-group': 0.45,         // 恢复到0.45
         'video-with-card': 0.25,    // 保持0.25
         'multi-layer-composition': 0.20  // 保持0.20
       }
     };
 
-    // ⭐ 场景类型的基础时长配置（秒）v2.1 - 增加卡片和原视频时长
+    // ⭐ 场景类型的基础时长配置（秒）v2.2 - 恢复优化配置
     this.baseDurations = {
-      'original': 3,                // 从2秒增加到3秒
-      'card-group': 5,              // 从4秒增加到5秒
-      'video-with-card': 4,         // 从3秒增加到4秒
+      'original': 2,                // 恢复到2秒（快节奏）
+      'card-group': 4,              // 恢复到4秒
+      'video-with-card': 3,         // 恢复到3秒
       'multi-layer-composition': 5  // 保持5秒
     };
 
-    // ⭐ 时长调整范围 v2.1 - 增加卡片和原视频时长
+    // ⭐ 时长调整范围 v2.2 - 恢复优化配置
     this.durationRanges = {
-      'original': { min: 2, max: 4 },           // 从1.5-3秒增加到2-4秒
-      'card-group': { min: 4, max: 7 },         // 从3-5秒增加到4-7秒
-      'video-with-card': { min: 3, max: 5 },    // 从2-4秒增加到3-5秒
+      'original': { min: 1.5, max: 3 },         // 恢复到1.5-3秒
+      'card-group': { min: 3, max: 5 },         // 恢复到3-5秒
+      'video-with-card': { min: 2, max: 4 },    // 恢复到2-4秒
       'multi-layer-composition': { min: 4, max: 6 }  // 保持4-6秒
     };
   }
@@ -290,7 +290,15 @@ export class SimpleLayoutOptimizer {
 
       // 更新场景
       scene.type = nextType;
-      scene.description = `${nextType} (密度: ${density.score.toFixed(2)})`;
+      // ✅ 修复：将密度信息存储到metadata，不影响卡片文字显示
+      if (!scene.metadata) scene.metadata = {};
+      scene.metadata.density = density.score;
+      scene.metadata.densityLabel = density.score > 0.7 ? '高密度' : (density.score < 0.3 ? '低密度' : '中密度');
+
+      // 保持原有的description（如果有的话），不添加密度信息
+      if (!scene.description || scene.description.includes('密度')) {
+        scene.description = `${nextType}场景`;
+      }
 
       // 动态调整时长（可选）
       if (options.enableDynamicDuration) {

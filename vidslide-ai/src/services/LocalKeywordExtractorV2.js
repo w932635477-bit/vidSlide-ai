@@ -31,26 +31,19 @@ class LocalKeywordExtractorV2 {
       this.logger.warn('⚠️  Jieba自定义词典加载失败:', error.message);
     }
 
-    // 停用词（扩展版）
+    // 停用词（恢复完整版 - 过滤无意义词汇）
     this.stopWords = new Set([
-      // 代词
-      '的', '了', '是', '在', '和', '有', '就', '不', '人', '都',
-      '一', '一个', '上', '也', '很', '到', '说', '要', '去', '你',
-      '会', '着', '没有', '看', '好', '自己', '这', '那', '个',
-      '这个', '那个', '这些', '那些', '什么', '怎么', '哪里',
+      // 基础停用词
+      '的', '了', '是', '在', '和', '有', '就', '不', '都',
+      '一个', '这个', '那个', '什么', '怎么', '哪里',
 
-      // 动词
+      // 恢复常见无意义词（提升关键词质量）
+      '人', '上', '也', '很', '到', '说', '要', '去', '你',
+      '会', '着', '没有', '看', '好', '自己', '这', '那', '个',
       '需要', '可能', '应该', '必须', '可以', '能够', '想要', '做',
       '已经', '正在', '开始', '结束', '进行', '发生', '出现',
-
-      // 副词
       '非常', '特别', '十分', '比较', '更加', '最', '更', '还', '太',
-      '反而', '越来越', '反复', '可能', '费心',
-
-      // 连词
       '但是', '然后', '因为', '所以', '如果', '虽然', '而且', '不过',
-
-      // 无意义词
       '方式', '问题', '思考', '老板', '后台', '私信'
     ]);
 
@@ -101,13 +94,19 @@ class LocalKeywordExtractorV2 {
    * @returns {Array} 关键词数组
    */
   extractKeywordsWithTimestamp(text, videoDuration, options = {}) {
-    const topN = options.topN || 5;
+    // ⭐ 修改：动态计算topN
+    const topN = options.topN || this.calculateOptimalTopN(text.length, videoDuration);
     const method = options.method || 'both'; // 'tfidf', 'textrank', 'both'
+    const asrWords = options.asrWords || []; // ⭐ 新增：接收ASR词级时间戳
 
     this.logger.info('🔍 LocalKeywordExtractor: 开始提取关键词');
     this.logger.info(`  文本长度: ${text.length}字`);
     this.logger.info(`  视频时长: ${videoDuration.toFixed(2)}秒`);
     this.logger.info(`  提取方法: ${method}`);
+    this.logger.info(`  目标数量: ${topN}个`);
+    if (asrWords.length > 0) {
+      this.logger.info(`  ASR词级时间戳: ${asrWords.length}个词`);
+    }
 
     const results = [];
 
@@ -152,21 +151,33 @@ class LocalKeywordExtractorV2 {
       for (const item of sortedKeywords) {
         const keyword = item.word;
 
-        // 过滤条件
+        // 过滤条件（优化版 - 放宽限制）
         if (this.stopWords.has(keyword)) continue;
-        if (keyword.length < 2) continue;
-        if (!/[\u4e00-\u9fa5]/.test(keyword)) continue; // 必须包含中文
+        if (keyword.length < 2) continue;  // 保持长度≥2
+        // ✅ 允许纯英文关键词（如"AI"、"API"）
+        // ❌ 已删除：if (!/[\u4e00-\u9fa5]/.test(keyword)) continue;
+
+        // ⭐ 新增：权重阈值过滤（避免低质量关键词）
+        if (item.weight < 3) continue;  // 权重<3的过滤掉
 
         // 查找关键词在文本中的首次出现位置
         const firstOccurrence = this.findFirstOccurrence(text, keyword);
         if (!firstOccurrence) continue; // 如果在文本中找不到，跳过
 
-        // 计算时间戳
-        const timestamp = this.calculateTimestamp(
-          text,
-          firstOccurrence.charIndex,
-          videoDuration
-        );
+        // ⭐ 修改：优先使用ASR词级时间戳
+        let timestamp;
+        let timestampMethod = 'interpolation';
+        if (asrWords.length > 0) {
+          timestamp = this.calculateTimestampFromWords(keyword, asrWords);
+          if (timestamp) {
+            timestampMethod = 'asr';
+          }
+        }
+
+        // 降级：使用字符位置插值
+        if (!timestamp) {
+          timestamp = this.calculateTimestamp(text, firstOccurrence.charIndex, videoDuration);
+        }
 
         // 获取英文翻译
         const english = this.translateToEnglish(keyword);
@@ -182,7 +193,8 @@ class LocalKeywordExtractorV2 {
           charIndex: firstOccurrence.charIndex,
           timestamp: timestamp,
           context: firstOccurrence.context,
-          method: method
+          method: method,
+          timestampMethod: timestampMethod // ⭐ 标记时间戳来源
         });
 
         // 达到topN个停止
@@ -190,6 +202,10 @@ class LocalKeywordExtractorV2 {
       }
 
       this.logger.info(`  ✅ 成功提取 ${results.length} 个关键词`);
+      if (asrWords.length > 0) {
+        const asrCount = results.filter(r => r.timestampMethod === 'asr').length;
+        this.logger.info(`  → ASR精确时间戳: ${asrCount}个, 插值时间戳: ${results.length - asrCount}个`);
+      }
 
       return results;
 
@@ -197,6 +213,37 @@ class LocalKeywordExtractorV2 {
       this.logger.error('关键词提取失败:', error.message);
       return this.getFallbackKeywords(text, videoDuration, topN);
     }
+  }
+
+  /**
+   * ⭐ 优化：动态计算最优topN（增强版 - 提升关键词数量）
+   * @param {number} textLength - 文本长度
+   * @param {number} videoDuration - 视频时长（秒）
+   * @returns {number} 最优topN值
+   */
+  calculateOptimalTopN(textLength, videoDuration) {
+    // 基于文本长度（提升提取数量）
+    let topN = 8; // ✅ 默认值从5增加到8
+
+    if (textLength < 500) {
+      topN = 8;  // ✅ 短文本提取8个（从5增加）
+    } else if (textLength < 2000) {
+      topN = Math.min(15, Math.ceil(textLength / 150));  // ✅ 从250改为150，提取更多
+    } else if (textLength < 5000) {
+      topN = Math.min(25, Math.ceil(textLength / 200));  // ✅ 中等文本最多25个
+    } else {
+      topN = Math.min(35, Math.ceil(textLength / 250));  // ✅ 超长文本最多35个
+    }
+
+    // 基于视频时长调整（增强）
+    if (videoDuration > 180) { // 超过3分钟
+      topN = Math.min(topN + 5, 40);  // ✅ 从+3改为+5，上限从15改为40
+    } else if (videoDuration > 120) { // 超过2分钟
+      topN = Math.min(topN + 3, 30);  // ✅ 新增：2-3分钟增加3个
+    }
+
+    this.logger.info(`  → 动态topN: ${topN} (文本长度: ${textLength}, 视频时长: ${videoDuration}s)`);
+    return topN;
   }
 
   /**
@@ -215,6 +262,53 @@ class LocalKeywordExtractorV2 {
       charIndex: index,
       context: context
     };
+  }
+
+  /**
+   * ⭐ 新增：从ASR词级时间戳计算精确时间
+   * @param {string} keyword - 关键词
+   * @param {Array} words - ASR词级时间戳数组
+   * @returns {Object|null} 时间戳对象或null
+   */
+  calculateTimestampFromWords(keyword, words) {
+    if (!words || words.length === 0) {
+      return null; // 降级到字符位置插值
+    }
+
+    // 在words数组中查找包含关键词的词
+    const matchedWords = [];
+    for (const word of words) {
+      // ⭐ 验证字段有效性
+      if (!word.text ||
+          typeof word.beginTime !== 'number' ||
+          typeof word.endTime !== 'number' ||
+          word.beginTime < 0 ||
+          word.endTime < word.beginTime) {
+        continue;
+      }
+
+      // ⭐ 改进匹配逻辑：优先完全匹配，其次关键词包含ASR词
+      if (keyword === word.text || keyword.includes(word.text)) {
+        matchedWords.push(word);
+      }
+    }
+
+    if (matchedWords.length > 0) {
+      const firstWord = matchedWords[0];
+      const lastWord = matchedWords[matchedWords.length - 1];
+
+      // ⭐ 使用安全的数值转换
+      const beginTime = parseFloat(firstWord.beginTime) || 0;
+      const endTime = parseFloat(lastWord.endTime) || 0;
+
+      return {
+        start: Math.max(0, beginTime - 0.5),  // 提前0.5秒
+        end: endTime + 1.0,                     // 延后1秒
+        exact: (beginTime + endTime) / 2
+      };
+    }
+
+    return null; // 未找到匹配，降级
   }
 
   /**
@@ -343,8 +437,179 @@ class LocalKeywordExtractorV2 {
       endTime: kw.timestamp.end,
       weight: kw.weight,
       explanation: `"${kw.text}"在视频${kw.timestamp.exact.toFixed(1)}秒处提到`,
-      context: kw.context
+      context: kw.context,
+      // ⭐ 新增：次关键词（用于卡片组）
+      subKeywords: kw.subKeywords || []
     }));
+  }
+
+  /**
+   * ⭐⭐⭐ 为主关键词生成次关键词（v2.0 - 从句子中提取有意义的词）
+   *
+   * 策略：
+   * 1. 从关键词所在句子中提取名词、动词
+   * 2. 排除主关键词本身
+   * 3. 排除停用词和无意义词
+   * 4. 优先选择与主关键词语义相关的词
+   *
+   * 例如："如何创办自己的公司" → 主关键词"创办" → 次关键词["公司", "自己的"]
+   *
+   * @param {string} mainKeyword - 主关键词
+   * @param {string} context - 上下文（关键词所在句子）
+   * @param {string} fullText - 完整文本
+   * @returns {Array} 次关键词数组
+   */
+  generateSubKeywords(mainKeyword, context, fullText) {
+    const subKeywords = [];
+
+    // ⭐ 无意义词列表（这些词不应该作为次关键词）
+    const meaninglessWords = new Set([
+      '详解', '解析', '分析', '介绍', '说明', '讲解', '解读',
+      '什么', '怎么', '如何', '为什么', '哪些', '哪个', '哪里',
+      '这个', '那个', '这些', '那些', '这里', '那里',
+      '就是', '可以', '能够', '应该', '需要', '必须',
+      '一个', '一些', '一种', '一下', '一起',
+      '非常', '特别', '十分', '很', '太', '最',
+      '今天', '明天', '昨天', '现在', '以后', '之前',
+      '大家', '我们', '你们', '他们', '自己',
+      '其实', '所以', '因为', '但是', '而且', '或者',
+      '第一', '第二', '第三', '首先', '然后', '最后'
+    ]);
+
+    // 1. 对上下文进行分词，提取有意义的词
+    const contextWords = nodejieba.cut(context);
+    const meaningfulWords = [];
+
+    for (const word of contextWords) {
+      // 跳过停用词
+      if (this.stopWords.has(word)) continue;
+      // 跳过无意义词
+      if (meaninglessWords.has(word)) continue;
+      // 跳过太短或太长的词
+      if (word.length < 2 || word.length > 6) continue;
+      // 跳过非中文词
+      if (!/[\u4e00-\u9fa5]/.test(word)) continue;
+      // 跳过主关键词本身
+      if (word === mainKeyword) continue;
+      // 跳过包含主关键词的词
+      if (word.includes(mainKeyword) || mainKeyword.includes(word)) continue;
+
+      meaningfulWords.push(word);
+    }
+
+    // 2. 使用词性标注对词语进行重要性排序
+    const wordScores = [];
+    for (const word of meaningfulWords) {
+      // 计算词语的重要性分数
+      let score = 0;
+
+      // 名词和动词加分
+      const tags = nodejieba.tag(word);
+      for (const tag of tags) {
+        if (tag.tag === 'n' || tag.tag === 'v' || tag.tag === 'vn') {
+          score += 2;
+        }
+      }
+
+      // 在全文中出现次数加分
+      const occurrences = (fullText.match(new RegExp(word, 'g')) || []).length;
+      score += Math.min(occurrences, 3);
+
+      // 词长加分（2-4字最佳）
+      if (word.length >= 2 && word.length <= 4) {
+        score += 1;
+      }
+
+      wordScores.push({ word, score });
+    }
+
+    // 3. 按分数排序，取前3个
+    wordScores.sort((a, b) => b.score - a.score);
+
+    for (const { word } of wordScores.slice(0, 3)) {
+      // 避免重复
+      if (subKeywords.some(sk => sk.text === word)) continue;
+
+      subKeywords.push({
+        text: word,
+        english: this.translateToEnglish(word),
+        source: 'sentence'
+      });
+    }
+
+    // 4. 如果从句子中提取不够，从关联词库补充
+    if (subKeywords.length < 2) {
+      const relatedWords = this.getRelatedWords(mainKeyword);
+      for (const related of relatedWords) {
+        if (subKeywords.some(sk => sk.text === related)) continue;
+        if (meaninglessWords.has(related)) continue;
+        if (fullText.includes(related)) {
+          subKeywords.push({
+            text: related,
+            english: this.translateToEnglish(related),
+            source: 'related'
+          });
+        }
+        if (subKeywords.length >= 3) break;
+      }
+    }
+
+    return subKeywords.slice(0, 3);
+  }
+
+  /**
+   * ⭐ 获取关联词
+   * @param {string} keyword - 关键词
+   * @returns {Array} 关联词数组
+   */
+  getRelatedWords(keyword) {
+    const relatedMap = {
+      '抖音': ['短视频', '流量', '推荐', '算法'],
+      '流量': ['曝光', '转化', '获客', '增长'],
+      '获客': ['转化', '成本', '效率', '精准'],
+      '推送': ['触达', '精准', '用户', '转化'],
+      '营销': ['推广', '投放', '转化', '品牌'],
+      '转化': ['成交', '订单', '效果', '提升'],
+      '用户': ['粉丝', '客户', '受众', '群体'],
+      '增长': ['提升', '翻倍', '突破', '爆发'],
+      '数据': ['分析', '报表', '指标', '效果'],
+      '算法': ['推荐', '机制', '规则', '逻辑'],
+      '广告': ['投放', '素材', '创意', '效果'],
+      '内容': ['创作', '素材', '文案', '脚本'],
+      '视频': ['拍摄', '剪辑', '制作', '发布'],
+      '直播': ['带货', '互动', '转化', '流量'],
+      '粉丝': ['关注', '互动', '留存', '活跃'],
+      '运营': ['策略', '执行', '优化', '复盘'],
+      '品牌': ['曝光', '认知', '形象', '价值']
+    };
+
+    for (const [key, values] of Object.entries(relatedMap)) {
+      if (keyword.includes(key)) {
+        return values;
+      }
+    }
+
+    return [];
+  }
+
+  /**
+   * ⭐ 提取关键词（增强版 - 包含次关键词）
+   * @param {string} text - 完整文本
+   * @param {number} videoDuration - 视频总时长（秒）
+   * @param {Object} options - 选项
+   * @returns {Array} 关键词数组（包含次关键词）
+   */
+  extractKeywordsWithSubKeywords(text, videoDuration, options = {}) {
+    // 先提取主关键词
+    const mainKeywords = this.extractKeywordsWithTimestamp(text, videoDuration, options);
+
+    // 为每个主关键词生成次关键词
+    for (const kw of mainKeywords) {
+      kw.subKeywords = this.generateSubKeywords(kw.text, kw.context, text);
+      this.logger.info(`  → "${kw.text}" 次关键词: ${kw.subKeywords.map(sk => sk.text).join(', ') || '无'}`);
+    }
+
+    return mainKeywords;
   }
 }
 
